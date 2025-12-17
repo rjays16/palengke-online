@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Palengke Online Backend - Run Script
+# Usage: ./run [command]
+# Examples:
+#   ./run php artisan migrate
+#   ./run composer install
+#   ./run bash
+
+# Check if docker-compose is running
+if ! docker-compose ps | grep -q "palengke-app"; then
+    echo "Error: Containers are not running. Start them with: docker-compose up -d"
+    exit 1
+fi
+
+# If no arguments provided, show usage
+if [ $# -eq 0 ]; then
+    echo "Usage: ./run [command]"
+    echo ""
+    echo "Examples:"
+    echo "  ./run php artisan migrate"
+    echo "  ./run php artisan make:model Product"
+    echo "  ./run composer install"
+    echo "  ./run bash"
+    echo "  ./run npm install"
+    exit 1
+fi
+
+# Execute the command in the container
+docker-compose exec app "$@"
