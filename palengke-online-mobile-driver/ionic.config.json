@@ -1,0 +1,7 @@
+{
+  "name": "palengke-online-mobile-driver",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
