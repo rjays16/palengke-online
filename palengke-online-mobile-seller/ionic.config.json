@@ -1,7 +1,0 @@
-{
-  "name": "palengke-online-mobile-seller",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "angular"
-}
