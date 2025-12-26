@@ -1,12 +1,8 @@
 <template>
   <div v-if="showSplash" class="splash-container">
     <div class="logo-wrapper">
-      <!-- Your logo - BIGGER SIZE to fill the circle -->
       <img src="/assets/images/logo-without-circle.png" alt="Palengke Online" class="logo-image">
-      
-      <!-- Animated loading circle -->
       <svg class="loading-circle" viewBox="0 0 200 200">
-        <!-- Background circle (light gray) -->
         <circle 
           cx="100" 
           cy="100" 
@@ -16,7 +12,6 @@
           stroke-width="6"
         />
         
-        <!-- Animated circle (black - spinning continuously) -->
         <circle 
           class="animated-stroke-spin" 
           cx="100" 
@@ -44,7 +39,6 @@ export default {
     const showSplash = ref(true);
 
     onMounted(() => {
-      // Hide splash screen after 3 seconds
       setTimeout(() => {
         showSplash.value = false;
       }, 3000);
@@ -83,8 +77,7 @@ export default {
 }
 
 .logo-image {
-  /* BIGGER SIZE - fills most of the circle */
-  width: 200px;          /* Was 130px, now 170px - much bigger! */
+  width: 200px;
   height: auto;
   position: relative;
   z-index: 2;
@@ -99,13 +92,11 @@ export default {
   height: 100%;
   z-index: 1;
   transform: rotate(-90deg);
-  /* Add rotation animation to the whole SVG */
   animation: rotateSVG 2s linear infinite;
 }
 
-/* Spinning circle with 3/4 stroke showing */
 .animated-stroke-spin {
-  stroke-dasharray: 400, 534;  /* 3/4 circle showing, 1/4 gap */
+  stroke-dasharray: 400, 534; 
   stroke-dashoffset: 0;
 }
 
@@ -119,7 +110,6 @@ export default {
   animation: textPulse 1.8s ease-in-out infinite;
 }
 
-/* Animations */
 @keyframes logoScaleIn {
   0% {
     transform: scale(0.7);
@@ -131,7 +121,6 @@ export default {
   }
 }
 
-/* Rotate the entire SVG for spinning effect */
 @keyframes rotateSVG {
   0% {
     transform: rotate(-90deg);
@@ -160,7 +149,6 @@ export default {
   }
 }
 
-/* Responsive */
 @media (max-width: 576px) {
   .logo-wrapper {
     width: 180px;
@@ -168,7 +156,7 @@ export default {
   }
   
   .logo-image {
-    width: 150px;  /* Also bigger on mobile */
+    width: 150px;
   }
   
   .loading-text {
