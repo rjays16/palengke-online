@@ -8,14 +8,18 @@
           <ion-icon :icon="arrowBackOutline"></ion-icon>
         </div>
 
-        <!-- Logo -->
+        <!-- Logo Section - Both logos, seller is bigger -->
         <div class="logo-section">
-          <img src="/assets/images/logo.png" alt="Palengke Online" class="logo">
+          <div class="logos-wrapper">
+            <img src="/assets/images/logo.png" alt="Palengke Online" class="logo-main">
+            <div class="plus-sign">+</div>
+            <img src="/assets/images/palengke-seller.png" alt="Seller" class="logo-seller">
+          </div>
         </div>
 
         <!-- Title -->
-        <h1 class="title">Create Account</h1>
-        <p class="subtitle">Join us for fresh market deals</p>
+        <h1 class="title">Create Seller Account</h1>
+        <p class="subtitle">Start selling fresh produce</p>
 
         <!-- Signup Form -->
         <div class="form-section">
@@ -45,6 +49,16 @@
               v-model="phone" 
               type="tel" 
               placeholder="Phone number"
+              class="custom-input"
+            >
+          </div>
+
+          <div class="input-group">
+            <ion-icon :icon="storefrontOutline" class="input-icon"></ion-icon>
+            <input 
+              v-model="storeName" 
+              type="text" 
+              placeholder="Store name"
               class="custom-input"
             >
           </div>
@@ -150,6 +164,7 @@ import {
   personOutline,
   mailOutline,
   callOutline,
+  storefrontOutline,
   lockClosedOutline, 
   eyeOutline, 
   eyeOffOutline,
@@ -163,6 +178,7 @@ const router = useRouter();
 const fullName = ref('');
 const email = ref('');
 const phone = ref('');
+const storeName = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const acceptedTerms = ref(false);
@@ -175,6 +191,7 @@ const isFormValid = computed(() => {
   return fullName.value && 
          email.value && 
          phone.value && 
+         storeName.value &&
          password.value && 
          confirmPassword.value &&
          password.value === confirmPassword.value &&
@@ -196,13 +213,14 @@ const handleSignup = async () => {
       fullName: fullName.value, 
       email: email.value,
       phone: phone.value,
+      storeName: storeName.value,
       password: password.value 
     });
     
     // Show success message
     const alert = await alertController.create({
       header: 'Success!',
-      message: 'Your account has been created successfully.',
+      message: 'Your seller account has been created successfully.',
       buttons: ['OK']
     });
     await alert.present();
@@ -225,7 +243,7 @@ const handleSignup = async () => {
 const showTerms = async () => {
   const alert = await alertController.create({
     header: 'Terms & Conditions',
-    message: 'By using Palengke Online, you agree to our terms of service and privacy policy.',
+    message: 'By using Palengke Online Seller, you agree to our terms of service and privacy policy.',
     buttons: ['Close']
   });
   await alert.present();
@@ -253,7 +271,7 @@ const goToLogin = () => {
 </script>
 
 <style scoped>
-/* Simple white background, no animations */
+/* Simple white background */
 .signup-content {
   --background: #ffffff;
 }
@@ -294,15 +312,37 @@ const goToLogin = () => {
   color: #1a1a1a;
 }
 
-/* Logo Section - Simple, no animation */
+/* Logo Section - Seller is 40% bigger */
 .logo-section {
   text-align: center;
-  margin: 60px 0 30px 0;
+  margin: 60px 0 24px 0;
 }
 
-.logo {
-  width: 160px;
-  height: auto;
+.logos-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.logo-main {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+}
+
+.plus-sign {
+  font-size: 32px;
+  font-weight: 700;
+  color: #000000;
+  line-height: 1;
+  margin: 0 2px;
+}
+
+.logo-seller {
+  width: 140px;  /* 100px + 40% = 140px (BIGGER!) */
+  height: 140px;
+  object-fit: contain;
 }
 
 /* Title Section */
@@ -506,17 +546,57 @@ const goToLogin = () => {
 }
 
 /* Responsive */
-@media (max-width: 360px) {
-  .signup-container {
-    padding: 20px 16px;
+@media (max-width: 480px) {
+  .logos-wrapper {
+    gap: 5px;
+  }
+  
+  .logo-main {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .plus-sign {
+    font-size: 24px;
+    margin: 0 1px;
+  }
+  
+  .logo-seller {
+    width: 112px;  /* 80px + 40% */
+    height: 112px;
   }
   
   .title {
     font-size: 24px;
   }
+}
+
+@media (max-width: 360px) {
+  .signup-container {
+    padding: 20px 16px;
+  }
   
-  .logo {
-    width: 130px;
+  .logos-wrapper {
+    gap: 4px;
+  }
+  
+  .logo-main {
+    width: 65px;
+    height: 65px;
+  }
+  
+  .plus-sign {
+    font-size: 20px;
+    margin: 0 1px;
+  }
+  
+  .logo-seller {
+    width: 91px;  /* 65px + 40% */
+    height: 91px;
+  }
+  
+  .title {
+    font-size: 22px;
   }
 }
 </style>
