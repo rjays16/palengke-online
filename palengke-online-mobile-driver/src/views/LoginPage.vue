@@ -3,9 +3,13 @@
     <ion-content :fullscreen="true" class="login-content">
       <div class="login-container">
         
-        <!-- Logo -->
+        <!-- Logo Section - Both logos, driver is bigger -->
         <div class="logo-section">
-          <img src="/assets/images/logo.png" alt="Palengke Online" class="logo">
+          <div class="logos-wrapper">
+            <img src="/assets/images/logo.png" alt="Palengke Online" class="logo-main">
+            <div class="plus-sign">+</div>
+            <img src="/assets/images/palengke-driver.png" alt="Driver" class="logo-driver">
+          </div>
         </div>
 
         <!-- Title -->
@@ -191,7 +195,7 @@ const goToSignup = () => {
 </script>
 
 <style scoped>
-/* Simple white background, no animations */
+/* Simple white background */
 .login-content {
   --background: #ffffff;
 }
@@ -204,15 +208,37 @@ const goToSignup = () => {
   padding: 40px 24px;
 }
 
-/* Logo Section - Simple, no animation */
+/* Logo Section - Driver is 40% bigger than Palengke logo */
 .logo-section {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
 }
 
-.logo {
-  width: 180px;
-  height: auto;
+.logos-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.logo-main {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+}
+
+.plus-sign {
+  font-size: 36px;
+  font-weight: 700;
+  color: #000000;
+  line-height: 1;
+  margin: 0 2px;
+}
+
+.logo-driver {
+  width: 154px;  /* 110px + 40% = 154px (BIGGER!) */
+  height: 154px;
+  object-fit: contain;
 }
 
 /* Title Section */
@@ -398,17 +424,57 @@ const goToSignup = () => {
 }
 
 /* Responsive */
-@media (max-width: 360px) {
-  .login-container {
-    padding: 32px 20px;
+@media (max-width: 480px) {
+  .logos-wrapper {
+    gap: 6px;
+  }
+  
+  .logo-main {
+    width: 90px;
+    height: 90px;
+  }
+  
+  .plus-sign {
+    font-size: 28px;
+    margin: 0 1px;
+  }
+  
+  .logo-driver {
+    width: 126px;  /* 90px + 40% */
+    height: 126px;
   }
   
   .title {
     font-size: 28px;
   }
+}
+
+@media (max-width: 360px) {
+  .login-container {
+    padding: 32px 20px;
+  }
   
-  .logo {
-    width: 150px;
+  .logos-wrapper {
+    gap: 5px;
+  }
+  
+  .logo-main {
+    width: 75px;
+    height: 75px;
+  }
+  
+  .plus-sign {
+    font-size: 24px;
+    margin: 0 1px;
+  }
+  
+  .logo-driver {
+    width: 105px;  /* 75px + 40% */
+    height: 105px;
+  }
+  
+  .title {
+    font-size: 24px;
   }
 }
 </style>
