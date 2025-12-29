@@ -1,0 +1,414 @@
+<template>
+  <ion-page>
+    <ion-content :fullscreen="true" class="login-content">
+      <div class="login-container">
+        
+        <!-- Logo -->
+        <div class="logo-section">
+          <img src="/assets/images/logo.png" alt="Palengke Online" class="logo">
+        </div>
+
+        <!-- Title -->
+        <h1 class="title">Palengke Online</h1>
+        <p class="subtitle">Fresh deals delivered to your door</p>
+
+        <!-- Login Form -->
+        <div class="form-section">
+          <div class="input-group">
+            <ion-icon :icon="mailOutline" class="input-icon"></ion-icon>
+            <input 
+              v-model="email" 
+              type="email" 
+              placeholder="Email address"
+              class="custom-input"
+              @keyup.enter="handleLogin"
+            >
+          </div>
+
+          <div class="input-group">
+            <ion-icon :icon="lockClosedOutline" class="input-icon"></ion-icon>
+            <input 
+              v-model="password" 
+              :type="showPassword ? 'text' : 'password'" 
+              placeholder="Password"
+              class="custom-input"
+              @keyup.enter="handleLogin"
+            >
+            <ion-icon 
+              :icon="showPassword ? eyeOffOutline : eyeOutline" 
+              class="toggle-password"
+              @click="showPassword = !showPassword"
+            ></ion-icon>
+          </div>
+
+          <div class="forgot-password">
+            <a href="#" @click.prevent="handleForgotPassword">Forgot Password?</a>
+          </div>
+
+          <ion-button 
+            expand="block" 
+            class="login-button"
+            @click="handleLogin"
+            :disabled="!email || !password"
+          >
+            <span v-if="!isLoading">Sign In</span>
+            <ion-spinner v-else name="crescent"></ion-spinner>
+          </ion-button>
+
+          <!-- Divider -->
+          <div class="divider">
+            <span>or continue with</span>
+          </div>
+
+          <!-- Social Login -->
+          <div class="social-buttons">
+            <button class="social-btn google" @click="handleGoogleLogin">
+              <ion-icon :icon="logoGoogle"></ion-icon>
+              Google
+            </button>
+            <button class="social-btn facebook" @click="handleFacebookLogin">
+              <ion-icon :icon="logoFacebook"></ion-icon>
+              Facebook
+            </button>
+          </div>
+        </div>
+
+        <!-- Sign Up Link -->
+        <div class="signup-section">
+          <p class="signup-text">
+            Don't have an account? 
+            <a href="#" @click.prevent="goToSignup">Sign Up</a>
+          </p>
+        </div>
+
+      </div>
+    </ion-content>
+  </ion-page>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { 
+  IonPage, 
+  IonContent, 
+  IonButton, 
+  IonIcon, 
+  IonSpinner,
+  alertController 
+} from '@ionic/vue';
+import { 
+  mailOutline, 
+  lockClosedOutline, 
+  eyeOutline, 
+  eyeOffOutline,
+  logoGoogle,
+  logoFacebook
+} from 'ionicons/icons';
+
+const router = useRouter();
+
+// Form data
+const email = ref('');
+const password = ref('');
+const showPassword = ref(false);
+const isLoading = ref(false);
+
+// Login handler
+const handleLogin = async () => {
+  if (!email.value || !password.value) return;
+  
+  isLoading.value = true;
+  
+  try {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // TODO: Replace with actual login logic
+    console.log('Login:', { email: email.value, password: password.value });
+    
+    // Save auth state
+    localStorage.setItem('isAuthenticated', 'true');
+    
+    // Navigate to home page
+    router.push('/home');
+  } catch (error) {
+    const alert = await alertController.create({
+      header: 'Login Failed',
+      message: 'Invalid email or password. Please try again.',
+      buttons: ['OK']
+    });
+    await alert.present();
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+// Forgot password handler
+const handleForgotPassword = async () => {
+  const alert = await alertController.create({
+    header: 'Reset Password',
+    message: 'Enter your email address to receive a password reset link.',
+    inputs: [
+      {
+        name: 'email',
+        type: 'email',
+        placeholder: 'Email address'
+      }
+    ],
+    buttons: [
+      {
+        text: 'Cancel',
+        role: 'cancel'
+      },
+      {
+        text: 'Send',
+        handler: (data) => {
+          console.log('Reset password for:', data.email);
+          // TODO: Implement password reset logic
+        }
+      }
+    ]
+  });
+  await alert.present();
+};
+
+// Social login handlers
+const handleGoogleLogin = () => {
+  console.log('Google login');
+  // TODO: Implement Google login
+};
+
+const handleFacebookLogin = () => {
+  console.log('Facebook login');
+  // TODO: Implement Facebook login
+};
+
+// Navigate to signup
+const goToSignup = () => {
+  router.push('/signup');
+};
+</script>
+
+<style scoped>
+/* Simple white background, no animations */
+.login-content {
+  --background: #ffffff;
+}
+
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px 24px;
+}
+
+/* Logo Section - Simple, no animation */
+.logo-section {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.logo {
+  width: 180px;
+  height: auto;
+}
+
+/* Title Section */
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #666;
+  margin: 0 0 40px 0;
+  text-align: center;
+}
+
+/* Form Section */
+.form-section {
+  max-width: 400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.input-group {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.input-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  color: #4CAF50;
+  z-index: 2;
+}
+
+.custom-input {
+  width: 100%;
+  padding: 16px 16px 16px 48px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 16px;
+  background: white;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+.custom-input:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+
+.custom-input::placeholder {
+  color: #999;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  color: #999;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.forgot-password {
+  text-align: right;
+  margin-bottom: 24px;
+}
+
+.forgot-password a {
+  color: #4CAF50;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.login-button {
+  --background: #4CAF50;
+  --background-hover: #45a049;
+  --border-radius: 12px;
+  height: 56px;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.5px;
+  margin-bottom: 24px;
+}
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: 32px 0;
+  color: #999;
+  font-size: 14px;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.divider span {
+  padding: 0 16px;
+}
+
+/* Social Buttons */
+.social-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  background: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.social-btn:active {
+  transform: scale(0.98);
+}
+
+.social-btn ion-icon {
+  font-size: 20px;
+}
+
+.social-btn.google {
+  color: #DB4437;
+}
+
+.social-btn.google:hover {
+  border-color: #DB4437;
+  background: #fff5f5;
+}
+
+.social-btn.facebook {
+  color: #4267B2;
+}
+
+.social-btn.facebook:hover {
+  border-color: #4267B2;
+  background: #f0f5ff;
+}
+
+/* Sign Up Section */
+.signup-section {
+  text-align: center;
+  margin-top: 32px;
+}
+
+.signup-text {
+  color: #666;
+  font-size: 15px;
+  margin: 0;
+}
+
+.signup-text a {
+  color: #4CAF50;
+  text-decoration: none;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+/* Responsive */
+@media (max-width: 360px) {
+  .login-container {
+    padding: 32px 20px;
+  }
+  
+  .title {
+    font-size: 28px;
+  }
+  
+  .logo {
+    width: 150px;
+  }
+}
+</style>
