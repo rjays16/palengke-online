@@ -16,7 +16,7 @@
         <!-- Welcome Section -->
         <div class="welcome-section">
           <div class="logo-container">
-            <img src="/assets/images/logo-without-circle.png" alt="Palengke Online" class="logo">
+            <img src="/assets/images/logo.png" alt="Palengke Online" class="logo">
           </div>
           <h1>Welcome to Palengke Online! 🥬🥕🌽</h1>
           <p class="subtitle">Fresh market delivered to your door</p>
