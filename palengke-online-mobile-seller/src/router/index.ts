@@ -1,66 +1,114 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
+import type { RouteRecordRaw } from 'vue-router';
 
-const routes = [
+// ============================================
+// COMPONENT IMPORTS
+// ============================================
+import LoginPage from '@/views/LoginPage.vue';
+import SignupPage from '@/views/SignupPage.vue';
+import SellerDashboard from '@/views/SellerLandingPage.vue';
+import AddProductPage from '@/views/AddProductPage.vue';
+import ProductsListPage from '@/views/ProductsListPage.vue';
+import EditProductPage from '@/views/EditProductPage.vue';
+import OTPVerificationPage from '@/views/OTPVerificationPage.vue';
+
+// Uncomment when you create these pages:
+// import ProductsListPage from '@/views/ProductsListPage.vue';
+// import OrdersPage from '@/views/OrdersPage.vue';
+// import ProfilePage from '@/views/ProfilePage.vue';
+// import AnalyticsPage from '@/views/AnalyticsPage.vue';
+
+// ============================================
+// ROUTE DEFINITIONS
+// ============================================
+const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    redirect: '/login'  // Redirect to login instead of landing page
+    redirect: '/login'
   },
   {
     path: '/login',
-    component: () => import('@/views/LoginPage.vue')  // Use SellerLoginPage
+    name: 'Login',
+    component: LoginPage
+  },
+  {
+    path: '/otp-verify/:phone?',
+    name: 'OTPVerification',
+    component: OTPVerificationPage,
+    meta: { requiresAuth: false }
   },
   {
     path: '/signup',
-    component: () => import('@/views/SignupPage.vue')  // Use SellerSignupPage
+    name: 'Signup',
+    component: SignupPage
   },
   {
-  path: '/home',
-  component: () => import('@/views/SellerLandingPage.vue'),  // Use this instead
-  meta: { requiresAuth: true }
+    path: '/home',
+    name: 'Home',
+    component: SellerDashboard,
+    meta: { requiresAuth: true }
   },
   {
     path: '/products/add',
-    component: () => import('@/views/AddProductPage.vue'),
+    name: 'AddProduct',
+    component: AddProductPage,
     meta: { requiresAuth: true }
   },
-  // {
-  //   path: '/products',
-  //   component: () => import('@/views/ProductsListPage.vue'),
-  //   meta: { requiresAuth: true }
-  // },
+  
+  {
+    path: '/products',
+    name: 'Products',
+    component: ProductsListPage,
+    meta: { requiresAuth: true }
+  },
+  {
+  path: '/products/edit/:id',
+  name: 'EditProduct',
+  component: EditProductPage,
+  meta: { requiresAuth: true }
+  },
   // {
   //   path: '/orders',
-  //   component: () => import('@/views/OrdersPage.vue'),
+  //   name: 'Orders',
+  //   component: OrdersPage,
   //   meta: { requiresAuth: true }
   // },
   // {
   //   path: '/profile',
-  //   component: () => import('@/views/ProfilePage.vue'),
+  //   name: 'Profile',
+  //   component: ProfilePage,
   //   meta: { requiresAuth: true }
   // },
   // {
   //   path: '/analytics',
-  //   component: () => import('@/views/AnalyticsPage.vue'),
+  //   name: 'Analytics',
+  //   component: AnalyticsPage,
   //   meta: { requiresAuth: true }
   // }
 ];
 
+// ============================================
+// ROUTER INSTANCE
+// ============================================
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes
 });
 
-// Optional: Add authentication guard
+// ============================================
+// AUTHENTICATION GUARD
+// ============================================
 router.beforeEach((to, from, next) => {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
   
   if (to.meta.requiresAuth && !isAuthenticated) {
-    // Redirect to login if not authenticated
+    // Not logged in, redirect to login
     next('/login');
   } else if (to.path === '/login' && isAuthenticated) {
-    // Redirect to home if already logged in
+    // Already logged in, redirect to home
     next('/home');
   } else {
+    // All good, proceed
     next();
   }
 });

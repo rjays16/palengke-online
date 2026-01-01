@@ -99,7 +99,8 @@ import {
   IonButton, 
   IonIcon, 
   IonSpinner,
-  alertController 
+  alertController,
+  toastController
 } from '@ionic/vue';
 import { 
   mailOutline, 
@@ -125,26 +126,68 @@ const handleLogin = async () => {
   isLoading.value = true;
   
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    // Simulate API call to validate credentials
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // TODO: Replace with actual login logic
+    // TODO: Replace with actual login API
     console.log('Login:', { email: email.value, password: password.value });
     
-    // Save auth state
-    localStorage.setItem('isAuthenticated', 'true');
+    isLoading.value = false;
     
-    // Navigate to home page
-    router.push('/home');
+    // Show OTP confirmation dialog (like GCash)
+    const alert = await alertController.create({
+      header: 'Verify Account',
+      message: 'Do you want to link this device to your account?',
+      subHeader: 'We need to do a quick authentication before linking your device. A 6-digit code will be sent to your registered mobile number.',
+      cssClass: 'otp-confirm-alert',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          cssClass: 'alert-button-cancel'
+        },
+        {
+          text: 'Send Code',
+          cssClass: 'alert-button-confirm',
+          handler: async () => {
+            // TODO: Call API to send OTP
+            console.log('Sending OTP code...');
+            
+            // Show sending toast
+            const toast = await toastController.create({
+              message: 'Sending verification code...',
+              duration: 1500,
+              color: 'success',
+              position: 'top'
+            });
+            await toast.present();
+            
+            // Save auth state temporarily
+            localStorage.setItem('pendingAuth', 'true');
+            localStorage.setItem('userEmail', email.value);
+            
+            // Navigate to OTP page after toast
+            setTimeout(() => {
+              router.push({
+                name: 'OTPVerification',
+                params: { phone: '890' } // Last 3 digits of phone
+              });
+            }, 1500);
+          }
+        }
+      ]
+    });
+    
+    await alert.present();
+    
   } catch (error) {
+    isLoading.value = false;
     const alert = await alertController.create({
       header: 'Login Failed',
       message: 'Invalid email or password. Please try again.',
       buttons: ['OK']
     });
     await alert.present();
-  } finally {
-    isLoading.value = false;
   }
 };
 

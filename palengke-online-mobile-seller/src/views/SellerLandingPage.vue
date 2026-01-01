@@ -4,12 +4,12 @@
       <ion-toolbar color="success">
         <ion-title>Seller Dashboard</ion-title>
         <ion-buttons slot="end">
-          <ion-button @click="showNotifications">
-            <ion-badge color="danger" v-if="notificationCount > 0">{{ notificationCount }}</ion-badge>
+          <ion-button @click="showNotifications" class="notification-btn">
+            <span v-if="notificationCount > 0" class="notification-badge">{{ notificationCount }}</span>
             <ion-icon :icon="notificationsOutline"></ion-icon>
           </ion-button>
-          <ion-button @click="openProfile">
-            <ion-icon :icon="personCircleOutline"></ion-icon>
+          <ion-button @click="openSettings">
+            <ion-icon :icon="settingsOutline"></ion-icon>
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
@@ -90,13 +90,6 @@
               <div class="action-text">Add Product</div>
             </div>
 
-            <div class="action-card" @click="viewProducts">
-              <div class="action-icon view">
-                <ion-icon :icon="listOutline"></ion-icon>
-              </div>
-              <div class="action-text">My Products</div>
-            </div>
-
             <div class="action-card" @click="viewOrders">
               <div class="action-icon orders">
                 <ion-icon :icon="receiptOutline"></ion-icon>
@@ -153,7 +146,7 @@
           
           <div class="categories-chips">
             <div class="category-chip" v-for="category in selectedCategories" :key="category">
-              {{ getCategoryIcon(category) }} {{ category }}
+              {{ category }}
             </div>
             <div class="category-chip add" @click="manageCategories">
               <ion-icon :icon="addOutline"></ion-icon> Add More
@@ -204,23 +197,27 @@ import {
   IonButtons,
   IonIcon,
   IonBadge,
-  alertController
+  alertController,
+  actionSheetController
 } from '@ionic/vue';
 import {
   notificationsOutline,
-  personCircleOutline,
+  settingsOutline,
   timeOutline,
   cartOutline,
   cashOutline,
   cubeOutline,
   trendingUpOutline,
   addCircleOutline,
-  listOutline,
   receiptOutline,
   statsChartOutline,
   personOutline,
   addOutline,
-  homeOutline
+  homeOutline,
+  logOutOutline,
+  helpCircleOutline,
+  informationCircleOutline,
+  closeOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -273,16 +270,118 @@ const showNotifications = () => {
   console.log('Show notifications');
 };
 
-const openProfile = () => {
-  router.push('/profile');
+const openSettings = async () => {
+  const actionSheet = await actionSheetController.create({
+    header: 'Settings',
+    cssClass: 'settings-action-sheet',
+    buttons: [
+      {
+        text: 'Account Settings',
+        icon: personOutline,
+        handler: () => {
+          console.log('Account Settings');
+          // TODO: Navigate to account settings
+        }
+      },
+      {
+        text: 'Notification Settings',
+        icon: notificationsOutline,
+        handler: () => {
+          console.log('Notification Settings');
+          // TODO: Navigate to notification settings
+        }
+      },
+      {
+        text: 'Help & Support',
+        icon: helpCircleOutline,
+        handler: () => {
+          console.log('Help & Support');
+          // TODO: Navigate to help page
+        }
+      },
+      {
+        text: 'About',
+        icon: informationCircleOutline,
+        handler: () => {
+          console.log('About');
+          // TODO: Show about page
+        }
+      },
+      {
+        text: 'Logout',
+        icon: logOutOutline,
+        role: 'destructive',
+        handler: () => {
+          handleLogout();
+        }
+      }
+    ]
+  });
+  
+  // Add close button to header after presenting
+  await actionSheet.present();
+  
+  // Add custom close button to header
+  const headerElement = document.querySelector('.settings-action-sheet .action-sheet-title');
+  if (headerElement && !headerElement.querySelector('.close-btn')) {
+    const closeBtn = document.createElement('ion-icon');
+    closeBtn.setAttribute('name', 'close-outline');
+    closeBtn.classList.add('close-btn');
+    closeBtn.style.cssText = 'position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 24px; cursor: pointer;';
+    closeBtn.onclick = () => actionSheet.dismiss();
+    headerElement.style.position = 'relative';
+    headerElement.appendChild(closeBtn);
+  }
+};
+
+const handleLogout = async () => {
+  const alert = await alertController.create({
+    header: 'Logout',
+    message: 'Are you sure you want to logout?',
+    buttons: [
+      {
+        text: 'Cancel',
+        role: 'cancel'
+      },
+      {
+        text: 'Logout',
+        role: 'destructive',
+        handler: () => {
+          // Clear authentication
+          localStorage.removeItem('isAuthenticated');
+          
+          // Show success message
+          showSuccessLogout();
+          
+          // Redirect to login after delay
+          setTimeout(() => {
+            router.push('/login');
+          }, 1500);
+        }
+      }
+    ]
+  });
+  await alert.present();
+};
+
+const showSuccessLogout = async () => {
+  const alert = await alertController.create({
+    cssClass: 'success-modal',
+    header: ' ',
+    message: '✅ Logged out successfully',
+    buttons: ['OK']
+  });
+  
+  await alert.present();
+  
+  // Auto dismiss
+  setTimeout(() => {
+    alert.dismiss();
+  }, 1500);
 };
 
 const addProduct = () => {
   router.push('/products/add');
-};
-
-const viewProducts = () => {
-  router.push('/products');
 };
 
 const viewOrders = () => {
@@ -302,14 +401,16 @@ const manageCategories = async () => {
     header: 'Manage Categories',
     message: 'Select the types of products you sell',
     inputs: [
-      { type: 'checkbox', label: 'Fish 🐟', value: 'Fish', checked: true },
-      { type: 'checkbox', label: 'Pork 🐷', value: 'Pork' },
-      { type: 'checkbox', label: 'Chicken 🐔', value: 'Chicken' },
-      { type: 'checkbox', label: 'Vegetables 🥬', value: 'Vegetables', checked: true },
-      { type: 'checkbox', label: 'Fruits 🍌', value: 'Fruits', checked: true },
-      { type: 'checkbox', label: 'Condiments 🧂', value: 'Condiments' },
-      { type: 'checkbox', label: 'Dairy 🥛', value: 'Dairy' },
-      { type: 'checkbox', label: 'Rice 🍚', value: 'Rice' }
+      { type: 'checkbox', label: 'Fish', value: 'Fish', checked: true },
+      { type: 'checkbox', label: 'Shellfish', value: 'Shellfish' },
+      { type: 'checkbox', label: 'Squid & Octopus', value: 'Squid' },
+      { type: 'checkbox', label: 'Pork', value: 'Pork' },
+      { type: 'checkbox', label: 'Chicken', value: 'Chicken' },
+      { type: 'checkbox', label: 'Vegetables', value: 'Vegetables', checked: true },
+      { type: 'checkbox', label: 'Fruits', value: 'Fruits', checked: true },
+      { type: 'checkbox', label: 'Condiments', value: 'Condiments' },
+      { type: 'checkbox', label: 'Dairy & Goods', value: 'Dairy' },
+      { type: 'checkbox', label: 'Rice & Grains', value: 'Rice' }
     ],
     buttons: [
       { text: 'Cancel', role: 'cancel' },
@@ -322,20 +423,6 @@ const manageCategories = async () => {
     ]
   });
   await alert.present();
-};
-
-const getCategoryIcon = (category) => {
-  const icons = {
-    'Fish': '🐟',
-    'Pork': '🐷',
-    'Chicken': '🐔',
-    'Vegetables': '🥬',
-    'Fruits': '🍌',
-    'Condiments': '🧂',
-    'Dairy': '🥛',
-    'Rice': '🍚'
-  };
-  return icons[category] || '📦';
 };
 
 // Bottom Nav
@@ -359,6 +446,41 @@ const goToProfile = () => {
 <style scoped>
 .dashboard-content {
   --background: #f8f9fa;
+}
+
+/* Fix header button spacing */
+ion-header ion-toolbar ion-buttons {
+  gap: 0 !important;
+}
+
+ion-header ion-toolbar ion-buttons ion-button {
+  margin: 0 !important;
+  --padding-start: 8px;
+  --padding-end: 8px;
+}
+
+.notification-btn {
+  position: relative;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #f44336;
+  color: white;
+  border-radius: 50%;
+  min-width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 0px;
+  z-index: 10;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  border: 1px solid #4CAF50;
 }
 
 .dashboard-container {
@@ -489,7 +611,7 @@ const goToProfile = () => {
 
 .actions-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
 
@@ -517,11 +639,6 @@ const goToProfile = () => {
 .action-icon.add {
   background: #E8F5E9;
   color: #4CAF50;
-}
-
-.action-icon.view {
-  background: #E3F2FD;
-  color: #2196F3;
 }
 
 .action-icon.orders {
@@ -730,5 +847,84 @@ const goToProfile = () => {
     height: 50px;
     font-size: 24px;
   }
+}
+
+/* Success Modal Styling */
+:deep(.success-modal .alert-wrapper) {
+  border-radius: 20px;
+  text-align: center;
+  max-width: 320px;
+  padding: 30px 20px;
+}
+
+:deep(.success-modal .alert-head) {
+  padding: 0;
+  min-height: 0;
+}
+
+:deep(.success-modal .alert-message) {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  padding: 20px 10px;
+}
+
+:deep(.success-modal .alert-button-group) {
+  padding: 10px 0 0 0;
+}
+
+:deep(.success-modal button) {
+  background: #4CAF50;
+  color: white;
+  font-weight: 600;
+  border-radius: 12px;
+  height: 44px;
+}
+
+/* Settings Action Sheet Styling */
+:deep(.settings-action-sheet .action-sheet-wrapper) {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+:deep(.settings-action-sheet .action-sheet-group) {
+  border-radius: 16px 16px 0 0;
+}
+
+:deep(.settings-action-sheet .action-sheet-title) {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  position: relative;
+  padding-right: 48px;
+}
+
+:deep(.settings-action-sheet .close-btn) {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 28px;
+  color: #666;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+:deep(.settings-action-sheet .close-btn:hover) {
+  color: #1a1a1a;
+}
+
+:deep(.settings-action-sheet button.action-sheet-button) {
+  font-size: 15px;
+  padding: 16px;
+}
+
+:deep(.settings-action-sheet button[role="destructive"]) {
+  color: #f44336;
+  font-weight: 600;
+}
+
+:deep(.settings-action-sheet button[role="cancel"]) {
+  display: none;
 }
 </style>
