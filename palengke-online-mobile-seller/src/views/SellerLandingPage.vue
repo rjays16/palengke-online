@@ -90,18 +90,18 @@
               <div class="action-text">Add Product</div>
             </div>
 
-            <div class="action-card" @click="viewOrders">
-              <div class="action-icon orders">
-                <ion-icon :icon="receiptOutline"></ion-icon>
+            <div class="action-card" @click="openChat">
+              <div class="action-icon chat">
+                <ion-icon :icon="chatbubblesOutline"></ion-icon>
               </div>
-              <div class="action-text">Orders</div>
+              <div class="action-text">Messages</div>
             </div>
 
-            <div class="action-card" @click="viewAnalytics">
-              <div class="action-icon analytics">
-                <ion-icon :icon="statsChartOutline"></ion-icon>
+            <div class="action-card" @click="shareShop">
+              <div class="action-icon share">
+                <ion-icon :icon="shareSocialOutline"></ion-icon>
               </div>
-              <div class="action-text">Analytics</div>
+              <div class="action-text">Share Shop</div>
             </div>
           </div>
         </div>
@@ -115,7 +115,7 @@
             </ion-button>
           </div>
 
-          <div class="order-card" v-for="order in recentOrders" :key="order.id">
+          <div class="order-card" v-for="order in recentOrders" :key="order.id" @click="viewOrderDetails(order.id)">
             <div class="order-header">
               <div class="order-id">Order #{{ order.id }}</div>
               <div class="order-status" :class="order.status">{{ order.status }}</div>
@@ -198,7 +198,8 @@ import {
   IonIcon,
   IonBadge,
   alertController,
-  actionSheetController
+  actionSheetController,
+  toastController
 } from '@ionic/vue';
 import {
   notificationsOutline,
@@ -217,7 +218,9 @@ import {
   logOutOutline,
   helpCircleOutline,
   informationCircleOutline,
-  closeOutline
+  closeOutline,
+  shareSocialOutline,
+  chatbubblesOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -276,6 +279,13 @@ const openSettings = async () => {
     cssClass: 'settings-action-sheet',
     buttons: [
       {
+        text: 'Analytics',
+        icon: statsChartOutline,
+        handler: () => {
+          router.push('/analytics');
+        }
+      },
+      {
         text: 'Account Settings',
         icon: personOutline,
         handler: () => {
@@ -318,20 +328,7 @@ const openSettings = async () => {
     ]
   });
   
-  // Add close button to header after presenting
   await actionSheet.present();
-  
-  // Add custom close button to header
-  const headerElement = document.querySelector('.settings-action-sheet .action-sheet-title');
-  if (headerElement && !headerElement.querySelector('.close-btn')) {
-    const closeBtn = document.createElement('ion-icon');
-    closeBtn.setAttribute('name', 'close-outline');
-    closeBtn.classList.add('close-btn');
-    closeBtn.style.cssText = 'position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 24px; cursor: pointer;';
-    closeBtn.onclick = () => actionSheet.dismiss();
-    headerElement.style.position = 'relative';
-    headerElement.appendChild(closeBtn);
-  }
 };
 
 const handleLogout = async () => {
@@ -347,13 +344,8 @@ const handleLogout = async () => {
         text: 'Logout',
         role: 'destructive',
         handler: () => {
-          // Clear authentication
           localStorage.removeItem('isAuthenticated');
-          
-          // Show success message
           showSuccessLogout();
-          
-          // Redirect to login after delay
           setTimeout(() => {
             router.push('/login');
           }, 1500);
@@ -374,7 +366,6 @@ const showSuccessLogout = async () => {
   
   await alert.present();
   
-  // Auto dismiss
   setTimeout(() => {
     alert.dismiss();
   }, 1500);
@@ -384,8 +375,55 @@ const addProduct = () => {
   router.push('/products/add');
 };
 
-const viewOrders = () => {
-  router.push('/orders');
+const openChat = () => {
+  router.push('/messages');
+};
+
+const shareShop = async () => {
+  const alert = await alertController.create({
+    header: 'Share Your Shop',
+    message: 'Share your shop link with customers via:',
+    buttons: [
+      {
+        text: 'Copy Link',
+        handler: () => {
+          // TODO: Copy shop URL to clipboard
+          const shopUrl = `https://palengke-online.com/shop/${sellerName.value}`;
+          navigator.clipboard.writeText(shopUrl);
+          showToast('✅ Shop link copied!', 'success');
+        }
+      },
+      {
+        text: 'Share via Facebook',
+        handler: () => {
+          // TODO: Share to Facebook
+          showToast('Opening Facebook...', 'primary');
+        }
+      },
+      {
+        text: 'Share via Messenger',
+        handler: () => {
+          // TODO: Share to Messenger
+          showToast('Opening Messenger...', 'primary');
+        }
+      },
+      {
+        text: 'Cancel',
+        role: 'cancel'
+      }
+    ]
+  });
+  await alert.present();
+};
+
+const showToast = async (message, color = 'dark') => {
+  const toast = await toastController.create({
+    message,
+    duration: 2000,
+    color,
+    position: 'top'
+  });
+  await toast.present();
 };
 
 const viewAnalytics = () => {
@@ -394,6 +432,10 @@ const viewAnalytics = () => {
 
 const viewAllOrders = () => {
   router.push('/orders');
+};
+
+const viewOrderDetails = (orderId) => {
+  router.push(`/orders/${orderId}`);
 };
 
 const manageCategories = async () => {
@@ -641,14 +683,14 @@ ion-header ion-toolbar ion-buttons ion-button {
   color: #4CAF50;
 }
 
-.action-icon.orders {
+.action-icon.chat {
   background: #FFF3E0;
   color: #FF9800;
 }
 
-.action-icon.analytics {
-  background: #F3E5F5;
-  color: #9C27B0;
+.action-icon.share {
+  background: #E3F2FD;
+  color: #2196F3;
 }
 
 .action-text {
@@ -675,6 +717,12 @@ ion-header ion-toolbar ion-buttons ion-button {
   padding: 16px;
   margin-bottom: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.order-card:active {
+  transform: scale(0.98);
 }
 
 .order-header {
@@ -897,21 +945,6 @@ ion-header ion-toolbar ion-buttons ion-button {
   color: #1a1a1a;
   position: relative;
   padding-right: 48px;
-}
-
-:deep(.settings-action-sheet .close-btn) {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 28px;
-  color: #666;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-:deep(.settings-action-sheet .close-btn:hover) {
-  color: #1a1a1a;
 }
 
 :deep(.settings-action-sheet button.action-sheet-button) {

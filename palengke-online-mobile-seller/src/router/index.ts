@@ -11,12 +11,11 @@ import AddProductPage from '@/views/AddProductPage.vue';
 import ProductsListPage from '@/views/ProductsListPage.vue';
 import EditProductPage from '@/views/EditProductPage.vue';
 import OTPVerificationPage from '@/views/OTPVerificationPage.vue';
-
-// Uncomment when you create these pages:
-// import ProductsListPage from '@/views/ProductsListPage.vue';
-// import OrdersPage from '@/views/OrdersPage.vue';
-// import ProfilePage from '@/views/ProfilePage.vue';
-// import AnalyticsPage from '@/views/AnalyticsPage.vue';
+import OrdersManagementPage from '@/views/OrdersManagementPage.vue';
+import OrderDetailsPage from '@/views/OrderDetailsPage.vue';
+import MessagesPage from '@/views/MessagesPage.vue';
+import AnalyticsPage from '@/views/AnalyticsPage.vue';
+import ProfilePage from '@/views/ProfilePage.vue';
 
 // ============================================
 // ROUTE DEFINITIONS
@@ -54,7 +53,6 @@ const routes: Array<RouteRecordRaw> = [
     component: AddProductPage,
     meta: { requiresAuth: true }
   },
-  
   {
     path: '/products',
     name: 'Products',
@@ -62,29 +60,41 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAuth: true }
   },
   {
-  path: '/products/edit/:id',
-  name: 'EditProduct',
-  component: EditProductPage,
-  meta: { requiresAuth: true }
+    path: '/products/edit/:id',
+    name: 'EditProduct',
+    component: EditProductPage,
+    meta: { requiresAuth: true }
   },
-  // {
-  //   path: '/orders',
-  //   name: 'Orders',
-  //   component: OrdersPage,
-  //   meta: { requiresAuth: true }
-  // },
-  // {
-  //   path: '/profile',
-  //   name: 'Profile',
-  //   component: ProfilePage,
-  //   meta: { requiresAuth: true }
-  // },
-  // {
-  //   path: '/analytics',
-  //   name: 'Analytics',
-  //   component: AnalyticsPage,
-  //   meta: { requiresAuth: true }
-  // }
+  {
+    path: '/orders',
+    name: 'Orders',
+    component: OrdersManagementPage,  // ✅ FIXED: Changed from OrdersPage to OrdersManagementPage
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/orders/:id',
+    name: 'OrderDetails',
+    component: OrderDetailsPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/messages',
+    name: 'Messages',
+    component: MessagesPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: ProfilePage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/analytics',
+    name: 'Analytics',
+    component: AnalyticsPage,
+    meta: { requiresAuth: true }
+  }
 ];
 
 // ============================================
