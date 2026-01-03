@@ -270,7 +270,7 @@ const recentOrders = ref([
 
 // Methods
 const showNotifications = () => {
-  console.log('Show notifications');
+  router.push('/notifications');
 };
 
 const openSettings = async () => {
@@ -305,16 +305,14 @@ const openSettings = async () => {
         text: 'Help & Support',
         icon: helpCircleOutline,
         handler: () => {
-          console.log('Help & Support');
-          // TODO: Navigate to help page
+          router.push('/help');
         }
       },
       {
         text: 'About',
         icon: informationCircleOutline,
         handler: () => {
-          console.log('About');
-          // TODO: Show about page
+          router.push('/about');
         }
       },
       {

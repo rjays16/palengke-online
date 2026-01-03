@@ -16,6 +16,9 @@ import OrderDetailsPage from '@/views/OrderDetailsPage.vue';
 import MessagesPage from '@/views/MessagesPage.vue';
 import AnalyticsPage from '@/views/AnalyticsPage.vue';
 import ProfilePage from '@/views/ProfilePage.vue';
+import NotificationPage from '@/views/NotificationsPage.vue';
+import HelpSupportPage from '@/views/HelpSupportPage.vue';
+import AboutPage from '@/views/AboutPage.vue';
 
 // ============================================
 // ROUTE DEFINITIONS
@@ -94,7 +97,27 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Analytics',
     component: AnalyticsPage,
     meta: { requiresAuth: true }
-  }
+  },
+  {
+  path: '/notifications',
+  name: 'Notifications',
+  component: () => NotificationPage,
+  meta: { requiresAuth: true }
+ },
+ {
+  path: '/help',
+  name: 'Help',
+  component: () => HelpSupportPage,
+  meta: { requiresAuth: true }
+ },
+
+ {
+  path: '/about',
+  name: 'About',
+  component: () => AboutPage,
+  meta: { requiresAuth: true }
+}
+ 
 ];
 
 // ============================================
