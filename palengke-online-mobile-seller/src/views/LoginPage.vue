@@ -58,23 +58,6 @@
             <span v-if="!isLoading">Sign In</span>
             <ion-spinner v-else name="crescent"></ion-spinner>
           </ion-button>
-
-          <!-- Divider -->
-          <div class="divider">
-            <span>or continue with</span>
-          </div>
-
-          <!-- Social Login -->
-          <div class="social-buttons">
-            <button class="social-btn google" @click="handleGoogleLogin">
-              <ion-icon :icon="logoGoogle"></ion-icon>
-              Google
-            </button>
-            <button class="social-btn facebook" @click="handleFacebookLogin">
-              <ion-icon :icon="logoFacebook"></ion-icon>
-              Facebook
-            </button>
-          </div>
         </div>
 
         <!-- Sign Up Link -->
@@ -106,9 +89,7 @@ import {
   mailOutline, 
   lockClosedOutline, 
   eyeOutline, 
-  eyeOffOutline,
-  logoGoogle,
-  logoFacebook
+  eyeOffOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -220,20 +201,9 @@ const handleForgotPassword = async () => {
   await alert.present();
 };
 
-// Social login handlers
-const handleGoogleLogin = () => {
-  console.log('Google login');
-  // TODO: Implement Google login
-};
-
-const handleFacebookLogin = () => {
-  console.log('Facebook login');
-  // TODO: Implement Facebook login
-};
-
 // Navigate to signup
 const goToSignup = () => {
-  router.push('/signup');
+  router.push('/welcome');
 };
 </script>
 
@@ -374,77 +344,7 @@ const goToSignup = () => {
   font-weight: 600;
   text-transform: none;
   letter-spacing: 0.5px;
-  margin-bottom: 24px;
-}
-
-/* Divider */
-.divider {
-  display: flex;
-  align-items: center;
-  margin: 32px 0;
-  color: #999;
-  font-size: 14px;
-}
-
-.divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: #e0e0e0;
-}
-
-.divider span {
-  padding: 0 16px;
-}
-
-/* Social Buttons */
-.social-buttons {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.social-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
-  background: white;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: inherit;
-}
-
-.social-btn:active {
-  transform: scale(0.98);
-}
-
-.social-btn ion-icon {
-  font-size: 20px;
-}
-
-.social-btn.google {
-  color: #DB4437;
-}
-
-.social-btn.google:hover {
-  border-color: #DB4437;
-  background: #fff5f5;
-}
-
-.social-btn.facebook {
-  color: #4267B2;
-}
-
-.social-btn.facebook:hover {
-  border-color: #4267B2;
-  background: #f0f5ff;
+  margin-bottom: 0;
 }
 
 /* Sign Up Section */
