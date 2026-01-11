@@ -218,17 +218,7 @@ const verifyCode = async () => {
     localStorage.removeItem('pendingAuth'); // Clean up pending state
     
     // Show success modal
-    const alert = await alertController.create({
-      cssClass: 'success-modal',
-      header: ' ',
-      message: '✅ Verification successful!',
-      buttons: ['OK']
-    });
-    
-    await alert.present();
-    
-    // Wait for modal to close
-    await alert.onDidDismiss();
+    await showSuccessModal('Verification successful!');
     
     // Navigate to dashboard (not login!)
     router.push('/home');
@@ -247,6 +237,49 @@ const verifyCode = async () => {
   } finally {
     isVerifying.value = false;
   }
+};
+
+const showSuccessModal = async (message) => {
+  const alert = await alertController.create({
+    cssClass: 'success-modal',
+    header: ' ',
+    message: message,
+    buttons: ['OK']
+  });
+  
+  await alert.present();
+  
+  // Add the image after modal is presented
+  setTimeout(() => {
+    const alertElement = document.querySelector('.success-modal .alert-message');
+    if (alertElement) {
+      // Clear the text content
+      const textContent = alertElement.textContent;
+      alertElement.innerHTML = '';
+      
+      // Create and add the image
+      const img = document.createElement('img');
+      img.src = '/assets/images/checkmark_success.png';
+      img.style.width = '80px';
+      img.style.height = '80px';
+      img.style.margin = '0 auto 16px auto';
+      img.style.display = 'block';
+      
+      // Create and add the text
+      const textDiv = document.createElement('div');
+      textDiv.textContent = textContent;
+      textDiv.style.fontSize = '18px';
+      textDiv.style.fontWeight = '600';
+      textDiv.style.color = '#1a1a1a';
+      
+      // Append both
+      alertElement.appendChild(img);
+      alertElement.appendChild(textDiv);
+    }
+  }, 50);
+  
+  // Wait for modal to close
+  await alert.onDidDismiss();
 };
 
 // Lifecycle

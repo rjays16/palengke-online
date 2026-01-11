@@ -401,17 +401,65 @@ const saveProduct = async () => {
 
   console.log('Saving product:', productData);
 
-  // Show success message
-  const toast = await toastController.create({
-    message: 'Product added successfully!',
-    duration: 2000,
-    color: 'success',
-    position: 'top'
-  });
-  await toast.present();
+  // Show success modal
+  await showSuccessModal('Product added successfully!');
 
   // Navigate back to products
   router.push('/products');
+};
+
+const showSuccessModal = async (message) => {
+  const alert = await alertController.create({
+    cssClass: 'success-modal',
+    header: ' ',
+    message: message,
+    buttons: ['OK']
+  });
+  
+  await alert.present();
+  
+  // Add the image after modal is presented
+  setTimeout(() => {
+    const alertElement = document.querySelector('.success-modal .alert-message');
+    if (alertElement) {
+      // Clear the text content
+      const textContent = alertElement.textContent;
+      alertElement.innerHTML = '';
+      
+      // Create wrapper for centering
+      const wrapper = document.createElement('div');
+      wrapper.style.display = 'flex';
+      wrapper.style.flexDirection = 'column';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.textAlign = 'center';
+      
+      // Create and add the image
+      const img = document.createElement('img');
+      img.src = '/assets/images/checkmark_success.png';
+      img.style.width = '80px';
+      img.style.height = '80px';
+      img.style.margin = '0 auto 16px auto';
+      img.style.display = 'block';
+      
+      // Create and add the text
+      const textDiv = document.createElement('div');
+      textDiv.textContent = textContent;
+      textDiv.style.fontSize = '18px';
+      textDiv.style.fontWeight = '600';
+      textDiv.style.color = '#1a1a1a';
+      textDiv.style.textAlign = 'center';
+      
+      // Append to wrapper
+      wrapper.appendChild(img);
+      wrapper.appendChild(textDiv);
+      
+      // Append wrapper to alert
+      alertElement.appendChild(wrapper);
+    }
+  }, 50);
+  
+  // Wait for modal to close
+  await alert.onDidDismiss();
 };
 
 const saveDraft = async () => {
@@ -745,6 +793,38 @@ const saveDraft = async () => {
   --border-radius: 12px;
   height: 48px;
   font-weight: 600;
+}
+
+/* Success Modal Styling */
+:deep(.success-modal .alert-wrapper) {
+  border-radius: 20px;
+  text-align: center;
+  max-width: 320px;
+  padding: 30px 20px;
+}
+
+:deep(.success-modal .alert-head) {
+  padding: 0;
+  min-height: 0;
+}
+
+:deep(.success-modal .alert-message) {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  padding: 20px 10px;
+}
+
+:deep(.success-modal .alert-button-group) {
+  padding: 10px 0 0 0;
+}
+
+:deep(.success-modal button) {
+  background: #4CAF50;
+  color: white;
+  font-weight: 600;
+  border-radius: 12px;
+  height: 44px;
 }
 
 /* Responsive */

@@ -29,8 +29,8 @@ import RegisterStep2 from '@/views/registration/RegisterStep2.vue';
 import RegisterStep3 from '@/views/registration/RegisterStep3.vue';
 import RegisterStep4 from '@/views/registration/RegisterStep4.vue';
 import RegisterStep5 from '@/views/registration/RegisterStep5.vue';
-// import RegisterStep6 from '@/views/registration/RegisterStep6.vue';
-// import RegisterStep7 from '@/views/registration/RegisterStep7.vue';
+import RegisterStep6 from '@/views/registration/RegisterStep6.vue';
+import RegisterStep7 from '@/views/registration/RegisterStep7.vue';
 import RegisterSuccess from '@/views/registration/RegisterSuccess.vue';
 
 // ============================================
@@ -96,18 +96,18 @@ const routes: Array<RouteRecordRaw> = [
     component: RegisterStep5,
     meta: { requiresAuth: false }
   },
-  // {
-  //   path: '/register/step6',
-  //   name: 'RegisterStep6',
-  //   component: RegisterStep6,
-  //   meta: { requiresAuth: false }
-  // },
-  // {
-  //   path: '/register/step7',
-  //   name: 'RegisterStep7',
-  //   component: RegisterStep7,
-  //   meta: { requiresAuth: false }
-  // },
+  {
+    path: '/register/step6',
+    name: 'RegisterStep6',
+    component: RegisterStep6,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/register/step7',
+    name: 'RegisterStep7',
+    component: RegisterStep7,
+    meta: { requiresAuth: false }
+  },
   {
     path: '/register/success',
     name: 'RegisterSuccess',

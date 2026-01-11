@@ -363,6 +363,62 @@ const quickAction = async (order) => {
   }
 };
 
+const showSuccessModal = async (message) => {
+  const alert = await alertController.create({
+    cssClass: 'success-modal',
+    header: ' ',
+    message: message,
+    buttons: ['OK']
+  });
+  
+  await alert.present();
+  
+  // Add the image after modal is presented
+  setTimeout(() => {
+    const alertElement = document.querySelector('.success-modal .alert-message');
+    if (alertElement) {
+      // Clear the text content
+      const textContent = alertElement.textContent;
+      alertElement.innerHTML = '';
+      
+      // Create wrapper for centering
+      const wrapper = document.createElement('div');
+      wrapper.style.display = 'flex';
+      wrapper.style.flexDirection = 'column';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.textAlign = 'center';
+      
+      // Create and add the image
+      const img = document.createElement('img');
+      img.src = '/assets/images/checkmark_success.png';
+      img.style.width = '80px';
+      img.style.height = '80px';
+      img.style.margin = '0 auto 16px auto';
+      img.style.display = 'block';
+      
+      // Create and add the text
+      const textDiv = document.createElement('div');
+      textDiv.textContent = textContent;
+      textDiv.style.fontSize = '18px';
+      textDiv.style.fontWeight = '600';
+      textDiv.style.color = '#1a1a1a';
+      textDiv.style.textAlign = 'center';
+      
+      // Append to wrapper
+      wrapper.appendChild(img);
+      wrapper.appendChild(textDiv);
+      
+      // Append wrapper to alert
+      alertElement.appendChild(wrapper);
+    }
+  }, 50);
+  
+  // Auto dismiss after 2 seconds
+  setTimeout(() => {
+    alert.dismiss();
+  }, 2000);
+};
+
 const acceptOrder = async (order) => {
   const alert = await alertController.create({
     header: 'Accept Order',
@@ -376,20 +432,7 @@ const acceptOrder = async (order) => {
         text: 'Accept',
         handler: async () => {
           order.status = 'processing';
-          
-          // Show success modal instead of toast
-          const successAlert = await alertController.create({
-            cssClass: 'success-modal',
-            header: ' ',
-            message: '✅ Order accepted successfully!',
-            buttons: ['OK']
-          });
-          await successAlert.present();
-          
-          // Auto dismiss after 2 seconds
-          setTimeout(() => {
-            successAlert.dismiss();
-          }, 2000);
+          await showSuccessModal('Order accepted successfully!');
         }
       }
     ]
@@ -410,20 +453,7 @@ const completeOrder = async (order) => {
         text: 'Complete',
         handler: async () => {
           order.status = 'completed';
-          
-          // Show success modal instead of toast
-          const successAlert = await alertController.create({
-            cssClass: 'success-modal',
-            header: ' ',
-            message: '✅ Order completed successfully!',
-            buttons: ['OK']
-          });
-          await successAlert.present();
-          
-          // Auto dismiss after 2 seconds
-          setTimeout(() => {
-            successAlert.dismiss();
-          }, 2000);
+          await showSuccessModal('Order completed successfully!');
         }
       }
     ]

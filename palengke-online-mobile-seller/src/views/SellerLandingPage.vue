@@ -358,12 +358,124 @@ const showSuccessLogout = async () => {
   const alert = await alertController.create({
     cssClass: 'success-modal',
     header: ' ',
-    message: '✅ Logged out successfully',
+    message: 'Logged out successfully',
     buttons: ['OK']
   });
   
   await alert.present();
   
+  // Add the image after modal is presented
+  setTimeout(() => {
+    const alertElement = document.querySelector('.success-modal .alert-message');
+    if (alertElement) {
+      // Clear the text content
+      const textContent = alertElement.textContent;
+      alertElement.innerHTML = '';
+      
+      // Create wrapper for centering
+      const wrapper = document.createElement('div');
+      wrapper.style.display = 'flex';
+      wrapper.style.flexDirection = 'column';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.textAlign = 'center';
+      
+      // Create and add the image
+      const img = document.createElement('img');
+      img.src = '/assets/images/checkmark_success.png';
+      img.style.width = '80px';
+      img.style.height = '80px';
+      img.style.margin = '0 auto 16px auto';
+      img.style.display = 'block';
+      
+      // Create and add the text
+      const textDiv = document.createElement('div');
+      textDiv.textContent = textContent;
+      textDiv.style.fontSize = '18px';
+      textDiv.style.fontWeight = '600';
+      textDiv.style.color = '#1a1a1a';
+      textDiv.style.textAlign = 'center';
+      
+      // Append to wrapper
+      wrapper.appendChild(img);
+      wrapper.appendChild(textDiv);
+      
+      // Append wrapper to alert
+      alertElement.appendChild(wrapper);
+    }
+  }, 50);
+  
+  setTimeout(() => {
+    alert.dismiss();
+  }, 1500);
+};
+
+const showSuccessModal = async (message) => {
+  const alert = await alertController.create({
+    cssClass: 'success-modal',
+    header: ' ',
+    message: message,
+    buttons: ['OK']
+  });
+  
+  await alert.present();
+  
+  // Add the image after modal is presented
+  setTimeout(() => {
+    const alertElement = document.querySelector('.success-modal .alert-message');
+    if (alertElement) {
+      // Clear the text content
+      const textContent = alertElement.textContent;
+      alertElement.innerHTML = '';
+      
+      // Create wrapper for centering
+      const wrapper = document.createElement('div');
+      wrapper.style.display = 'flex';
+      wrapper.style.flexDirection = 'column';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.textAlign = 'center';
+      
+      // Create and add the image
+      const img = document.createElement('img');
+      img.src = '/assets/images/checkmark_success.png';
+      img.style.width = '80px';
+      img.style.height = '80px';
+      img.style.margin = '0 auto 16px auto';
+      img.style.display = 'block';
+      
+      // Create and add the text
+      const textDiv = document.createElement('div');
+      textDiv.textContent = textContent;
+      textDiv.style.fontSize = '18px';
+      textDiv.style.fontWeight = '600';
+      textDiv.style.color = '#1a1a1a';
+      textDiv.style.textAlign = 'center';
+      
+      // Append to wrapper
+      wrapper.appendChild(img);
+      wrapper.appendChild(textDiv);
+      
+      // Append wrapper to alert
+      alertElement.appendChild(wrapper);
+    }
+  }, 50);
+  
+  // Auto dismiss after 2 seconds
+  setTimeout(() => {
+    alert.dismiss();
+  }, 2000);
+};
+
+// ✨ NEW: Show loading with text only (no HTML)
+const showLoadingWithLogo = async (message) => {
+  const alert = await alertController.create({
+    cssClass: 'loading-modal-simple',
+    message: message,
+    buttons: []
+  });
+  
+  await alert.present();
+  
+  // Auto dismiss after 1.5 seconds
   setTimeout(() => {
     alert.dismiss();
   }, 1500);
@@ -377,32 +489,42 @@ const openChat = () => {
   router.push('/messages');
 };
 
+// ✨ UPDATED: Share shop with loading animations
 const shareShop = async () => {
-  const alert = await alertController.create({
+  const actionSheet = await actionSheetController.create({
     header: 'Share Your Shop',
-    message: 'Share your shop link with customers via:',
+    subHeader: 'Share your shop link with customers via:',
+    cssClass: 'share-shop-action-sheet',
     buttons: [
       {
         text: 'Copy Link',
-        handler: () => {
-          // TODO: Copy shop URL to clipboard
+        handler: async () => {
+          // Copy shop URL to clipboard
           const shopUrl = `https://palengke-online.com/shop/${sellerName.value}`;
           navigator.clipboard.writeText(shopUrl);
-          showToast('✅ Shop link copied!', 'success');
+          await showSuccessModal('Shop link copied!');
         }
       },
       {
         text: 'Share via Facebook',
-        handler: () => {
-          // TODO: Share to Facebook
-          showToast('Opening Facebook...', 'primary');
+        handler: async () => {
+          // Show loading
+          await showLoadingWithLogo('Opening Facebook...');
+          // Share to Facebook
+          setTimeout(() => {
+            window.open('https://www.facebook.com/sharer/sharer.php', '_blank');
+          }, 1500);
         }
       },
       {
         text: 'Share via Messenger',
-        handler: () => {
-          // TODO: Share to Messenger
-          showToast('Opening Messenger...', 'primary');
+        handler: async () => {
+          // Show loading
+          await showLoadingWithLogo('Opening Messenger...');
+          // Share to Messenger  
+          setTimeout(() => {
+            window.open('https://www.messenger.com', '_blank');
+          }, 1500);
         }
       },
       {
@@ -411,7 +533,7 @@ const shareShop = async () => {
       }
     ]
   });
-  await alert.present();
+  await actionSheet.present();
 };
 
 const showToast = async (message, color = 'dark') => {
@@ -927,6 +1049,51 @@ ion-header ion-toolbar ion-buttons ion-button {
   height: 44px;
 }
 
+/* ✨ NEW: Loading Modal Styling - Simple Version */
+:deep(.loading-modal-simple .alert-wrapper) {
+  border-radius: 20px;
+  text-align: center;
+  max-width: 280px;
+  padding: 50px 30px;
+  background: white;
+}
+
+:deep(.loading-modal-simple .alert-head) {
+  display: none;
+}
+
+:deep(.loading-modal-simple .alert-message) {
+  padding: 0;
+  position: relative;
+  padding-top: 70px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+:deep(.loading-modal-simple .alert-message::before) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: -25px;
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #1877F2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+:deep(.loading-modal-simple .alert-button-group) {
+  display: none;
+}
+
 /* Settings Action Sheet Styling */
 :deep(.settings-action-sheet .action-sheet-wrapper) {
   max-width: 500px;
@@ -957,5 +1124,33 @@ ion-header ion-toolbar ion-buttons ion-button {
 
 :deep(.settings-action-sheet button[role="cancel"]) {
   display: none;
+}
+
+/* Share Shop Action Sheet Styling */
+:deep(.share-shop-action-sheet .action-sheet-wrapper) {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+:deep(.share-shop-action-sheet .action-sheet-group) {
+  border-radius: 16px 16px 0 0;
+}
+
+:deep(.share-shop-action-sheet .action-sheet-title) {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-align: center;
+}
+
+:deep(.share-shop-action-sheet button.action-sheet-button) {
+  font-size: 15px;
+  padding: 16px;
+  text-align: left !important;
+  justify-content: flex-start !important;
+}
+
+:deep(.share-shop-action-sheet button.action-sheet-button .action-sheet-button-inner) {
+  justify-content: flex-start !important;
 }
 </style>

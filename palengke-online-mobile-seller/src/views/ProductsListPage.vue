@@ -425,7 +425,7 @@ const deleteProduct = async (product) => {
           const index = products.value.findIndex(p => p.id === product.id);
           if (index > -1) {
             products.value.splice(index, 1);
-            await showSuccessModal('✅ Product successfully deleted');
+            await showSuccessModal('Product successfully deleted');
           }
         }
       }
@@ -454,6 +454,35 @@ const showSuccessModal = async (message) => {
   });
   
   await alert.present();
+  
+  // Add the image after modal is presented
+  setTimeout(() => {
+    const alertElement = document.querySelector('.success-modal .alert-message');
+    if (alertElement) {
+      // Clear the text content
+      const textContent = alertElement.textContent;
+      alertElement.innerHTML = '';
+      
+      // Create and add the image
+      const img = document.createElement('img');
+      img.src = '/assets/images/checkmark_success.png';
+      img.style.width = '80px';
+      img.style.height = '80px';
+      img.style.margin = '0 auto 16px auto';
+      img.style.display = 'block';
+      
+      // Create and add the text
+      const textDiv = document.createElement('div');
+      textDiv.textContent = textContent;
+      textDiv.style.fontSize = '18px';
+      textDiv.style.fontWeight = '600';
+      textDiv.style.color = '#1a1a1a';
+      
+      // Append both
+      alertElement.appendChild(img);
+      alertElement.appendChild(textDiv);
+    }
+  }, 50);
   
   // Auto dismiss after 2 seconds
   setTimeout(() => {

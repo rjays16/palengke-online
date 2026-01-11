@@ -1,0 +1,845 @@
+<template>
+  <ion-page>
+    <ion-content :fullscreen="true" class="step-content">
+      <div class="step-container">
+        
+        <!-- Back Button -->
+        <div class="back-button" @click="goBack">
+          <ion-icon :icon="arrowBackOutline"></ion-icon>
+        </div>
+
+        <!-- Progress Indicator -->
+        <div class="progress-section">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 85.68%"></div>
+          </div>
+          <p class="progress-text">Step 6 of 7</p>
+        </div>
+
+        <!-- Title -->
+        <div class="title-section">
+          <h1 class="title">Take ID Photos</h1>
+          <p class="subtitle">{{ idTypeName }}</p>
+        </div>
+
+        <!-- Current Step Indicator -->
+        <div class="current-step-indicator">
+          <div class="step-dot" :class="{ active: currentPhotoStep === 'front', done: frontPhotoTaken }">
+            <ion-icon v-if="frontPhotoTaken" :icon="checkmarkOutline"></ion-icon>
+            <span v-else>1</span>
+          </div>
+          <div class="step-line" :class="{ active: frontPhotoTaken }"></div>
+          <div class="step-dot" :class="{ active: currentPhotoStep === 'back', done: backPhotoTaken }">
+            <ion-icon v-if="backPhotoTaken" :icon="checkmarkOutline"></ion-icon>
+            <span v-else>2</span>
+          </div>
+          <div class="step-labels">
+            <span :class="{ active: currentPhotoStep === 'front' }">Front</span>
+            <span :class="{ active: currentPhotoStep === 'back' }">Back</span>
+          </div>
+        </div>
+
+        <!-- Instructions Card -->
+        <div class="instructions-card">
+          <div class="instruction-header">
+            <ion-icon :icon="informationCircleOutline"></ion-icon>
+            <h3>{{ currentPhotoStep === 'front' ? 'Front Photo Instructions' : 'Back Photo Instructions' }}</h3>
+          </div>
+          <ul class="instruction-list">
+            <li>Place your ID on a flat, contrasting surface</li>
+            <li>Ensure good lighting with no shadows or glare</li>
+            <li>Keep all four corners of the ID visible</li>
+            <li>Make sure text is clear and readable</li>
+            <li>Avoid using flash if possible</li>
+          </ul>
+        </div>
+
+        <!-- Camera Preview / Photo Display -->
+        <div class="camera-section">
+          <div class="camera-frame">
+            <!-- When no photo taken yet -->
+            <div v-if="currentPhoto === null" class="camera-placeholder">
+              <ion-icon :icon="cameraOutline"></ion-icon>
+              <p>{{ currentPhotoStep === 'front' ? 'Front of ID' : 'Back of ID' }}</p>
+              <span>Tap button below to capture</span>
+            </div>
+
+            <!-- When photo is taken -->
+            <div v-else class="photo-preview">
+              <img :src="currentPhoto" alt="ID Photo">
+              <div class="photo-overlay">
+                <ion-button 
+                  size="small" 
+                  fill="clear" 
+                  class="retake-btn"
+                  @click="retakePhoto"
+                >
+                  <ion-icon slot="icon-only" :icon="refreshOutline"></ion-icon>
+                </ion-button>
+              </div>
+            </div>
+
+            <!-- ID Frame Overlay -->
+            <div class="id-frame-overlay">
+              <div class="corner top-left"></div>
+              <div class="corner top-right"></div>
+              <div class="corner bottom-left"></div>
+              <div class="corner bottom-right"></div>
+            </div>
+          </div>
+
+          <!-- Hidden file inputs for camera and upload -->
+          <input 
+            ref="cameraInput" 
+            type="file" 
+            accept="image/*" 
+            capture="environment"
+            style="display: none"
+            @change="handlePhotoCapture"
+          >
+          <input 
+            ref="uploadInput" 
+            type="file" 
+            accept="image/*"
+            style="display: none"
+            @change="handlePhotoCapture"
+          >
+        </div>
+
+        <!-- Tips -->
+        <div class="tips-box">
+          <ion-icon :icon="bulbOutline"></ion-icon>
+          <div class="tips-text">
+            <strong>Tips for best results:</strong><br>
+            Use natural lighting when possible. Hold your phone steady and ensure the entire ID fits within the frame.
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="button-group">
+          <!-- Show "Take Photo" and "Upload Photo" when no photo -->
+          <template v-if="currentPhoto === null">
+            <ion-button 
+              expand="block" 
+              class="capture-button"
+              @click="openCamera"
+            >
+              <ion-icon slot="start" :icon="cameraOutline"></ion-icon>
+              Take Photo
+            </ion-button>
+
+            <ion-button 
+              expand="block" 
+              fill="outline"
+              color="primary"
+              class="upload-button"
+              @click="openUpload"
+            >
+              <ion-icon slot="start" :icon="cloudUploadOutline"></ion-icon>
+              Upload from Gallery
+            </ion-button>
+          </template>
+
+          <!-- Show "Retake" and "Confirm" when photo taken -->
+          <template v-else>
+            <ion-button 
+              expand="block" 
+              fill="outline"
+              color="medium"
+              class="retake-button"
+              @click="retakePhoto"
+            >
+              <ion-icon slot="start" :icon="refreshOutline"></ion-icon>
+              Retake Photo
+            </ion-button>
+
+            <ion-button 
+              expand="block" 
+              class="confirm-button"
+              @click="confirmPhoto"
+            >
+              <ion-icon slot="start" :icon="checkmarkOutline"></ion-icon>
+              {{ currentPhotoStep === 'front' ? 'Confirm & Next' : 'Confirm Photo' }}
+            </ion-button>
+          </template>
+        </div>
+
+        <!-- Navigation Buttons (when both photos taken) -->
+        <div v-if="frontPhotoTaken && backPhotoTaken" class="nav-buttons">
+          <ion-button 
+            expand="block" 
+            fill="outline"
+            color="medium"
+            class="back-btn"
+            @click="goBack"
+          >
+            <ion-icon slot="start" :icon="arrowBackOutline"></ion-icon>
+            Back
+          </ion-button>
+
+          <ion-button 
+            expand="block" 
+            class="next-button"
+            @click="handleNext"
+          >
+            Next: Selfie
+            <ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon>
+          </ion-button>
+        </div>
+
+      </div>
+    </ion-content>
+  </ion-page>
+</template>
+
+<script setup>
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import {
+  IonPage,
+  IonContent,
+  IonButton,
+  IonIcon,
+  toastController,
+  alertController
+} from '@ionic/vue';
+import {
+  arrowBackOutline,
+  arrowForwardOutline,
+  cameraOutline,
+  checkmarkOutline,
+  refreshOutline,
+  informationCircleOutline,
+  bulbOutline,
+  cloudUploadOutline
+} from 'ionicons/icons';
+
+const router = useRouter();
+const cameraInput = ref(null);
+const uploadInput = ref(null);
+
+// Form data
+const idTypeName = ref('');
+const currentPhotoStep = ref('front'); // 'front' or 'back'
+const frontPhoto = ref(null);
+const backPhoto = ref(null);
+
+// Computed
+const currentPhoto = computed(() => {
+  return currentPhotoStep.value === 'front' ? frontPhoto.value : backPhoto.value;
+});
+
+const frontPhotoTaken = computed(() => {
+  return frontPhoto.value !== null;
+});
+
+const backPhotoTaken = computed(() => {
+  return backPhoto.value !== null;
+});
+
+// Load data
+onMounted(() => {
+  const savedData = localStorage.getItem('registrationData');
+  if (savedData) {
+    const data = JSON.parse(savedData);
+    idTypeName.value = data.idTypeName || 'Government ID';
+    
+    // Load previously taken photos if going back
+    if (data.idFrontPhoto) frontPhoto.value = data.idFrontPhoto;
+    if (data.idBackPhoto) backPhoto.value = data.idBackPhoto;
+    
+    // Determine current step
+    if (!frontPhoto.value) {
+      currentPhotoStep.value = 'front';
+    } else if (!backPhoto.value) {
+      currentPhotoStep.value = 'back';
+    }
+  }
+});
+
+// Open camera
+const openCamera = () => {
+  cameraInput.value.click();
+};
+
+// Open upload/gallery
+const openUpload = () => {
+  uploadInput.value.click();
+};
+
+// Handle photo capture
+const handlePhotoCapture = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Check file size (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('Photo is too large. Please use a photo under 5MB.', 'warning');
+    return;
+  }
+
+  // Read file as base64
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    if (currentPhotoStep.value === 'front') {
+      frontPhoto.value = e.target.result;
+    } else {
+      backPhoto.value = e.target.result;
+    }
+  };
+  reader.readAsDataURL(file);
+
+  // Reset input
+  event.target.value = '';
+};
+
+// Retake photo
+const retakePhoto = () => {
+  if (currentPhotoStep.value === 'front') {
+    frontPhoto.value = null;
+  } else {
+    backPhoto.value = null;
+  }
+};
+
+// Confirm photo
+const confirmPhoto = async () => {
+  if (currentPhotoStep.value === 'front') {
+    // Front photo confirmed, move to back
+    const toast = await toastController.create({
+      message: 'Front photo saved! Now capture the back.',
+      duration: 2000,
+      color: 'success',
+      position: 'top'
+    });
+    await toast.present();
+    
+    currentPhotoStep.value = 'back';
+    
+  } else {
+    // Back photo confirmed
+    const toast = await toastController.create({
+      message: 'Back photo saved! Both photos captured.',
+      duration: 2000,
+      color: 'success',
+      position: 'top'
+    });
+    await toast.present();
+  }
+};
+
+// Show toast
+const showToast = async (message, color = 'primary') => {
+  const toast = await toastController.create({
+    message,
+    duration: 2500,
+    color,
+    position: 'top'
+  });
+  await toast.present();
+};
+
+// Navigation
+const goBack = async () => {
+  // Show confirmation if photos are taken
+  if (frontPhotoTaken.value || backPhotoTaken.value) {
+    const alert = await alertController.create({
+      header: 'Discard Photos?',
+      message: 'Going back will discard your captured photos. Are you sure?',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Discard',
+          role: 'destructive',
+          handler: () => {
+            router.push('/register/step5');
+          }
+        }
+      ]
+    });
+    await alert.present();
+  } else {
+    router.push('/register/step5');
+  }
+};
+
+const handleNext = () => {
+  if (!frontPhotoTaken.value || !backPhotoTaken.value) {
+    showToast('Please capture both front and back photos.', 'warning');
+    return;
+  }
+
+  // Save photos
+  const existingData = JSON.parse(localStorage.getItem('registrationData') || '{}');
+  existingData.idFrontPhoto = frontPhoto.value;
+  existingData.idBackPhoto = backPhoto.value;
+  localStorage.setItem('registrationData', JSON.stringify(existingData));
+
+  // Navigate to Step 7 (Selfie)
+  router.push('/register/step7');
+};
+</script>
+
+<style scoped>
+.step-content {
+  --background: #ffffff;
+}
+
+.step-container {
+  min-height: 100vh;
+  padding: 24px;
+  padding-bottom: 100px;
+  position: relative;
+}
+
+/* Back Button */
+.back-button {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  border-radius: 12px;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.2s;
+}
+
+.back-button:active {
+  transform: scale(0.95);
+  background: #e0e0e0;
+}
+
+.back-button ion-icon {
+  font-size: 24px;
+  color: #1a1a1a;
+}
+
+/* Progress Section */
+.progress-section {
+  margin-top: 70px;
+  margin-bottom: 32px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #4CAF50;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  text-align: center;
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+  font-weight: 600;
+}
+
+/* Title Section */
+.title-section {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+}
+
+.subtitle {
+  font-size: 15px;
+  color: #666;
+  margin: 0;
+}
+
+/* Current Step Indicator */
+.current-step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.step-dot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  z-index: 2;
+  transition: all 0.3s;
+}
+
+.step-dot.active {
+  background: #4CAF50;
+  color: white;
+  transform: scale(1.1);
+}
+
+.step-dot.done {
+  background: #4CAF50;
+  color: white;
+}
+
+.step-dot ion-icon {
+  font-size: 24px;
+}
+
+.step-line {
+  width: 80px;
+  height: 4px;
+  background: #e0e0e0;
+  transition: background 0.3s;
+}
+
+.step-line.active {
+  background: #4CAF50;
+}
+
+.step-labels {
+  position: absolute;
+  bottom: -24px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 40px;
+}
+
+.step-labels span {
+  font-size: 13px;
+  color: #999;
+  font-weight: 600;
+  transition: color 0.3s;
+}
+
+.step-labels span.active {
+  color: #4CAF50;
+}
+
+/* Instructions Card */
+.instructions-card {
+  background: #E8F5E9;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 2px solid #4CAF50;
+}
+
+.instruction-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.instruction-header ion-icon {
+  font-size: 24px;
+  color: #4CAF50;
+}
+
+.instruction-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2E7D32;
+  margin: 0;
+}
+
+.instruction-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.instruction-list li {
+  font-size: 14px;
+  color: #2E7D32;
+  padding-left: 24px;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.instruction-list li:last-child {
+  margin-bottom: 0;
+}
+
+.instruction-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #4CAF50;
+  font-weight: 700;
+}
+
+/* Camera Section */
+.camera-section {
+  margin-bottom: 20px;
+}
+
+.camera-frame {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  aspect-ratio: 1.6;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #f5f5f5;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.camera-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+}
+
+.camera-placeholder ion-icon {
+  font-size: 64px;
+  color: #999;
+}
+
+.camera-placeholder p {
+  font-size: 18px;
+  font-weight: 700;
+  color: #666;
+  margin: 0;
+}
+
+.camera-placeholder span {
+  font-size: 14px;
+  color: #999;
+  margin: 0;
+}
+
+.photo-preview {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-overlay {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+.retake-btn {
+  --background: rgba(255, 255, 255, 0.9);
+  --color: #1a1a1a;
+  --border-radius: 50%;
+  width: 40px;
+  height: 40px;
+}
+
+/* ID Frame Overlay */
+.id-frame-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.corner {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 3px solid #4CAF50;
+}
+
+.corner.top-left {
+  top: 20px;
+  left: 20px;
+  border-right: none;
+  border-bottom: none;
+  border-radius: 12px 0 0 0;
+}
+
+.corner.top-right {
+  top: 20px;
+  right: 20px;
+  border-left: none;
+  border-bottom: none;
+  border-radius: 0 12px 0 0;
+}
+
+.corner.bottom-left {
+  bottom: 20px;
+  left: 20px;
+  border-right: none;
+  border-top: none;
+  border-radius: 0 0 0 12px;
+}
+
+.corner.bottom-right {
+  bottom: 20px;
+  right: 20px;
+  border-left: none;
+  border-top: none;
+  border-radius: 0 0 12px 0;
+}
+
+/* Tips Box */
+.tips-box {
+  display: flex;
+  gap: 12px;
+  background: #FFF3E0;
+  border-left: 4px solid #FF9800;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.tips-box ion-icon {
+  font-size: 24px;
+  color: #FF9800;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.tips-text {
+  font-size: 13px;
+  color: #E65100;
+  line-height: 1.5;
+}
+
+.tips-text strong {
+  font-weight: 700;
+}
+
+/* Button Group */
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.capture-button {
+  --background: #4CAF50;
+  --background-hover: #45a049;
+  --border-radius: 12px;
+  height: 56px;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.upload-button {
+  --border-radius: 12px;
+  --border-width: 2px;
+  height: 56px;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.retake-button {
+  --border-radius: 12px;
+  --border-width: 2px;
+  height: 52px;
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.confirm-button {
+  --background: #4CAF50;
+  --background-hover: #45a049;
+  --border-radius: 12px;
+  height: 52px;
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+/* Navigation Buttons */
+.nav-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.back-btn {
+  --border-radius: 12px;
+  --border-width: 2px;
+  height: 52px;
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.next-button {
+  --background: #4CAF50;
+  --background-hover: #45a049;
+  --border-radius: 12px;
+  height: 52px;
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .title {
+    font-size: 24px;
+  }
+
+  .step-container {
+    padding: 20px 16px 100px 16px;
+  }
+
+  .camera-frame {
+    aspect-ratio: 1.4;
+  }
+
+  .nav-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .back-btn {
+    order: 2;
+  }
+
+  .next-button {
+    order: 1;
+  }
+}
+</style>

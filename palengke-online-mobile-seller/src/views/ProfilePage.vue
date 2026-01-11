@@ -422,6 +422,79 @@ const profileData = ref({
 
 const darkMode = ref(false);
 
+// ✨ NEW: Loading Modal Function
+const showLoadingModal = async (message = 'Loading...') => {
+  const alert = await alertController.create({
+    cssClass: 'loading-modal-simple',
+    message: message,
+    buttons: []
+  });
+  
+  await alert.present();
+  
+  // Auto dismiss after 1.5 seconds
+  setTimeout(() => {
+    alert.dismiss();
+  }, 1500);
+};
+
+// Success Modal Function
+const showSuccessModal = async (message) => {
+  const alert = await alertController.create({
+    cssClass: 'success-modal',
+    header: ' ',
+    message: message,
+    buttons: ['OK']
+  });
+  
+  await alert.present();
+  
+  // Add the image after modal is presented
+  setTimeout(() => {
+    const alertElement = document.querySelector('.success-modal .alert-message');
+    if (alertElement) {
+      // Clear the text content
+      const textContent = alertElement.textContent;
+      alertElement.innerHTML = '';
+      
+      // Create wrapper for centering
+      const wrapper = document.createElement('div');
+      wrapper.style.display = 'flex';
+      wrapper.style.flexDirection = 'column';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.textAlign = 'center';
+      
+      // Create and add the image
+      const img = document.createElement('img');
+      img.src = '/assets/images/checkmark_success.png';
+      img.style.width = '80px';
+      img.style.height = '80px';
+      img.style.margin = '0 auto 16px auto';
+      img.style.display = 'block';
+      
+      // Create and add the text
+      const textDiv = document.createElement('div');
+      textDiv.textContent = textContent;
+      textDiv.style.fontSize = '18px';
+      textDiv.style.fontWeight = '600';
+      textDiv.style.color = '#1a1a1a';
+      textDiv.style.textAlign = 'center';
+      
+      // Append to wrapper
+      wrapper.appendChild(img);
+      wrapper.appendChild(textDiv);
+      
+      // Append wrapper to alert
+      alertElement.appendChild(wrapper);
+    }
+  }, 50);
+  
+  // Auto dismiss after 2 seconds
+  setTimeout(() => {
+    alert.dismiss();
+  }, 2000);
+};
+
 // Methods
 const editProfile = async () => {
   const alert = await alertController.create({
@@ -457,26 +530,14 @@ const changePhoto = async () => {
         text: 'Take Photo',
         icon: cameraOutline,
         handler: async () => {
-          const toast = await toastController.create({
-            message: '📸 Opening camera...',
-            duration: 2000,
-            color: 'primary',
-            position: 'top'
-          });
-          await toast.present();
+          await showLoadingModal('Opening camera...');
         }
       },
       {
         text: 'Choose from Gallery',
         icon: imagesOutline,
         handler: async () => {
-          const toast = await toastController.create({
-            message: '🖼️ Opening gallery...',
-            duration: 2000,
-            color: 'primary',
-            position: 'top'
-          });
-          await toast.present();
+          await showLoadingModal('Opening gallery...');
         }
       },
       {
@@ -531,14 +592,7 @@ const editField = async (field) => {
         handler: async (data) => {
           if (data.value) {
             profileData.value[field] = data.value;
-            
-            const toast = await toastController.create({
-              message: '✅ Updated successfully',
-              duration: 2000,
-              color: 'success',
-              position: 'top'
-            });
-            await toast.present();
+            await showSuccessModal('Updated successfully!');
           }
         }
       }
@@ -569,14 +623,7 @@ const manageCategories = async () => {
         text: 'Save',
         handler: async (data) => {
           profileData.value.categories = data;
-          
-          const toast = await toastController.create({
-            message: '✅ Categories updated',
-            duration: 2000,
-            color: 'success',
-            position: 'top'
-          });
-          await toast.present();
+          await showSuccessModal('Categories updated!');
         }
       }
     ]
@@ -610,13 +657,7 @@ const changePassword = async () => {
         text: 'Update',
         handler: async (data) => {
           if (data.newPassword === data.confirmPassword) {
-            const toast = await toastController.create({
-              message: '✅ Password updated successfully',
-              duration: 2000,
-              color: 'success',
-              position: 'top'
-            });
-            await toast.present();
+            await showSuccessModal('Password updated successfully!');
           } else {
             const toast = await toastController.create({
               message: '❌ Passwords do not match',
@@ -644,13 +685,7 @@ const toggleDarkMode = () => {
 };
 
 const helpCenter = async () => {
-  const toast = await toastController.create({
-    message: '📚 Opening Help Center...',
-    duration: 2000,
-    color: 'primary',
-    position: 'top'
-  });
-  await toast.present();
+  await showLoadingModal('Opening help center...');
 };
 
 const contactSupport = async () => {
@@ -660,37 +695,19 @@ const contactSupport = async () => {
       {
         text: 'Chat Support',
         handler: async () => {
-          const toast = await toastController.create({
-            message: '💬 Opening chat...',
-            duration: 2000,
-            color: 'primary',
-            position: 'top'
-          });
-          await toast.present();
+          await showLoadingModal('Opening chat...');
         }
       },
       {
         text: 'Email Support',
         handler: async () => {
-          const toast = await toastController.create({
-            message: '📧 Opening email...',
-            duration: 2000,
-            color: 'primary',
-            position: 'top'
-          });
-          await toast.present();
+          await showLoadingModal('Opening email...');
         }
       },
       {
         text: 'Call Support',
         handler: async () => {
-          const toast = await toastController.create({
-            message: '📞 Calling support...',
-            duration: 2000,
-            color: 'primary',
-            position: 'top'
-          });
-          await toast.present();
+          await showLoadingModal('Connecting call...');
         }
       },
       {
@@ -723,15 +740,7 @@ const showPrivacy = async () => {
 const aboutApp = async () => {
   const alert = await alertController.create({
     header: 'About Palengke Online',
-    message: `
-      <strong>Palengke Online Seller</strong><br>
-      Version 1.0.0 (Build 100)<br><br>
-      
-      Empowering Filipino sellers with digital solutions.<br><br>
-      
-      © 2024 Palengke Online<br>
-      All rights reserved.
-    `,
+    message: 'Palengke Online Seller\nVersion 1.0.0 (Build 100)\n\nEmpowering Filipino sellers with digital solutions.\n\n© 2024 Palengke Online\nAll rights reserved.',
     buttons: ['Close']
   });
   await alert.present();
@@ -763,13 +772,58 @@ const handleLogout = async () => {
 };
 
 const showSuccessLogout = async () => {
-  const toast = await toastController.create({
-    message: '✅ Logged out successfully',
-    duration: 2000,
-    color: 'success',
-    position: 'top'
+  const alert = await alertController.create({
+    cssClass: 'success-modal',
+    header: ' ',
+    message: 'Logged out successfully',
+    buttons: ['OK']
   });
-  await toast.present();
+  
+  await alert.present();
+  
+  // Add the image after modal is presented
+  setTimeout(() => {
+    const alertElement = document.querySelector('.success-modal .alert-message');
+    if (alertElement) {
+      // Clear the text content
+      const textContent = alertElement.textContent;
+      alertElement.innerHTML = '';
+      
+      // Create wrapper for centering
+      const wrapper = document.createElement('div');
+      wrapper.style.display = 'flex';
+      wrapper.style.flexDirection = 'column';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.textAlign = 'center';
+      
+      // Create and add the image
+      const img = document.createElement('img');
+      img.src = '/assets/images/checkmark_success.png';
+      img.style.width = '80px';
+      img.style.height = '80px';
+      img.style.margin = '0 auto 16px auto';
+      img.style.display = 'block';
+      
+      // Create and add the text
+      const textDiv = document.createElement('div');
+      textDiv.textContent = textContent;
+      textDiv.style.fontSize = '18px';
+      textDiv.style.fontWeight = '600';
+      textDiv.style.color = '#1a1a1a';
+      textDiv.style.textAlign = 'center';
+      
+      // Append to wrapper
+      wrapper.appendChild(img);
+      wrapper.appendChild(textDiv);
+      
+      // Append wrapper to alert
+      alertElement.appendChild(wrapper);
+    }
+  }, 50);
+  
+  setTimeout(() => {
+    alert.dismiss();
+  }, 1500);
 };
 
 // Bottom Navigation
@@ -1123,5 +1177,82 @@ const goToProfile = () => {
 
 .nav-item:active {
   transform: scale(0.95);
+}
+
+/* Success Modal Styling */
+:deep(.success-modal .alert-wrapper) {
+  border-radius: 20px;
+  text-align: center;
+  max-width: 320px;
+  padding: 30px 20px;
+}
+
+:deep(.success-modal .alert-head) {
+  padding: 0;
+  min-height: 0;
+}
+
+:deep(.success-modal .alert-message) {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  padding: 20px 10px;
+}
+
+:deep(.success-modal .alert-button-group) {
+  padding: 10px 0 0 0;
+}
+
+:deep(.success-modal button) {
+  background: #4CAF50;
+  color: white;
+  font-weight: 600;
+  border-radius: 12px;
+  height: 44px;
+}
+
+/* ✨ NEW: Loading Modal Styling */
+:deep(.loading-modal-simple .alert-wrapper) {
+  border-radius: 20px;
+  text-align: center;
+  max-width: 280px;
+  padding: 50px 30px;
+  background: white;
+}
+
+:deep(.loading-modal-simple .alert-head) {
+  display: none;
+}
+
+:deep(.loading-modal-simple .alert-message) {
+  padding: 0;
+  position: relative;
+  padding-top: 70px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+:deep(.loading-modal-simple .alert-message::before) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: -25px;
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #1877F2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+:deep(.loading-modal-simple .alert-button-group) {
+  display: none;
 }
 </style>
