@@ -684,8 +684,8 @@ const toggleDarkMode = () => {
   // TODO: Implement dark mode
 };
 
-const helpCenter = async () => {
-  await showLoadingModal('Opening help center...');
+const helpCenter = () => {
+  router.push('/help');
 };
 
 const contactSupport = async () => {

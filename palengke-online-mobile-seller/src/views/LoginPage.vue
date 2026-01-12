@@ -82,8 +82,7 @@ import {
   IonButton, 
   IonIcon, 
   IonSpinner,
-  alertController,
-  toastController
+  alertController
 } from '@ionic/vue';
 import { 
   mailOutline, 
@@ -99,6 +98,22 @@ const email = ref('');
 const password = ref('');
 const showPassword = ref(false);
 const isLoading = ref(false);
+
+// ✨ NEW: Loading Modal Function
+const showLoadingModal = async (message = 'Loading...') => {
+  const alert = await alertController.create({
+    cssClass: 'loading-modal-simple',
+    message: message,
+    buttons: []
+  });
+  
+  await alert.present();
+  
+  // Auto dismiss after 1.5 seconds
+  setTimeout(() => {
+    alert.dismiss();
+  }, 1500);
+};
 
 // Login handler
 const handleLogin = async () => {
@@ -134,20 +149,14 @@ const handleLogin = async () => {
             // TODO: Call API to send OTP
             console.log('Sending OTP code...');
             
-            // Show sending toast
-            const toast = await toastController.create({
-              message: 'Sending verification code...',
-              duration: 1500,
-              color: 'success',
-              position: 'top'
-            });
-            await toast.present();
+            // Show loading modal
+            await showLoadingModal('Sending verification code...');
             
             // Save auth state temporarily
             localStorage.setItem('pendingAuth', 'true');
             localStorage.setItem('userEmail', email.value);
             
-            // Navigate to OTP page after toast
+            // Navigate to OTP page after modal
             setTimeout(() => {
               router.push({
                 name: 'OTPVerification',
@@ -419,5 +428,50 @@ const goToSignup = () => {
   .title {
     font-size: 24px;
   }
+}
+
+/* ✨ NEW: Loading Modal Styling */
+:deep(.loading-modal-simple .alert-wrapper) {
+  border-radius: 20px;
+  text-align: center;
+  max-width: 280px;
+  padding: 50px 30px;
+  background: white;
+}
+
+:deep(.loading-modal-simple .alert-head) {
+  display: none;
+}
+
+:deep(.loading-modal-simple .alert-message) {
+  padding: 0;
+  position: relative;
+  padding-top: 70px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+:deep(.loading-modal-simple .alert-message::before) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: -25px;
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #1877F2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+:deep(.loading-modal-simple .alert-button-group) {
+  display: none;
 }
 </style>

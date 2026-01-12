@@ -375,19 +375,77 @@ const filteredFaqs = computed(() => {
   );
 });
 
+// ✨ NEW: Loading Modal Function
+const showLoadingModal = async (message = 'Loading...') => {
+  const alert = await alertController.create({
+    cssClass: 'loading-modal-simple',
+    message: message,
+    buttons: []
+  });
+  
+  await alert.present();
+  
+  setTimeout(() => {
+    alert.dismiss();
+  }, 1500);
+};
+
+// ✨ NEW: Success Modal Function
+const showSuccessModal = async (message) => {
+  const alert = await alertController.create({
+    cssClass: 'success-modal',
+    header: ' ',
+    message: message,
+    buttons: ['OK']
+  });
+  
+  await alert.present();
+  
+  // Add the image after modal is presented
+  setTimeout(() => {
+    const alertElement = document.querySelector('.success-modal .alert-message');
+    if (alertElement) {
+      const textContent = alertElement.textContent;
+      alertElement.innerHTML = '';
+      
+      const wrapper = document.createElement('div');
+      wrapper.style.display = 'flex';
+      wrapper.style.flexDirection = 'column';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.textAlign = 'center';
+      
+      const img = document.createElement('img');
+      img.src = '/assets/images/checkmark_success.png';
+      img.style.width = '80px';
+      img.style.height = '80px';
+      img.style.margin = '0 auto 16px auto';
+      img.style.display = 'block';
+      
+      const textDiv = document.createElement('div');
+      textDiv.textContent = textContent;
+      textDiv.style.fontSize = '18px';
+      textDiv.style.fontWeight = '600';
+      textDiv.style.color = '#1a1a1a';
+      textDiv.style.textAlign = 'center';
+      
+      wrapper.appendChild(img);
+      wrapper.appendChild(textDiv);
+      alertElement.appendChild(wrapper);
+    }
+  }, 50);
+  
+  setTimeout(() => {
+    alert.dismiss();
+  }, 2000);
+};
+
 // Methods
 const toggleFaq = (index) => {
   expandedFaq.value = expandedFaq.value === index ? null : index;
 };
 
 const openLiveChat = async () => {
-  const toast = await toastController.create({
-    message: '💬 Opening live chat...',
-    duration: 2000,
-    color: 'primary',
-    position: 'top'
-  });
-  await toast.present();
+  await showLoadingModal('Opening live chat...');
 };
 
 const callSupport = () => {
@@ -422,17 +480,7 @@ const reportProblem = async () => {
         text: 'Submit',
         handler: async (data) => {
           if (data.problem) {
-            const successAlert = await alertController.create({
-              cssClass: 'success-modal',
-              header: ' ',
-              message: '✅ Problem report submitted!',
-              buttons: ['OK']
-            });
-            await successAlert.present();
-            
-            setTimeout(() => {
-              successAlert.dismiss();
-            }, 2000);
+            await showSuccessModal('Problem report submitted!');
           }
         }
       }
@@ -461,17 +509,7 @@ const giveFeedback = async () => {
         text: 'Submit',
         handler: async (data) => {
           if (data.feedback) {
-            const successAlert = await alertController.create({
-              cssClass: 'success-modal',
-              header: ' ',
-              message: '✅ Thank you for your feedback!',
-              buttons: ['OK']
-            });
-            await successAlert.present();
-            
-            setTimeout(() => {
-              successAlert.dismiss();
-            }, 2000);
+            await showSuccessModal('Thank you for your feedback!');
           }
         }
       }
@@ -500,17 +538,7 @@ const requestFeature = async () => {
         text: 'Submit',
         handler: async (data) => {
           if (data.feature) {
-            const successAlert = await alertController.create({
-              cssClass: 'success-modal',
-              header: ' ',
-              message: '✅ Feature request submitted!',
-              buttons: ['OK']
-            });
-            await successAlert.present();
-            
-            setTimeout(() => {
-              successAlert.dismiss();
-            }, 2000);
+            await showSuccessModal('Feature request submitted!');
           }
         }
       }
@@ -529,23 +557,11 @@ const showTopic = async (topic) => {
     'troubleshooting': 'Troubleshooting Guide'
   };
   
-  const toast = await toastController.create({
-    message: `📚 Opening ${topics[topic]}...`,
-    duration: 2000,
-    color: 'primary',
-    position: 'top'
-  });
-  await toast.present();
+  await showLoadingModal(`Opening ${topics[topic]}...`);
 };
 
 const playVideo = async (video) => {
-  const toast = await toastController.create({
-    message: '▶️ Loading video tutorial...',
-    duration: 2000,
-    color: 'primary',
-    position: 'top'
-  });
-  await toast.present();
+  await showLoadingModal('Loading video tutorial...');
 };
 
 const viewTerms = async () => {
@@ -994,7 +1010,18 @@ const viewPrivacy = async () => {
   margin: 0;
 }
 
-/* Success Modal */
+/* Responsive */
+@media (max-width: 360px) {
+  .topics-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ✨ NEW: Success Modal Styling */
 :deep(.success-modal .alert-wrapper) {
   border-radius: 20px;
   text-align: center;
@@ -1014,6 +1041,10 @@ const viewPrivacy = async () => {
   padding: 20px 10px;
 }
 
+:deep(.success-modal .alert-button-group) {
+  padding: 10px 0 0 0;
+}
+
 :deep(.success-modal button) {
   background: #4CAF50;
   color: white;
@@ -1022,14 +1053,48 @@ const viewPrivacy = async () => {
   height: 44px;
 }
 
-/* Responsive */
-@media (max-width: 360px) {
-  .topics-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .quick-actions {
-    grid-template-columns: 1fr;
-  }
+/* ✨ NEW: Loading Modal Styling */
+:deep(.loading-modal-simple .alert-wrapper) {
+  border-radius: 20px;
+  text-align: center;
+  max-width: 280px;
+  padding: 50px 30px;
+  background: white;
+}
+
+:deep(.loading-modal-simple .alert-head) {
+  display: none;
+}
+
+:deep(.loading-modal-simple .alert-message) {
+  padding: 0;
+  position: relative;
+  padding-top: 70px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+:deep(.loading-modal-simple .alert-message::before) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: -25px;
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #1877F2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+:deep(.loading-modal-simple .alert-button-group) {
+  display: none;
 }
 </style>

@@ -199,7 +199,12 @@ const routes: Array<RouteRecordRaw> = [
     name: 'About',
     component: AboutPage,
     meta: { requiresAuth: true }
-  }
+  },
+  {
+  path: '/track-driver/:orderId',
+  name: 'TrackDriver',
+  component: () => import('@/views/DriverTrackingPage.vue')
+  },
 ];
 
 // ============================================

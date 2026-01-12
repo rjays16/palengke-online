@@ -232,6 +232,79 @@ const filteredNotifications = computed(() => {
   return filtered;
 });
 
+// ✨ NEW: Success Modal Function
+const showSuccessModal = async (message) => {
+  const alert = await alertController.create({
+    cssClass: 'success-modal',
+    header: ' ',
+    message: message,
+    buttons: ['OK']
+  });
+  
+  await alert.present();
+  
+  // Add the image after modal is presented
+  setTimeout(() => {
+    const alertElement = document.querySelector('.success-modal .alert-message');
+    if (alertElement) {
+      // Clear the text content
+      const textContent = alertElement.textContent;
+      alertElement.innerHTML = '';
+      
+      // Create wrapper for centering
+      const wrapper = document.createElement('div');
+      wrapper.style.display = 'flex';
+      wrapper.style.flexDirection = 'column';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.textAlign = 'center';
+      
+      // Create and add the image
+      const img = document.createElement('img');
+      img.src = '/assets/images/checkmark_success.png';
+      img.style.width = '80px';
+      img.style.height = '80px';
+      img.style.margin = '0 auto 16px auto';
+      img.style.display = 'block';
+      
+      // Create and add the text
+      const textDiv = document.createElement('div');
+      textDiv.textContent = textContent;
+      textDiv.style.fontSize = '18px';
+      textDiv.style.fontWeight = '600';
+      textDiv.style.color = '#1a1a1a';
+      textDiv.style.textAlign = 'center';
+      
+      // Append to wrapper
+      wrapper.appendChild(img);
+      wrapper.appendChild(textDiv);
+      
+      // Append wrapper to alert
+      alertElement.appendChild(wrapper);
+    }
+  }, 50);
+  
+  // Auto dismiss after 2 seconds
+  setTimeout(() => {
+    alert.dismiss();
+  }, 2000);
+};
+
+// ✨ NEW: Loading Modal Function
+const showLoadingModal = async (message = 'Loading...') => {
+  const alert = await alertController.create({
+    cssClass: 'loading-modal-simple',
+    message: message,
+    buttons: []
+  });
+  
+  await alert.present();
+  
+  // Auto dismiss after 1.5 seconds
+  setTimeout(() => {
+    alert.dismiss();
+  }, 1500);
+};
+
 // Methods
 const handleFilterChange = (event) => {
   selectedFilter.value = event.detail.value;
@@ -300,14 +373,7 @@ const markAllAsRead = async () => {
         text: 'Mark All',
         handler: async () => {
           notifications.value.forEach(n => n.read = true);
-          
-          const toast = await toastController.create({
-            message: '✅ All notifications marked as read',
-            duration: 2000,
-            color: 'success',
-            position: 'top'
-          });
-          await toast.present();
+          await showSuccessModal('All notifications marked as read');
         }
       }
     ]
@@ -344,14 +410,7 @@ const showOptions = async () => {
                 role: 'destructive',
                 handler: async () => {
                   notifications.value = [];
-                  
-                  const toast = await toastController.create({
-                    message: 'All notifications cleared',
-                    duration: 2000,
-                    color: 'dark',
-                    position: 'top'
-                  });
-                  await toast.present();
+                  await showSuccessModal('All notifications cleared');
                 }
               }
             ]
@@ -362,8 +421,8 @@ const showOptions = async () => {
       {
         text: 'Notification Settings',
         icon: alertCircleOutline,
-        handler: () => {
-          showToast('Notification settings coming soon');
+        handler: async () => {
+          await showLoadingModal('Opening settings...');
         }
       },
       {
@@ -373,16 +432,6 @@ const showOptions = async () => {
     ]
   });
   await actionSheet.present();
-};
-
-const showToast = async (message) => {
-  const toast = await toastController.create({
-    message,
-    duration: 2000,
-    color: 'dark',
-    position: 'top'
-  });
-  await toast.present();
 };
 </script>
 
@@ -591,5 +640,82 @@ ion-segment-button {
   .notification-message {
     font-size: 13px;
   }
+}
+
+/* ✨ NEW: Success Modal Styling */
+:deep(.success-modal .alert-wrapper) {
+  border-radius: 20px;
+  text-align: center;
+  max-width: 320px;
+  padding: 30px 20px;
+}
+
+:deep(.success-modal .alert-head) {
+  padding: 0;
+  min-height: 0;
+}
+
+:deep(.success-modal .alert-message) {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  padding: 20px 10px;
+}
+
+:deep(.success-modal .alert-button-group) {
+  padding: 10px 0 0 0;
+}
+
+:deep(.success-modal button) {
+  background: #4CAF50;
+  color: white;
+  font-weight: 600;
+  border-radius: 12px;
+  height: 44px;
+}
+
+/* ✨ NEW: Loading Modal Styling */
+:deep(.loading-modal-simple .alert-wrapper) {
+  border-radius: 20px;
+  text-align: center;
+  max-width: 280px;
+  padding: 50px 30px;
+  background: white;
+}
+
+:deep(.loading-modal-simple .alert-head) {
+  display: none;
+}
+
+:deep(.loading-modal-simple .alert-message) {
+  padding: 0;
+  position: relative;
+  padding-top: 70px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+:deep(.loading-modal-simple .alert-message::before) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: -25px;
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #1877F2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+:deep(.loading-modal-simple .alert-button-group) {
+  display: none;
 }
 </style>
