@@ -302,7 +302,7 @@ const markAllAsRead = async () => {
           notifications.value.forEach(n => n.read = true);
           
           const toast = await toastController.create({
-            message: '✅ All notifications marked as read',
+            message: '<font-awesome-icon icon="check-circle" /> All notifications marked as read',
             duration: 2000,
             color: 'success',
             position: 'top'

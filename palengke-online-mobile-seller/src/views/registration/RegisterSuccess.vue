@@ -44,14 +44,14 @@
           <div class="summary-item">
             <span class="label">Status:</span>
             <span class="value" :class="{ verified: isVerified, unverified: !isVerified }">
-              {{ isVerified ? 'Verified ✓' : 'Not Verified' }}
+              {{ isVerified ? 'Verified ' : 'Not Verified' }}
             </span>
           </div>
         </div>
 
         <!-- VERIFIED VERSION - What's Unlocked -->
         <div v-if="isVerified" class="unlocked-features">
-          <h3>🎉 All Features Unlocked!</h3>
+          <h3><font-awesome-icon icon="glass-cheers" /> All Features Unlocked!</h3>
           <div class="features-grid">
             <div class="feature-item">
               <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
@@ -82,7 +82,7 @@
 
         <!-- NOT VERIFIED VERSION - What's Missing -->
         <div v-else class="missing-features">
-          <h3>⚠️ Limited Account Features</h3>
+          <h3><font-awesome-icon icon="exclamation-triangle" /> Limited Account Features</h3>
           <p class="info-text">Verify your account to unlock all features:</p>
           <div class="features-list">
             <div class="feature-item limited">

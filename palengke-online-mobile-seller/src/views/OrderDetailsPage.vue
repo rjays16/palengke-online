@@ -536,7 +536,7 @@ const cancelOrder = async () => {
           const declineAlert = await alertController.create({
             cssClass: 'decline-modal',
             header: ' ',
-            message: '❌ Order declined',
+            message: '<font-awesome-icon icon="times-circle" /> Order declined',
             buttons: ['OK']
           });
           await declineAlert.present();

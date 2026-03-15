@@ -289,7 +289,7 @@ const conversations = ref([
     orderId: '1234',
     messages: [
       { text: 'Hello po! Do you have fresh tomatoes?', sent: false, time: '10:30 AM', status: 'read' },
-      { text: 'Yes po! Just arrived this morning 🍅', sent: true, time: '10:31 AM', status: 'read' },
+      { text: 'Yes po! Just arrived this morning <font-awesome-icon icon="leaf" />', sent: true, time: '10:31 AM', status: 'read' },
       { text: 'How much per kilo?', sent: false, time: '10:32 AM', status: 'read' },
       { text: '₱80/kg po', sent: true, time: '10:32 AM', status: 'read' },
       { text: 'Ok, I\'ll order 2kg please', sent: false, time: '10:33 AM', status: 'read' },

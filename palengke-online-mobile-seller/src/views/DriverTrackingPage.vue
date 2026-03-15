@@ -286,22 +286,22 @@ const initMap = () => {
 
   const driverIcon = L.divIcon({
     className: 'custom-marker',
-    html: '<div style="background: #2196F3; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">🚚</div>',
+    html: '<div style="background: #2196F3; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"><i class="fas fa-truck"></i></div>',
     iconSize: [40, 40]
   });
 
   // Add markers
   sellerMarker = L.marker(sellerLocation, { icon: sellerIcon })
     .addTo(map)
-    .bindPopup('<b>🏪 Your Shop</b><br>Pickup Location');
+    .bindPopup('<b><i class="fas fa-store"></i> Your Shop</b><br>Pickup Location');
 
   customerMarker = L.marker(customerLocation, { icon: customerIcon })
     .addTo(map)
-    .bindPopup('<b>🏠 Customer</b><br>' + orderData.value.customerName);
+    .bindPopup('<b><i class="fas fa-home"></i> Customer</b><br>' + orderData.value.customerName);
 
   driverMarker = L.marker(driverData.value.currentLocation, { icon: driverIcon })
     .addTo(map)
-    .bindPopup('<b>🚚 ' + driverData.value.name + '</b><br>' + driverData.value.vehicle);
+    .bindPopup('<b><i class="fas fa-truck"></i> ' + driverData.value.name + '</b><br>' + driverData.value.vehicle);
 
   drawRoute();
   fitMapToMarkers();

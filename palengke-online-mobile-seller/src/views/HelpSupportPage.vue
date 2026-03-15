@@ -43,7 +43,7 @@
               <div class="contact-content">
                 <h3>Live Chat</h3>
                 <p>Chat with our support team</p>
-                <span class="contact-status online">● Online</span>
+                <span class="contact-status online"><span class="status-dot"></span> Online</span>
               </div>
               <ion-icon :icon="chevronForwardOutline" class="arrow"></ion-icon>
             </div>

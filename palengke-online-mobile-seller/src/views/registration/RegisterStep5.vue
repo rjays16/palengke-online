@@ -123,14 +123,14 @@
               <div class="sample-item">
                 <div class="sample-placeholder correct">
                   <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
-                  <span>✓ CORRECT</span>
+                  <span><font-awesome-icon icon="check" /> CORRECT</span>
                 </div>
                 <p>Clear, well-lit, all corners visible</p>
               </div>
               <div class="sample-item">
                 <div class="sample-placeholder incorrect">
                   <ion-icon :icon="closeCircleOutline"></ion-icon>
-                  <span>✗ INCORRECT</span>
+                  <span><font-awesome-icon icon="times" /> INCORRECT</span>
                 </div>
                 <p>Blurry, cut off, or has glare</p>
               </div>

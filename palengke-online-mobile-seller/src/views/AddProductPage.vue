@@ -61,14 +61,14 @@
             <label>Category *</label>
             <select v-model="category" class="form-select">
               <option value="">Select a category</option>
-              <option value="fish">🐟 Fish & Seafood</option>
-              <option value="pork">🐷 Pork</option>
-              <option value="chicken">🐔 Chicken</option>
-              <option value="vegetables">🥬 Vegetables</option>
-              <option value="fruits">🍌 Fruits</option>
-              <option value="condiments">🧂 Condiments</option>
-              <option value="dairy">🥛 Dairy & Goods</option>
-              <option value="rice">🍚 Rice & Grains</option>
+              <option value="fish"><font-awesome-icon icon="fish" /> Fish & Seafood</option>
+              <option value="pork"><font-awesome-icon icon="piggy-bank" /> Pork</option>
+              <option value="chicken"><font-awesome-icon icon="crow" /> Chicken</option>
+              <option value="vegetables"><font-awesome-icon icon="carrot" /> Vegetables</option>
+              <option value="fruits"><font-awesome-icon icon="apple-alt" /> Fruits</option>
+              <option value="condiments"><font-awesome-icon icon="wine-bottle" /> Condiments</option>
+              <option value="dairy"><font-awesome-icon icon="cow" /> Dairy & Goods</option>
+              <option value="rice"><font-awesome-icon icon="seedling" /> Rice & Grains</option>
             </select>
           </div>
 

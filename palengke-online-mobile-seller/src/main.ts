@@ -31,12 +31,82 @@ import '@ionic/vue/css/display.css';
 /* @import '@ionic/vue/css/palettes/dark.class.css'; */
 import '@ionic/vue/css/palettes/dark.system.css';
 
+/* Font Awesome */
+import '@fortawesome/fontawesome-svg-core/styles.css';
+
 /* Theme variables */
 import './theme/variables.css';
+
+/* Font Awesome Configuration */
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { 
+  faFish, 
+  faPiggyBank, 
+  faCrow, 
+  faCarrot, 
+  faAppleAlt, 
+  faWineBottle, 
+  faCow, 
+  faSeedling,
+  faGlassCheers,
+  faTruck,
+  faStore,
+  faHome,
+  faExclamationTriangle,
+  faWeightHanging,
+  faBox,
+  faClipboardList,
+  faPhone,
+  faUsers,
+  faCity,
+  faLeaf,
+  faFileAlt,
+  faChartBar,
+  faShareAlt,
+  faCheck,
+  faTimes,
+  faCheckCircle,
+  faTimesCircle,
+  faStar
+} from '@fortawesome/free-solid-svg-icons'
+
+library.add(
+  faFish, 
+  faPiggyBank, 
+  faCrow, 
+  faCarrot, 
+  faAppleAlt, 
+  faWineBottle, 
+  faCow, 
+  faSeedling,
+  faGlassCheers,
+  faTruck,
+  faStore,
+  faHome,
+  faExclamationTriangle,
+  faWeightHanging,
+  faBox,
+  faClipboardList,
+  faPhone,
+  faUsers,
+  faCity,
+  faLeaf,
+  faFileAlt,
+  faChartBar,
+  faShareAlt,
+  faCheck,
+  faTimes,
+  faCheckCircle,
+  faTimesCircle,
+  faStar
+)
 
 const app = createApp(App)
   .use(IonicVue)
   .use(router);
+
+app.component('font-awesome-icon', FontAwesomeIcon);
 
 router.isReady().then(() => {
   app.mount('#app');

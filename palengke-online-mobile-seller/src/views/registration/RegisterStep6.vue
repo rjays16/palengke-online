@@ -587,11 +587,12 @@ const handleNext = () => {
 }
 
 .instruction-list li::before {
-  content: '✓';
+  content: '\f00c';
   position: absolute;
   left: 0;
   color: #4CAF50;
   font-weight: 700;
+  font-family: 'Font Awesome 6 Free';
 }
 
 /* Camera Section */

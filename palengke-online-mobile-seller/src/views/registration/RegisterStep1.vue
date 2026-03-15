@@ -79,7 +79,7 @@
               ></ion-icon>
             </div>
             <span v-if="errors.phone" class="error-message">{{ errors.phone }}</span>
-            <span v-else-if="isPhoneVerified" class="success-message">✓ Phone number verified</span>
+            <span v-else-if="isPhoneVerified" class="success-message"><font-awesome-icon icon="check" /> Phone number verified</span>
             <span v-else class="helper-text">11 digits starting with 09</span>
           </div>
 
@@ -425,7 +425,7 @@ const verifyOtp = async () => {
       showOtpSection.value = false;
       
       const toast = await toastController.create({
-        message: '✓ Phone number verified successfully!',
+        message: '<font-awesome-icon icon="check" /> Phone number verified successfully!',
         duration: 2500,
         color: 'success',
         position: 'top'

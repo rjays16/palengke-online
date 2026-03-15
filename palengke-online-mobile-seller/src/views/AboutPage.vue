@@ -108,25 +108,25 @@
           
           <div class="stats-grid">
             <div class="stat-card">
-              <div class="stat-icon">🏪</div>
+              <div class="stat-icon"><font-awesome-icon icon="store" /></div>
               <div class="stat-value">5,000+</div>
               <div class="stat-label">Active Sellers</div>
             </div>
 
             <div class="stat-card">
-              <div class="stat-icon">👥</div>
+              <div class="stat-icon"><font-awesome-icon icon="users" /></div>
               <div class="stat-value">50,000+</div>
               <div class="stat-label">Happy Customers</div>
             </div>
 
             <div class="stat-card">
-              <div class="stat-icon">📦</div>
+              <div class="stat-icon"><font-awesome-icon icon="box" /></div>
               <div class="stat-value">100,000+</div>
               <div class="stat-label">Orders Delivered</div>
             </div>
 
             <div class="stat-card">
-              <div class="stat-icon">🌆</div>
+              <div class="stat-icon"><font-awesome-icon icon="city" /></div>
               <div class="stat-value">15+</div>
               <div class="stat-label">Cities Served</div>
             </div>
@@ -485,7 +485,7 @@ const rateApp = async () => {
         text: 'Rate Now',
         handler: async () => {
           const toast = await toastController.create({
-            message: '⭐ Opening app store...',
+            message: '<font-awesome-icon icon="star" /> Opening app store...',
             duration: 2000,
             color: 'success',
             position: 'top'

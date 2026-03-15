@@ -91,7 +91,7 @@
                 :class="{ active: productData.unit === 'kilo' }"
                 @click="productData.unit = 'kilo'"
               >
-                <div class="unit-icon">⚖️</div>
+                <div class="unit-icon"><font-awesome-icon icon="weight-hanging" /></div>
                 <div class="unit-text">Per Kilo</div>
               </div>
               <div 
@@ -99,7 +99,7 @@
                 :class="{ active: productData.unit === 'piece' }"
                 @click="productData.unit = 'piece'"
               >
-                <div class="unit-icon">📦</div>
+                <div class="unit-icon"><font-awesome-icon icon="box" /></div>
                 <div class="unit-text">Per Piece</div>
               </div>
               <div 
@@ -107,7 +107,7 @@
                 :class="{ active: productData.unit === 'pack' }"
                 @click="productData.unit = 'pack'"
               >
-                <div class="unit-icon">📋</div>
+                <div class="unit-icon"><font-awesome-icon icon="clipboard-list" /></div>
                 <div class="unit-text">Per Pack</div>
               </div>
             </div>

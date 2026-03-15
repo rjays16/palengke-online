@@ -660,7 +660,7 @@ const changePassword = async () => {
             await showSuccessModal('Password updated successfully!');
           } else {
             const toast = await toastController.create({
-              message: '❌ Passwords do not match',
+              message: '<font-awesome-icon icon="times-circle" /> Passwords do not match',
               duration: 2000,
               color: 'danger',
               position: 'top'

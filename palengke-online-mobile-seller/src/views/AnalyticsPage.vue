@@ -556,7 +556,7 @@ const exportReport = async () => {
         icon: downloadOutline,
         handler: async () => {
           const toast = await toastController.create({
-            message: '📄 Exporting PDF report...',
+            message: '<font-awesome-icon icon="file-alt" /> Exporting PDF report...',
             duration: 2000,
             color: 'success',
             position: 'top'
@@ -569,7 +569,7 @@ const exportReport = async () => {
         icon: downloadOutline,
         handler: async () => {
           const toast = await toastController.create({
-            message: '📊 Exporting Excel report...',
+            message: '<font-awesome-icon icon="chart-bar" /> Exporting Excel report...',
             duration: 2000,
             color: 'success',
             position: 'top'
@@ -582,7 +582,7 @@ const exportReport = async () => {
         icon: downloadOutline,
         handler: async () => {
           const toast = await toastController.create({
-            message: '📤 Opening share options...',
+            message: '<font-awesome-icon icon="share-alt" /> Opening share options...',
             duration: 2000,
             color: 'primary',
             position: 'top'

@@ -183,7 +183,7 @@ const resendCode = async () => {
   console.log('Resending OTP...');
   
   const toast = await toastController.create({
-    message: '✅ Verification code sent!',
+    message: '<font-awesome-icon icon="check-circle" /> Verification code sent!',
     duration: 2000,
     color: 'success',
     position: 'top'
