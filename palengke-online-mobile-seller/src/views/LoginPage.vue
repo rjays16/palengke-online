@@ -134,7 +134,7 @@ const handleLogin = async () => {
     const alert = await alertController.create({
       header: 'Verify Account',
       message: 'Do you want to link this device to your account?',
-      subHeader: 'We need to do a quick authentication before linking your device. A 6-digit code will be sent to your registered mobile number.',
+      subHeader: 'We need to do a quick authentication before linking your device. A 6-digit verification code will be sent to your registered email address.',
       cssClass: 'otp-confirm-alert',
       buttons: [
         {
@@ -147,7 +147,7 @@ const handleLogin = async () => {
           cssClass: 'alert-button-confirm',
           handler: async () => {
             // TODO: Call API to send OTP
-            console.log('Sending OTP code...');
+            console.log('Sending OTP code to email...');
             
             // Show loading modal
             await showLoadingModal('Sending verification code...');
@@ -160,7 +160,7 @@ const handleLogin = async () => {
             setTimeout(() => {
               router.push({
                 name: 'OTPVerification',
-                params: { phone: '890' } // Last 3 digits of phone
+                params: { email: email.value }
               });
             }, 1500);
           }

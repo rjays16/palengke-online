@@ -51,7 +51,7 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAuth: false }
   },
   {
-    path: '/otp-verify/:phone?',
+    path: '/otp-verify/:email?',
     name: 'OTPVerification',
     component: OTPVerificationPage,
     meta: { requiresAuth: false }

@@ -5,7 +5,7 @@
         <ion-buttons slot="start">
           <ion-back-button default-href="/login"></ion-back-button>
         </ion-buttons>
-        <ion-title>Verify Code</ion-title>
+        <ion-title>Email Verification</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -21,11 +21,11 @@
 
         <!-- Title & Message -->
         <div class="text-section">
-          <h2 class="otp-title">Verify with Text Message</h2>
+          <h2 class="otp-title">Verify with Email</h2>
           <p class="otp-message">
-            We sent a 6-digit authentication code to your registered mobile number
+            We sent a 6-digit authentication code to your registered email address
           </p>
-          <p class="phone-number">+63 9**-***-**{{ phoneLastDigits }}</p>
+          <p class="email-address">{{ maskedEmail }}</p>
           <p class="helper-text">
             Please enter the authentication code
           </p>
@@ -99,8 +99,30 @@ import {
 const router = useRouter();
 const route = useRoute();
 
-// Get phone from route params or use masked default
-const phoneLastDigits = ref(route.params.phone || '890');
+// Get email from route params or localStorage
+const userEmail = ref(route.params.email || localStorage.getItem('userEmail') || '');
+
+// Computed to mask email for display
+const maskedEmail = computed(() => {
+  if (!userEmail.value || userEmail.value === 'your email') return userEmail.value;
+  
+  const email = userEmail.value;
+  const atIndex = email.indexOf('@');
+  
+  if (atIndex === -1) return email;
+  
+  const localPart = email.substring(0, atIndex);
+  const domain = email.substring(atIndex);
+  
+  // Mask local part: show first 2 chars + *** + last char
+  if (localPart.length > 3) {
+    return localPart.substring(0, 2) + '***' + localPart.substring(localPart.length - 1) + domain;
+  } else if (localPart.length > 1) {
+    return localPart.substring(0, 1) + '***' + domain;
+  }
+  
+  return '***' + domain;
+});
 
 // OTP State
 const otpDigits = ref(['', '', '', '', '', '']);
@@ -354,7 +376,7 @@ onUnmounted(() => {
   line-height: 1.5;
 }
 
-.phone-number {
+.email-address {
   font-size: 18px;
   font-weight: 700;
   color: #4CAF50;
