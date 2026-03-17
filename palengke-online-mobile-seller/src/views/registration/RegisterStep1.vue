@@ -53,8 +53,7 @@
             <label class="input-label">Phone Number *</label>
             <div class="input-wrapper" :class="{ 
               error: errors.phone, 
-              success: isPhoneValid && phone.length === 11,
-              verified: isPhoneVerified 
+              success: isPhoneValid && phone.length === 11
             }">
               <ion-icon :icon="callOutline" class="input-icon"></ion-icon>
               <input 
@@ -63,23 +62,16 @@
                 placeholder="09171234567"
                 class="custom-input with-icon"
                 maxlength="11"
-                :disabled="isPhoneVerified"
                 @input="onPhoneInput"
                 @blur="validateField('phone')"
               >
               <ion-icon 
-                v-if="isPhoneValid && phone.length === 11 && !isPhoneVerified" 
+                v-if="isPhoneValid && phone.length === 11" 
                 :icon="checkmarkCircleOutline" 
                 class="success-icon"
               ></ion-icon>
-              <ion-icon 
-                v-if="isPhoneVerified" 
-                :icon="shieldCheckmarkOutline" 
-                class="verified-icon"
-              ></ion-icon>
             </div>
             <span v-if="errors.phone" class="error-message">{{ errors.phone }}</span>
-            <span v-else-if="isPhoneVerified" class="success-message"><font-awesome-icon icon="check" /> Phone number verified</span>
             <span v-else class="helper-text">11 digits starting with 09</span>
           </div>
 
@@ -130,9 +122,9 @@
             <span v-else class="helper-text">Re-enter your password</span>
           </div>
 
-          <!-- Send OTP Button (shows when phone is valid but OTP not sent) -->
+          <!-- Send OTP Button (shows when email is valid but OTP not sent) -->
           <ion-button 
-            v-if="isPhoneValid && phone.length === 11 && !showOtpSection && !isPhoneVerified"
+            v-if="isEmailValid && !showOtpSection && !isEmailVerified && isPasswordValid && isConfirmPasswordValid"
             expand="block" 
             class="send-otp-button"
             :disabled="isSendingOtp"
@@ -144,12 +136,12 @@
           </ion-button>
 
           <!-- OTP Section (shows after sending OTP) -->
-          <div v-if="showOtpSection && !isPhoneVerified" class="otp-section">
+          <div v-if="showOtpSection && !isEmailVerified" class="otp-section">
             <div class="otp-header">
               <ion-icon :icon="shieldCheckmarkOutline"></ion-icon>
               <div class="otp-text">
-                <h3>Verify Phone Number</h3>
-                <p>Enter the 6-digit code sent to <strong>{{ formatPhone(phone) }}</strong></p>
+                <h3>Verify Email Address</h3>
+                <p>Enter the 6-digit code sent to <strong>{{ maskedEmail }}</strong></p>
               </div>
             </div>
 
@@ -182,8 +174,8 @@
               >
                 {{ resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend Code' }}
               </button>
-              <button class="change-number-button" @click="changePhoneNumber">
-                Change Number
+              <button class="change-number-button" @click="changeEmail">
+                Change Email
               </button>
             </div>
 
@@ -203,11 +195,11 @@
             <ion-icon :icon="informationCircleOutline"></ion-icon>
             <div class="info-text">
               <strong>Why we need this:</strong><br>
-              Your phone number will be verified with a one-time code to ensure account security.
+              Your email address will be verified with a one-time code to ensure account security.
             </div>
           </div>
 
-          <!-- Next Button (only enabled when phone is verified) -->
+          <!-- Next Button (only enabled when email is verified) -->
           <ion-button 
             expand="block" 
             class="next-button"
@@ -258,7 +250,7 @@ const phone = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const showPassword = ref(false);
-const isPhoneVerified = ref(false);
+const isEmailVerified = ref(false);
 
 // OTP data
 const showOtpSection = ref(false);
@@ -300,7 +292,7 @@ const otpValue = computed(() => {
 });
 
 const isFormValid = computed(() => {
-  return isEmailValid.value && isPhoneVerified.value && isPasswordValid.value && isConfirmPasswordValid.value;
+  return isEmailValid.value && isEmailVerified.value && isPhoneValid.value && phone.value.length === 11 && isPasswordValid.value && isConfirmPasswordValid.value;
 });
 
 // Email input handler
@@ -390,9 +382,28 @@ const formatPhone = (phoneNum) => {
   return `${phoneNum.slice(0, 4)} ${phoneNum.slice(4, 7)} ${phoneNum.slice(7)}`;
 };
 
-// Send OTP
+// Mask email for display
+const maskedEmail = computed(() => {
+  if (!email.value) return '';
+  
+  const atIndex = email.value.indexOf('@');
+  if (atIndex === -1) return email.value;
+  
+  const localPart = email.value.substring(0, atIndex);
+  const domain = email.value.substring(atIndex);
+  
+  if (localPart.length > 3) {
+    return localPart.substring(0, 2) + '***' + localPart.substring(localPart.length - 1) + domain;
+  } else if (localPart.length > 1) {
+    return localPart.substring(0, 1) + '***' + domain;
+  }
+  
+  return '***' + domain;
+});
+
+// Send OTP to email
 const sendOtp = async () => {
-  if (!validateField('phone')) return;
+  if (!validateField('email')) return;
 
   isSendingOtp.value = true;
 
@@ -401,11 +412,11 @@ const sendOtp = async () => {
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     // Simulate sending OTP
-    console.log('Sending OTP to:', phone.value);
+    console.log('Sending OTP to:', email.value);
     
     // Show success toast
     const toast = await toastController.create({
-      message: `Verification code sent to ${formatPhone(phone.value)}`,
+      message: `Verification code sent to ${maskedEmail.value}`,
       duration: 3000,
       color: 'success',
       position: 'top'
@@ -461,12 +472,12 @@ const startResendTimer = () => {
   }, 1000);
 };
 
-// Change phone number
-const changePhoneNumber = () => {
+// Change email
+const changeEmail = () => {
   showOtpSection.value = false;
   otpDigits.value = ['', '', '', '', '', ''];
   otpError.value = '';
-  isPhoneVerified.value = false;
+  isEmailVerified.value = false;
   resendTimer.value = 0;
 };
 
@@ -520,11 +531,11 @@ const verifyOtp = async () => {
     const isValid = true; // Replace with actual validation
     
     if (isValid) {
-      isPhoneVerified.value = true;
+      isEmailVerified.value = true;
       showOtpSection.value = false;
       
       const toast = await toastController.create({
-        message: '<font-awesome-icon icon="check" /> Phone number verified successfully!',
+        message: '<font-awesome-icon icon="check" /> Email verified successfully!',
         duration: 2500,
         color: 'success',
         position: 'top'
@@ -553,7 +564,7 @@ const handleNext = () => {
   const registrationData = {
     email: email.value,
     phone: phone.value,
-    phoneVerified: isPhoneVerified.value,
+    emailVerified: isEmailVerified.value,
     password: password.value
   };
   localStorage.setItem('registrationData', JSON.stringify(registrationData));
