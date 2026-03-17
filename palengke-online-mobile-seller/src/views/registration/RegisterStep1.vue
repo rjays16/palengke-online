@@ -83,6 +83,53 @@
             <span v-else class="helper-text">11 digits starting with 09</span>
           </div>
 
+          <!-- Password -->
+          <div class="input-group">
+            <label class="input-label">Password *</label>
+            <div class="input-wrapper" :class="{ error: errors.password, success: isPasswordValid }">
+              <ion-icon :icon="lockClosedOutline" class="input-icon"></ion-icon>
+              <input 
+                v-model="password" 
+                :type="showPassword ? 'text' : 'password'" 
+                placeholder="Create a password"
+                class="custom-input with-icon with-toggle"
+                @input="onPasswordInput"
+                @blur="validateField('password')"
+              >
+              <ion-icon 
+                :icon="showPassword ? eyeOffOutline : eyeOutline" 
+                class="password-toggle"
+                @click="showPassword = !showPassword"
+              ></ion-icon>
+            </div>
+            <span v-if="errors.password" class="error-message">{{ errors.password }}</span>
+            <span v-else class="helper-text">At least 8 characters</span>
+          </div>
+
+          <!-- Confirm Password -->
+          <div class="input-group">
+            <label class="input-label">Confirm Password *</label>
+            <div class="input-wrapper" :class="{ error: errors.confirmPassword, success: isConfirmPasswordValid }">
+              <ion-icon :icon="lockClosedOutline" class="input-icon"></ion-icon>
+              <input 
+                v-model="confirmPassword" 
+                :type="showPassword ? 'text' : 'password'" 
+                placeholder="Confirm your password"
+                class="custom-input with-icon"
+                @input="onConfirmPasswordInput"
+                @blur="validateField('confirmPassword')"
+              >
+              <ion-icon 
+                v-if="isConfirmPasswordValid" 
+                :icon="checkmarkCircleOutline" 
+                class="success-icon"
+              ></ion-icon>
+            </div>
+            <span v-if="errors.confirmPassword" class="error-message">{{ errors.confirmPassword }}</span>
+            <span v-else-if="isConfirmPasswordValid" class="success-message"><font-awesome-icon icon="check" /> Passwords match</span>
+            <span v-else class="helper-text">Re-enter your password</span>
+          </div>
+
           <!-- Send OTP Button (shows when phone is valid but OTP not sent) -->
           <ion-button 
             v-if="isPhoneValid && phone.length === 11 && !showOtpSection && !isPhoneVerified"
@@ -193,6 +240,9 @@ import {
   arrowForwardOutline,
   mailOutline,
   callOutline,
+  lockClosedOutline,
+  eyeOutline,
+  eyeOffOutline,
   checkmarkCircleOutline,
   shieldCheckmarkOutline,
   paperPlaneOutline,
@@ -205,6 +255,9 @@ const router = useRouter();
 // Form data
 const email = ref('');
 const phone = ref('');
+const password = ref('');
+const confirmPassword = ref('');
+const showPassword = ref(false);
 const isPhoneVerified = ref(false);
 
 // OTP data
@@ -219,7 +272,9 @@ const isVerifyingOtp = ref(false);
 // Errors
 const errors = ref({
   email: '',
-  phone: ''
+  phone: '',
+  password: '',
+  confirmPassword: ''
 });
 
 // Validation
@@ -232,12 +287,20 @@ const isPhoneValid = computed(() => {
   return phone.value.startsWith('09') && phone.value.length === 11;
 });
 
+const isPasswordValid = computed(() => {
+  return password.value.length >= 8;
+});
+
+const isConfirmPasswordValid = computed(() => {
+  return confirmPassword.value === password.value && password.value.length >= 8;
+});
+
 const otpValue = computed(() => {
   return otpDigits.value.join('');
 });
 
 const isFormValid = computed(() => {
-  return isEmailValid.value && isPhoneVerified.value;
+  return isEmailValid.value && isPhoneVerified.value && isPasswordValid.value && isConfirmPasswordValid.value;
 });
 
 // Email input handler
@@ -250,6 +313,16 @@ const onPhoneInput = () => {
   // Only allow numbers
   phone.value = phone.value.replace(/\D/g, '');
   errors.value.phone = '';
+};
+
+// Password input handler
+const onPasswordInput = () => {
+  errors.value.password = '';
+};
+
+// Confirm password input handler
+const onConfirmPasswordInput = () => {
+  errors.value.confirmPassword = '';
 };
 
 // Validate field
@@ -281,6 +354,32 @@ const validateField = (field) => {
       return false;
     }
     errors.value.phone = '';
+    return true;
+  }
+
+  if (field === 'password') {
+    if (!password.value) {
+      errors.value.password = 'Password is required';
+      return false;
+    }
+    if (password.value.length < 8) {
+      errors.value.password = 'Password must be at least 8 characters';
+      return false;
+    }
+    errors.value.password = '';
+    return true;
+  }
+
+  if (field === 'confirmPassword') {
+    if (!confirmPassword.value) {
+      errors.value.confirmPassword = 'Please confirm your password';
+      return false;
+    }
+    if (confirmPassword.value !== password.value) {
+      errors.value.confirmPassword = 'Passwords do not match';
+      return false;
+    }
+    errors.value.confirmPassword = '';
     return true;
   }
 };
@@ -454,7 +553,8 @@ const handleNext = () => {
   const registrationData = {
     email: email.value,
     phone: phone.value,
-    phoneVerified: isPhoneVerified.value
+    phoneVerified: isPhoneVerified.value,
+    password: password.value
   };
   localStorage.setItem('registrationData', JSON.stringify(registrationData));
 
@@ -602,6 +702,10 @@ const handleNext = () => {
   padding-right: 48px;
 }
 
+.custom-input.with-toggle {
+  padding-right: 48px;
+}
+
 .custom-input:focus {
   outline: none;
   border-color: #4CAF50;
@@ -627,6 +731,17 @@ const handleNext = () => {
   font-size: 24px;
   color: #4CAF50;
   z-index: 2;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  color: #999;
+  z-index: 2;
+  cursor: pointer;
 }
 
 .verified-icon {
