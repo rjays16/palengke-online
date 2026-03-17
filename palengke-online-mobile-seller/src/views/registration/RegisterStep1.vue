@@ -535,7 +535,7 @@ const verifyOtp = async () => {
       showOtpSection.value = false;
       
       const toast = await toastController.create({
-        message: '<font-awesome-icon icon="check" /> Email verified successfully!',
+        message: 'Email verified successfully!',
         duration: 2500,
         color: 'success',
         position: 'top'
