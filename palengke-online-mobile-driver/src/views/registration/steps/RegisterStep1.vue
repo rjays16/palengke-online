@@ -28,23 +28,25 @@
           <!-- Email Input -->
           <div class="input-group">
             <label class="input-label">Email Address *</label>
-            <div class="input-wrapper" :class="{ error: errors.email, success: isEmailValid }">
+            <div class="input-wrapper" :class="{ error: errors.email, success: isEmailValid && !isEmailVerified, verified: isEmailVerified }">
               <ion-icon :icon="mailOutline" class="input-icon"></ion-icon>
               <input 
                 v-model="email" 
                 type="email" 
                 placeholder="driver@example.com"
                 class="custom-input with-icon"
+                :disabled="isEmailVerified"
                 @input="onEmailInput"
                 @blur="validateField('email')"
               >
               <ion-icon 
-                v-if="isEmailValid" 
+                v-if="isEmailVerified" 
                 :icon="checkmarkCircleOutline" 
-                class="success-icon"
+                class="verified-icon"
               ></ion-icon>
             </div>
             <span v-if="errors.email" class="error-message">{{ errors.email }}</span>
+            <span v-else-if="isEmailVerified" class="verified-text">Email verified</span>
             <span v-else class="helper-text">We'll send verification to this email</span>
           </div>
 
@@ -122,6 +124,74 @@
             <span v-else class="helper-text">Re-enter your password</span>
           </div>
 
+          <!-- Send OTP Button (shows when email is valid but OTP not sent) -->
+          <ion-button 
+            v-if="isEmailValid && !showOtpSection && !isEmailVerified && isPasswordValid && isConfirmPasswordValid"
+            expand="block" 
+            class="send-otp-button"
+            :disabled="isSendingOtp"
+            @click="sendOtp"
+          >
+            <ion-icon slot="start" :icon="paperPlaneOutline"></ion-icon>
+            <span v-if="!isSendingOtp">Send Verification Code</span>
+            <ion-spinner v-else name="crescent"></ion-spinner>
+          </ion-button>
+
+          <!-- OTP Section (shows after sending OTP) -->
+          <div v-if="showOtpSection && !isEmailVerified" class="otp-section">
+            <div class="otp-header">
+              <ion-icon :icon="shieldCheckmarkOutline"></ion-icon>
+              <div class="otp-text">
+                <h3>Verify Email Address</h3>
+                <p>Enter the 6-digit code sent to <strong>{{ maskedEmail }}</strong></p>
+              </div>
+            </div>
+
+            <div class="otp-inputs">
+              <input 
+                v-for="(digit, index) in otpDigits" 
+                :key="index"
+                :ref="el => otpInputs[index] = el"
+                v-model="otpDigits[index]"
+                type="tel"
+                maxlength="1"
+                class="otp-input"
+                :class="{ error: otpError }"
+                @input="onOtpInput(index)"
+                @keydown="onOtpKeydown($event, index)"
+                @paste="onOtpPaste"
+              >
+            </div>
+
+            <div v-if="otpError" class="otp-error">
+              <ion-icon :icon="alertCircleOutline"></ion-icon>
+              <span>{{ otpError }}</span>
+            </div>
+
+            <div class="otp-actions">
+              <button 
+                class="resend-button" 
+                :disabled="resendTimer > 0"
+                @click="resendOtp"
+              >
+                {{ resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend Code' }}
+              </button>
+              <button class="change-number-button" @click="changeEmail">
+                Change Email
+              </button>
+            </div>
+
+            <ion-button 
+              expand="block" 
+              class="verify-button"
+              :disabled="otpValue.length !== 6 || isVerifyingOtp"
+              @click="verifyOtp"
+            >
+              <span v-if="!isVerifyingOtp">Verify Code</span>
+              <ion-spinner v-else name="crescent"></ion-spinner>
+            </ion-button>
+          </div>
+
           <!-- Info Box -->
           <div class="info-box">
             <ion-icon :icon="informationCircleOutline"></ion-icon>
@@ -156,6 +226,7 @@ import {
   IonContent,
   IonButton,
   IonIcon,
+  IonSpinner,
   toastController
 } from '@ionic/vue';
 import {
@@ -167,7 +238,10 @@ import {
   eyeOutline,
   eyeOffOutline,
   checkmarkCircleOutline,
-  informationCircleOutline
+  paperPlaneOutline,
+  shieldCheckmarkOutline,
+  informationCircleOutline,
+  alertCircleOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -177,6 +251,15 @@ const phone = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const showPassword = ref(false);
+const isEmailVerified = ref(false);
+
+const showOtpSection = ref(false);
+const otpDigits = ref(['', '', '', '', '', '']);
+const otpInputs = ref([]);
+const otpError = ref('');
+const resendTimer = ref(0);
+const isSendingOtp = ref(false);
+const isVerifyingOtp = ref(false);
 
 const errors = ref({
   email: '',
@@ -202,8 +285,24 @@ const isConfirmPasswordValid = computed(() => {
   return confirmPassword.value === password.value && password.value.length >= 8;
 });
 
+const otpValue = computed(() => {
+  return otpDigits.value.join('');
+});
+
+const maskedEmail = computed(() => {
+  if (!email.value) return '';
+  const atIndex = email.value.indexOf('@');
+  if (atIndex === -1) return email.value;
+  const localPart = email.value.substring(0, atIndex);
+  const domain = email.value.substring(atIndex);
+  if (localPart.length > 3) {
+    return localPart.substring(0, 2) + '***' + localPart.substring(localPart.length - 1) + domain;
+  }
+  return '***' + domain;
+});
+
 const isFormValid = computed(() => {
-  return isEmailValid.value && isPhoneValid.value && isPasswordValid.value && isConfirmPasswordValid.value;
+  return isEmailValid.value && isEmailVerified.value && isPhoneValid.value && phone.value.length === 11 && isPasswordValid.value && isConfirmPasswordValid.value;
 });
 
 const onEmailInput = () => {
@@ -278,6 +377,131 @@ const validateField = (field) => {
     }
     errors.value.confirmPassword = '';
     return true;
+  }
+};
+
+const sendOtp = async () => {
+  if (!validateField('email')) return;
+
+  isSendingOtp.value = true;
+
+  try {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    const toast = await toastController.create({
+      message: `Verification code sent to ${maskedEmail.value}`,
+      duration: 3000,
+      color: 'success',
+      position: 'top'
+    });
+    await toast.present();
+
+    showOtpSection.value = true;
+    startResendTimer();
+    
+    setTimeout(() => {
+      if (otpInputs.value[0]) {
+        otpInputs.value[0].focus();
+      }
+    }, 300);
+
+  } catch (error) {
+    const toast = await toastController.create({
+      message: 'Failed to send code. Please try again.',
+      duration: 3000,
+      color: 'danger',
+      position: 'top'
+    });
+    await toast.present();
+  } finally {
+    isSendingOtp.value = false;
+  }
+};
+
+const resendOtp = async () => {
+  if (resendTimer.value > 0) return;
+  
+  otpDigits.value = ['', '', '', '', '', ''];
+  otpError.value = '';
+  
+  await sendOtp();
+};
+
+const startResendTimer = () => {
+  resendTimer.value = 60;
+  const interval = setInterval(() => {
+    resendTimer.value--;
+    if (resendTimer.value <= 0) {
+      clearInterval(interval);
+    }
+  }, 1000);
+};
+
+const changeEmail = () => {
+  showOtpSection.value = false;
+  otpDigits.value = ['', '', '', '', '', ''];
+  otpError.value = '';
+  isEmailVerified.value = false;
+  resendTimer.value = 0;
+};
+
+const onOtpInput = (index) => {
+  otpDigits.value[index] = otpDigits.value[index].replace(/\D/g, '');
+  otpError.value = '';
+  
+  if (otpDigits.value[index] && index < 5) {
+    otpInputs.value[index + 1]?.focus();
+  }
+};
+
+const onOtpKeydown = (event, index) => {
+  if (event.key === 'Backspace' && !otpDigits.value[index] && index > 0) {
+    otpInputs.value[index - 1]?.focus();
+  }
+};
+
+const onOtpPaste = (event) => {
+  event.preventDefault();
+  const pastedData = event.clipboardData.getData('text').replace(/\D/g, '');
+  
+  if (pastedData.length === 6) {
+    for (let i = 0; i < 6; i++) {
+      otpDigits.value[i] = pastedData[i] || '';
+    }
+    otpInputs.value[5]?.focus();
+  }
+};
+
+const verifyOtp = async () => {
+  if (otpValue.value.length !== 6) return;
+
+  isVerifyingOtp.value = true;
+  otpError.value = '';
+
+  try {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    const isValid = true;
+    
+    if (isValid) {
+      isEmailVerified.value = true;
+      showOtpSection.value = false;
+      
+      const toast = await toastController.create({
+        message: 'Email verified successfully!',
+        duration: 2500,
+        color: 'success',
+        position: 'top'
+      });
+      await toast.present();
+    } else {
+      otpError.value = 'Invalid code. Please try again.';
+    }
+
+  } catch (error) {
+    otpError.value = 'Verification failed. Please try again.';
+  } finally {
+    isVerifyingOtp.value = false;
   }
 };
 
@@ -442,6 +666,12 @@ const handleNext = () => {
   border-color: #4CAF50;
 }
 
+.custom-input:disabled {
+  background: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
+
 .custom-input::placeholder {
   color: #999;
 }
@@ -457,6 +687,16 @@ const handleNext = () => {
   z-index: 2;
 }
 
+.verified-icon {
+  animation: scaleIn 0.3s ease-out;
+}
+
+@keyframes scaleIn {
+  0% { transform: translateY(-50%) scale(0); }
+  50% { transform: translateY(-50%) scale(1.2); }
+  100% { transform: translateY(-50%) scale(1); }
+}
+
 .password-toggle {
   position: absolute;
   right: 14px;
@@ -470,6 +710,11 @@ const handleNext = () => {
 
 .input-wrapper.success .custom-input {
   border-color: #4CAF50;
+}
+
+.input-wrapper.verified .custom-input {
+  border-color: #4CAF50;
+  background: #f1f8f4;
 }
 
 .input-wrapper.error .custom-input {
@@ -503,6 +748,165 @@ const handleNext = () => {
   font-weight: 600;
 }
 
+.verified-text {
+  display: block;
+  font-size: 12px;
+  color: #4CAF50;
+  margin-top: 6px;
+  font-weight: 600;
+}
+
+/* Send OTP Button */
+.send-otp-button {
+  --background: #2196F3;
+  --background-hover: #1976D2;
+  --border-radius: 12px;
+  height: 52px;
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: none;
+  margin-bottom: 20px;
+}
+
+/* OTP Section */
+.otp-section {
+  background: #E3F2FD;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  border: 2px solid #2196F3;
+}
+
+.otp-header {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.otp-header ion-icon {
+  font-size: 32px;
+  color: #2196F3;
+  flex-shrink: 0;
+}
+
+.otp-text h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1565C0;
+  margin: 0 0 6px 0;
+}
+
+.otp-text p {
+  font-size: 13px;
+  color: #1976D2;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.otp-text strong {
+  font-weight: 700;
+}
+
+/* OTP Inputs */
+.otp-inputs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.otp-input {
+  width: 48px;
+  height: 56px;
+  border: 2px solid #2196F3;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  background: white;
+  transition: all 0.2s;
+}
+
+.otp-input:focus {
+  outline: none;
+  border-color: #1976D2;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.otp-input.error {
+  border-color: #f44336;
+}
+
+/* OTP Error */
+.otp-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #FFEBEE;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.otp-error ion-icon {
+  font-size: 20px;
+  color: #f44336;
+  flex-shrink: 0;
+}
+
+.otp-error span {
+  font-size: 13px;
+  color: #c62828;
+  font-weight: 500;
+}
+
+/* OTP Actions */
+.otp-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.resend-button,
+.change-number-button {
+  background: none;
+  border: none;
+  color: #2196F3;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px;
+  font-family: inherit;
+}
+
+.resend-button:disabled {
+  color: #999;
+  cursor: not-allowed;
+}
+
+.change-number-button {
+  color: #666;
+}
+
+/* Verify Button */
+.verify-button {
+  --background: #2196F3;
+  --background-hover: #1976D2;
+  --border-radius: 12px;
+  height: 52px;
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.verify-button:disabled {
+  --background: #e0e0e0;
+  --color: #999;
+}
+
+/* Info Box */
 .info-box {
   display: flex;
   gap: 12px;
@@ -530,6 +934,7 @@ const handleNext = () => {
   font-weight: 700;
 }
 
+/* Next Button */
 .next-button {
   --background: #4CAF50;
   --background-hover: #45a049;
@@ -552,6 +957,12 @@ const handleNext = () => {
 
   .step-container {
     padding: 20px 16px 100px 16px;
+  }
+
+  .otp-input {
+    width: 44px;
+    height: 52px;
+    font-size: 22px;
   }
 }
 </style>
