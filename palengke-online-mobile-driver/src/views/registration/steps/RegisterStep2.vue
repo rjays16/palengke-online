@@ -1,176 +1,474 @@
 <template>
   <ion-page>
-    <ion-header>
-      <ion-toolbar color="success">
-        <ion-buttons slot="start">
-          <ion-button @click="goBack">
-            <ion-icon :icon="arrowBackOutline"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-        <ion-title>Step 2 of 2</ion-title>
-        <ion-buttons slot="end">
-          <ion-button @click="finishRegistration" fill="clear" color="light">Skip</ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-      <ion-toolbar color="light">
-        <ion-progress-bar :value="1"></ion-progress-bar>
-      </ion-toolbar>
-    </ion-header>
-
-    <ion-content class="ion-padding">
+    <ion-content :fullscreen="true" class="step-content">
       <div class="step-container">
-        <h1 class="step-title">Vehicle Information</h1>
-        <p class="step-subtitle">Tell us about your vehicle</p>
+        
+        <!-- Back Button -->
+        <div class="back-button" @click="goBack">
+          <ion-icon :icon="arrowBackOutline"></ion-icon>
+        </div>
 
+        <!-- Progress Indicator -->
+        <div class="progress-section">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 28.56%"></div>
+          </div>
+          <p class="progress-text">Step 2 of 7</p>
+        </div>
+
+        <!-- Title -->
+        <div class="title-section">
+          <h1 class="title">Personal Information</h1>
+          <p class="subtitle">Tell us about yourself</p>
+        </div>
+
+        <!-- Form -->
         <div class="form-section">
-          <div class="input-group">
-            <ion-icon :icon="carOutline" class="input-icon"></ion-icon>
-            <input 
-              v-model="formData.vehicleType" 
-              type="text" 
-              placeholder="Vehicle type (e.g., Motorcycle, Tricycle, Van)"
-              class="custom-input"
-            >
+          
+          <!-- Section Header -->
+          <div class="section-header">
+            <ion-icon :icon="personOutline"></ion-icon>
+            <h2>Your Details</h2>
           </div>
 
+          <!-- First Name -->
           <div class="input-group">
-            <ion-icon :icon="barcodeOutline" class="input-icon"></ion-icon>
-            <input 
-              v-model="formData.plateNumber" 
-              type="text" 
-              placeholder="Plate number"
-              class="custom-input"
-            >
+            <label class="input-label">First Name *</label>
+            <div class="input-wrapper" :class="{ error: errors.firstName }">
+              <input 
+                v-model="formData.firstName" 
+                type="text" 
+                placeholder="Juan"
+                class="custom-input"
+                @blur="validateField('firstName')"
+                @input="errors.firstName = ''"
+              >
+            </div>
+            <span v-if="errors.firstName" class="error-message">{{ errors.firstName }}</span>
           </div>
 
+          <!-- Middle Name (Optional) -->
           <div class="input-group">
-            <ion-icon :icon="constructOutline" class="input-icon"></ion-icon>
+            <label class="input-label">Middle Name <span class="optional">(Optional)</span></label>
+            <div class="input-wrapper">
+              <input 
+                v-model="formData.middleName" 
+                type="text" 
+                placeholder="Santos"
+                class="custom-input"
+              >
+            </div>
+          </div>
+
+          <!-- Last Name -->
+          <div class="input-group">
+            <label class="input-label">Last Name *</label>
+            <div class="input-wrapper" :class="{ error: errors.lastName }">
+              <input 
+                v-model="formData.lastName" 
+                type="text" 
+                placeholder="Dela Cruz"
+                class="custom-input"
+                @blur="validateField('lastName')"
+                @input="errors.lastName = ''"
+              >
+            </div>
+            <span v-if="errors.lastName" class="error-message">{{ errors.lastName }}</span>
+          </div>
+
+          <!-- Birthdate -->
+          <div class="input-group">
+            <label class="input-label">Birthdate *</label>
+            <div class="input-wrapper" :class="{ error: errors.birthdate }">
+              <ion-icon :icon="calendarOutline" class="input-icon"></ion-icon>
+              <input 
+                v-model="formData.birthdate" 
+                type="date" 
+                class="custom-input with-icon"
+                :max="maxDate"
+                @blur="validateField('birthdate')"
+                @input="errors.birthdate = ''"
+              >
+            </div>
+            <span v-if="errors.birthdate" class="error-message">{{ errors.birthdate }}</span>
+            <span v-else class="helper-text">You must be 18 years or older</span>
+          </div>
+
+          <!-- Birthplace -->
+          <div class="input-group">
+            <label class="input-label">Birthplace *</label>
+            <div class="input-wrapper" :class="{ error: errors.birthplace }">
+              <ion-icon :icon="locationOutline" class="input-icon"></ion-icon>
+              <input 
+                v-model="formData.birthplace" 
+                type="text" 
+                placeholder="Manila City"
+                class="custom-input with-icon"
+                @blur="validateField('birthplace')"
+                @input="errors.birthplace = ''"
+              >
+            </div>
+            <span v-if="errors.birthplace" class="error-message">{{ errors.birthplace }}</span>
+            <span v-else class="helper-text">City or municipality of birth</span>
+          </div>
+
+          <!-- Address Section Header -->
+          <div class="section-header" style="margin-top: 32px;">
+            <ion-icon :icon="homeOutline"></ion-icon>
+            <h2>Current Address</h2>
+          </div>
+
+          <!-- Checkbox: Same as Birthplace -->
+          <div class="checkbox-group">
             <input 
-              v-model="formData.vehicleModel" 
-              type="text" 
-              placeholder="Vehicle model & year"
-              class="custom-input"
+              type="checkbox" 
+              id="sameAsBirthplace" 
+              v-model="sameAsBirthplace"
+              @change="onSameAsBirthplaceChange"
+              class="checkbox-input"
             >
+            <label for="sameAsBirthplace">
+              Current address is the same as birthplace
+            </label>
+          </div>
+
+          <!-- Current Address -->
+          <div class="input-group">
+            <label class="input-label">Current Address *</label>
+            <div class="input-wrapper" :class="{ error: errors.currentAddress }">
+              <ion-icon :icon="homeOutline" class="input-icon-textarea"></ion-icon>
+              <textarea 
+                v-model="formData.currentAddress" 
+                placeholder="123 Main Street, Barangay, City"
+                class="custom-textarea with-icon"
+                rows="3"
+                :disabled="sameAsBirthplace"
+                @blur="validateField('currentAddress')"
+                @input="errors.currentAddress = ''"
+              ></textarea>
+            </div>
+            <span v-if="errors.currentAddress" class="error-message">{{ errors.currentAddress }}</span>
+            <span v-else class="helper-text">Complete address including barangay and city</span>
+          </div>
+
+          <!-- Info Box -->
+          <div class="info-box">
+            <ion-icon :icon="shieldCheckmarkOutline"></ion-icon>
+            <div class="info-text">
+              <strong>Your information is secure</strong><br>
+              All personal data is encrypted and will only be used for account verification.
+            </div>
+          </div>
+
+          <!-- Navigation Buttons -->
+          <div class="button-group">
+            <ion-button 
+              expand="block" 
+              fill="outline"
+              color="medium"
+              class="back-btn"
+              @click="goBack"
+            >
+              <ion-icon slot="start" :icon="arrowBackOutline"></ion-icon>
+              Back
+            </ion-button>
+
+            <ion-button 
+              expand="block" 
+              class="next-button"
+              @click="handleNext"
+              :disabled="!isFormValid"
+            >
+              Next
+              <ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon>
+            </ion-button>
           </div>
         </div>
 
-        <!-- Document Upload Placeholder -->
-        <div class="upload-section">
-          <h3>Upload Documents</h3>
-          <p>Please prepare the following documents for upload:</p>
-          <div class="document-list">
-            <div class="document-item">
-              <ion-icon :icon="documentTextOutline"></ion-icon>
-              <span>Driver's License (front & back)</span>
-            </div>
-            <div class="document-item">
-              <ion-icon :icon="documentTextOutline"></ion-icon>
-              <span>Vehicle Registration (OR/CR)</span>
-            </div>
-            <div class="document-item">
-              <ion-icon :icon="documentTextOutline"></ion-icon>
-              <span>NBI or Police Clearance</span>
-            </div>
-            <div class="document-item">
-              <ion-icon :icon="documentTextOutline"></ion-icon>
-              <span>Birth Certificate</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="action-section">
-          <ion-button 
-            expand="block" 
-            class="finish-button"
-            @click="finishRegistration"
-          >
-            <span v-if="!isLoading">Complete Registration</span>
-            <ion-spinner v-else name="crescent"></ion-spinner>
-          </ion-button>
-        </div>
       </div>
     </ion-content>
   </ion-page>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { 
-  IonPage, 
-  IonHeader, 
-  IonToolbar, 
-  IonTitle, 
-  IonContent, 
+import {
+  IonPage,
+  IonContent,
   IonButton,
-  IonButtons,
-  IonIcon,
-  IonProgressBar,
-  IonSpinner
+  IonIcon
 } from '@ionic/vue';
-import { 
+import {
   arrowBackOutline,
-  carOutline,
-  barcodeOutline,
-  constructOutline,
-  documentTextOutline
+  arrowForwardOutline,
+  personOutline,
+  calendarOutline,
+  locationOutline,
+  homeOutline,
+  shieldCheckmarkOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
 
-const isLoading = ref(false);
-
 const formData = ref({
-  vehicleType: '',
-  plateNumber: '',
-  vehicleModel: ''
+  firstName: '',
+  middleName: '',
+  lastName: '',
+  birthdate: '',
+  birthplace: '',
+  currentAddress: ''
 });
 
+const sameAsBirthplace = ref(false);
+
+const errors = ref({
+  firstName: '',
+  lastName: '',
+  birthdate: '',
+  birthplace: '',
+  currentAddress: ''
+});
+
+const maxDate = computed(() => {
+  const today = new Date();
+  const year = today.getFullYear() - 18;
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+});
+
+const isFormValid = computed(() => {
+  return formData.value.firstName.trim() && 
+         formData.value.lastName.trim() && 
+         formData.value.birthdate &&
+         formData.value.birthplace.trim() &&
+         formData.value.currentAddress.trim();
+});
+
+const validateField = (fieldName) => {
+  switch (fieldName) {
+    case 'firstName':
+      if (!formData.value.firstName.trim()) {
+        errors.value.firstName = 'First name is required';
+        return false;
+      }
+      errors.value.firstName = '';
+      return true;
+
+    case 'lastName':
+      if (!formData.value.lastName.trim()) {
+        errors.value.lastName = 'Last name is required';
+        return false;
+      }
+      errors.value.lastName = '';
+      return true;
+
+    case 'birthdate':
+      if (!formData.value.birthdate) {
+        errors.value.birthdate = 'Birthdate is required';
+        return false;
+      }
+      const birthDate = new Date(formData.value.birthdate);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      
+      if (age < 18) {
+        errors.value.birthdate = 'You must be at least 18 years old';
+        return false;
+      }
+      errors.value.birthdate = '';
+      return true;
+
+    case 'birthplace':
+      if (!formData.value.birthplace.trim()) {
+        errors.value.birthplace = 'Birthplace is required';
+        return false;
+      }
+      errors.value.birthplace = '';
+      return true;
+
+    case 'currentAddress':
+      if (!formData.value.currentAddress.trim()) {
+        errors.value.currentAddress = 'Current address is required';
+        return false;
+      }
+      errors.value.currentAddress = '';
+      return true;
+
+    default:
+      return true;
+  }
+};
+
+const onSameAsBirthplaceChange = () => {
+  if (sameAsBirthplace.value) {
+    formData.value.currentAddress = formData.value.birthplace;
+    errors.value.currentAddress = '';
+  } else {
+    formData.value.currentAddress = '';
+  }
+};
+
 const goBack = () => {
+  saveData();
   router.push('/register/step1');
 };
 
-const finishRegistration = async () => {
-  isLoading.value = true;
-  
-  try {
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    router.push('/register/success');
-  } catch (error) {
-    console.error('Registration failed:', error);
-  } finally {
-    isLoading.value = false;
-  }
+const saveData = () => {
+  const existingData = JSON.parse(localStorage.getItem('driverRegistrationData') || '{}');
+  const updatedData = {
+    ...existingData,
+    ...formData.value,
+    sameAsBirthplace: sameAsBirthplace.value
+  };
+  localStorage.setItem('driverRegistrationData', JSON.stringify(updatedData));
+};
+
+const handleNext = () => {
+  saveData();
+  router.push('/register/step3');
 };
 </script>
 
 <style scoped>
-.step-container {
-  max-width: 500px;
-  margin: 0 auto;
-  padding-top: 20px;
+.step-content {
+  --background: #ffffff;
 }
 
-.step-title {
+.step-container {
+  min-height: 100vh;
+  padding: 24px;
+  padding-bottom: 100px;
+  position: relative;
+}
+
+.back-button {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  border-radius: 12px;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.2s;
+}
+
+.back-button:active {
+  transform: scale(0.95);
+  background: #e0e0e0;
+}
+
+.back-button ion-icon {
+  font-size: 24px;
+  color: #1a1a1a;
+}
+
+.progress-section {
+  margin-top: 70px;
+  margin-bottom: 32px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #4CAF50;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  text-align: center;
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+  font-weight: 600;
+}
+
+.title-section {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.title {
   font-size: 28px;
   font-weight: 700;
   color: #1a1a1a;
   margin: 0 0 8px 0;
 }
 
-.step-subtitle {
+.subtitle {
   font-size: 15px;
   color: #666;
-  margin: 0 0 32px 0;
+  margin: 0;
 }
 
 .form-section {
+  max-width: 500px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.section-header ion-icon {
+  font-size: 24px;
+  color: #4CAF50;
+}
+
+.section-header h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
 }
 
 .input-group {
+  margin-bottom: 20px;
+}
+
+.input-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.optional {
+  font-weight: 400;
+  color: #999;
+  font-size: 13px;
+}
+
+.input-wrapper {
   position: relative;
-  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
 }
 
 .input-icon {
@@ -183,15 +481,28 @@ const finishRegistration = async () => {
   z-index: 2;
 }
 
+.input-icon-textarea {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  font-size: 20px;
+  color: #4CAF50;
+  z-index: 2;
+}
+
 .custom-input {
   width: 100%;
-  padding: 16px 16px 16px 48px;
+  padding: 14px 16px;
   border: 2px solid #e0e0e0;
   border-radius: 12px;
-  font-size: 16px;
+  font-size: 15px;
   background: white;
   transition: border-color 0.2s;
   font-family: inherit;
+}
+
+.custom-input.with-icon {
+  padding-left: 48px;
 }
 
 .custom-input:focus {
@@ -203,59 +514,165 @@ const finishRegistration = async () => {
   color: #999;
 }
 
-.upload-section {
-  background: #f8f9fa;
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 32px;
+.input-wrapper.error .custom-input {
+  border-color: #f44336;
 }
 
-.upload-section h3 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 8px 0;
+.input-wrapper.error .input-icon {
+  color: #f44336;
 }
 
-.upload-section > p {
-  font-size: 14px;
-  color: #666;
-  margin: 0 0 16px 0;
+.helper-text {
+  display: block;
+  font-size: 12px;
+  color: #999;
+  margin-top: 6px;
 }
 
-.document-list {
+.error-message {
+  display: block;
+  font-size: 12px;
+  color: #f44336;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.info-box {
   display: flex;
-  flex-direction: column;
   gap: 12px;
+  background: #E8F5E9;
+  border-left: 4px solid #4CAF50;
+  padding: 16px;
+  border-radius: 8px;
+  margin: 32px 0 24px 0;
 }
 
-.document-item {
+.info-box ion-icon {
+  font-size: 24px;
+  color: #4CAF50;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.info-text {
+  font-size: 13px;
+  color: #2E7D32;
+  line-height: 1.5;
+}
+
+.info-text strong {
+  font-weight: 700;
+}
+
+.custom-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 15px;
+  background: white;
+  transition: border-color 0.2s;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.custom-textarea.with-icon {
+  padding-left: 48px;
+}
+
+.custom-textarea:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+
+.custom-textarea::placeholder {
+  color: #999;
+}
+
+.custom-textarea:disabled {
+  background: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.checkbox-group {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px;
-  background: white;
-  border-radius: 10px;
-  border: 1px solid #e0e0e0;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
 }
 
-.document-item ion-icon {
-  font-size: 20px;
-  color: #4CAF50;
+.checkbox-input {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: #4CAF50;
+  flex-shrink: 0;
 }
 
-.document-item span {
+.checkbox-group label {
   font-size: 14px;
-  color: #333;
+  color: #1a1a1a;
+  font-weight: 500;
+  cursor: pointer;
+  flex: 1;
+  line-height: 1.5;
 }
 
-.finish-button {
+.button-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.back-btn {
+  --border-radius: 12px;
+  --border-width: 2px;
+  height: 52px;
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.next-button {
   --background: #4CAF50;
   --background-hover: #45a049;
   --border-radius: 12px;
-  height: 56px;
-  font-size: 16px;
+  height: 52px;
+  font-size: 15px;
   font-weight: 600;
   text-transform: none;
+}
+
+.next-button:disabled {
+  --background: #e0e0e0;
+  --color: #999;
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 24px;
+  }
+
+  .step-container {
+    padding: 20px 16px 100px 16px;
+  }
+
+  .button-group {
+    grid-template-columns: 1fr;
+  }
+
+  .back-btn {
+    order: 2;
+  }
+
+  .next-button {
+    order: 1;
+  }
 }
 </style>

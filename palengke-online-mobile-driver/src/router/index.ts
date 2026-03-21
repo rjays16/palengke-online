@@ -37,6 +37,36 @@ const routes = [
     meta: { requiresAuth: false }
   },
   {
+    path: '/register/step3',
+    name: 'RegisterStep3',
+    component: () => import('@/views/registration/steps/RegisterStep3.vue'),
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/register/step4',
+    name: 'RegisterStep4',
+    component: () => import('@/views/registration/steps/RegisterStep4.vue'),
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/register/step5',
+    name: 'RegisterStep5',
+    component: () => import('@/views/registration/steps/RegisterStep5.vue'),
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/register/step6',
+    name: 'RegisterStep6',
+    component: () => import('@/views/registration/steps/RegisterStep6.vue'),
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/register/step7',
+    name: 'RegisterStep7',
+    component: () => import('@/views/registration/steps/RegisterStep7.vue'),
+    meta: { requiresAuth: false }
+  },
+  {
     path: '/register/success',
     name: 'RegisterSuccess',
     component: () => import('@/views/registration/RegisterSuccess.vue'),
