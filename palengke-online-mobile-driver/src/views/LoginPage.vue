@@ -3,7 +3,7 @@
     <ion-content :fullscreen="true" class="login-content">
       <div class="login-container">
         
-        <!-- Logo Section - Both logos, driver is bigger -->
+        <!-- Logo Section -->
         <div class="logo-section">
           <div class="logos-wrapper">
             <img src="/assets/images/logo.png" alt="Palengke Online" class="logo-main">
@@ -18,6 +18,8 @@
 
         <!-- Login Form -->
         <div class="form-section">
+          
+          <!-- Email Input -->
           <div class="input-group">
             <ion-icon :icon="mailOutline" class="input-icon"></ion-icon>
             <input 
@@ -25,11 +27,13 @@
               type="email" 
               placeholder="Email address"
               class="custom-input"
+              :disabled="showOtpSection"
               @keyup.enter="handleLogin"
             >
           </div>
 
-          <div class="input-group">
+          <!-- Password Input -->
+          <div class="input-group" v-if="!showOtpSection">
             <ion-icon :icon="lockClosedOutline" class="input-icon"></ion-icon>
             <input 
               v-model="password" 
@@ -45,19 +49,77 @@
             ></ion-icon>
           </div>
 
-          <div class="forgot-password">
+          <!-- Forgot Password -->
+          <div class="forgot-password" v-if="!showOtpSection">
             <a href="#" @click.prevent="handleForgotPassword">Forgot Password?</a>
           </div>
 
+          <!-- Sign In Button -->
           <ion-button 
+            v-if="!showOtpSection"
             expand="block" 
             class="login-button"
             @click="handleLogin"
-            :disabled="!email || !password"
+            :disabled="!email || !password || isLoading"
           >
             <span v-if="!isLoading">Sign In</span>
             <ion-spinner v-else name="crescent"></ion-spinner>
           </ion-button>
+
+          <!-- OTP Section -->
+          <div v-if="showOtpSection" class="otp-section">
+            <div class="otp-header">
+              <ion-icon :icon="shieldCheckmarkOutline"></ion-icon>
+              <div class="otp-text">
+                <h3>Verify Your Email</h3>
+                <p>Enter the 6-digit code sent to <strong>{{ maskedEmail }}</strong></p>
+              </div>
+            </div>
+
+            <div class="otp-inputs">
+              <input 
+                v-for="(digit, index) in otpDigits" 
+                :key="index"
+                :ref="el => otpInputs[index] = el"
+                v-model="otpDigits[index]"
+                type="tel"
+                maxlength="1"
+                class="otp-input"
+                :class="{ error: otpError }"
+                @input="onOtpInput(index)"
+                @keydown="onOtpKeydown($event, index)"
+                @paste="onOtpPaste"
+              >
+            </div>
+
+            <div v-if="otpError" class="otp-error">
+              <ion-icon :icon="alertCircleOutline"></ion-icon>
+              <span>{{ otpError }}</span>
+            </div>
+
+            <div class="otp-actions">
+              <button 
+                class="resend-button" 
+                :disabled="resendTimer > 0"
+                @click="resendOtp"
+              >
+                {{ resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend Code' }}
+              </button>
+              <button class="change-email-button" @click="changeEmail">
+                Change Email
+              </button>
+            </div>
+
+            <ion-button 
+              expand="block" 
+              class="verify-button"
+              :disabled="otpValue.length !== 6 || isVerifying"
+              @click="verifyOtp"
+            >
+              <span v-if="!isVerifying">Verify & Sign In</span>
+              <ion-spinner v-else name="crescent"></ion-spinner>
+            </ion-button>
+          </div>
 
         </div>
 
@@ -75,7 +137,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { 
   IonPage, 
@@ -83,45 +145,77 @@ import {
   IonButton, 
   IonIcon, 
   IonSpinner,
-  alertController 
+  alertController,
+  toastController
 } from '@ionic/vue';
 import { 
   mailOutline, 
   lockClosedOutline, 
   eyeOutline, 
-  eyeOffOutline
+  eyeOffOutline,
+  shieldCheckmarkOutline,
+  alertCircleOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
 
-// Form data
 const email = ref('');
 const password = ref('');
 const showPassword = ref(false);
 const isLoading = ref(false);
+const isVerifying = ref(false);
 
-// Login handler
+const showOtpSection = ref(false);
+const otpDigits = ref(['', '', '', '', '', '']);
+const otpInputs = ref([]);
+const otpError = ref('');
+const resendTimer = ref(0);
+
+const maskedEmail = computed(() => {
+  if (!email.value) return '';
+  const atIndex = email.value.indexOf('@');
+  if (atIndex === -1) return email.value;
+  const localPart = email.value.substring(0, atIndex);
+  const domain = email.value.substring(atIndex);
+  if (localPart.length > 3) {
+    return localPart.substring(0, 2) + '***' + localPart.substring(localPart.length - 1) + domain;
+  }
+  return '***' + domain;
+});
+
+const otpValue = computed(() => {
+  return otpDigits.value.join('');
+});
+
 const handleLogin = async () => {
   if (!email.value || !password.value) return;
   
   isLoading.value = true;
   
   try {
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    // TODO: Replace with actual login logic
-    console.log('Login:', { email: email.value, password: password.value });
+    const toast = await toastController.create({
+      message: `Verification code sent to ${maskedEmail.value}`,
+      duration: 3000,
+      color: 'success',
+      position: 'top'
+    });
+    await toast.present();
+
+    showOtpSection.value = true;
+    startResendTimer();
     
-    // Save auth state
-    localStorage.setItem('isAuthenticated', 'true');
-    
-    // Navigate to home page
-    router.push('/home');
+    setTimeout(() => {
+      if (otpInputs.value[0]) {
+        otpInputs.value[0].focus();
+      }
+    }, 300);
+
   } catch (error) {
     const alert = await alertController.create({
       header: 'Login Failed',
-      message: 'Invalid email or password. Please try again.',
+      message: 'Something went wrong. Please try again.',
       buttons: ['OK']
     });
     await alert.present();
@@ -130,7 +224,78 @@ const handleLogin = async () => {
   }
 };
 
-// Forgot password handler
+const onOtpInput = (index) => {
+  otpDigits.value[index] = otpDigits.value[index].replace(/\D/g, '');
+  otpError.value = '';
+  
+  if (otpDigits.value[index] && index < 5) {
+    otpInputs.value[index + 1]?.focus();
+  }
+};
+
+const onOtpKeydown = (event, index) => {
+  if (event.key === 'Backspace' && !otpDigits.value[index] && index > 0) {
+    otpInputs.value[index - 1]?.focus();
+  }
+};
+
+const onOtpPaste = (event) => {
+  event.preventDefault();
+  const pastedData = event.clipboardData.getData('text').replace(/\D/g, '');
+  
+  if (pastedData.length === 6) {
+    for (let i = 0; i < 6; i++) {
+      otpDigits.value[i] = pastedData[i] || '';
+    }
+    otpInputs.value[5]?.focus();
+  }
+};
+
+const verifyOtp = async () => {
+  if (otpValue.value.length !== 6) return;
+
+  isVerifying.value = true;
+  otpError.value = '';
+
+  try {
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    localStorage.setItem('isAuthenticated', 'true');
+    router.push('/home');
+    
+  } catch (error) {
+    otpError.value = 'Verification failed. Please try again.';
+  } finally {
+    isVerifying.value = false;
+  }
+};
+
+const resendOtp = async () => {
+  if (resendTimer.value > 0) return;
+  
+  otpDigits.value = ['', '', '', '', '', ''];
+  otpError.value = '';
+  
+  await handleLogin();
+};
+
+const startResendTimer = () => {
+  resendTimer.value = 60;
+  const interval = setInterval(() => {
+    resendTimer.value--;
+    if (resendTimer.value <= 0) {
+      clearInterval(interval);
+    }
+  }, 1000);
+};
+
+const changeEmail = () => {
+  showOtpSection.value = false;
+  otpDigits.value = ['', '', '', '', '', ''];
+  otpError.value = '';
+  resendTimer.value = 0;
+};
+
 const handleForgotPassword = async () => {
   const alert = await alertController.create({
     header: 'Reset Password',
@@ -151,7 +316,6 @@ const handleForgotPassword = async () => {
         text: 'Send',
         handler: (data) => {
           console.log('Reset password for:', data.email);
-          // TODO: Implement password reset logic
         }
       }
     ]
@@ -159,14 +323,12 @@ const handleForgotPassword = async () => {
   await alert.present();
 };
 
-// Navigate to signup
 const goToSignup = () => {
   router.push('/signup');
 };
 </script>
 
 <style scoped>
-/* Simple white background */
 .login-content {
   --background: #ffffff;
 }
@@ -179,7 +341,6 @@ const goToSignup = () => {
   padding: 40px 24px;
 }
 
-/* Logo Section - Driver is 40% bigger than Palengke logo */
 .logo-section {
   text-align: center;
   margin-bottom: 30px;
@@ -207,12 +368,11 @@ const goToSignup = () => {
 }
 
 .logo-driver {
-  width: 154px;  /* 110px + 40% = 154px (BIGGER!) */
+  width: 154px;
   height: 154px;
   object-fit: contain;
 }
 
-/* Title Section */
 .title {
   font-size: 32px;
   font-weight: 700;
@@ -228,7 +388,6 @@ const goToSignup = () => {
   text-align: center;
 }
 
-/* Form Section */
 .form-section {
   max-width: 400px;
   margin: 0 auto;
@@ -270,6 +429,11 @@ const goToSignup = () => {
   color: #999;
 }
 
+.custom-input:disabled {
+  background: #f5f5f5;
+  color: #999;
+}
+
 .toggle-password {
   position: absolute;
   right: 16px;
@@ -305,6 +469,140 @@ const goToSignup = () => {
   margin-bottom: 24px;
 }
 
+/* OTP Section */
+.otp-section {
+  background: #E3F2FD;
+  border-radius: 16px;
+  padding: 24px;
+  margin-top: 20px;
+  border: 2px solid #2196F3;
+}
+
+.otp-header {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.otp-header ion-icon {
+  font-size: 32px;
+  color: #2196F3;
+  flex-shrink: 0;
+}
+
+.otp-text h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1565C0;
+  margin: 0 0 6px 0;
+}
+
+.otp-text p {
+  font-size: 13px;
+  color: #1976D2;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.otp-text strong {
+  font-weight: 700;
+}
+
+.otp-inputs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.otp-input {
+  width: 48px;
+  height: 56px;
+  border: 2px solid #2196F3;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+  background: white;
+  transition: all 0.2s;
+}
+
+.otp-input:focus {
+  outline: none;
+  border-color: #1976D2;
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+}
+
+.otp-input.error {
+  border-color: #f44336;
+}
+
+.otp-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #FFEBEE;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.otp-error ion-icon {
+  font-size: 20px;
+  color: #f44336;
+  flex-shrink: 0;
+}
+
+.otp-error span {
+  font-size: 13px;
+  color: #c62828;
+  font-weight: 500;
+}
+
+.otp-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.resend-button,
+.change-email-button {
+  background: none;
+  border: none;
+  color: #2196F3;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px;
+  font-family: inherit;
+}
+
+.resend-button:disabled {
+  color: #999;
+  cursor: not-allowed;
+}
+
+.change-email-button {
+  color: #666;
+}
+
+.verify-button {
+  --background: #2196F3;
+  --background-hover: #1976D2;
+  --border-radius: 12px;
+  height: 56px;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.verify-button:disabled {
+  --background: #e0e0e0;
+  --color: #999;
+}
+
 /* Sign Up Section */
 .signup-section {
   text-align: center;
@@ -324,7 +622,6 @@ const goToSignup = () => {
   margin-left: 4px;
 }
 
-/* Responsive */
 @media (max-width: 480px) {
   .logos-wrapper {
     gap: 6px;
@@ -341,12 +638,18 @@ const goToSignup = () => {
   }
   
   .logo-driver {
-    width: 126px;  /* 90px + 40% */
+    width: 126px;
     height: 126px;
   }
   
   .title {
     font-size: 28px;
+  }
+
+  .otp-input {
+    width: 44px;
+    height: 52px;
+    font-size: 22px;
   }
 }
 
@@ -370,7 +673,7 @@ const goToSignup = () => {
   }
   
   .logo-driver {
-    width: 105px;  /* 75px + 40% */
+    width: 105px;
     height: 105px;
   }
   
