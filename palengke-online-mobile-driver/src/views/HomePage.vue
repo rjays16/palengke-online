@@ -18,7 +18,7 @@
           <div class="logo-container">
             <img src="/assets/images/logo-without-circle.png" alt="Palengke Online" class="logo">
           </div>
-          <h1>Welcome to Palengke Online! 🥬🥕🌽</h1>
+          <h1>Welcome to Palengke Online!</h1>
           <p class="subtitle">Fresh market delivered to your door</p>
         </div>
 
@@ -63,7 +63,7 @@
 
         <!-- Info Text -->
         <p class="info-text">
-          You are successfully logged in! 🎉
+          You are successfully logged in!
         </p>
       </div>
     </ion-content>
