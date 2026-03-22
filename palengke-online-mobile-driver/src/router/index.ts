@@ -7,7 +7,7 @@ const routes = [
     redirect: '/login'
   },
 
-  // ─── Auth Flow ──────────────────────────────────────
+  // ─── Auth Flow ───────────────────────────────────────
   {
     path: '/login',
     name: 'Login',
@@ -15,7 +15,7 @@ const routes = [
     meta: { requiresAuth: false }
   },
 
-  // ─── Driver Requirements Check ───────────────────────
+  // ─── Driver Requirements / Signup ────────────────────
   {
     path: '/signup',
     name: 'DriverRequirements',
@@ -73,13 +73,103 @@ const routes = [
     meta: { requiresAuth: false }
   },
 
-  // ─── Main App ────────────────────────────────────────
+  // ─── Phase 2 - Core Driver Pages (DONE) ──────────────
   {
     path: '/home',
     name: 'Home',
     component: () => import('@/views/HomePage.vue'),
     meta: { requiresAuth: true }
   },
+  {
+    path: '/orders',
+    name: 'Orders',
+    component: () => import('@/views/AvailableOrdersPage.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/active-delivery',
+    name: 'ActiveDelivery',
+    component: () => import('@/views/ActiveDeliveryPage.vue'),
+    meta: { requiresAuth: true }
+  },
+
+  // ─── Phase 3 - Earnings & History (uncomment when built)
+  // {
+  //   path: '/earnings',
+  //   name: 'Earnings',
+  //   component: () => import('@/views/EarningsPage.vue'),
+  //   meta: { requiresAuth: true }
+  // },
+  // {
+  //   path: '/history',
+  //   name: 'History',
+  //   component: () => import('@/views/HistoryPage.vue'),
+  //   meta: { requiresAuth: true }
+  // },
+  // {
+  //   path: '/tip-received',
+  //   name: 'TipReceived',
+  //   component: () => import('@/views/TipReceivedPage.vue'),
+  //   meta: { requiresAuth: true }
+  // },
+
+  // ─── Phase 4 - Profile & Settings (uncomment when built)
+  // {
+  //   path: '/profile',
+  //   name: 'Profile',
+  //   component: () => import('@/views/ProfilePage.vue'),
+  //   meta: { requiresAuth: true }
+  // },
+  // {
+  //   path: '/documents',
+  //   name: 'Documents',
+  //   component: () => import('@/views/DocumentsPage.vue'),
+  //   meta: { requiresAuth: true }
+  // },
+  // {
+  //   path: '/settings',
+  //   name: 'Settings',
+  //   component: () => import('@/views/SettingsPage.vue'),
+  //   meta: { requiresAuth: true }
+  // },
+  // {
+  //   path: '/service-type',
+  //   name: 'ServiceType',
+  //   component: () => import('@/views/ServiceTypePage.vue'),
+  //   meta: { requiresAuth: true }
+  // },
+  // {
+  //   path: '/my-destination',
+  //   name: 'MyDestination',
+  //   component: () => import('@/views/MyDestinationPage.vue'),
+  //   meta: { requiresAuth: true }
+  // },
+
+  // ─── Phase 5 - Messages & Support (uncomment when built)
+  // {
+  //   path: '/messages',
+  //   name: 'Messages',
+  //   component: () => import('@/views/MessagesPage.vue'),
+  //   meta: { requiresAuth: true }
+  // },
+  // {
+  //   path: '/notifications',
+  //   name: 'Notifications',
+  //   component: () => import('@/views/NotificationsPage.vue'),
+  //   meta: { requiresAuth: true }
+  // },
+  // {
+  //   path: '/help',
+  //   name: 'Help',
+  //   component: () => import('@/views/HelpSupportPage.vue'),
+  //   meta: { requiresAuth: true }
+  // },
+  // {
+  //   path: '/about',
+  //   name: 'About',
+  //   component: () => import('@/views/AboutPage.vue'),
+  //   meta: { requiresAuth: true }
+  // },
 ];
 
 const router = createRouter({
@@ -92,8 +182,10 @@ router.beforeEach((to, from, next) => {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
 
   if (to.meta.requiresAuth && !isAuthenticated) {
+    // Not logged in → redirect to login
     next('/login');
   } else if (to.path === '/login' && isAuthenticated) {
+    // Already logged in → redirect to home
     next('/home');
   } else {
     next();
