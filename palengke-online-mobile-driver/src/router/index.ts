@@ -114,36 +114,36 @@ const routes = [
   },
 
   // ─── Phase 4 - Profile & Settings (uncomment when built)
-  // {
-  //   path: '/profile',
-  //   name: 'Profile',
-  //   component: () => import('@/views/ProfilePage.vue'),
-  //   meta: { requiresAuth: true }
-  // },
-  // {
-  //   path: '/documents',
-  //   name: 'Documents',
-  //   component: () => import('@/views/DocumentsPage.vue'),
-  //   meta: { requiresAuth: true }
-  // },
-  // {
-  //   path: '/settings',
-  //   name: 'Settings',
-  //   component: () => import('@/views/SettingsPage.vue'),
-  //   meta: { requiresAuth: true }
-  // },
-  // {
-  //   path: '/service-type',
-  //   name: 'ServiceType',
-  //   component: () => import('@/views/ServiceTypePage.vue'),
-  //   meta: { requiresAuth: true }
-  // },
-  // {
-  //   path: '/my-destination',
-  //   name: 'MyDestination',
-  //   component: () => import('@/views/MyDestinationPage.vue'),
-  //   meta: { requiresAuth: true }
-  // },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: () => import('@/views/ProfilePage.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/documents',
+    name: 'Documents',
+    component: () => import('@/views/DocumentsPage.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/settings',
+    name: 'Settings',
+    component: () => import('@/views/SettingsPage.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/service-type',
+    name: 'ServiceType',
+    component: () => import('@/views/ServiceTypePage.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/my-destination',
+    name: 'MyDestination',
+    component: () => import('@/views/MyDestinationPage.vue'),
+    meta: { requiresAuth: true }
+  },
 
   // ─── Phase 5 - Messages & Support (uncomment when built)
   // {
