@@ -94,24 +94,24 @@ const routes = [
   },
 
   // ─── Phase 3 - Earnings & History (uncomment when built)
-  // {
-  //   path: '/earnings',
-  //   name: 'Earnings',
-  //   component: () => import('@/views/EarningsPage.vue'),
-  //   meta: { requiresAuth: true }
-  // },
-  // {
-  //   path: '/history',
-  //   name: 'History',
-  //   component: () => import('@/views/HistoryPage.vue'),
-  //   meta: { requiresAuth: true }
-  // },
-  // {
-  //   path: '/tip-received',
-  //   name: 'TipReceived',
-  //   component: () => import('@/views/TipReceivedPage.vue'),
-  //   meta: { requiresAuth: true }
-  // },
+  {
+    path: '/earnings',
+    name: 'Earnings',
+    component: () => import('@/views/EarningsPage.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/history',
+    name: 'History',
+    component: () => import('@/views/HistoryPage.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/tip-received',
+    name: 'TipReceived',
+    component: () => import('@/views/TipReceivedPage.vue'),
+    meta: { requiresAuth: true }
+  },
 
   // ─── Phase 4 - Profile & Settings (uncomment when built)
   // {
