@@ -73,7 +73,7 @@
             <div class="hero-stat-divider"></div>
             <div class="hero-stat">
               <span class="hero-stat-value">{{ currentStats.onlineHours }}h</span>
-              <span class="hero-stat-label">Online</span>
+              <span class="hero-stat-label">Active</span>
             </div>
             <div class="hero-stat-divider"></div>
             <div class="hero-stat">

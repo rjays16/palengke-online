@@ -28,14 +28,14 @@
 
     <ion-content :fullscreen="true" class="orders-content">
 
-      <!-- Offline Warning -->
-      <div class="offline-warning" v-if="!isOnline && selectedTab === 'available'">
+      <!-- Inactive Warning -->
+      <div class="offline-warning" v-if="!isActive && selectedTab === 'available'">
         <ion-icon :icon="powerOutline"></ion-icon>
         <div>
-          <strong>You're Offline</strong>
-          <p>Go online to see available orders</p>
+          <strong>You're Inactive</strong>
+          <p>Go active to see available orders</p>
         </div>
-        <ion-button size="small" color="success" @click="goOnline">Go Online</ion-button>
+        <ion-button size="small" color="success" @click="goActive">Go Active</ion-button>
       </div>
 
       <!-- Empty State -->
@@ -207,7 +207,7 @@ import {
 const router = useRouter();
 
 const selectedTab = ref('available');
-const isOnline = ref(true);
+const isActive = ref(true);
 
 // Mock Orders Data
 const orders = ref([
@@ -291,13 +291,13 @@ const activeCount = computed(() => orders.value.filter(o => o.status === 'active
 const completedCount = computed(() => orders.value.filter(o => o.status === 'completed').length);
 
 const emptyTitle = computed(() => {
-  if (selectedTab.value === 'available') return isOnline.value ? 'No Available Orders' : "You're Offline";
+  if (selectedTab.value === 'available') return isActive.value ? 'No Available Orders' : "You're Inactive";
   if (selectedTab.value === 'active') return 'No Active Orders';
   return 'No Completed Orders';
 });
 
 const emptyMessage = computed(() => {
-  if (selectedTab.value === 'available') return isOnline.value ? 'New orders will appear here' : 'Go online to receive orders';
+  if (selectedTab.value === 'available') return isActive.value ? 'New orders will appear here' : 'Go active to receive orders';
   if (selectedTab.value === 'active') return 'Accept an order to start delivering';
   return 'Your completed deliveries will appear here';
 });
@@ -365,10 +365,10 @@ const declineOrder = async (order) => {
 
 const viewActiveDelivery = (order) => { router.push('/active-delivery'); };
 
-const goOnline = async () => {
-  isOnline.value = true;
+const goActive = async () => {
+  isActive.value = true;
   const toast = await toastController.create({
-    message: 'You are now online!',
+    message: 'You are now active!',
     duration: 2000,
     color: 'success',
     position: 'top'
@@ -397,7 +397,7 @@ const goToProfile = () => router.push('/profile');
 <style scoped>
 .orders-content { --background: #f8f9fa; }
 
-/* Offline Warning */
+/* Inactive Warning */
 .offline-warning {
   display: flex; align-items: center; gap: 12px;
   background: #FFF3E0; padding: 16px 20px;

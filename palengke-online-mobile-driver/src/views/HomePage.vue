@@ -18,7 +18,7 @@
     <ion-content :fullscreen="true" class="dashboard-content">
       <div class="dashboard-container">
 
-        <!-- Welcome + Online/Offline Section -->
+        <!-- Welcome + Active/Inactive Section -->
         <div class="welcome-section">
           <div class="welcome-header">
             <div>
@@ -33,18 +33,18 @@
             <img src="/assets/images/palengke-driver.png" alt="Driver" class="welcome-avatar">
           </div>
 
-          <!-- Online/Offline Toggle -->
-          <div class="online-toggle-card" :class="{ online: isOnline, offline: !isOnline }">
+          <!-- Active/Inactive Toggle -->
+          <div class="online-toggle-card" :class="{ online: isActive, offline: !isActive }">
             <div class="toggle-info">
-              <div class="toggle-status-dot" :class="{ online: isOnline }"></div>
+              <div class="toggle-status-dot" :class="{ online: isActive }"></div>
               <div>
-                <p class="toggle-status-text">{{ isOnline ? "You're Online" : "You're Offline" }}</p>
-                <p class="toggle-status-sub">{{ isOnline ? 'Finding orders near you...' : 'Go online to receive orders' }}</p>
+                <p class="toggle-status-text">{{ isActive ? "You're Active" : "You're Inactive" }}</p>
+                <p class="toggle-status-sub">{{ isActive ? 'Finding orders near you...' : 'Go active to receive orders' }}</p>
               </div>
             </div>
-            <button class="toggle-btn" :class="{ online: isOnline }" @click="toggleOnlineStatus">
+            <button class="toggle-btn" :class="{ online: isActive }" @click="toggleActiveStatus">
               <ion-icon :icon="powerOutline"></ion-icon>
-              <span>{{ isOnline ? 'Go Offline' : 'Go Online' }}</span>
+              <span>{{ isActive ? 'Go Inactive' : 'Go Active' }}</span>
             </button>
           </div>
         </div>
@@ -76,8 +76,8 @@
               <ion-icon :icon="timeOutline"></ion-icon>
             </div>
             <div class="stat-content">
-              <div class="stat-value">{{ onlineHours }}h</div>
-              <div class="stat-label">Online Hours</div>
+              <div class="stat-value">{{ activeHours }}h</div>
+              <div class="stat-label">Active Hours</div>
             </div>
           </div>
 
@@ -207,8 +207,8 @@
           <div class="empty-state" v-if="recentDeliveries.length === 0">
             <ion-icon :icon="bicycleOutline" class="empty-icon"></ion-icon>
             <p>No deliveries yet</p>
-            <ion-button size="small" @click="toggleOnlineStatus" v-if="!isOnline">
-              Go Online to Start
+            <ion-button size="small" @click="toggleActiveStatus" v-if="!isActive">
+              Go Active to Start
             </ion-button>
           </div>
         </div>
@@ -270,13 +270,13 @@ const notificationCount = ref(2);
 const unreadMessages = ref(3);
 const availableOrders = ref(4);
 
-// Online Status
-const isOnline = ref(false);
+// Active Status
+const isActive = ref(false);
 
 // Stats
 const todayEarnings = ref(850);
 const todayTrips = ref(5);
-const onlineHours = ref(3.5);
+const activeHours = ref(3.5);
 const weekEarnings = ref(4250);
 
 // Active Delivery (null if no active delivery)
@@ -319,22 +319,22 @@ const recentDeliveries = ref([
   }
 ]);
 
-// Toggle Online/Offline
-const toggleOnlineStatus = async () => {
-  if (isOnline.value) {
-    // Going offline - confirm
+// Toggle Active/Inactive
+const toggleActiveStatus = async () => {
+  if (isActive.value) {
+    // Going inactive - confirm
     const alert = await alertController.create({
-      header: 'Go Offline?',
+      header: 'Go Inactive?',
       message: 'You will stop receiving new orders.',
       buttons: [
         { text: 'Cancel', role: 'cancel' },
         {
-          text: 'Go Offline',
+          text: 'Go Inactive',
           role: 'destructive',
           handler: async () => {
-            isOnline.value = false;
+            isActive.value = false;
             const toast = await toastController.create({
-              message: 'You are now offline',
+              message: 'You are now inactive',
               duration: 2000,
               color: 'dark',
               position: 'top'
@@ -346,10 +346,10 @@ const toggleOnlineStatus = async () => {
     });
     await alert.present();
   } else {
-    // Going online
-    isOnline.value = true;
+    // Going active
+    isActive.value = true;
     const toast = await toastController.create({
-      message: 'You are now online! Finding orders...',
+      message: 'You are now active! Finding orders...',
       duration: 2500,
       color: 'success',
       position: 'top'
@@ -469,7 +469,7 @@ ion-header ion-toolbar ion-buttons ion-button {
 
 .welcome-avatar { width: 90px; height: auto; }
 
-/* Online/Offline Toggle */
+/* Active/Inactive Toggle */
 .online-toggle-card {
   background: rgba(0,0,0,0.2);
   border-radius: 16px;
