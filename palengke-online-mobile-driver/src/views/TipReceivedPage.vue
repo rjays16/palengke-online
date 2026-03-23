@@ -20,7 +20,7 @@
           <div class="tip-icon-wrapper">
             <div class="tip-icon-outer">
               <div class="tip-icon-inner">
-                <span class="tip-emoji">💰</span>
+                <font-awesome-icon :icon="['fas', 'money-bill']" class="tip-emoji" />
               </div>
             </div>
             <!-- Pulse rings -->
@@ -241,7 +241,7 @@ onMounted(() => {
   display: flex; align-items: center; justify-content: center;
 }
 
-.tip-emoji { font-size: 44px; }
+.tip-emoji { font-size: 44px; color: #4CAF50; }
 
 @keyframes bounceIn {
   0% { transform: scale(0); opacity: 0; }

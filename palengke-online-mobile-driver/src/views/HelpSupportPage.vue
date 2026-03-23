@@ -216,7 +216,7 @@ const onSearch = () => { selectedTopic.value = 'all'; };
 
 const chatSupport = async () => {
   const toast = await toastController.create({
-    message: '💬 Connecting to live chat...', duration: 2000, color: 'primary', position: 'top'
+    message: 'Connecting to live chat...', duration: 2000, color: 'primary', position: 'top'
   });
   await toast.present();
 };
@@ -224,7 +224,7 @@ const chatSupport = async () => {
 const callSupport = async () => {
   const alert = await alertController.create({
     header: 'Call Support',
-    message: 'Palengke Online Driver Support\n📞 1800-PALENGKE\nAvailable 24/7',
+    message: 'Palengke Online Driver Support\n1800-PALENGKE\nAvailable 24/7',
     buttons: [
       { text: 'Cancel', role: 'cancel' },
       { text: 'Call Now', handler: () => { window.location.href = 'tel:1800-PALENGKE'; } }
@@ -255,7 +255,7 @@ const reportProblem = async () => {
       { text: 'Cancel', role: 'cancel' },
       { text: 'Submit', handler: async (data) => {
         if (data.issue) {
-          const toast = await toastController.create({ message: '✅ Report submitted! We\'ll get back to you within 24 hours.', duration: 3000, color: 'success', position: 'top' });
+          const toast = await toastController.create({ message: 'Report submitted! We\'ll get back to you within 24 hours.', duration: 3000, color: 'success', position: 'top' });
           await toast.present();
         }
       }}
@@ -276,11 +276,11 @@ const openLink = async (type) => {
 
 const rateApp = async () => {
   const alert = await alertController.create({
-    header: 'Rate Our App ⭐',
+    header: 'Rate Our App',
     message: 'Thank you for using Palengke Online Driver! Your feedback helps us improve.',
     buttons: [
       { text: 'Maybe Later', role: 'cancel' },
-      { text: 'Rate Now ⭐', handler: () => {} }
+      { text: 'Rate Now', handler: () => {} }
     ]
   });
   await alert.present();

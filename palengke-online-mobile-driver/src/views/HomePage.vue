@@ -198,7 +198,7 @@
               <div class="delivery-time">{{ delivery.time }}</div>
               <div class="delivery-earn">
                 <span class="earn-amount">₱{{ delivery.amount.toLocaleString() }}</span>
-                <span class="tip-badge" v-if="delivery.tipped">💰 Tipped</span>
+                <span class="tip-badge" v-if="delivery.tipped"><font-awesome-icon :icon="['fas', 'money-bill']" /> Tipped</span>
               </div>
             </div>
           </div>
@@ -334,7 +334,7 @@ const toggleOnlineStatus = async () => {
           handler: async () => {
             isOnline.value = false;
             const toast = await toastController.create({
-              message: '🔴 You are now offline',
+              message: 'You are now offline',
               duration: 2000,
               color: 'dark',
               position: 'top'
@@ -349,7 +349,7 @@ const toggleOnlineStatus = async () => {
     // Going online
     isOnline.value = true;
     const toast = await toastController.create({
-      message: '🟢 You are now online! Finding orders...',
+      message: 'You are now online! Finding orders...',
       duration: 2500,
       color: 'success',
       position: 'top'

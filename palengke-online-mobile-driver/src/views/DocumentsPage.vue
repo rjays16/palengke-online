@@ -86,7 +86,7 @@ const documents = ref([
 const viewDocument = async (doc) => {
   const alert = await alertController.create({
     header: doc.name,
-    message: `Status: ${doc.status === 'verified' ? '✅ Verified' : '⏳ Pending'}\n${doc.expiry ? `Expires: ${doc.expiry}` : 'No expiry date'}`,
+    message: `Status: ${doc.status === 'verified' ? 'Verified' : 'Pending'}\n${doc.expiry ? `Expires: ${doc.expiry}` : 'No expiry date'}`,
     buttons: [{ text: 'Update Document', handler: () => {} }, { text: 'Close', role: 'cancel' }]
   });
   await alert.present();

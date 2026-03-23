@@ -63,7 +63,7 @@
             </div>
             <div class="order-badges">
               <span class="payment-badge" :class="order.paymentMethod">
-                {{ order.paymentMethod === 'cash' ? '💵 Cash' : '📱 GCash' }}
+                {{ order.paymentMethod === 'cash' ? 'Cash' : 'GCash' }}
               </span>
               <span class="status-badge" :class="order.status">
                 {{ getStatusLabel(order.status) }}
@@ -155,7 +155,7 @@
           <div class="completed-info" v-if="order.status === 'completed'">
             <ion-icon :icon="checkmarkCircleOutline" class="done-icon"></ion-icon>
             <span>Delivered {{ order.completedTime }}</span>
-            <span class="tip-tag" v-if="order.tipped">💰 Tipped</span>
+            <span class="tip-tag" v-if="order.tipped"><font-awesome-icon :icon="['fas', 'money-bill']" /> Tipped</span>
           </div>
 
         </div>
@@ -323,7 +323,7 @@ const acceptOrder = async (order) => {
         handler: async () => {
           order.status = 'active';
           const toast = await toastController.create({
-            message: '✅ Order accepted! Head to pickup location.',
+            message: 'Order accepted! Head to pickup location.',
             duration: 2500,
             color: 'success',
             position: 'top'
@@ -368,7 +368,7 @@ const viewActiveDelivery = (order) => { router.push('/active-delivery'); };
 const goOnline = async () => {
   isOnline.value = true;
   const toast = await toastController.create({
-    message: '🟢 You are now online!',
+    message: 'You are now online!',
     duration: 2000,
     color: 'success',
     position: 'top'

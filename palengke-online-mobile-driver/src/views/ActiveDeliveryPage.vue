@@ -235,24 +235,24 @@ const initMap = () => {
     attribution: '© OpenStreetMap contributors', maxZoom: 19
   }).addTo(map);
 
-  // Seller marker (green)
+  const sellerIconHtml = '<div style="background:#4CAF50;color:white;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:3px solid white;box-shadow:0 3px 10px rgba(0,0,0,0.3);"><i class="fas fa-store"></i></div>';
   const sellerIcon = L.divIcon({
     className: 'custom-marker',
-    html: `<div style="background:#4CAF50;color:white;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;border:3px solid white;box-shadow:0 3px 10px rgba(0,0,0,0.3);">🏪</div>`,
+    html: sellerIconHtml,
     iconSize: [44, 44], iconAnchor: [22, 22]
   });
 
-  // Customer marker (red)
+  const customerIconHtml = '<div style="background:#f44336;color:white;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:3px solid white;box-shadow:0 3px 10px rgba(0,0,0,0.3);"><i class="fas fa-home"></i></div>';
   const customerIcon = L.divIcon({
     className: 'custom-marker',
-    html: `<div style="background:#f44336;color:white;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;border:3px solid white;box-shadow:0 3px 10px rgba(0,0,0,0.3);">🏠</div>`,
+    html: customerIconHtml,
     iconSize: [44, 44], iconAnchor: [22, 22]
   });
 
-  // Driver marker (blue)
+  const driverIconHtml = '<div style="background:#2196F3;color:white;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;border:3px solid white;box-shadow:0 3px 10px rgba(0,0,0,0.3);"><i class="fas fa-motorcycle"></i></div>';
   const driverIcon = L.divIcon({
     className: 'custom-marker',
-    html: `<div style="background:#2196F3;color:white;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;border:3px solid white;box-shadow:0 3px 10px rgba(0,0,0,0.3);">🏍️</div>`,
+    html: driverIconHtml,
     iconSize: [48, 48], iconAnchor: [24, 24]
   });
 
@@ -300,7 +300,7 @@ const confirmPickup = async () => {
           etaTime.value = '8 min';
           etaDistance.value = '1.5 km';
           const toast = await toastController.create({
-            message: '🚀 Order picked up! Now deliver to customer.',
+            message: 'Order picked up! Now deliver to customer.',
             duration: 2500, color: 'success', position: 'top'
           });
           await toast.present();
@@ -317,7 +317,7 @@ const confirmArrived = async () => {
   etaDistance.value = '0 m';
   if (driverMarker) driverMarker.setLatLng(customerLocation);
   const toast = await toastController.create({
-    message: '📍 You have arrived! Confirm delivery with customer.',
+    message: 'You have arrived! Confirm delivery with customer.',
     duration: 2500, color: 'primary', position: 'top'
   });
   await toast.present();
@@ -334,7 +334,7 @@ const confirmDelivery = async () => {
         handler: async () => {
           // Show success and navigate back
           const toast = await toastController.create({
-            message: `✅ Delivery complete! You earned ₱${orderData.value.driverEarnings}`,
+            message: `Delivery complete! You earned ₱${orderData.value.driverEarnings}`,
             duration: 3000, color: 'success', position: 'top'
           });
           await toast.present();

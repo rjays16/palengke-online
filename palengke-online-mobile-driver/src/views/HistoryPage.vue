@@ -119,10 +119,10 @@
                   {{ job.paymentMethod === 'cash' ? 'Cash' : 'GCash' }}
                 </span>
                 <span class="tipped-tag" v-if="job.tipped">
-                  💰 Tipped
+                  <font-awesome-icon :icon="['fas', 'money-bill']" /> Tipped
                 </span>
                 <span class="bonus-tag" v-if="job.bonus > 0">
-                  ⚡ Bonus
+                  <font-awesome-icon :icon="['fas', 'bolt']" /> Bonus
                 </span>
               </div>
             </div>
@@ -268,7 +268,7 @@ const selectDate = (date) => { selectedDate.value = date; };
 const viewJobDetails = async (job) => {
   const alert = await alertController.create({
     header: `Order Details`,
-    message: `From: ${job.sellerName}\nTo: ${job.deliveryAddress}\nAmount: ₱${job.amount.toFixed(2)}\nPayment: ${job.paymentMethod === 'cash' ? 'Cash' : 'GCash'}${job.tipped ? '\n💰 Customer gave a tip!' : ''}`,
+    message: `From: ${job.sellerName}\nTo: ${job.deliveryAddress}\nAmount: ₱${job.amount.toFixed(2)}\nPayment: ${job.paymentMethod === 'cash' ? 'Cash' : 'GCash'}${job.tipped ? '\nCustomer gave a tip!' : ''}`,
     buttons: ['Close']
   });
   await alert.present();

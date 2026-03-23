@@ -127,10 +127,10 @@ const selectedTab = ref('notifications');
 const notifications = ref([
   { id: 1, type: 'order', title: 'New Order Available!', message: 'Order #1234 from Juan\'s Fresh Market - ₱85 earnings', time: '2 mins ago', read: false },
   { id: 2, type: 'payment', title: 'Payment Received', message: 'You received ₱250 for Order #1233', time: '1 hour ago', read: false },
-  { id: 3, type: 'tip', title: '💰 You Got a Tip!', message: 'Maria Santos gave you a ₱50 tip. Thank you!', time: '2 hours ago', read: true },
+  { id: 3, type: 'tip', title: 'You Got a Tip!', message: 'Maria Santos gave you a ₱50 tip. Thank you!', time: '2 hours ago', read: true },
   { id: 4, type: 'warning', title: 'Low Acceptance Rate', message: 'Your acceptance rate dropped to 75%. Try to accept more orders.', time: 'Yesterday', read: true },
   { id: 5, type: 'info', title: 'Weekly Earnings Report', message: 'You earned ₱11,196 this week! Great job!', time: '2 days ago', read: true },
-  { id: 6, type: 'achievement', title: '🏆 New Badge Earned!', message: 'You earned the "Fast Delivery" badge!', time: '3 days ago', read: true },
+  { id: 6, type: 'achievement', title: 'New Badge Earned!', message: 'You earned the "Fast Delivery" badge!', time: '3 days ago', read: true },
 ]);
 
 const chats = ref([
