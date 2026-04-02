@@ -285,7 +285,7 @@ const contactSupport = async () => {
 
 <style scoped>
 .success-content {
-  --background: linear-gradient(135deg, #f8f9fa 0%, #e8f5e9 100%);
+  --background: var(--color-bg-primary);
 }
 
 .success-container {
@@ -312,18 +312,18 @@ const contactSupport = async () => {
 }
 
 .icon-circle.verified {
-  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+  background: linear-gradient(135deg, var(--color-verified-bg) 0%, var(--color-primary) 100%);
   box-shadow: 0 8px 24px rgba(76, 175, 80, 0.3);
 }
 
 .icon-circle.basic {
-  background: linear-gradient(135deg, #FF9800 0%, #FFA726 100%);
+  background: linear-gradient(135deg, var(--color-unverified-bg) 0%, var(--color-warning) 100%);
   box-shadow: 0 8px 24px rgba(255, 152, 0, 0.3);
 }
 
 .icon-circle ion-icon {
   font-size: 64px;
-  color: white;
+  color: var(--color-text-inverse);
 }
 
 @keyframes scaleIn {
@@ -350,13 +350,13 @@ const contactSupport = async () => {
 .title {
   font-size: 32px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin: 0 0 8px 0;
 }
 
 .subtitle {
   font-size: 16px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
   line-height: 1.5;
 }
@@ -374,13 +374,13 @@ const contactSupport = async () => {
 }
 
 .status-badge.verified {
-  background: #4CAF50;
-  color: white;
+  background: var(--color-verified-bg);
+  color: var(--color-text-inverse);
 }
 
 .status-badge.basic {
-  background: #FF9800;
-  color: white;
+  background: var(--color-unverified-bg);
+  color: var(--color-text-inverse);
 }
 
 .status-badge ion-icon {
@@ -391,20 +391,20 @@ const contactSupport = async () => {
 .summary-card {
   width: 100%;
   max-width: 500px;
-  background: white;
+  background: var(--color-card-bg);
   border-radius: 20px;
   padding: 24px;
   margin-bottom: 24px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px var(--color-card-shadow);
 }
 
 .summary-card h3 {
   font-size: 18px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin: 0 0 20px 0;
   padding-bottom: 12px;
-  border-bottom: 2px solid #f0f0f0;
+  border-bottom: 2px solid var(--color-card-border);
 }
 
 .summary-item {
@@ -412,7 +412,7 @@ const contactSupport = async () => {
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid #f5f5f5;
+  border-bottom: 1px solid var(--color-card-border);
 }
 
 .summary-item:last-child {
@@ -421,41 +421,41 @@ const contactSupport = async () => {
 
 .summary-item .label {
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-secondary);
   font-weight: 500;
 }
 
 .summary-item .value {
   font-size: 14px;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   font-weight: 600;
   text-align: right;
 }
 
 .summary-item .value.verified {
-  color: #4CAF50;
+  color: var(--color-verified-bg);
 }
 
 .summary-item .value.unverified {
-  color: #FF9800;
+  color: var(--color-unverified-bg);
 }
 
 /* Unlocked Features (Verified) */
 .unlocked-features {
   width: 100%;
   max-width: 500px;
-  background: white;
+  background: var(--color-card-bg);
   border-radius: 20px;
   padding: 24px;
   margin-bottom: 24px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  border: 3px solid #4CAF50;
+  box-shadow: 0 4px 16px var(--color-card-shadow);
+  border: 3px solid var(--color-verified-bg);
 }
 
 .unlocked-features h3 {
   font-size: 18px;
   font-weight: 700;
-  color: #2E7D32;
+  color: var(--color-success-text);
   margin: 0 0 20px 0;
 }
 
@@ -473,13 +473,13 @@ const contactSupport = async () => {
 
 .feature-item ion-icon {
   font-size: 24px;
-  color: #4CAF50;
+  color: var(--color-verified-bg);
   flex-shrink: 0;
 }
 
 .feature-item span {
   font-size: 13px;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   font-weight: 500;
   line-height: 1.3;
 }
@@ -488,24 +488,24 @@ const contactSupport = async () => {
 .missing-features {
   width: 100%;
   max-width: 500px;
-  background: white;
+  background: var(--color-card-bg);
   border-radius: 20px;
   padding: 24px;
   margin-bottom: 24px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  border: 3px solid #FF9800;
+  box-shadow: 0 4px 16px var(--color-card-shadow);
+  border: 3px solid var(--color-unverified-bg);
 }
 
 .missing-features h3 {
   font-size: 18px;
   font-weight: 700;
-  color: #E65100;
+  color: var(--color-warning-text);
   margin: 0 0 12px 0;
 }
 
 .info-text {
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0 0 16px 0;
 }
 
@@ -524,35 +524,35 @@ const contactSupport = async () => {
 
 .feature-item.limited ion-icon {
   font-size: 20px;
-  color: #FF9800;
+  color: var(--color-unverified-bg);
   flex-shrink: 0;
 }
 
 .feature-item.limited span {
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 /* Verify CTA */
 .verify-cta {
   display: flex;
   gap: 12px;
-  background: #FFF3E0;
+  background: var(--color-warning-bg);
   border-radius: 12px;
   padding: 16px;
-  border-left: 4px solid #FF9800;
+  border-left: 4px solid var(--color-warning-border);
 }
 
 .verify-cta ion-icon {
   font-size: 24px;
-  color: #FF9800;
+  color: var(--color-warning-border);
   flex-shrink: 0;
   margin-top: 2px;
 }
 
 .cta-text {
   font-size: 13px;
-  color: #E65100;
+  color: var(--color-warning-text);
   line-height: 1.5;
 }
 
@@ -566,17 +566,17 @@ const contactSupport = async () => {
 .next-steps {
   width: 100%;
   max-width: 500px;
-  background: white;
+  background: var(--color-card-bg);
   border-radius: 20px;
   padding: 24px;
   margin-bottom: 24px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px var(--color-card-shadow);
 }
 
 .next-steps h3 {
   font-size: 18px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin: 0 0 20px 0;
 }
 
@@ -595,8 +595,8 @@ const contactSupport = async () => {
 .step-number {
   width: 32px;
   height: 32px;
-  background: #4CAF50;
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -614,13 +614,13 @@ const contactSupport = async () => {
   display: block;
   font-size: 15px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin-bottom: 4px;
 }
 
 .step-content p {
   font-size: 13px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
@@ -645,8 +645,8 @@ const contactSupport = async () => {
 
 .login-button,
 .dashboard-button {
-  --background: #4CAF50;
-  --background-hover: #45a049;
+  --background: var(--color-primary);
+  --background-hover: var(--color-primary-hover);
   --border-radius: 12px;
   height: 52px;
   font-size: 15px;
@@ -662,12 +662,12 @@ const contactSupport = async () => {
 
 .support-link p {
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
 .support-link a {
-  color: #4CAF50;
+  color: var(--color-link);
   text-decoration: none;
   font-weight: 600;
 }

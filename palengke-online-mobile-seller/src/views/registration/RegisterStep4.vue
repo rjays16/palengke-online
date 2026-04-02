@@ -229,7 +229,7 @@ const selectOption = async (option) => {
 
 <style scoped>
 .step-content {
-  --background: #f8f9fa;
+  --background: var(--color-bg-primary);
 }
 
 .step-container {
@@ -249,22 +249,22 @@ const selectOption = async (option) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
+  background: var(--color-card-bg);
   border-radius: 12px;
   cursor: pointer;
   z-index: 10;
   transition: background 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px var(--color-card-shadow);
 }
 
 .back-button:active {
   transform: scale(0.95);
-  background: #f5f5f5;
+  background: var(--color-bg-tertiary);
 }
 
 .back-button ion-icon {
   font-size: 24px;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
 }
 
 /* Progress Section */
@@ -276,7 +276,7 @@ const selectOption = async (option) => {
 .progress-bar {
   width: 100%;
   height: 6px;
-  background: #e0e0e0;
+  background: var(--color-border);
   border-radius: 3px;
   overflow: hidden;
   margin-bottom: 8px;
@@ -284,14 +284,14 @@ const selectOption = async (option) => {
 
 .progress-fill {
   height: 100%;
-  background: #4CAF50;
+  background: var(--color-primary);
   transition: width 0.3s ease;
 }
 
 .progress-text {
   text-align: center;
   font-size: 13px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
   font-weight: 600;
 }
@@ -305,13 +305,13 @@ const selectOption = async (option) => {
 .title {
   font-size: 28px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin: 0 0 8px 0;
 }
 
 .subtitle {
   font-size: 15px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
@@ -326,43 +326,43 @@ const selectOption = async (option) => {
 .info-message {
   display: flex;
   gap: 16px;
-  background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+  background: var(--color-success-bg);
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 24px;
-  border: 2px solid #4CAF50;
+  border: 2px solid var(--color-success-border);
 }
 
 .info-message > ion-icon {
   font-size: 32px;
-  color: #4CAF50;
+  color: var(--color-success-border);
   flex-shrink: 0;
 }
 
 .info-content h3 {
   font-size: 16px;
   font-weight: 700;
-  color: #2E7D32;
+  color: var(--color-success-text);
   margin: 0 0 8px 0;
 }
 
 .info-content p {
   font-size: 14px;
-  color: #2E7D32;
+  color: var(--color-success-text);
   margin: 0;
   line-height: 1.5;
 }
 
 /* Option Cards */
 .option-card {
-  background: white;
+  background: var(--color-card-bg);
   border-radius: 20px;
   padding: 24px;
   margin-bottom: 20px;
   cursor: pointer;
   transition: all 0.3s;
   border: 3px solid transparent;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px var(--color-card-shadow);
 }
 
 .option-card:active {
@@ -370,12 +370,12 @@ const selectOption = async (option) => {
 }
 
 .option-card.verify {
-  border-color: #4CAF50;
-  background: linear-gradient(135deg, #ffffff 0%, #f1f8f4 100%);
+  border-color: var(--color-primary);
+  background: var(--color-success-bg);
 }
 
 .option-card.skip {
-  border-color: #e0e0e0;
+  border-color: var(--color-border);
 }
 
 .option-card.verify:hover {
@@ -384,7 +384,7 @@ const selectOption = async (option) => {
 }
 
 .option-card.skip:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px var(--color-card-shadow);
   transform: translateY(-2px);
 }
 
@@ -407,16 +407,16 @@ const selectOption = async (option) => {
 }
 
 .option-icon.verified {
-  background: #4CAF50;
+  background: var(--color-primary);
 }
 
 .option-icon.unverified {
-  background: #FF9800;
+  background: var(--color-warning);
 }
 
 .option-icon ion-icon {
   font-size: 32px;
-  color: white;
+  color: var(--color-text-inverse);
 }
 
 .option-title {
@@ -426,7 +426,7 @@ const selectOption = async (option) => {
 .option-title h2 {
   font-size: 20px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin: 0 0 4px 0;
 }
 
@@ -439,14 +439,14 @@ const selectOption = async (option) => {
 }
 
 .badge.recommended {
-  background: #4CAF50;
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
 }
 
 /* Option Description */
 .option-description {
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0 0 20px 0;
   line-height: 1.6;
 }
@@ -467,13 +467,13 @@ const selectOption = async (option) => {
 
 .benefit-item ion-icon {
   font-size: 20px;
-  color: #4CAF50;
+  color: var(--color-primary);
   flex-shrink: 0;
 }
 
 .benefit-item span {
   font-size: 14px;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   font-weight: 500;
 }
 
@@ -496,16 +496,16 @@ const selectOption = async (option) => {
 }
 
 .limitation-item:not(:last-child) ion-icon {
-  color: #f44336;
+  color: var(--color-error);
 }
 
 .limitation-item:last-child ion-icon {
-  color: #2196F3;
+  color: var(--color-info);
 }
 
 .limitation-item span {
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 /* Time Estimate */
@@ -514,19 +514,19 @@ const selectOption = async (option) => {
   align-items: center;
   gap: 8px;
   padding: 12px 16px;
-  background: #E8F5E9;
+  background: var(--color-success-bg);
   border-radius: 12px;
   margin-top: 16px;
 }
 
 .time-estimate ion-icon {
   font-size: 20px;
-  color: #4CAF50;
+  color: var(--color-success-border);
 }
 
 .time-estimate span {
   font-size: 13px;
-  color: #2E7D32;
+  color: var(--color-success-text);
   font-weight: 600;
 }
 
@@ -534,8 +534,8 @@ const selectOption = async (option) => {
 .security-note {
   display: flex;
   gap: 16px;
-  background: #E3F2FD;
-  border-left: 4px solid #2196F3;
+  background: var(--color-info-bg);
+  border-left: 4px solid var(--color-info-border);
   border-radius: 12px;
   padding: 20px;
   margin-top: 24px;
@@ -543,14 +543,14 @@ const selectOption = async (option) => {
 
 .security-note ion-icon {
   font-size: 28px;
-  color: #2196F3;
+  color: var(--color-info-border);
   flex-shrink: 0;
   margin-top: 2px;
 }
 
 .security-text {
   font-size: 13px;
-  color: #1565C0;
+  color: var(--color-info-text);
   line-height: 1.6;
 }
 
@@ -564,26 +564,28 @@ const selectOption = async (option) => {
 :deep(.verification-warning-modal .alert-wrapper) {
   border-radius: 20px;
   max-width: 400px;
+  background: var(--color-modal-bg);
 }
 
 :deep(.verification-warning-modal .alert-message) {
   font-size: 14px;
   line-height: 1.6;
   text-align: left;
-  color: #1a1a1a;
+  color: var(--color-modal-text);
 }
 
 :deep(.skip-confirmation-modal .alert-wrapper) {
   border-radius: 20px;
   max-width: 360px;
+  background: var(--color-modal-bg);
 }
 
 :deep(.alert-button-cancel) {
-  color: #666 !important;
+  color: var(--color-text-secondary) !important;
 }
 
 :deep(.alert-button-confirm) {
-  color: #4CAF50 !important;
+  color: var(--color-primary) !important;
   font-weight: 700 !important;
 }
 

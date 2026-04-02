@@ -219,7 +219,7 @@ const goToSignup = () => {
 <style scoped>
 /* Simple white background */
 .login-content {
-  --background: #ffffff;
+  --background: var(--color-bg-primary);
 }
 
 .login-container {
@@ -252,7 +252,7 @@ const goToSignup = () => {
 .plus-sign {
   font-size: 36px;
   font-weight: 700;
-  color: #000000;
+  color: var(--color-text-primary);
   line-height: 1;
   margin: 0 2px;
 }
@@ -267,14 +267,14 @@ const goToSignup = () => {
 .title {
   font-size: 32px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin: 0 0 8px 0;
   text-align: center;
 }
 
 .subtitle {
   font-size: 16px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0 0 40px 0;
   text-align: center;
 }
@@ -297,28 +297,29 @@ const goToSignup = () => {
   top: 50%;
   transform: translateY(-50%);
   font-size: 20px;
-  color: #4CAF50;
+  color: var(--color-icon-primary);
   z-index: 2;
 }
 
 .custom-input {
   width: 100%;
   padding: 16px 16px 16px 48px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--color-border);
   border-radius: 12px;
   font-size: 16px;
-  background: white;
+  background: var(--color-input-bg);
+  color: var(--color-text-primary);
   transition: border-color 0.2s;
   font-family: inherit;
 }
 
 .custom-input:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: var(--color-border-focus);
 }
 
 .custom-input::placeholder {
-  color: #999;
+  color: var(--color-input-placeholder);
 }
 
 .toggle-password {
@@ -327,7 +328,7 @@ const goToSignup = () => {
   top: 50%;
   transform: translateY(-50%);
   font-size: 20px;
-  color: #999;
+  color: var(--color-icon-tertiary);
   cursor: pointer;
   z-index: 2;
 }
@@ -338,15 +339,15 @@ const goToSignup = () => {
 }
 
 .forgot-password a {
-  color: #4CAF50;
+  color: var(--color-link);
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
 }
 
 .login-button {
-  --background: #4CAF50;
-  --background-hover: #45a049;
+  --background: var(--color-primary);
+  --background-hover: var(--color-primary-hover);
   --border-radius: 12px;
   height: 56px;
   font-size: 16px;
@@ -363,13 +364,13 @@ const goToSignup = () => {
 }
 
 .signup-text {
-  color: #666;
+  color: var(--color-text-secondary);
   font-size: 15px;
   margin: 0;
 }
 
 .signup-text a {
-  color: #4CAF50;
+  color: var(--color-link);
   text-decoration: none;
   font-weight: 600;
   margin-left: 4px;
@@ -436,7 +437,7 @@ const goToSignup = () => {
   text-align: center;
   max-width: 280px;
   padding: 50px 30px;
-  background: white;
+  background: var(--color-modal-bg);
 }
 
 :deep(.loading-modal-simple .alert-head) {
@@ -449,7 +450,7 @@ const goToSignup = () => {
   padding-top: 70px;
   font-size: 16px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--color-modal-text);
 }
 
 :deep(.loading-modal-simple .alert-message::before) {
@@ -460,8 +461,8 @@ const goToSignup = () => {
   margin-left: -25px;
   width: 50px;
   height: 50px;
-  border: 5px solid #f3f3f3;
-  border-top: 5px solid #1877F2;
+  border: 5px solid var(--color-bg-tertiary);
+  border-top: 5px solid var(--color-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -473,5 +474,35 @@ const goToSignup = () => {
 
 :deep(.loading-modal-simple .alert-button-group) {
   display: none;
+}
+
+/* Dark Mode: OTP Confirm Alert */
+:deep(.otp-confirm-alert .alert-wrapper) {
+  background: var(--color-modal-bg);
+}
+
+:deep(.otp-confirm-alert .alert-head) {
+  background: var(--color-modal-bg);
+}
+
+:deep(.otp-confirm-alert .alert-head h2) {
+  color: var(--color-modal-text);
+}
+
+:deep(.otp-confirm-alert .alert-message) {
+  background: var(--color-modal-bg);
+  color: var(--color-text-secondary);
+}
+
+:deep(.otp-confirm-alert .alert-button-group) {
+  background: var(--color-modal-bg);
+}
+
+:deep(.otp-confirm-alert .alert-button) {
+  color: var(--color-primary);
+}
+
+:deep(.otp-confirm-alert .alert-button-cancel) {
+  color: var(--color-text-secondary);
 }
 </style>

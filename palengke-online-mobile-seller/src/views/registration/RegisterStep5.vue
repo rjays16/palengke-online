@@ -303,7 +303,7 @@ const handleNext = async () => {
 
 <style scoped>
 .step-content {
-  --background: #ffffff;
+  --background: var(--color-bg-primary);
 }
 
 .step-container {
@@ -323,7 +323,7 @@ const handleNext = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f5f5;
+  background: var(--color-bg-tertiary);
   border-radius: 12px;
   cursor: pointer;
   z-index: 10;
@@ -332,12 +332,12 @@ const handleNext = async () => {
 
 .back-button:active {
   transform: scale(0.95);
-  background: #e0e0e0;
+  background: var(--color-border);
 }
 
 .back-button ion-icon {
   font-size: 24px;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
 }
 
 /* Progress Section */
@@ -349,7 +349,7 @@ const handleNext = async () => {
 .progress-bar {
   width: 100%;
   height: 6px;
-  background: #e0e0e0;
+  background: var(--color-border);
   border-radius: 3px;
   overflow: hidden;
   margin-bottom: 8px;
@@ -357,14 +357,14 @@ const handleNext = async () => {
 
 .progress-fill {
   height: 100%;
-  background: #4CAF50;
+  background: var(--color-primary);
   transition: width 0.3s ease;
 }
 
 .progress-text {
   text-align: center;
   font-size: 13px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
   font-weight: 600;
 }
@@ -378,13 +378,13 @@ const handleNext = async () => {
 .title {
   font-size: 28px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin: 0 0 8px 0;
 }
 
 .subtitle {
   font-size: 15px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
@@ -404,7 +404,7 @@ const handleNext = async () => {
   display: block;
   font-size: 14px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin-bottom: 8px;
 }
 
@@ -419,7 +419,7 @@ const handleNext = async () => {
   left: 16px;
   top: 16px;
   font-size: 20px;
-  color: #4CAF50;
+  color: var(--color-icon-primary);
   z-index: 2;
 }
 
@@ -427,10 +427,11 @@ const handleNext = async () => {
 .custom-select {
   width: 100%;
   padding: 14px 16px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--color-border);
   border-radius: 12px;
   font-size: 15px;
-  background: white;
+  background: var(--color-input-bg);
+  color: var(--color-text-primary);
   transition: border-color 0.2s;
   font-family: inherit;
   cursor: pointer;
@@ -447,41 +448,41 @@ const handleNext = async () => {
 
 .custom-select:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: var(--color-border-focus);
 }
 
 /* Error State */
 .input-wrapper.error .custom-select {
-  border-color: #f44336;
+  border-color: var(--color-error);
 }
 
 .input-wrapper.error .input-icon {
-  color: #f44336;
+  color: var(--color-error);
 }
 
 /* Helper/Error Text */
 .helper-text {
   display: block;
   font-size: 12px;
-  color: #999;
+  color: var(--color-text-tertiary);
   margin-top: 6px;
 }
 
 .error-message {
   display: block;
   font-size: 12px;
-  color: #f44336;
+  color: var(--color-error);
   margin-top: 6px;
   font-weight: 500;
 }
 
 /* Requirements Card */
 .requirements-card {
-  background: #E8F5E9;
+  background: var(--color-success-bg);
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 20px;
-  border: 2px solid #4CAF50;
+  border: 2px solid var(--color-success-border);
 }
 
 .requirements-header {
@@ -493,13 +494,13 @@ const handleNext = async () => {
 
 .requirements-header ion-icon {
   font-size: 24px;
-  color: #4CAF50;
+  color: var(--color-success-border);
 }
 
 .requirements-header h3 {
   font-size: 16px;
   font-weight: 700;
-  color: #2E7D32;
+  color: var(--color-success-text);
   margin: 0;
 }
 
@@ -518,26 +519,26 @@ const handleNext = async () => {
 
 .requirement-item ion-icon {
   font-size: 20px;
-  color: #4CAF50;
+  color: var(--color-success-border);
   flex-shrink: 0;
 }
 
 .requirement-item span {
   font-size: 14px;
-  color: #2E7D32;
+  color: var(--color-success-text);
   font-weight: 500;
 }
 
 /* What You'll Need */
 .what-need {
-  border-top: 2px solid #C8E6C9;
+  border-top: 2px solid var(--color-success-bg);
   padding-top: 16px;
 }
 
 .what-need h4 {
   font-size: 14px;
   font-weight: 700;
-  color: #2E7D32;
+  color: var(--color-success-text);
   margin: 0 0 12px 0;
 }
 
@@ -555,28 +556,28 @@ const handleNext = async () => {
 
 .need-item ion-icon {
   font-size: 18px;
-  color: #4CAF50;
+  color: var(--color-success-border);
 }
 
 .need-item span {
   font-size: 13px;
-  color: #2E7D32;
+  color: var(--color-success-text);
 }
 
 /* Sample Card */
 .sample-card {
-  background: white;
+  background: var(--color-card-bg);
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border: 2px solid #e0e0e0;
+  box-shadow: 0 2px 8px var(--color-card-shadow);
+  border: 2px solid var(--color-border);
 }
 
 .sample-card h3 {
   font-size: 16px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin: 0 0 16px 0;
 }
 
@@ -602,13 +603,13 @@ const handleNext = async () => {
 }
 
 .sample-placeholder.correct {
-  background: #E8F5E9;
-  border: 2px solid #4CAF50;
+  background: var(--color-success-bg);
+  border: 2px solid var(--color-success-border);
 }
 
 .sample-placeholder.incorrect {
-  background: #FFEBEE;
-  border: 2px solid #f44336;
+  background: var(--color-error-bg);
+  border: 2px solid var(--color-error-border);
 }
 
 .sample-placeholder ion-icon {
@@ -616,11 +617,11 @@ const handleNext = async () => {
 }
 
 .sample-placeholder.correct ion-icon {
-  color: #4CAF50;
+  color: var(--color-success-border);
 }
 
 .sample-placeholder.incorrect ion-icon {
-  color: #f44336;
+  color: var(--color-error-border);
 }
 
 .sample-placeholder span {
@@ -629,16 +630,16 @@ const handleNext = async () => {
 }
 
 .sample-placeholder.correct span {
-  color: #2E7D32;
+  color: var(--color-success-text);
 }
 
 .sample-placeholder.incorrect span {
-  color: #c62828;
+  color: var(--color-error-text);
 }
 
 .sample-item p {
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
   line-height: 1.4;
 }
@@ -647,8 +648,8 @@ const handleNext = async () => {
 .privacy-notice {
   display: flex;
   gap: 12px;
-  background: #E3F2FD;
-  border-left: 4px solid #2196F3;
+  background: var(--color-info-bg);
+  border-left: 4px solid var(--color-info-border);
   padding: 16px;
   border-radius: 8px;
   margin-bottom: 24px;
@@ -656,14 +657,14 @@ const handleNext = async () => {
 
 .privacy-notice ion-icon {
   font-size: 24px;
-  color: #2196F3;
+  color: var(--color-info-border);
   flex-shrink: 0;
   margin-top: 2px;
 }
 
 .privacy-text {
   font-size: 13px;
-  color: #1565C0;
+  color: var(--color-info-text);
   line-height: 1.5;
 }
 
@@ -689,8 +690,8 @@ const handleNext = async () => {
 }
 
 .next-button {
-  --background: #4CAF50;
-  --background-hover: #45a049;
+  --background: var(--color-primary);
+  --background-hover: var(--color-primary-hover);
   --border-radius: 12px;
   height: 52px;
   font-size: 15px;
@@ -699,22 +700,23 @@ const handleNext = async () => {
 }
 
 .next-button:disabled {
-  --background: #e0e0e0;
-  --color: #999;
+  --background: var(--color-border);
+  --color: var(--color-text-tertiary);
 }
 
 /* Alert Modals */
 :deep(.camera-warning-modal .alert-wrapper) {
   border-radius: 20px;
   max-width: 380px;
+  background: var(--color-modal-bg);
 }
 
 :deep(.alert-button-cancel) {
-  color: #666 !important;
+  color: var(--color-text-secondary) !important;
 }
 
 :deep(.alert-button-confirm) {
-  color: #4CAF50 !important;
+  color: var(--color-primary) !important;
   font-weight: 700 !important;
 }
 

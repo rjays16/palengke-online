@@ -385,7 +385,7 @@ const handleNext = () => {
 
 <style scoped>
 .step-content {
-  --background: #ffffff;
+  --background: var(--color-bg-primary);
 }
 
 .step-container {
@@ -405,7 +405,7 @@ const handleNext = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f5f5;
+  background: var(--color-bg-tertiary);
   border-radius: 12px;
   cursor: pointer;
   z-index: 10;
@@ -414,12 +414,12 @@ const handleNext = () => {
 
 .back-button:active {
   transform: scale(0.95);
-  background: #e0e0e0;
+  background: var(--color-border);
 }
 
 .back-button ion-icon {
   font-size: 24px;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
 }
 
 /* Progress Section */
@@ -431,7 +431,7 @@ const handleNext = () => {
 .progress-bar {
   width: 100%;
   height: 6px;
-  background: #e0e0e0;
+  background: var(--color-border);
   border-radius: 3px;
   overflow: hidden;
   margin-bottom: 8px;
@@ -439,14 +439,14 @@ const handleNext = () => {
 
 .progress-fill {
   height: 100%;
-  background: #4CAF50;
+  background: var(--color-primary);
   transition: width 0.3s ease;
 }
 
 .progress-text {
   text-align: center;
   font-size: 13px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
   font-weight: 600;
 }
@@ -460,13 +460,13 @@ const handleNext = () => {
 .title {
   font-size: 28px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin: 0 0 8px 0;
 }
 
 .subtitle {
   font-size: 15px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
@@ -483,8 +483,8 @@ const handleNext = () => {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #e0e0e0;
-  color: #999;
+  background: var(--color-border);
+  color: var(--color-text-tertiary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -495,14 +495,14 @@ const handleNext = () => {
 }
 
 .step-dot.active {
-  background: #4CAF50;
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
   transform: scale(1.1);
 }
 
 .step-dot.done {
-  background: #4CAF50;
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
 }
 
 .step-dot ion-icon {
@@ -512,12 +512,12 @@ const handleNext = () => {
 .step-line {
   width: 80px;
   height: 4px;
-  background: #e0e0e0;
+  background: var(--color-border);
   transition: background 0.3s;
 }
 
 .step-line.active {
-  background: #4CAF50;
+  background: var(--color-primary);
 }
 
 .step-labels {
@@ -531,22 +531,22 @@ const handleNext = () => {
 
 .step-labels span {
   font-size: 13px;
-  color: #999;
+  color: var(--color-text-tertiary);
   font-weight: 600;
   transition: color 0.3s;
 }
 
 .step-labels span.active {
-  color: #4CAF50;
+  color: var(--color-primary);
 }
 
 /* Instructions Card */
 .instructions-card {
-  background: #E8F5E9;
+  background: var(--color-success-bg);
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 20px;
-  border: 2px solid #4CAF50;
+  border: 2px solid var(--color-success-border);
 }
 
 .instruction-header {
@@ -558,13 +558,13 @@ const handleNext = () => {
 
 .instruction-header ion-icon {
   font-size: 24px;
-  color: #4CAF50;
+  color: var(--color-success-border);
 }
 
 .instruction-header h3 {
   font-size: 16px;
   font-weight: 700;
-  color: #2E7D32;
+  color: var(--color-success-text);
   margin: 0;
 }
 
@@ -576,7 +576,7 @@ const handleNext = () => {
 
 .instruction-list li {
   font-size: 14px;
-  color: #2E7D32;
+  color: var(--color-success-text);
   padding-left: 24px;
   margin-bottom: 8px;
   position: relative;
@@ -590,7 +590,7 @@ const handleNext = () => {
   content: '\f00c';
   position: absolute;
   left: 0;
-  color: #4CAF50;
+  color: var(--color-success-border);
   font-weight: 700;
   font-family: 'Font Awesome 6 Free';
 }
@@ -608,8 +608,8 @@ const handleNext = () => {
   aspect-ratio: 1.6;
   border-radius: 20px;
   overflow: hidden;
-  background: #f5f5f5;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  background: var(--color-bg-tertiary);
+  box-shadow: 0 4px 16px var(--color-card-shadow);
 }
 
 .camera-placeholder {
@@ -620,24 +620,24 @@ const handleNext = () => {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  background: var(--color-bg-tertiary);
 }
 
 .camera-placeholder ion-icon {
   font-size: 64px;
-  color: #999;
+  color: var(--color-text-tertiary);
 }
 
 .camera-placeholder p {
   font-size: 18px;
   font-weight: 700;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
 .camera-placeholder span {
   font-size: 14px;
-  color: #999;
+  color: var(--color-text-tertiary);
   margin: 0;
 }
 
@@ -661,7 +661,7 @@ const handleNext = () => {
 
 .retake-btn {
   --background: rgba(255, 255, 255, 0.9);
-  --color: #1a1a1a;
+  --color: var(--color-text-primary);
   --border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -681,7 +681,7 @@ const handleNext = () => {
   position: absolute;
   width: 40px;
   height: 40px;
-  border: 3px solid #4CAF50;
+  border: 3px solid var(--color-primary);
 }
 
 .corner.top-left {
@@ -720,8 +720,8 @@ const handleNext = () => {
 .tips-box {
   display: flex;
   gap: 12px;
-  background: #FFF3E0;
-  border-left: 4px solid #FF9800;
+  background: var(--color-warning-bg);
+  border-left: 4px solid var(--color-warning-border);
   padding: 16px;
   border-radius: 8px;
   margin-bottom: 24px;
@@ -729,14 +729,14 @@ const handleNext = () => {
 
 .tips-box ion-icon {
   font-size: 24px;
-  color: #FF9800;
+  color: var(--color-warning-border);
   flex-shrink: 0;
   margin-top: 2px;
 }
 
 .tips-text {
   font-size: 13px;
-  color: #E65100;
+  color: var(--color-warning-text);
   line-height: 1.5;
 }
 
@@ -753,8 +753,8 @@ const handleNext = () => {
 }
 
 .capture-button {
-  --background: #4CAF50;
-  --background-hover: #45a049;
+  --background: var(--color-primary);
+  --background-hover: var(--color-primary-hover);
   --border-radius: 12px;
   height: 56px;
   font-size: 16px;
@@ -781,8 +781,8 @@ const handleNext = () => {
 }
 
 .confirm-button {
-  --background: #4CAF50;
-  --background-hover: #45a049;
+  --background: var(--color-primary);
+  --background-hover: var(--color-primary-hover);
   --border-radius: 12px;
   height: 52px;
   font-size: 15px;
@@ -808,8 +808,8 @@ const handleNext = () => {
 }
 
 .next-button {
-  --background: #4CAF50;
-  --background-hover: #45a049;
+  --background: var(--color-primary);
+  --background-hover: var(--color-primary-hover);
   --border-radius: 12px;
   height: 52px;
   font-size: 15px;

@@ -407,7 +407,7 @@ const submitVerification = async () => {
 
 <style scoped>
 .step-content {
-  --background: #ffffff;
+  --background: var(--color-bg-primary);
 }
 
 .step-container {
@@ -427,7 +427,7 @@ const submitVerification = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f5f5;
+  background: var(--color-bg-tertiary);
   border-radius: 12px;
   cursor: pointer;
   z-index: 10;
@@ -436,12 +436,12 @@ const submitVerification = async () => {
 
 .back-button:active {
   transform: scale(0.95);
-  background: #e0e0e0;
+  background: var(--color-border);
 }
 
 .back-button ion-icon {
   font-size: 24px;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
 }
 
 /* Progress Section */
@@ -453,7 +453,7 @@ const submitVerification = async () => {
 .progress-bar {
   width: 100%;
   height: 6px;
-  background: #e0e0e0;
+  background: var(--color-border);
   border-radius: 3px;
   overflow: hidden;
   margin-bottom: 8px;
@@ -461,7 +461,7 @@ const submitVerification = async () => {
 
 .progress-fill {
   height: 100%;
-  background: #4CAF50;
+  background: var(--color-primary);
   transition: width 0.3s ease;
   animation: fillComplete 0.5s ease-out;
 }
@@ -474,7 +474,7 @@ const submitVerification = async () => {
 .progress-text {
   text-align: center;
   font-size: 13px;
-  color: #4CAF50;
+  color: var(--color-primary);
   margin: 0;
   font-weight: 700;
 }
@@ -488,23 +488,23 @@ const submitVerification = async () => {
 .title {
   font-size: 28px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin: 0 0 8px 0;
 }
 
 .subtitle {
   font-size: 15px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
 /* Instructions Card */
 .instructions-card {
-  background: #E8F5E9;
+  background: var(--color-success-bg);
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 20px;
-  border: 2px solid #4CAF50;
+  border: 2px solid var(--color-success-border);
 }
 
 .instruction-header {
@@ -516,13 +516,13 @@ const submitVerification = async () => {
 
 .instruction-header ion-icon {
   font-size: 24px;
-  color: #4CAF50;
+  color: var(--color-success-border);
 }
 
 .instruction-header h3 {
   font-size: 16px;
   font-weight: 700;
-  color: #2E7D32;
+  color: var(--color-success-text);
   margin: 0;
 }
 
@@ -534,7 +534,7 @@ const submitVerification = async () => {
 
 .instruction-list li {
   font-size: 14px;
-  color: #2E7D32;
+  color: var(--color-success-text);
   padding-left: 24px;
   margin-bottom: 8px;
   position: relative;
@@ -548,7 +548,7 @@ const submitVerification = async () => {
   content: '\f00c';
   position: absolute;
   left: 0;
-  color: #4CAF50;
+  color: var(--color-success-border);
   font-weight: 700;
   font-family: 'Font Awesome 6 Free';
 }
@@ -561,7 +561,7 @@ const submitVerification = async () => {
 .example-section h3 {
   font-size: 16px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin: 0 0 12px 0;
 }
 
@@ -586,13 +586,13 @@ const submitVerification = async () => {
 }
 
 .example-item.correct .example-placeholder {
-  background: #E8F5E9;
-  border: 2px solid #4CAF50;
+  background: var(--color-success-bg);
+  border: 2px solid var(--color-success-border);
 }
 
 .example-item.incorrect .example-placeholder {
-  background: #FFEBEE;
-  border: 2px solid #f44336;
+  background: var(--color-error-bg);
+  border: 2px solid var(--color-error-border);
 }
 
 .example-placeholder ion-icon {
@@ -600,19 +600,19 @@ const submitVerification = async () => {
 }
 
 .example-item.correct .example-placeholder ion-icon {
-  color: #4CAF50;
+  color: var(--color-success-border);
 }
 
 .example-item.incorrect .example-placeholder ion-icon {
-  color: #999;
+  color: var(--color-text-tertiary);
 }
 
 .id-badge {
   position: absolute;
   bottom: 12px;
   right: 12px;
-  background: #4CAF50;
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
   padding: 4px 8px;
   border-radius: 6px;
   font-size: 12px;
@@ -622,7 +622,7 @@ const submitVerification = async () => {
 .cross {
   position: absolute;
   font-size: 64px !important;
-  color: #f44336 !important;
+  color: var(--color-error) !important;
 }
 
 .example-label {
@@ -638,11 +638,11 @@ const submitVerification = async () => {
 }
 
 .example-label.correct {
-  color: #4CAF50;
+  color: var(--color-success-border);
 }
 
 .example-label.incorrect {
-  color: #f44336;
+  color: var(--color-error-border);
 }
 
 .example-label span {
@@ -652,7 +652,7 @@ const submitVerification = async () => {
 
 .example-item p {
   font-size: 11px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
   line-height: 1.3;
 }
@@ -670,8 +670,8 @@ const submitVerification = async () => {
   aspect-ratio: 0.75;
   border-radius: 20px;
   overflow: hidden;
-  background: #f5f5f5;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  background: var(--color-bg-tertiary);
+  box-shadow: 0 4px 16px var(--color-card-shadow);
 }
 
 .camera-placeholder {
@@ -682,24 +682,24 @@ const submitVerification = async () => {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  background: var(--color-bg-tertiary);
 }
 
 .camera-placeholder ion-icon {
   font-size: 80px;
-  color: #999;
+  color: var(--color-text-tertiary);
 }
 
 .camera-placeholder p {
   font-size: 18px;
   font-weight: 700;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
 .camera-placeholder span {
   font-size: 14px;
-  color: #999;
+  color: var(--color-text-tertiary);
   margin: 0;
 }
 
@@ -723,7 +723,7 @@ const submitVerification = async () => {
 
 .retake-btn {
   --background: rgba(255, 255, 255, 0.9);
-  --color: #1a1a1a;
+  --color: var(--color-text-primary);
   --border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -746,7 +746,7 @@ const submitVerification = async () => {
 .face-guide {
   width: 200px;
   height: 280px;
-  border: 3px dashed #4CAF50;
+  border: 3px dashed var(--color-primary);
   border-radius: 50% / 60%;
   opacity: 0.6;
 }
@@ -755,8 +755,8 @@ const submitVerification = async () => {
 .tips-box {
   display: flex;
   gap: 12px;
-  background: #FFF3E0;
-  border-left: 4px solid #FF9800;
+  background: var(--color-warning-bg);
+  border-left: 4px solid var(--color-warning-border);
   padding: 16px;
   border-radius: 8px;
   margin-bottom: 24px;
@@ -764,14 +764,14 @@ const submitVerification = async () => {
 
 .tips-box ion-icon {
   font-size: 24px;
-  color: #FF9800;
+  color: var(--color-warning-border);
   flex-shrink: 0;
   margin-top: 2px;
 }
 
 .tips-text {
   font-size: 13px;
-  color: #E65100;
+  color: var(--color-warning-text);
   line-height: 1.5;
 }
 
@@ -788,8 +788,8 @@ const submitVerification = async () => {
 }
 
 .capture-button {
-  --background: #4CAF50;
-  --background-hover: #45a049;
+  --background: var(--color-primary);
+  --background-hover: var(--color-primary-hover);
   --border-radius: 12px;
   height: 56px;
   font-size: 16px;
@@ -798,8 +798,8 @@ const submitVerification = async () => {
 }
 
 .upload-button {
-  --background: #2196F3;
-  --background-hover: #1976D2;
+  --background: var(--color-info);
+  --background-hover: var(--color-info);
   --border-radius: 12px;
   height: 56px;
   font-size: 16px;
@@ -817,8 +817,8 @@ const submitVerification = async () => {
 }
 
 .submit-button {
-  --background: #4CAF50;
-  --background-hover: #45a049;
+  --background: var(--color-primary);
+  --background-hover: var(--color-primary-hover);
   --border-radius: 12px;
   height: 56px;
   font-size: 16px;
@@ -843,6 +843,7 @@ const submitVerification = async () => {
 /* Success Alert */
 :deep(.success-alert .alert-wrapper) {
   border-radius: 20px;
+  background: var(--color-modal-bg);
 }
 
 /* Responsive */

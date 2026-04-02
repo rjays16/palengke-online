@@ -576,7 +576,7 @@ const handleNext = () => {
 
 <style scoped>
 .step-content {
-  --background: #ffffff;
+  --background: var(--color-bg-primary);
 }
 
 .step-container {
@@ -596,7 +596,7 @@ const handleNext = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f5f5;
+  background: var(--color-bg-tertiary);
   border-radius: 12px;
   cursor: pointer;
   z-index: 10;
@@ -605,12 +605,12 @@ const handleNext = () => {
 
 .back-button:active {
   transform: scale(0.95);
-  background: #e0e0e0;
+  background: var(--color-border);
 }
 
 .back-button ion-icon {
   font-size: 24px;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
 }
 
 /* Progress Section */
@@ -622,7 +622,7 @@ const handleNext = () => {
 .progress-bar {
   width: 100%;
   height: 6px;
-  background: #e0e0e0;
+  background: var(--color-border);
   border-radius: 3px;
   overflow: hidden;
   margin-bottom: 8px;
@@ -630,14 +630,14 @@ const handleNext = () => {
 
 .progress-fill {
   height: 100%;
-  background: #4CAF50;
+  background: var(--color-primary);
   transition: width 0.3s ease;
 }
 
 .progress-text {
   text-align: center;
   font-size: 13px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
   font-weight: 600;
 }
@@ -651,13 +651,13 @@ const handleNext = () => {
 .title {
   font-size: 28px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin: 0 0 8px 0;
 }
 
 .subtitle {
   font-size: 15px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
@@ -677,7 +677,7 @@ const handleNext = () => {
   display: block;
   font-size: 14px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin-bottom: 8px;
 }
 
@@ -693,17 +693,18 @@ const handleNext = () => {
   top: 50%;
   transform: translateY(-50%);
   font-size: 20px;
-  color: #4CAF50;
+  color: var(--color-icon-primary);
   z-index: 2;
 }
 
 .custom-input {
   width: 100%;
   padding: 14px 16px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--color-border);
   border-radius: 12px;
   font-size: 15px;
-  background: white;
+  background: var(--color-input-bg);
+  color: var(--color-text-primary);
   transition: border-color 0.2s;
   font-family: inherit;
 }
@@ -719,17 +720,17 @@ const handleNext = () => {
 
 .custom-input:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: var(--color-border-focus);
 }
 
 .custom-input:disabled {
-  background: #f5f5f5;
-  color: #999;
+  background: var(--color-input-disabled-bg);
+  color: var(--color-text-tertiary);
   cursor: not-allowed;
 }
 
 .custom-input::placeholder {
-  color: #999;
+  color: var(--color-input-placeholder);
 }
 
 /* Success/Error Icons */
@@ -740,7 +741,7 @@ const handleNext = () => {
   top: 50%;
   transform: translateY(-50%);
   font-size: 24px;
-  color: #4CAF50;
+  color: var(--color-success);
   z-index: 2;
 }
 
@@ -750,7 +751,7 @@ const handleNext = () => {
   top: 50%;
   transform: translateY(-50%);
   font-size: 20px;
-  color: #999;
+  color: var(--color-icon-tertiary);
   z-index: 2;
   cursor: pointer;
 }
@@ -767,34 +768,34 @@ const handleNext = () => {
 
 /* Input States */
 .input-wrapper.success .custom-input {
-  border-color: #4CAF50;
+  border-color: var(--color-success);
 }
 
 .input-wrapper.verified .custom-input {
-  border-color: #4CAF50;
-  background: #f1f8f4;
+  border-color: var(--color-success);
+  background: var(--color-success-bg);
 }
 
 .input-wrapper.error .custom-input {
-  border-color: #f44336;
+  border-color: var(--color-error);
 }
 
 .input-wrapper.error .input-icon {
-  color: #f44336;
+  color: var(--color-error);
 }
 
 /* Helper/Error/Success Text */
 .helper-text {
   display: block;
   font-size: 12px;
-  color: #999;
+  color: var(--color-text-tertiary);
   margin-top: 6px;
 }
 
 .error-message {
   display: block;
   font-size: 12px;
-  color: #f44336;
+  color: var(--color-error);
   margin-top: 6px;
   font-weight: 500;
 }
@@ -802,15 +803,15 @@ const handleNext = () => {
 .success-message {
   display: block;
   font-size: 12px;
-  color: #4CAF50;
+  color: var(--color-success);
   margin-top: 6px;
   font-weight: 600;
 }
 
 /* Send OTP Button */
 .send-otp-button {
-  --background: #2196F3;
-  --background-hover: #1976D2;
+  --background: var(--color-info);
+  --background-hover: var(--color-info);
   --border-radius: 12px;
   height: 52px;
   font-size: 15px;
@@ -821,11 +822,11 @@ const handleNext = () => {
 
 /* OTP Section */
 .otp-section {
-  background: #E3F2FD;
+  background: var(--color-otp-bg);
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 20px;
-  border: 2px solid #2196F3;
+  border: 2px solid var(--color-otp-border);
 }
 
 .otp-header {
@@ -836,20 +837,20 @@ const handleNext = () => {
 
 .otp-header ion-icon {
   font-size: 32px;
-  color: #2196F3;
+  color: var(--color-otp-border);
   flex-shrink: 0;
 }
 
 .otp-text h3 {
   font-size: 16px;
   font-weight: 700;
-  color: #1565C0;
+  color: var(--color-otp-text);
   margin: 0 0 6px 0;
 }
 
 .otp-text p {
   font-size: 13px;
-  color: #1976D2;
+  color: var(--color-otp-text);
   margin: 0;
   line-height: 1.4;
 }
@@ -869,24 +870,24 @@ const handleNext = () => {
 .otp-input {
   width: 48px;
   height: 56px;
-  border: 2px solid #2196F3;
+  border: 2px solid var(--color-info);
   border-radius: 12px;
   text-align: center;
   font-size: 24px;
   font-weight: 700;
-  color: #1a1a1a;
-  background: white;
+  color: var(--color-text-primary);
+  background: var(--color-input-bg);
   transition: all 0.2s;
 }
 
 .otp-input:focus {
   outline: none;
-  border-color: #1976D2;
-  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+  border-color: var(--color-info);
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
 }
 
 .otp-input.error {
-  border-color: #f44336;
+  border-color: var(--color-error);
 }
 
 /* OTP Error */
@@ -895,20 +896,20 @@ const handleNext = () => {
   align-items: center;
   gap: 8px;
   padding: 12px;
-  background: #FFEBEE;
+  background: var(--color-error-bg);
   border-radius: 8px;
   margin-bottom: 16px;
 }
 
 .otp-error ion-icon {
   font-size: 20px;
-  color: #f44336;
+  color: var(--color-error);
   flex-shrink: 0;
 }
 
 .otp-error span {
   font-size: 13px;
-  color: #c62828;
+  color: var(--color-error-text);
   font-weight: 500;
 }
 
@@ -924,7 +925,7 @@ const handleNext = () => {
 .change-number-button {
   background: none;
   border: none;
-  color: #2196F3;
+  color: var(--color-info);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -933,18 +934,18 @@ const handleNext = () => {
 }
 
 .resend-button:disabled {
-  color: #999;
+  color: var(--color-text-tertiary);
   cursor: not-allowed;
 }
 
 .change-number-button {
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 /* Verify Button */
 .verify-button {
-  --background: #2196F3;
-  --background-hover: #1976D2;
+  --background: var(--color-info);
+  --background-hover: var(--color-info);
   --border-radius: 12px;
   height: 52px;
   font-size: 15px;
@@ -953,16 +954,16 @@ const handleNext = () => {
 }
 
 .verify-button:disabled {
-  --background: #e0e0e0;
-  --color: #999;
+  --background: var(--color-border);
+  --color: var(--color-text-tertiary);
 }
 
 /* Info Box */
 .info-box {
   display: flex;
   gap: 12px;
-  background: #E3F2FD;
-  border-left: 4px solid #2196F3;
+  background: var(--color-info-bg);
+  border-left: 4px solid var(--color-info-border);
   padding: 16px;
   border-radius: 8px;
   margin-bottom: 24px;
@@ -970,14 +971,14 @@ const handleNext = () => {
 
 .info-box ion-icon {
   font-size: 24px;
-  color: #2196F3;
+  color: var(--color-info-border);
   flex-shrink: 0;
   margin-top: 2px;
 }
 
 .info-text {
   font-size: 13px;
-  color: #1565C0;
+  color: var(--color-info-text);
   line-height: 1.5;
 }
 
@@ -987,8 +988,8 @@ const handleNext = () => {
 
 /* Next Button */
 .next-button {
-  --background: #4CAF50;
-  --background-hover: #45a049;
+  --background: var(--color-primary);
+  --background-hover: var(--color-primary-hover);
   --border-radius: 12px;
   height: 52px;
   font-size: 15px;
@@ -997,8 +998,8 @@ const handleNext = () => {
 }
 
 .next-button:disabled {
-  --background: #e0e0e0;
-  --color: #999;
+  --background: var(--color-border);
+  --color: var(--color-text-tertiary);
 }
 
 /* Responsive */
