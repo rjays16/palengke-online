@@ -2,31 +2,24 @@ import { createRouter, createWebHistory } from '@ionic/vue-router';
 
 const routes = [
   { path: '/', redirect: '/login' },
-
-  // ─── Auth ─────────────────────────────────────
   { path: '/login', component: () => import('@/views/LoginPage.vue') },
   { path: '/signup', component: () => import('@/views/SignupPage.vue') },
-
-  // ─── Phase 2 ──────────────────────────────────
+  // Phase 2
   { path: '/home', component: () => import('@/views/HomePage.vue') },
   { path: '/browse', component: () => import('@/views/BrowseSellersPage.vue') },
-
-  // ─── Phase 3 ──────────────────────────────────
+  // Phase 3
   { path: '/seller/:id', component: () => import('@/views/SellerStorePage.vue') },
   { path: '/product/:id', component: () => import('@/views/ProductDetailPage.vue') },
-
-  // ─── Phase 4 (uncomment when built) ───────────
-  // { path: '/cart', component: () => import('@/views/CartPage.vue') },
-  // { path: '/checkout', component: () => import('@/views/CheckoutPage.vue') },
-  // { path: '/offers', component: () => import('@/views/OffersPage.vue') },
-  // { path: '/payment-methods', component: () => import('@/views/PaymentMethodsPage.vue') },
-
-  // ─── Phase 5 (uncomment when built) ───────────
+  // Phase 4
+  { path: '/cart', component: () => import('@/views/CartPage.vue') },
+  { path: '/checkout/:id', component: () => import('@/views/CheckoutPage.vue') },
+  { path: '/offers', component: () => import('@/views/OffersPage.vue') },
+  { path: '/payment-methods', component: () => import('@/views/PaymentMethodsPage.vue') },
+  // Phase 5 (uncomment when built)
   // { path: '/tip', component: () => import('@/views/TipPage.vue') },
   // { path: '/order-tracking/:id', component: () => import('@/views/OrderTrackingPage.vue') },
   // { path: '/order-rating/:id', component: () => import('@/views/OrderRatingPage.vue') },
-
-  // ─── Phase 6 (uncomment when built) ───────────
+  // Phase 6 (uncomment when built)
   // { path: '/activity', component: () => import('@/views/ActivityPage.vue') },
   // { path: '/order-history', component: () => import('@/views/OrderHistoryPage.vue') },
   // { path: '/profile', component: () => import('@/views/ProfilePage.vue') },
