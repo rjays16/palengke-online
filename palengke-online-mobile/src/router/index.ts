@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from '@ionic/vue-router';
 
 const routes = [
   { path: '/', redirect: '/login' },
+  // Auth
   { path: '/login', component: () => import('@/views/LoginPage.vue') },
   { path: '/signup', component: () => import('@/views/SignupPage.vue') },
   // Phase 2
@@ -19,14 +20,14 @@ const routes = [
   { path: '/tip', component: () => import('@/views/TipPage.vue') },
   { path: '/order-tracking/:id', component: () => import('@/views/OrderTrackingPage.vue') },
   { path: '/order-rating/:id', component: () => import('@/views/OrderRatingPage.vue') },
-  // Phase 6 (uncomment when built)
-  // { path: '/activity', component: () => import('@/views/ActivityPage.vue') },
-  // { path: '/order-history', component: () => import('@/views/OrderHistoryPage.vue') },
-  // { path: '/profile', component: () => import('@/views/ProfilePage.vue') },
-  // { path: '/addresses', component: () => import('@/views/AddressesPage.vue') },
-  // { path: '/messages', component: () => import('@/views/MessagesPage.vue') },
-  // { path: '/notifications', component: () => import('@/views/NotificationsPage.vue') },
-  // { path: '/help', component: () => import('@/views/HelpSupportPage.vue') },
+  // Phase 6
+  { path: '/activity', component: () => import('@/views/ActivityPage.vue') },
+  { path: '/order-history', component: () => import('@/views/OrderHistoryPage.vue') },
+  { path: '/profile', component: () => import('@/views/ProfilePage.vue') },
+  { path: '/addresses', component: () => import('@/views/AddressesPage.vue') },
+  { path: '/messages', component: () => import('@/views/MessagesPage.vue') },
+  { path: '/notifications', component: () => import('@/views/NotificationsPage.vue') },
+  { path: '/help', component: () => import('@/views/HelpSupportPage.vue') },
 ];
 
 const router = createRouter({
