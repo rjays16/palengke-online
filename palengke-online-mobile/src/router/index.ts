@@ -15,10 +15,10 @@ const routes = [
   { path: '/checkout/:id', component: () => import('@/views/CheckoutPage.vue') },
   { path: '/offers', component: () => import('@/views/OffersPage.vue') },
   { path: '/payment-methods', component: () => import('@/views/PaymentMethodsPage.vue') },
-  // Phase 5 (uncomment when built)
-  // { path: '/tip', component: () => import('@/views/TipPage.vue') },
-  // { path: '/order-tracking/:id', component: () => import('@/views/OrderTrackingPage.vue') },
-  // { path: '/order-rating/:id', component: () => import('@/views/OrderRatingPage.vue') },
+  // Phase 5
+  { path: '/tip', component: () => import('@/views/TipPage.vue') },
+  { path: '/order-tracking/:id', component: () => import('@/views/OrderTrackingPage.vue') },
+  { path: '/order-rating/:id', component: () => import('@/views/OrderRatingPage.vue') },
   // Phase 6 (uncomment when built)
   // { path: '/activity', component: () => import('@/views/ActivityPage.vue') },
   // { path: '/order-history', component: () => import('@/views/OrderHistoryPage.vue') },
