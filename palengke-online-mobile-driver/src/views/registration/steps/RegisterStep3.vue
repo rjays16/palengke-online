@@ -235,7 +235,7 @@ const handleNext = () => {
 
 <style scoped>
 .step-content {
-  --background: #ffffff;
+  --background: var(--color-bg-primary);
 }
 
 .step-container {
@@ -254,7 +254,7 @@ const handleNext = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f5f5;
+  background: var(--color-bg-tertiary);
   border-radius: 12px;
   cursor: pointer;
   z-index: 10;
@@ -263,12 +263,12 @@ const handleNext = () => {
 
 .back-button:active {
   transform: scale(0.95);
-  background: #e0e0e0;
+  background: var(--color-border);
 }
 
 .back-button ion-icon {
   font-size: 24px;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
 }
 
 .progress-section {
@@ -279,7 +279,7 @@ const handleNext = () => {
 .progress-bar {
   width: 100%;
   height: 6px;
-  background: #e0e0e0;
+  background: var(--color-border);
   border-radius: 3px;
   overflow: hidden;
   margin-bottom: 8px;
@@ -287,14 +287,14 @@ const handleNext = () => {
 
 .progress-fill {
   height: 100%;
-  background: #4CAF50;
+  background: var(--color-primary);
   transition: width 0.3s ease;
 }
 
 .progress-text {
   text-align: center;
   font-size: 13px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
   font-weight: 600;
 }
@@ -307,13 +307,13 @@ const handleNext = () => {
 .title {
   font-size: 28px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin: 0 0 8px 0;
 }
 
 .subtitle {
   font-size: 15px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
@@ -329,18 +329,18 @@ const handleNext = () => {
   gap: 12px;
   margin-bottom: 24px;
   padding-bottom: 12px;
-  border-bottom: 2px solid #f0f0f0;
+  border-bottom: 2px solid var(--color-border);
 }
 
 .section-header ion-icon {
   font-size: 24px;
-  color: #4CAF50;
+  color: var(--color-primary);
 }
 
 .section-header h2 {
   font-size: 18px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin: 0;
 }
 
@@ -352,7 +352,7 @@ const handleNext = () => {
   display: block;
   font-size: 14px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin-bottom: 8px;
 }
 
@@ -368,7 +368,7 @@ const handleNext = () => {
   top: 50%;
   transform: translateY(-50%);
   font-size: 20px;
-  color: #4CAF50;
+  color: var(--color-primary);
   z-index: 2;
 }
 
@@ -376,10 +376,11 @@ const handleNext = () => {
 .custom-select {
   width: 100%;
   padding: 14px 16px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--color-border);
   border-radius: 12px;
   font-size: 15px;
-  background: white;
+  background: var(--color-input-bg);
+  color: var(--color-text-primary);
   transition: border-color 0.2s;
   font-family: inherit;
 }
@@ -392,11 +393,11 @@ const handleNext = () => {
 .custom-input:focus,
 .custom-select:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: var(--color-border-focus);
 }
 
 .custom-input::placeholder {
-  color: #999;
+  color: var(--color-input-placeholder);
 }
 
 .custom-select {
@@ -410,24 +411,24 @@ const handleNext = () => {
 
 .input-wrapper.error .custom-input,
 .input-wrapper.error .custom-select {
-  border-color: #f44336;
+  border-color: var(--color-error);
 }
 
 .input-wrapper.error .input-icon {
-  color: #f44336;
+  color: var(--color-error);
 }
 
 .helper-text {
   display: block;
   font-size: 12px;
-  color: #999;
+  color: var(--color-text-tertiary);
   margin-top: 6px;
 }
 
 .error-message {
   display: block;
   font-size: 12px;
-  color: #f44336;
+  color: var(--color-error);
   margin-top: 6px;
   font-weight: 500;
 }
@@ -435,8 +436,8 @@ const handleNext = () => {
 .info-box {
   display: flex;
   gap: 12px;
-  background: #E3F2FD;
-  border-left: 4px solid #2196F3;
+  background: var(--color-info-bg);
+  border-left: 4px solid var(--color-info);
   padding: 16px;
   border-radius: 8px;
   margin: 24px 0;
@@ -444,14 +445,14 @@ const handleNext = () => {
 
 .info-box ion-icon {
   font-size: 24px;
-  color: #2196F3;
+  color: var(--color-info);
   flex-shrink: 0;
   margin-top: 2px;
 }
 
 .info-text {
   font-size: 13px;
-  color: #1565C0;
+  color: var(--color-info-text);
   line-height: 1.5;
 }
 
@@ -476,8 +477,8 @@ const handleNext = () => {
 }
 
 .next-button {
-  --background: #4CAF50;
-  --background-hover: #45a049;
+  --background: var(--color-primary);
+  --background-hover: var(--color-primary-hover);
   --border-radius: 12px;
   height: 52px;
   font-size: 15px;
@@ -486,8 +487,8 @@ const handleNext = () => {
 }
 
 .next-button:disabled {
-  --background: #e0e0e0;
-  --color: #999;
+  --background: var(--color-border);
+  --color: var(--color-text-tertiary);
 }
 
 @media (max-width: 480px) {

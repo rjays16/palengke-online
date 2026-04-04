@@ -128,6 +128,16 @@ const logout = async () => {
   padding: 20px 0;
 }
 
+/* Dark mode background for ion-content */
+:global(html.dark) ion-page ion-content,
+:global(html.dark) ion-content {
+  --background: var(--color-bg-primary);
+}
+
+:global(html.dark) .dashboard-content {
+  --background: var(--color-bg-secondary);
+}
+
 /* Welcome Section */
 .welcome-section {
   text-align: center;
@@ -147,13 +157,13 @@ const logout = async () => {
 h1 {
   font-size: 28px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin: 0 0 8px 0;
 }
 
 .subtitle {
   font-size: 16px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
@@ -166,12 +176,12 @@ h1 {
 }
 
 .stat-card {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
   border-radius: 16px;
   padding: 20px 12px;
   text-align: center;
-  color: white;
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+  color: var(--color-text-inverse);
+  box-shadow: 0 4px 12px var(--color-card-shadow);
 }
 
 .stat-icon {
@@ -212,7 +222,7 @@ h1 {
 /* Info Text */
 .info-text {
   text-align: center;
-  color: #666;
+  color: var(--color-text-secondary);
   font-size: 14px;
   margin-top: 40px;
 }
