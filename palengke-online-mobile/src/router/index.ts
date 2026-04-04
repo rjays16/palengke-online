@@ -1,33 +1,82 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
+import type { RouteRecordRaw } from 'vue-router';
 
-const routes = [
+import LoginPage from '@/views/LoginPage.vue';
+import SignupWelcome from '@/views/registration/SignupWelcome.vue';
+import RegisterStep1 from '@/views/registration/steps/RegisterStep1.vue';
+import RegisterStep2 from '@/views/registration/steps/RegisterStep2.vue';
+import RegisterStep3 from '@/views/registration/steps/RegisterStep3.vue';
+import RegisterStep4 from '@/views/registration/steps/RegisterStep4.vue';
+import RegisterStep5 from '@/views/registration/steps/RegisterStep5.vue';
+import RegisterStep6 from '@/views/registration/steps/RegisterStep6.vue';
+
+// Main app pages (add your existing pages here)
+import HomePage from '@/views/HomePage.vue';
+
+const routes: Array<RouteRecordRaw> = [
   { path: '/', redirect: '/login' },
+
   // Auth
-  { path: '/login', component: () => import('@/views/LoginPage.vue') },
-  { path: '/signup', component: () => import('@/views/SignupPage.vue') },
-  // Phase 2
-  { path: '/home', component: () => import('@/views/HomePage.vue') },
-  { path: '/browse', component: () => import('@/views/BrowseSellersPage.vue') },
-  // Phase 3
-  { path: '/seller/:id', component: () => import('@/views/SellerStorePage.vue') },
-  { path: '/product/:id', component: () => import('@/views/ProductDetailPage.vue') },
-  // Phase 4
-  { path: '/cart', component: () => import('@/views/CartPage.vue') },
-  { path: '/checkout/:id', component: () => import('@/views/CheckoutPage.vue') },
-  { path: '/offers', component: () => import('@/views/OffersPage.vue') },
-  { path: '/payment-methods', component: () => import('@/views/PaymentMethodsPage.vue') },
-  // Phase 5
-  { path: '/tip', component: () => import('@/views/TipPage.vue') },
-  { path: '/order-tracking/:id', component: () => import('@/views/OrderTrackingPage.vue') },
-  { path: '/order-rating/:id', component: () => import('@/views/OrderRatingPage.vue') },
-  // Phase 6
-  { path: '/activity', component: () => import('@/views/ActivityPage.vue') },
-  { path: '/order-history', component: () => import('@/views/OrderHistoryPage.vue') },
-  { path: '/profile', component: () => import('@/views/ProfilePage.vue') },
-  { path: '/addresses', component: () => import('@/views/AddressesPage.vue') },
-  { path: '/messages', component: () => import('@/views/MessagesPage.vue') },
-  { path: '/notifications', component: () => import('@/views/NotificationsPage.vue') },
-  { path: '/help', component: () => import('@/views/HelpSupportPage.vue') },
+  {
+    path: '/login',
+    name: 'Login',
+    component: LoginPage,
+    meta: { requiresAuth: false }
+  },
+
+  // Registration entry
+  {
+    path: '/signup',
+    name: 'SignupWelcome',
+    component: SignupWelcome,
+    meta: { requiresAuth: false }
+  },
+
+  // Registration steps
+  {
+    path: '/register/step1',
+    name: 'RegisterStep1',
+    component: RegisterStep1,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/register/step2',
+    name: 'RegisterStep2',
+    component: RegisterStep2,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/register/step3',
+    name: 'RegisterStep3',
+    component: RegisterStep3,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/register/step4',
+    name: 'RegisterStep4',
+    component: RegisterStep4,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/register/step5',
+    name: 'RegisterStep5',
+    component: RegisterStep5,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/register/step6',
+    name: 'RegisterStep6',
+    component: RegisterStep6,
+    meta: { requiresAuth: false }
+  },
+
+  // App pages (authenticated)
+  {
+    path: '/home',
+    name: 'Home',
+    component: HomePage,
+    meta: { requiresAuth: true }
+  },
 ];
 
 const router = createRouter({
@@ -36,11 +85,14 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const publicPaths = ['/login', '/signup'];
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-  if (!publicPaths.includes(to.path) && !isAuthenticated) { next('/login'); }
-  else if (to.path === '/login' && isAuthenticated) { next('/home'); }
-  else { next(); }
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    next('/login');
+  } else if (to.path === '/login' && isAuthenticated) {
+    next('/home');
+  } else {
+    next();
+  }
 });
 
 export default router;
