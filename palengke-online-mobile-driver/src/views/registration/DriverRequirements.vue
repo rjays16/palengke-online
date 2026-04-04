@@ -188,7 +188,7 @@ const proceedToRegistration = async () => {
 
 <style scoped>
 .requirements-content {
-  --background: #ffffff;
+  --background: var(--color-bg-primary);
 }
 
 .requirements-container {
@@ -207,7 +207,7 @@ const proceedToRegistration = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f5f5;
+  background: var(--color-bg-tertiary);
   border-radius: 12px;
   cursor: pointer;
   margin-bottom: 20px;
@@ -219,24 +219,24 @@ const proceedToRegistration = async () => {
 }
 
 .back-button:hover {
-  background: #e0e0e0;
+  background: var(--color-border);
 }
 
 .back-button ion-icon {
   font-size: 24px;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
 }
 
 .page-title {
   font-size: 28px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin: 0 0 8px 0;
 }
 
 .page-subtitle {
   font-size: 15px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
   line-height: 1.5;
 }
@@ -254,22 +254,22 @@ const proceedToRegistration = async () => {
   align-items: flex-start;
   gap: 16px;
   padding: 20px;
-  background: #f8f9fa;
-  border: 2px solid #e0e0e0;
+  background: var(--color-bg-secondary);
+  border: 2px solid var(--color-border);
   border-radius: 16px;
   transition: all 0.3s ease;
 }
 
 .requirement-card.completed {
-  background: #e8f5e9;
-  border-color: #4CAF50;
+  background: var(--color-success-bg);
+  border-color: var(--color-success-border);
 }
 
 .requirement-icon {
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: #e0e0e0;
+  background: var(--color-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -278,17 +278,17 @@ const proceedToRegistration = async () => {
 }
 
 .requirement-card.completed .requirement-icon {
-  background: #4CAF50;
+  background: var(--color-primary);
 }
 
 .requirement-icon ion-icon {
   font-size: 24px;
-  color: #666;
+  color: var(--color-icon-secondary);
   transition: color 0.3s ease;
 }
 
 .requirement-card.completed .requirement-icon ion-icon {
-  color: white;
+  color: var(--color-text-inverse);
 }
 
 .requirement-info {
@@ -299,13 +299,13 @@ const proceedToRegistration = async () => {
 .requirement-info h3 {
   font-size: 16px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   margin: 0 0 6px 0;
 }
 
 .requirement-info p {
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-secondary);
   margin: 0;
   line-height: 1.5;
 }
@@ -332,11 +332,11 @@ const proceedToRegistration = async () => {
 }
 
 .qualification-message.success {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
 }
 
 .qualification-message.pending {
-  background: #fff3e0;
+  background: var(--color-warning-bg);
 }
 
 .qualification-message ion-icon {
@@ -345,11 +345,11 @@ const proceedToRegistration = async () => {
 }
 
 .qualification-message.success ion-icon {
-  color: white;
+  color: var(--color-text-inverse);
 }
 
 .qualification-message.pending ion-icon {
-  color: #ff9800;
+  color: var(--color-warning-border);
 }
 
 .qualification-message h2 {
@@ -359,11 +359,11 @@ const proceedToRegistration = async () => {
 }
 
 .qualification-message.success h2 {
-  color: white;
+  color: var(--color-text-inverse);
 }
 
 .qualification-message.pending h2 {
-  color: #e65100;
+  color: var(--color-warning-text);
 }
 
 .qualification-message p {
@@ -373,11 +373,11 @@ const proceedToRegistration = async () => {
 }
 
 .qualification-message.success p {
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--color-text-inverse);
 }
 
 .qualification-message.pending p {
-  color: #bf360c;
+  color: var(--color-warning-text);
 }
 
 /* Action Section */
@@ -386,8 +386,8 @@ const proceedToRegistration = async () => {
 }
 
 .proceed-button {
-  --background: #4CAF50;
-  --background-hover: #45a049;
+  --background: var(--color-primary);
+  --background-hover: var(--color-primary-hover);
   --border-radius: 12px;
   height: 56px;
   font-size: 16px;
@@ -397,8 +397,8 @@ const proceedToRegistration = async () => {
 }
 
 .proceed-button:disabled {
-  --background: #e0e0e0;
-  --background-hover: #d0d0d0;
+  --background: var(--color-border);
+  --background-hover: var(--color-border);
   opacity: 1;
 }
 
