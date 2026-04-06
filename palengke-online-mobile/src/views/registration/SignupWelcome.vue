@@ -52,21 +52,6 @@
             Create Free Account
           </ion-button>
 
-          <div class="divider">
-            <span>or sign up with</span>
-          </div>
-
-          <div class="social-row">
-            <button class="social-btn google" @click="socialSignup('google')">
-              <span class="g-logo">G</span>
-              Google
-            </button>
-            <button class="social-btn facebook" @click="socialSignup('facebook')">
-              <ion-icon :icon="logoFacebook"></ion-icon>
-              Facebook
-            </button>
-          </div>
-
           <p class="login-text">
             Already have an account?
             <a href="#" @click.prevent="goToLogin">Sign In</a>
@@ -83,7 +68,7 @@ import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon } from '@ionic/vue';
 import {
   arrowBackOutline, cartOutline, bicycleOutline,
-  pricetagOutline, logoFacebook
+  pricetagOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -91,10 +76,6 @@ const router = useRouter();
 const startRegistration = () => router.push('/register/step1');
 const goToLogin = () => router.push('/login');
 const goBack = () => router.back();
-const socialSignup = (provider) => {
-  console.log('Social signup with', provider);
-  // TODO: Implement OAuth
-};
 </script>
 
 <style scoped>
@@ -143,25 +124,6 @@ const socialSignup = (provider) => {
   --border-radius: 14px; height: 56px; font-size: 16px;
   font-weight: 700; text-transform: none; margin-bottom: 24px;
 }
-
-.divider { display: flex; align-items: center; margin-bottom: 16px; font-size: 13px; color: #aaa; }
-.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e8e8e8; }
-.divider span { padding: 0 14px; }
-
-.social-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
-.social-btn {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 13px; border: 2px solid #e0e0e0; border-radius: 12px;
-  background: white; font-size: 14px; font-weight: 600; cursor: pointer;
-  font-family: inherit; transition: all 0.2s;
-}
-.social-btn:active { transform: scale(0.97); }
-.social-btn ion-icon { font-size: 18px; }
-.g-logo { font-size: 16px; font-weight: 700; }
-.social-btn.google { color: #DB4437; }
-.social-btn.google:hover { border-color: #DB4437; background: #fff5f5; }
-.social-btn.facebook { color: #1877F2; }
-.social-btn.facebook:hover { border-color: #1877F2; background: #f0f5ff; }
 
 .login-text { text-align: center; font-size: 14px; color: #666; margin: 0; }
 .login-text a { color: #4CAF50; font-weight: 600; text-decoration: none; margin-left: 4px; }

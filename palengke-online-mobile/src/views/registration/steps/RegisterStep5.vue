@@ -17,7 +17,7 @@
             <ion-icon :icon="shieldCheckmarkOutline"></ion-icon>
           </div>
           <h1 class="title">Secure Your Account</h1>
-          <p class="subtitle">Link a social account for faster sign-in and account recovery</p>
+          <p class="subtitle">Your account is almost ready</p>
         </div>
 
         <div class="form-section">
@@ -43,76 +43,21 @@
                 <span class="check-sub">Account login secured</span>
               </div>
             </div>
-            <div class="check-connector"></div>
-            <div class="check-item" :class="{ done: linkedAccount }">
-              <div class="check-dot" :class="{ done: linkedAccount, active: !linkedAccount }">
-                <ion-icon v-if="linkedAccount" :icon="checkmarkOutline"></ion-icon>
-                <span v-else>3</span>
-              </div>
-              <div class="check-text">
-                <span class="check-title">Link social account</span>
-                <span class="check-sub">For easy login &amp; recovery</span>
-              </div>
+          </div>
+
+          <!-- Info card -->
+          <div class="info-card">
+            <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
+            <div class="info-content">
+              <h3>Account Ready!</h3>
+              <p>Your account has been secured with a password. You can now continue to complete your registration.</p>
             </div>
           </div>
 
-          <!-- Social options -->
-          <div v-if="!linkedAccount" class="social-section">
-            <p class="social-intro">Choose a social account to link (optional but recommended):</p>
-
-            <!-- Google -->
-            <button class="social-card" @click="linkSocial('google')" :disabled="isLinking">
-              <div class="social-logo google-logo">G</div>
-              <div class="social-info">
-                <span class="social-name">Continue with Google</span>
-                <span class="social-desc">Link your Google account</span>
-              </div>
-              <ion-icon :icon="chevronForwardOutline"></ion-icon>
-            </button>
-
-            <!-- Facebook -->
-            <button class="social-card" @click="linkSocial('facebook')" :disabled="isLinking">
-              <div class="social-logo facebook-logo">f</div>
-              <div class="social-info">
-                <span class="social-name">Continue with Facebook</span>
-                <span class="social-desc">Link your Facebook account</span>
-              </div>
-              <ion-icon :icon="chevronForwardOutline"></ion-icon>
-            </button>
-
-            <!-- Skip -->
-            <button class="skip-link" @click="handleSkip">Skip for now</button>
-          </div>
-
-          <!-- Linked success -->
-          <div v-else class="linked-success">
-            <div class="linked-icon">
-              <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
-            </div>
-            <h3>{{ linkedAccount === 'google' ? 'Google' : 'Facebook' }} linked successfully!</h3>
-            <p>You can now sign in faster using your {{ linkedAccount === 'google' ? 'Google' : 'Facebook' }} account.</p>
-            <ion-button expand="block" class="next-button" @click="handleNext">
-              Continue
-              <ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon>
-            </ion-button>
-          </div>
-
-          <!-- Benefits list -->
-          <div v-if="!linkedAccount" class="benefits-card">
-            <h4>Why link a social account?</h4>
-            <div class="benefit-item">
-              <ion-icon :icon="flashOutline"></ion-icon>
-              <span>Sign in faster — no need to type your password</span>
-            </div>
-            <div class="benefit-item">
-              <ion-icon :icon="keyOutline"></ion-icon>
-              <span>Recover your account if you forget your password</span>
-            </div>
-            <div class="benefit-item">
-              <ion-icon :icon="shieldOutline"></ion-icon>
-              <span>Extra layer of security for your account</span>
-            </div>
-          </div>
+          <ion-button expand="block" class="next-button" @click="handleNext">
+            Continue
+            <ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon>
+          </ion-button>
 
         </div>
       </div>
@@ -126,41 +71,12 @@ import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon, toastController } from '@ionic/vue';
 import {
   arrowBackOutline, arrowForwardOutline, shieldCheckmarkOutline,
-  checkmarkOutline, checkmarkCircleOutline, chevronForwardOutline,
-  flashOutline, keyOutline, shieldOutline
+  checkmarkOutline, checkmarkCircleOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
 
-const linkedAccount = ref('');
-const isLinking = ref(false);
-
-const linkSocial = async (provider) => {
-  isLinking.value = true;
-  try {
-    await new Promise(r => setTimeout(r, 1500));
-    linkedAccount.value = provider;
-    const toast = await toastController.create({
-      message: `${provider === 'google' ? 'Google' : 'Facebook'} account linked successfully!`,
-      duration: 2500, color: 'success', position: 'top'
-    });
-    await toast.present();
-  } finally {
-    isLinking.value = false;
-  }
-};
-
-const handleSkip = () => {
-  const existing = JSON.parse(localStorage.getItem('buyerRegistrationData') || '{}');
-  existing.linkedSocial = null;
-  localStorage.setItem('buyerRegistrationData', JSON.stringify(existing));
-  router.push('/register/step6');
-};
-
 const handleNext = () => {
-  const existing = JSON.parse(localStorage.getItem('buyerRegistrationData') || '{}');
-  existing.linkedSocial = linkedAccount.value;
-  localStorage.setItem('buyerRegistrationData', JSON.stringify(existing));
   router.push('/register/step6');
 };
 
@@ -211,64 +127,23 @@ const goBack = () => router.push('/register/step4');
 .check-title { font-size: 14px; font-weight: 600; color: #1a1a1a; }
 .check-sub { font-size: 12px; color: #888; }
 
-/* Social section */
-.social-section { margin-bottom: 24px; }
-.social-intro { font-size: 14px; color: #555; margin: 0 0 16px 0; font-weight: 500; }
-
-.social-card {
-  display: flex; align-items: center; gap: 16px; width: 100%;
-  padding: 16px; border: 2px solid #e0e0e0; border-radius: 14px;
-  background: white; cursor: pointer; font-family: inherit;
-  transition: all 0.2s; margin-bottom: 12px; text-align: left;
+/* Info card */
+.info-card {
+  display: flex; align-items: flex-start; gap: 16px;
+  padding: 20px; background: #E8F5E9; border-radius: 16px;
+  border-left: 4px solid #4CAF50;
 }
-.social-card:hover { border-color: #4CAF50; box-shadow: 0 2px 12px rgba(76,175,80,0.12); }
-.social-card:active { transform: scale(0.98); }
-.social-card:disabled { opacity: 0.6; cursor: not-allowed; }
-.social-card ion-icon { font-size: 20px; color: #ccc; flex-shrink: 0; }
-
-.social-logo {
-  width: 44px; height: 44px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px; font-weight: 700; flex-shrink: 0;
+.info-card ion-icon {
+  font-size: 32px; color: #4CAF50; flex-shrink: 0;
 }
-.google-logo { background: #fff; border: 2px solid #e0e0e0; color: #DB4437; }
-.facebook-logo { background: #1877F2; color: white; }
-
-.social-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-.social-name { font-size: 15px; font-weight: 600; color: #1a1a1a; }
-.social-desc { font-size: 12px; color: #888; }
-
-.skip-link {
-  display: block; width: 100%; padding: 14px; text-align: center;
-  background: none; border: 2px dashed #e0e0e0; border-radius: 14px;
-  font-size: 14px; font-weight: 600; color: #888; cursor: pointer;
-  font-family: inherit; transition: all 0.2s; margin-top: 4px;
-}
-.skip-link:hover { border-color: #999; color: #555; }
-
-/* Linked success */
-.linked-success { text-align: center; padding: 24px 0; }
-.linked-icon {
-  width: 80px; height: 80px; background: #E8F5E9; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;
-}
-.linked-icon ion-icon { font-size: 44px; color: #4CAF50; }
-.linked-success h3 { font-size: 20px; font-weight: 700; color: #1a1a1a; margin: 0 0 8px 0; }
-.linked-success p { font-size: 14px; color: #666; margin: 0 0 24px 0; line-height: 1.5; }
+.info-content h3 { font-size: 16px; font-weight: 700; color: #1a1a1a; margin: 0 0 8px 0; }
+.info-content p { font-size: 13px; color: #555; margin: 0; line-height: 1.5; }
 
 .next-button {
   --background: #4CAF50; --background-hover: #45a049;
   --border-radius: 12px; height: 52px; font-size: 15px; font-weight: 600; text-transform: none;
+  margin-top: 24px;
 }
-
-/* Benefits */
-.benefits-card {
-  background: #f8f9fa; border-radius: 16px; padding: 20px; margin-top: 8px;
-}
-.benefits-card h4 { font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 0 0 16px 0; }
-.benefit-item { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 13px; color: #555; }
-.benefit-item:last-child { margin-bottom: 0; }
-.benefit-item ion-icon { font-size: 20px; color: #4CAF50; flex-shrink: 0; }
 
 @media (max-width: 480px) {
   .title { font-size: 22px; }
