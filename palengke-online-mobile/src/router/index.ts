@@ -12,6 +12,8 @@ import RegisterStep6 from '@/views/registration/steps/RegisterStep6.vue';
 
 // Main app pages (add your existing pages here)
 import HomePage from '@/views/HomePage.vue';
+import BrowseSellersPage from '@/views/BrowseSellersPage.vue';
+import SellerStorePage from '@/views/SellerStorePage.vue';
 
 const routes: Array<RouteRecordRaw> = [
   { path: '/', redirect: '/login' },
@@ -75,6 +77,18 @@ const routes: Array<RouteRecordRaw> = [
     path: '/home',
     name: 'Home',
     component: HomePage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/browse',
+    name: 'BrowseSellers',
+    component: BrowseSellersPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/store/:id',
+    name: 'SellerStore',
+    component: SellerStorePage,
     meta: { requiresAuth: true }
   },
 ];
