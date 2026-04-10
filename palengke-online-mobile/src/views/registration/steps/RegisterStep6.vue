@@ -3,79 +3,129 @@
     <ion-content :fullscreen="true" class="success-content">
       <div class="success-container">
 
-        <!-- Animated checkmark -->
-        <div class="success-animation">
-          <div class="ring-outer"></div>
-          <div class="checkmark-circle">
-            <ion-icon :icon="checkmarkOutline"></ion-icon>
+        <!-- Success Icon -->
+        <div class="success-icon">
+          <div class="icon-circle">
+            <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
           </div>
         </div>
 
-        <!-- Welcome message -->
-        <div class="welcome-section">
-          <h1 class="welcome-title">Welcome to<br>Palengke Online!</h1>
-          <p class="welcome-sub">Your account has been created successfully.</p>
+        <!-- Title -->
+        <div class="title-section">
+          <h1 class="title">Account Created!</h1>
+          <p class="subtitle">Welcome to Palengke Online</p>
         </div>
 
-        <!-- Account summary -->
+        <!-- Status Badge -->
+        <div class="status-badge">
+          <ion-icon :icon="informationCircleOutline"></ion-icon>
+          <span>Basic Account - Not Verified</span>
+        </div>
+
+        <!-- Account Summary -->
         <div class="summary-card">
-          <div class="summary-row">
-            <span class="summary-label">Name</span>
-            <span class="summary-value">{{ accountData.fullName }}</span>
+          <h3>Account Details</h3>
+          <div class="summary-item">
+            <span class="label">Name:</span>
+            <span class="value">{{ accountData.fullName }}</span>
           </div>
-          <div class="summary-divider"></div>
-          <div class="summary-row">
-            <span class="summary-label">Mobile</span>
-            <span class="summary-value">{{ accountData.phone }}</span>
+          <div class="summary-item">
+            <span class="label">Email:</span>
+            <span class="value">{{ accountData.email }}</span>
           </div>
-          <div class="summary-divider"></div>
-          <div class="summary-row">
-            <span class="summary-label">Email</span>
-            <span class="summary-value">{{ accountData.email }}</span>
+          <div class="summary-item">
+            <span class="label">Phone:</span>
+            <span class="value">{{ accountData.phone }}</span>
           </div>
-          <div class="summary-divider"></div>
-          <div class="summary-row">
-            <span class="summary-label">Status</span>
-            <span class="badge unverified">Unverified</span>
+          <div class="summary-item">
+            <span class="label">Address:</span>
+            <span class="value">{{ accountData.address }}</span>
           </div>
         </div>
 
-        <!-- Verify CTA -->
-        <div class="verify-card">
-          <div class="verify-header">
-            <ion-icon :icon="shieldHalfOutline"></ion-icon>
-            <div>
-              <h3>Verify now to unlock all features</h3>
-              <p>Submit a valid ID and get your verified badge</p>
+        <!-- What's Missing -->
+        <div class="missing-features">
+          <h3>Limited Account Features</h3>
+          <p class="info-text">Verify your account to unlock all features:</p>
+          <div class="features-list">
+            <div class="feature-item limited">
+              <ion-icon :icon="lockClosedOutline"></ion-icon>
+              <span>Limited purchase amounts</span>
+            </div>
+            <div class="feature-item limited">
+              <ion-icon :icon="lockClosedOutline"></ion-icon>
+              <span>No verified buyer badge</span>
+            </div>
+            <div class="feature-item limited">
+              <ion-icon :icon="lockClosedOutline"></ion-icon>
+              <span>Standard support only</span>
             </div>
           </div>
-          <div class="features-grid">
-            <div class="feature-chip">
-              <ion-icon :icon="checkmarkCircleOutline"></ion-icon>Higher purchase limits
-            </div>
-            <div class="feature-chip">
-              <ion-icon :icon="checkmarkCircleOutline"></ion-icon>Verified buyer badge
-            </div>
-            <div class="feature-chip">
-              <ion-icon :icon="checkmarkCircleOutline"></ion-icon>Priority support
-            </div>
-            <div class="feature-chip">
-              <ion-icon :icon="checkmarkCircleOutline"></ion-icon>Full checkout access
+
+          <!-- Verify Later CTA -->
+          <div class="verify-cta">
+            <ion-icon :icon="informationCircleOutline"></ion-icon>
+            <div class="cta-text">
+              <strong>You can verify anytime!</strong><br>
+              Go to Settings → Account Verification to complete your verification.
             </div>
           </div>
-          <ion-button expand="block" class="verify-btn" @click="goToVerify">
+        </div>
+
+        <!-- Next Steps -->
+        <div class="next-steps">
+          <h3>What's Next?</h3>
+          <div class="steps-list">
+            <div class="step-item">
+              <div class="step-number">1</div>
+              <div class="step-content">
+                <strong>Browse sellers</strong>
+                <p>Explore fresh produce in your area</p>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-number">2</div>
+              <div class="step-content">
+                <strong>Add items to cart</strong>
+                <p>Select products you want to buy</p>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-number">3</div>
+              <div class="step-content">
+                <strong>Place your order</strong>
+                <p>Choose delivery and payment method</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <ion-button 
+            expand="block" 
+            fill="outline"
+            color="primary"
+            class="verify-button"
+            @click="goToVerify"
+          >
             <ion-icon slot="start" :icon="shieldCheckmarkOutline"></ion-icon>
-            Verify My Account
+            Verify Now
+          </ion-button>
+
+          <ion-button 
+            expand="block" 
+            class="home-button"
+            @click="goToHome"
+          >
+            Continue to Browse
+            <ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon>
           </ion-button>
         </div>
 
-        <!-- Skip / browse -->
-        <div class="skip-section">
-          <button class="skip-btn" @click="goToHome">
-            Skip for now — Browse the market
-            <ion-icon :icon="arrowForwardOutline"></ion-icon>
-          </button>
-          <p class="skip-note">You can verify anytime in Profile → Account Verification</p>
+        <!-- Support Link -->
+        <div class="support-link">
+          <p>Need help? <a href="#" @click.prevent="contactSupport">Contact Support</a></p>
         </div>
 
       </div>
@@ -86,22 +136,46 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { IonPage, IonContent, IonButton, IonIcon } from '@ionic/vue';
 import {
-  checkmarkOutline, checkmarkCircleOutline, shieldHalfOutline,
-  shieldCheckmarkOutline, arrowForwardOutline
+  IonPage,
+  IonContent,
+  IonButton,
+  IonIcon,
+  toastController
+} from '@ionic/vue';
+import {
+  checkmarkCircleOutline,
+  informationCircleOutline,
+  shieldCheckmarkOutline,
+  shieldHalfOutline,
+  lockClosedOutline,
+  arrowForwardOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
 
-const accountData = ref({ fullName: '', phone: '', email: '' });
+const accountData = ref({
+  fullName: '',
+  email: '',
+  phone: '',
+  address: ''
+});
 
 onMounted(() => {
   const data = JSON.parse(localStorage.getItem('buyerRegistrationData') || '{}');
   const mid = data.middleName ? ` ${data.middleName} ` : ' ';
   accountData.value.fullName = `${data.firstName || ''}${mid}${data.lastName || ''}`.trim();
-  accountData.value.phone = data.phone || '';
   accountData.value.email = data.email || '';
+  accountData.value.phone = data.phone || '';
+  
+  // Build address from delivery info
+  const addressParts = [];
+  if (data.barangay) addressParts.push(data.barangay);
+  if (data.city) addressParts.push(data.city);
+  if (data.region) addressParts.push(data.region);
+  accountData.value.address = addressParts.length > 0 
+    ? addressParts.join(', ') 
+    : 'Not provided';
 });
 
 const goToVerify = () => {
@@ -111,105 +185,376 @@ const goToVerify = () => {
 const goToHome = () => {
   localStorage.removeItem('buyerRegistrationData');
   localStorage.setItem('isAuthenticated', 'true');
-  router.push('/home');
+  
+  showSuccessToast();
+  
+  setTimeout(() => {
+    router.push('/home');
+  }, 1000);
+};
+
+const showSuccessToast = async () => {
+  const toast = await toastController.create({
+    message: 'Account created! Welcome to Palengke Online.',
+    duration: 3000,
+    color: 'success',
+    position: 'top'
+  });
+  await toast.present();
+};
+
+const contactSupport = async () => {
+  const toast = await toastController.create({
+    message: 'Support: support@palengke-online.com',
+    duration: 3000,
+    color: 'primary',
+    position: 'bottom'
+  });
+  await toast.present();
 };
 </script>
 
 <style scoped>
-.success-content { --background: #ffffff; }
+.success-content {
+  --background: var(--color-bg-primary);
+}
+
 .success-container {
-  min-height: 100vh; padding: 48px 24px 40px;
-  display: flex; flex-direction: column; align-items: center;
+  min-height: 100vh;
+  padding: 40px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* Animation */
-.success-animation {
-  position: relative; width: 120px; height: 120px; margin-bottom: 32px;
-}
-.checkmark-circle {
-  width: 120px; height: 120px; border-radius: 50%;
-  background: #4CAF50; display: flex; align-items: center; justify-content: center;
-  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 8px 24px rgba(76,175,80,0.3);
-}
-.checkmark-circle ion-icon { font-size: 64px; color: white; }
-
-.ring-outer {
-  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-  border-radius: 50%; border: 3px solid #4CAF50;
-  animation: expandRing 1.5s ease-out infinite; opacity: 0;
+/* Success Icon */
+.success-icon {
+  margin-bottom: 24px;
 }
 
-@keyframes popIn {
-  0% { transform: scale(0); opacity: 0; }
-  60% { transform: scale(1.1); }
-  100% { transform: scale(1); opacity: 1; }
-}
-@keyframes expandRing {
-  0% { transform: scale(1); opacity: 0.6; }
-  100% { transform: scale(1.6); opacity: 0; }
+.icon-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-unverified-bg) 0%, var(--color-warning) 100%);
+  box-shadow: 0 8px 24px rgba(255, 152, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: scaleIn 0.5s ease-out;
 }
 
-/* Welcome */
-.welcome-section { text-align: center; margin-bottom: 28px; }
-.welcome-title { font-size: 30px; font-weight: 700; color: #1a1a1a; margin: 0 0 10px 0; line-height: 1.3; }
-.welcome-sub { font-size: 15px; color: #666; margin: 0; }
+.icon-circle ion-icon {
+  font-size: 64px;
+  color: var(--color-text-inverse);
+}
 
-/* Summary card */
+@keyframes scaleIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Title Section */
+.title-section {
+  text-align: center;
+  margin-bottom: 24px;
+  max-width: 500px;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 8px 0;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Status Badge */
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 24px;
+  margin-bottom: 32px;
+  font-weight: 600;
+  font-size: 14px;
+  background: var(--color-unverified-bg);
+  color: var(--color-text-inverse);
+}
+
+.status-badge ion-icon {
+  font-size: 20px;
+}
+
+/* Summary Card */
 .summary-card {
-  width: 100%; max-width: 420px; background: #f8f9fa;
-  border-radius: 16px; padding: 20px; margin-bottom: 20px;
-}
-.summary-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
-.summary-label { font-size: 13px; color: #888; }
-.summary-value { font-size: 14px; font-weight: 600; color: #1a1a1a; text-align: right; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.summary-divider { height: 1px; background: #e8e8e8; margin: 10px 0; }
-
-.badge {
-  display: inline-flex; align-items: center; padding: 4px 12px;
-  border-radius: 20px; font-size: 12px; font-weight: 700;
-}
-.badge.unverified { background: #FFF3E0; color: #E65100; }
-.badge.verified { background: #E8F5E9; color: #2E7D32; }
-
-/* Verify card */
-.verify-card {
-  width: 100%; max-width: 420px; background: #E8F5E9;
-  border: 2px solid #4CAF50; border-radius: 20px; padding: 24px; margin-bottom: 20px;
-}
-.verify-header { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 16px; }
-.verify-header ion-icon { font-size: 32px; color: #4CAF50; flex-shrink: 0; margin-top: 2px; }
-.verify-header h3 { font-size: 16px; font-weight: 700; color: #1a1a1a; margin: 0 0 4px 0; }
-.verify-header p { font-size: 13px; color: #555; margin: 0; }
-
-.features-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
-.feature-chip {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 12px; color: #2E7D32; font-weight: 500;
-}
-.feature-chip ion-icon { font-size: 16px; color: #4CAF50; flex-shrink: 0; }
-
-.verify-btn {
-  --background: #4CAF50; --background-hover: #45a049;
-  --border-radius: 12px; height: 52px; font-size: 15px; font-weight: 600; text-transform: none;
+  width: 100%;
+  max-width: 500px;
+  background: var(--color-card-bg);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 16px var(--color-card-shadow);
 }
 
-/* Skip */
-.skip-section { text-align: center; }
-.skip-btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: none; border: none; font-size: 14px; font-weight: 600;
-  color: #4CAF50; cursor: pointer; font-family: inherit; padding: 10px;
+.summary-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 20px 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--color-card-border);
 }
-.skip-btn ion-icon { font-size: 16px; }
-.skip-note { font-size: 12px; color: #aaa; margin: 8px 0 0 0; }
 
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-card-border);
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+}
+
+.summary-item .label {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.summary-item .value {
+  font-size: 14px;
+  color: var(--color-text-primary);
+  font-weight: 600;
+  text-align: right;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Missing Features */
+.missing-features {
+  width: 100%;
+  max-width: 500px;
+  background: var(--color-card-bg);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 16px var(--color-card-shadow);
+  border: 3px solid var(--color-unverified-bg);
+}
+
+.missing-features h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-warning-text);
+  margin: 0 0 12px 0;
+}
+
+.info-text {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin: 0 0 16px 0;
+}
+
+.features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.feature-item.limited {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.feature-item.limited ion-icon {
+  font-size: 20px;
+  color: var(--color-unverified-bg);
+  flex-shrink: 0;
+}
+
+.feature-item.limited span {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+/* Verify CTA */
+.verify-cta {
+  display: flex;
+  gap: 12px;
+  background: var(--color-warning-bg);
+  border-radius: 12px;
+  padding: 16px;
+  border-left: 4px solid var(--color-warning-border);
+}
+
+.verify-cta ion-icon {
+  font-size: 24px;
+  color: var(--color-warning-border);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.cta-text {
+  font-size: 13px;
+  color: var(--color-warning-text);
+  line-height: 1.5;
+}
+
+.cta-text strong {
+  font-weight: 700;
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* Next Steps */
+.next-steps {
+  width: 100%;
+  max-width: 500px;
+  background: var(--color-card-bg);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 16px var(--color-card-shadow);
+}
+
+.next-steps h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 20px 0;
+}
+
+.steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.step-item {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.step-number {
+  width: 32px;
+  height: 32px;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.step-content {
+  flex: 1;
+}
+
+.step-content strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 4px;
+}
+
+.step-content p {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Action Buttons */
+.action-buttons {
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.verify-button {
+  --border-radius: 12px;
+  --border-width: 2px;
+  height: 52px;
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.home-button {
+  --background: var(--color-primary);
+  --background-hover: var(--color-primary-hover);
+  --border-radius: 12px;
+  height: 52px;
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+/* Support Link */
+.support-link {
+  text-align: center;
+  margin-top: 16px;
+}
+
+.support-link p {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.support-link a {
+  color: var(--color-link);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* Responsive */
 @media (max-width: 480px) {
-  .success-container { padding: 40px 16px 32px; }
-  .welcome-title { font-size: 26px; }
-  .checkmark-circle { width: 100px; height: 100px; }
-  .checkmark-circle ion-icon { font-size: 52px; }
-  .success-animation { width: 100px; height: 100px; }
-  .features-grid { grid-template-columns: 1fr; }
+  .success-container {
+    padding: 32px 16px;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+
+  .icon-circle {
+    width: 100px;
+    height: 100px;
+  }
+
+  .icon-circle ion-icon {
+    font-size: 56px;
+  }
 }
 </style>

@@ -8,8 +8,8 @@
         </div>
 
         <div class="progress-section">
-          <div class="progress-bar"><div class="progress-fill" style="width: 33.32%"></div></div>
-          <p class="progress-text">Step 2 of 6</p>
+          <div class="progress-bar"><div class="progress-fill" style="width: 28.56%"></div></div>
+          <p class="progress-text">Step 2 of 7</p>
         </div>
 
         <div class="title-section">
@@ -74,19 +74,6 @@
             <span v-else class="helper-text">You must be at least 18 years old</span>
           </div>
 
-          <!-- Email -->
-          <div class="input-group">
-            <label class="input-label">Email Address *</label>
-            <div class="input-wrapper" :class="{ error: errors.email, success: isEmailValid && formData.email }">
-              <ion-icon :icon="mailOutline" class="input-icon"></ion-icon>
-              <input v-model="formData.email" type="email" placeholder="juan@example.com"
-                class="custom-input with-icon" @blur="validateField('email')" @input="errors.email = ''">
-              <ion-icon v-if="isEmailValid && formData.email" :icon="checkmarkCircleOutline" class="success-icon"></ion-icon>
-            </div>
-            <span v-if="errors.email" class="error-message">{{ errors.email }}</span>
-            <span v-else class="helper-text">For order confirmations and receipts</span>
-          </div>
-
           <div class="info-box">
             <ion-icon :icon="shieldCheckmarkOutline"></ion-icon>
             <div>
@@ -116,14 +103,14 @@ import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon } from '@ionic/vue';
 import {
   arrowBackOutline, arrowForwardOutline, personOutline,
-  calendarOutline, mailOutline, checkmarkCircleOutline, shieldCheckmarkOutline
+  calendarOutline, shieldCheckmarkOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
 
-const formData = ref({ firstName: '', middleName: '', lastName: '', birthdate: '', email: '' });
+const formData = ref({ firstName: '', middleName: '', lastName: '', birthdate: '' });
 const noMiddleName = ref(false);
-const errors = ref({ firstName: '', lastName: '', birthdate: '', email: '' });
+const errors = ref({ firstName: '', lastName: '', birthdate: '' });
 
 const maxDate = computed(() => {
   const d = new Date();
@@ -131,14 +118,10 @@ const maxDate = computed(() => {
   return d.toISOString().split('T')[0];
 });
 
-const isEmailValid = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.email));
-
 const isFormValid = computed(() =>
   formData.value.firstName.trim() &&
   formData.value.lastName.trim() &&
-  formData.value.birthdate &&
-  formData.value.email &&
-  isEmailValid.value
+  formData.value.birthdate
 );
 
 const onNoMiddleNameChange = () => {
@@ -165,18 +148,13 @@ const validateField = (field) => {
     if (age < 18) { errors.value.birthdate = 'You must be at least 18 years old'; return false; }
     errors.value.birthdate = ''; return true;
   }
-  if (field === 'email') {
-    if (!formData.value.email) { errors.value.email = 'Email is required'; return false; }
-    if (!isEmailValid.value) { errors.value.email = 'Enter a valid email address'; return false; }
-    errors.value.email = ''; return true;
-  }
   return true;
 };
 
 const goBack = () => router.push('/register/step1');
 
 const handleNext = () => {
-  const valid = ['firstName', 'lastName', 'birthdate', 'email'].every(f => validateField(f));
+  const valid = ['firstName', 'lastName', 'birthdate'].every(f => validateField(f));
   if (!valid) return;
   const existing = JSON.parse(localStorage.getItem('buyerRegistrationData') || '{}');
   Object.assign(existing, {
@@ -184,8 +162,7 @@ const handleNext = () => {
     middleName: noMiddleName.value ? '' : formData.value.middleName,
     lastName: formData.value.lastName,
     noMiddleName: noMiddleName.value,
-    birthdate: formData.value.birthdate,
-    email: formData.value.email
+    birthdate: formData.value.birthdate
   });
   localStorage.setItem('buyerRegistrationData', JSON.stringify(existing));
   router.push('/register/step3');

@@ -8,95 +8,16 @@
         </div>
 
         <div class="progress-section">
-          <div class="progress-bar"><div class="progress-fill" style="width: 66.64%"></div></div>
-          <p class="progress-text">Step 4 of 6</p>
+          <div class="progress-bar"><div class="progress-fill" style="width: 57.12%"></div></div>
+          <p class="progress-text">Step 4 of 7</p>
         </div>
 
         <div class="title-section">
-          <h1 class="title">Set Your Password</h1>
-          <p class="subtitle">Create a strong password for your account</p>
+          <h1 class="title">Terms & Conditions</h1>
+          <p class="subtitle">Please review and accept to continue</p>
         </div>
 
         <div class="form-section">
-
-          <!-- Password -->
-          <div class="input-group">
-            <label class="input-label">Password *</label>
-            <div class="input-wrapper" :class="{ error: errors.password, success: isPasswordStrong }">
-              <ion-icon :icon="lockClosedOutline" class="input-icon"></ion-icon>
-              <input
-                v-model="password"
-                :type="showPassword ? 'text' : 'password'"
-                placeholder="Create a password"
-                class="custom-input with-icon with-toggle"
-                @input="onPasswordInput"
-                @blur="validatePassword"
-              >
-              <ion-icon
-                :icon="showPassword ? eyeOffOutline : eyeOutline"
-                class="toggle-icon"
-                @click="showPassword = !showPassword"
-              ></ion-icon>
-            </div>
-            <span v-if="errors.password" class="error-message">{{ errors.password }}</span>
-
-            <!-- Password strength meter -->
-            <div v-if="password" class="strength-section">
-              <div class="strength-bar">
-                <div
-                  class="strength-fill"
-                  :class="strengthClass"
-                  :style="{ width: strengthPercent + '%' }"
-                ></div>
-              </div>
-              <span class="strength-label" :class="strengthClass">{{ strengthLabel }}</span>
-            </div>
-
-            <!-- Criteria list -->
-            <div v-if="password" class="criteria-list">
-              <div class="criteria-item" :class="{ met: password.length >= 8 }">
-                <ion-icon :icon="password.length >= 8 ? checkmarkCircleOutline : ellipseOutline"></ion-icon>
-                At least 8 characters
-              </div>
-              <div class="criteria-item" :class="{ met: hasUppercase }">
-                <ion-icon :icon="hasUppercase ? checkmarkCircleOutline : ellipseOutline"></ion-icon>
-                One uppercase letter
-              </div>
-              <div class="criteria-item" :class="{ met: hasNumber }">
-                <ion-icon :icon="hasNumber ? checkmarkCircleOutline : ellipseOutline"></ion-icon>
-                One number
-              </div>
-              <div class="criteria-item" :class="{ met: hasSpecial }">
-                <ion-icon :icon="hasSpecial ? checkmarkCircleOutline : ellipseOutline"></ion-icon>
-                One special character (!@#$...)
-              </div>
-            </div>
-          </div>
-
-          <!-- Confirm Password -->
-          <div class="input-group">
-            <label class="input-label">Confirm Password *</label>
-            <div class="input-wrapper" :class="{ error: errors.confirmPassword, success: isConfirmValid }">
-              <ion-icon :icon="lockClosedOutline" class="input-icon"></ion-icon>
-              <input
-                v-model="confirmPassword"
-                :type="showConfirm ? 'text' : 'password'"
-                placeholder="Re-enter your password"
-                class="custom-input with-icon with-toggle"
-                @input="errors.confirmPassword = ''"
-                @blur="validateConfirm"
-              >
-              <ion-icon
-                :icon="showConfirm ? eyeOffOutline : eyeOutline"
-                class="toggle-icon"
-                @click="showConfirm = !showConfirm"
-              ></ion-icon>
-            </div>
-            <span v-if="errors.confirmPassword" class="error-message">{{ errors.confirmPassword }}</span>
-            <span v-else-if="isConfirmValid" class="success-message">
-              <ion-icon :icon="checkmarkCircleOutline"></ion-icon> Passwords match
-            </span>
-          </div>
 
           <!-- Terms & Conditions -->
           <div class="terms-section">
@@ -121,8 +42,8 @@
           <div class="security-note">
             <ion-icon :icon="shieldCheckmarkOutline"></ion-icon>
             <div>
-              <strong>Your password is encrypted</strong><br>
-              We never store your password in plain text. It is secured using industry-standard encryption.
+              <strong>Your data is secure</strong><br>
+              Your personal information is encrypted and never shared with third parties.
             </div>
           </div>
 
@@ -146,75 +67,16 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon, alertController } from '@ionic/vue';
 import {
-  arrowBackOutline, arrowForwardOutline, lockClosedOutline,
-  eyeOutline, eyeOffOutline, checkmarkCircleOutline, ellipseOutline,
+  arrowBackOutline, arrowForwardOutline,
   shieldCheckmarkOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
 
-const password = ref('');
-const confirmPassword = ref('');
-const showPassword = ref(false);
-const showConfirm = ref(false);
 const acceptedTerms = ref(false);
 const acceptMarketing = ref(false);
-const errors = ref({ password: '', confirmPassword: '' });
 
-const hasUppercase = computed(() => /[A-Z]/.test(password.value));
-const hasNumber = computed(() => /\d/.test(password.value));
-const hasSpecial = computed(() => /[!@#$%^&*(),.?":{}|<>]/.test(password.value));
-
-const strengthScore = computed(() => {
-  let score = 0;
-  if (password.value.length >= 8) score++;
-  if (password.value.length >= 12) score++;
-  if (hasUppercase.value) score++;
-  if (hasNumber.value) score++;
-  if (hasSpecial.value) score++;
-  return score;
-});
-
-const strengthPercent = computed(() => (strengthScore.value / 5) * 100);
-const isPasswordStrong = computed(() => password.value.length >= 8 && hasUppercase.value && hasNumber.value);
-
-const strengthClass = computed(() => {
-  if (strengthScore.value <= 1) return 'weak';
-  if (strengthScore.value <= 3) return 'fair';
-  if (strengthScore.value === 4) return 'good';
-  return 'strong';
-});
-
-const strengthLabel = computed(() => {
-  if (strengthScore.value <= 1) return 'Weak';
-  if (strengthScore.value <= 3) return 'Fair';
-  if (strengthScore.value === 4) return 'Good';
-  return 'Strong';
-});
-
-const isConfirmValid = computed(() =>
-  confirmPassword.value && password.value === confirmPassword.value
-);
-
-const isFormValid = computed(() =>
-  password.value.length >= 8 &&
-  password.value === confirmPassword.value &&
-  acceptedTerms.value
-);
-
-const onPasswordInput = () => { errors.value.password = ''; };
-
-const validatePassword = () => {
-  if (!password.value) { errors.value.password = 'Password is required'; return false; }
-  if (password.value.length < 8) { errors.value.password = 'Password must be at least 8 characters'; return false; }
-  errors.value.password = ''; return true;
-};
-
-const validateConfirm = () => {
-  if (!confirmPassword.value) { errors.value.confirmPassword = 'Please confirm your password'; return false; }
-  if (confirmPassword.value !== password.value) { errors.value.confirmPassword = 'Passwords do not match'; return false; }
-  errors.value.confirmPassword = ''; return true;
-};
+const isFormValid = computed(() => acceptedTerms.value);
 
 const openTerms = async () => {
   const alert = await alertController.create({
@@ -239,7 +101,6 @@ const goBack = () => router.push('/register/step3');
 const handleNext = () => {
   if (!isFormValid.value) return;
   const existing = JSON.parse(localStorage.getItem('buyerRegistrationData') || '{}');
-  existing.password = password.value;
   existing.acceptMarketing = acceptMarketing.value;
   existing.termsAccepted = true;
   localStorage.setItem('buyerRegistrationData', JSON.stringify(existing));
@@ -269,55 +130,6 @@ const handleNext = () => {
 .subtitle { font-size: 15px; color: #666; margin: 0; }
 
 .form-section { max-width: 480px; margin: 0 auto; width: 100%; }
-
-.input-group { margin-bottom: 20px; }
-.input-label { display: block; font-size: 14px; font-weight: 600; color: #1a1a1a; margin-bottom: 8px; }
-
-.input-wrapper { position: relative; display: flex; align-items: center; }
-.input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 20px; color: #4CAF50; z-index: 2; }
-.toggle-icon { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 20px; color: #999; cursor: pointer; z-index: 2; }
-
-.custom-input {
-  width: 100%; padding: 14px 16px; border: 2px solid #e0e0e0;
-  border-radius: 12px; font-size: 15px; background: white;
-  transition: border-color 0.2s; font-family: inherit;
-}
-.custom-input.with-icon { padding-left: 46px; }
-.custom-input.with-toggle { padding-right: 46px; }
-.custom-input:focus { outline: none; border-color: #4CAF50; }
-.custom-input::placeholder { color: #999; }
-
-.input-wrapper.error .custom-input { border-color: #f44336; }
-.input-wrapper.success .custom-input { border-color: #4CAF50; }
-
-.error-message { display: block; font-size: 12px; color: #f44336; margin-top: 6px; font-weight: 500; }
-.success-message {
-  display: flex; align-items: center; gap: 4px;
-  font-size: 12px; color: #4CAF50; margin-top: 6px; font-weight: 600;
-}
-.success-message ion-icon { font-size: 16px; }
-
-/* Strength meter */
-.strength-section { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
-.strength-bar { flex: 1; height: 6px; background: #e0e0e0; border-radius: 3px; overflow: hidden; }
-.strength-fill { height: 100%; border-radius: 3px; transition: width 0.3s, background 0.3s; }
-.strength-fill.weak { background: #f44336; }
-.strength-fill.fair { background: #FF9800; }
-.strength-fill.good { background: #2196F3; }
-.strength-fill.strong { background: #4CAF50; }
-
-.strength-label { font-size: 12px; font-weight: 600; min-width: 44px; }
-.strength-label.weak { color: #f44336; }
-.strength-label.fair { color: #FF9800; }
-.strength-label.good { color: #2196F3; }
-.strength-label.strong { color: #4CAF50; }
-
-/* Criteria */
-.criteria-list { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
-.criteria-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #999; }
-.criteria-item ion-icon { font-size: 16px; flex-shrink: 0; color: #e0e0e0; }
-.criteria-item.met { color: #4CAF50; }
-.criteria-item.met ion-icon { color: #4CAF50; }
 
 /* Terms */
 .terms-section { margin: 28px 0; }

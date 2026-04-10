@@ -1,2 +1,84 @@
 /* For information on how to create your own theme, please refer to:
 http://ionicframework.com/docs/theming/ */
+
+/* Ionic Theme Variables for Light/Dark Mode Support */
+:root {
+  /* Brand Colors */
+  --color-primary: #4CAF50;
+  --color-primary-hover: #45a049;
+  --color-secondary: #2196F3;
+  --color-secondary-hover: #1976D2;
+  --color-success: #4CAF50;
+  --color-warning: #FF9800;
+  --color-error: #f44336;
+  --color-info: #2196F3;
+
+  /* Background Colors */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f8f9fa;
+  --color-bg-tertiary: #f5f5f5;
+  --color-bg-gradient-start: #f8f9fa;
+  --color-bg-gradient-end: #e8f5e9;
+
+  /* Card/Container Colors */
+  --color-card-bg: #ffffff;
+  --color-card-border: #f0f0f0;
+  --color-card-shadow: rgba(0, 0, 0, 0.08);
+
+  /* Text Colors */
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #666666;
+  --color-text-tertiary: #999999;
+  --color-text-inverse: #ffffff;
+
+  /* Border Colors */
+  --color-border: #e0e0e0;
+  --color-border-focus: #4CAF50;
+
+  /* Input Colors */
+  --color-input-bg: #ffffff;
+  --color-input-placeholder: #999999;
+  --color-input-disabled-bg: #f5f5f5;
+
+  /* Icon Colors */
+  --color-icon-primary: #4CAF50;
+  --color-icon-secondary: #666666;
+  --color-icon-tertiary: #999999;
+
+  /* Info Box Colors */
+  --color-info-bg: #E3F2FD;
+  --color-info-border: #2196F3;
+  --color-info-text: #1565C0;
+
+  /* Success Box Colors */
+  --color-success-bg: #E8F5E9;
+  --color-success-border: #4CAF50;
+  --color-success-text: #2E7D32;
+
+  /* Warning Box Colors */
+  --color-warning-bg: #FFF3E0;
+  --color-warning-border: #FF9800;
+  --color-warning-text: #E65100;
+
+  /* Error Box Colors */
+  --color-error-bg: #FFEBEE;
+  --color-error-border: #f44336;
+  --color-error-text: #c62828;
+
+  /* OTP Section Colors */
+  --color-otp-bg: #E3F2FD;
+  --color-otp-border: #2196F3;
+  --color-otp-text: #1565C0;
+
+  /* Modal/Alert Colors */
+  --color-modal-bg: #ffffff;
+  --color-modal-text: #1a1a1a;
+  --color-modal-backdrop: rgba(0, 0, 0, 0.5);
+
+  /* Status Badge Colors */
+  --color-verified-bg: #4CAF50;
+  --color-unverified-bg: #FF9800;
+
+  /* Link Colors */
+  --color-link: #4CAF50;
+}

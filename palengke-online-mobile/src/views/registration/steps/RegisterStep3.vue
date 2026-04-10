@@ -8,8 +8,8 @@
         </div>
 
         <div class="progress-section">
-          <div class="progress-bar"><div class="progress-fill" style="width: 49.98%"></div></div>
-          <p class="progress-text">Step 3 of 6</p>
+          <div class="progress-bar"><div class="progress-fill" style="width: 42.84%"></div></div>
+          <p class="progress-text">Step 3 of 7</p>
         </div>
 
         <div class="title-section">
