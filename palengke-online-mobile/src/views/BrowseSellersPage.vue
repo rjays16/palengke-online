@@ -362,12 +362,21 @@ const goToProfile = () => router.push('/profile');
 </script>
 
 <style scoped>
-.browse-content { --background: #f8f9fa; }
+.browse-content { 
+  --background: #f8f9fa;
+  --padding-top: 0px;
+  --padding-start: 0px;
+  --padding-end: 0px;
+}
+
+.browse-content .scroll-content {
+  padding-top: 0px !important;
+}
 
 /* ─── Search Header ──────────────────────────── */
 .search-header {
   background: white;
-  padding: 52px 16px 12px;
+  padding: 4px 16px 12px;
   border-bottom: 1px solid #f0f0f0;
   position: sticky; top: 0; z-index: 100;
 }

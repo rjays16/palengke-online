@@ -392,12 +392,17 @@ const goToNotifications = () => router.push('/notifications');
 </script>
 
 <style scoped>
-.home-content { --background: #f8f9fa; }
+.home-content { 
+  --background: #f8f9fa;
+  --padding-top: 0px;
+  --padding-start: 0px;
+  --padding-end: 0px;
+}
 
 /* ─── Top Header ────────────────────────────── */
 .top-header {
   background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
-  padding: 52px 20px 16px;
+  padding: 12px 20px 16px;
   display: flex; justify-content: space-between; align-items: flex-start;
 }
 
