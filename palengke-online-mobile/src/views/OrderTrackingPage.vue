@@ -232,12 +232,8 @@ const simulateDriverMovement = () => {
 
 const toggleSheet = () => {};
 const openPromo = () => {};
-const chatDriver = async () => {
-  const toast = await toastController.create({
-    message: 'Opening chat with driver...',
-    duration: 1500, color: 'primary', position: 'top'
-  });
-  await toast.present();
+const chatDriver = () => {
+  router.push('/messages');
 };
 const callDriver = () => { window.location.href = 'tel:+639123456789'; };
 const getHelp = () => router.push('/help');

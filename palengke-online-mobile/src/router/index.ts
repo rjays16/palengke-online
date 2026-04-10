@@ -18,6 +18,7 @@ import CartPage from '@/views/CartPage.vue';
 import CheckoutPage from '@/views/CheckoutPage.vue';
 import TipPage from '@/views/TipPage.vue';
 import OrderTrackingPage from '@/views/OrderTrackingPage.vue';
+import MessagesPage from '@/views/MessagesPage.vue';
 
 const routes: Array<RouteRecordRaw> = [
   { path: '/', redirect: '/login' },
@@ -117,6 +118,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/order-tracking/:id',
     name: 'OrderTracking',
     component: OrderTrackingPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/messages',
+    name: 'Messages',
+    component: MessagesPage,
     meta: { requiresAuth: true }
   },
 ];
