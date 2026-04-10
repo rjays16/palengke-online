@@ -33,22 +33,34 @@
           v-for="store in cartStores"
           :key="store.id"
           class="store-cart-card"
-          @click="goToCheckout(store)"
         >
           <!-- Store Header -->
           <div class="store-cart-header">
-            <div class="store-cart-icon">{{ store.emoji }}</div>
+            <div class="store-cart-icon" :style="{ background: store.color }">{{ store.emoji }}</div>
             <div class="store-cart-info">
               <h3>{{ store.name }}</h3>
               <p>{{ store.itemCount }} items • {{ store.deliveryTime }} • {{ store.distance }}</p>
             </div>
-            <div class="store-cart-images">
-              <div
-                v-for="(item, i) in store.items.slice(0, 3)"
-                :key="i"
-                class="cart-thumb"
-              >
-                {{ item.emoji }}
+            <div class="store-total" @click="goToCheckout(store)">
+              <span class="total-amount">₱{{ getStoreTotal(store).toFixed(2) }}</span>
+              <ion-icon :icon="chevronForwardOutline"></ion-icon>
+            </div>
+          </div>
+
+          <!-- Items List -->
+          <div class="items-list">
+            <div v-for="item in store.items" :key="item.id" class="cart-item">
+              <span class="item-emoji">{{ item.emoji }}</span>
+              <div class="item-details">
+                <span class="item-name">{{ item.name }}</span>
+                <span class="item-price">₱{{ item.price.toFixed(2) }}</span>
+              </div>
+              <div class="quantity-controls">
+                <button class="qty-btn" @click.stop="updateQuantity(store.id, item.id, -1)">
+                  {{ item.quantity > 1 ? '−' : '🗑️' }}
+                </button>
+                <span class="qty-value">{{ item.quantity }}</span>
+                <button class="qty-btn" @click.stop="updateQuantity(store.id, item.id, 1)">+</button>
               </div>
             </div>
           </div>
@@ -59,6 +71,27 @@
           <ion-icon :icon="addCircleOutline"></ion-icon>
           <span>Order from another seller</span>
         </div>
+      </div>
+
+      <!-- Cart Summary -->
+      <div class="cart-summary">
+        <div class="summary-row">
+          <span>Items ({{ getItemCount() }})</span>
+          <span>₱{{ getCartTotal().toFixed(2) }}</span>
+        </div>
+        <div class="summary-row">
+          <span>Delivery Fee</span>
+          <span :class="{ free: getTotalDeliveryFee() === 0 }">
+            {{ getTotalDeliveryFee() === 0 ? 'Free' : '₱' + getTotalDeliveryFee().toFixed(2) }}
+          </span>
+        </div>
+        <div class="summary-total">
+          <span>Total</span>
+          <span>₱{{ (getCartTotal() + getTotalDeliveryFee()).toFixed(2) }}</span>
+        </div>
+        <ion-button expand="block" color="success" class="checkout-btn" @click="goToCheckoutFirst">
+          Proceed to Checkout
+        </ion-button>
       </div>
 
     </ion-content>
@@ -73,7 +106,7 @@ import {
   IonButtons, IonBackButton, IonButton, IonIcon,
   actionSheetController
 } from '@ionic/vue';
-import { searchOutline, addCircleOutline } from 'ionicons/icons';
+import { searchOutline, addCircleOutline, chevronForwardOutline } from 'ionicons/icons';
 
 const router = useRouter();
 
@@ -82,27 +115,64 @@ const cartStores = ref([
     id: 1,
     name: "Juan's Fresh Market",
     emoji: '🥦',
-    itemCount: 2,
+    color: 'linear-gradient(135deg, #4CAF50, #2E7D32)',
+    itemCount: 3,
     deliveryTime: 'From 25 mins',
     distance: '2.3 km',
+    deliveryFee: 45,
+    freeDelivery: false,
     items: [
-      { id: 1, name: 'Bawang/Garlic', emoji: '🧄', price: 66.00, quantity: 1 },
-      { id: 2, name: 'Kamatis/Tomato', emoji: '🍅', price: 48.00, quantity: 2 }
+      { id: 1, name: 'Bawang/Garlic (100g)', emoji: '🧄', price: 66.00, quantity: 1 },
+      { id: 2, name: 'Kamatis/Tomato (1kg)', emoji: '🍅', price: 48.00, quantity: 2 },
+      { id: 3, name: 'Siling Labuyo (50g)', emoji: '🌶️', price: 35.00, quantity: 1 }
     ]
   },
   {
     id: 2,
     name: "Ana's Palengke - Cogon",
     emoji: '🍎',
+    color: 'linear-gradient(135deg, #FF9800, #E65100)',
     itemCount: 2,
     deliveryTime: 'From 20 mins',
     distance: '1.5 km',
+    deliveryFee: 0,
+    freeDelivery: true,
     items: [
       { id: 10, name: 'Apple Med. Size', emoji: '🍎', price: 162.00, quantity: 1 },
       { id: 11, name: 'Banana (Large)', emoji: '🍌', price: 129.00, quantity: 1 }
     ]
   }
 ]);
+
+const getStoreTotal = (store) => {
+  return store.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+};
+
+const getCartTotal = () => {
+  return cartStores.value.reduce((sum, store) => sum + getStoreTotal(store), 0);
+};
+
+const getTotalDeliveryFee = () => {
+  return cartStores.value.reduce((sum, store) => sum + store.deliveryFee, 0);
+};
+
+const getItemCount = () => {
+  return cartStores.value.reduce((sum, store) => sum + store.items.reduce((s, item) => s + item.quantity, 0), 0);
+};
+
+const updateQuantity = (storeId, itemId, delta) => {
+  const store = cartStores.value.find(s => s.id === storeId);
+  if (store) {
+    const item = store.items.find(i => i.id === itemId);
+    if (item) {
+      item.quantity = Math.max(0, item.quantity + delta);
+      if (item.quantity === 0) {
+        store.items = store.items.filter(i => i.id !== itemId);
+      }
+      store.itemCount = store.items.reduce((s, i) => s + i.quantity, 0);
+    }
+  }
+};
 
 const manageCart = async () => {
   const actionSheet = await actionSheetController.create({
@@ -115,12 +185,19 @@ const manageCart = async () => {
   await actionSheet.present();
 };
 
-const goToCheckout = (store) => router.push(`/checkout/${store.id}`);
+const goToCheckoutFirst = () => {
+  router.push('/checkout');
+};
+
+const goToCheckout = (store) => router.push('/checkout');
 const goToBrowse = () => router.push('/browse');
 </script>
 
 <style scoped>
-.cart-content { --background: #f8f9fa; }
+.cart-content { 
+  --background: #f8f9fa;
+  --padding-top: 0px;
+}
 
 /* Empty Cart */
 .empty-cart {
@@ -174,4 +251,74 @@ const goToBrowse = () => router.push('/browse');
   color: #4CAF50; font-size: 15px; font-weight: 600;
 }
 .add-more-btn ion-icon { font-size: 24px; }
+
+/* Store Total */
+.store-total {
+  display: flex; align-items: center; gap: 4px;
+  cursor: pointer;
+}
+.total-amount {
+  font-size: 16px; font-weight: 700; color: #4CAF50;
+}
+.store-total ion-icon { font-size: 18px; color: #999; }
+
+/* Items List */
+.items-list {
+  padding: 0 16px 16px;
+  display: flex; flex-direction: column; gap: 0;
+}
+
+.cart-item {
+  display: flex; align-items: center;
+  padding: 12px 0; border-bottom: 1px solid #f0f0f0;
+}
+.cart-item:last-child { border-bottom: none; }
+
+.item-emoji { font-size: 28px; margin-right: 12px; }
+
+.item-details {
+  flex: 1; display: flex; flex-direction: column;
+}
+.item-name { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+.item-price { font-size: 13px; color: #666; }
+
+.quantity-controls {
+  display: flex; align-items: center; gap: 8px;
+}
+.qty-btn {
+  width: 32px; height: 32px; border-radius: 8px;
+  border: none; background: #f5f5f5;
+  font-size: 18px; font-weight: 700;
+  cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+}
+.qty-value {
+  width: 28px; text-align: center;
+  font-size: 15px; font-weight: 700;
+}
+
+/* Cart Summary */
+.cart-summary {
+  background: white; padding: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+.summary-row {
+  display: flex; justify-content: space-between;
+  padding: 8px 0; font-size: 14px; color: #666;
+}
+.summary-row .free { color: #4CAF50; font-weight: 600; }
+
+.summary-total {
+  display: flex; justify-content: space-between;
+  padding: 16px 0; border-top: 1px solid #e0e0e0;
+  margin-top: 8px; font-size: 18px; font-weight: 700;
+  color: #1a1a1a;
+}
+
+.checkout-btn {
+  --background: #4CAF50;
+  --border-radius: 12px; height: 52px;
+  font-size: 16px; font-weight: 700;
+  margin-top: 16px;
+}
 </style>

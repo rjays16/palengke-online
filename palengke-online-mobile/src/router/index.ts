@@ -14,6 +14,9 @@ import RegisterStep6 from '@/views/registration/steps/RegisterStep6.vue';
 import HomePage from '@/views/HomePage.vue';
 import BrowseSellersPage from '@/views/BrowseSellersPage.vue';
 import SellerStorePage from '@/views/SellerStorePage.vue';
+import CartPage from '@/views/CartPage.vue';
+import CheckoutPage from '@/views/CheckoutPage.vue';
+import TipPage from '@/views/TipPage.vue';
 
 const routes: Array<RouteRecordRaw> = [
   { path: '/', redirect: '/login' },
@@ -89,6 +92,24 @@ const routes: Array<RouteRecordRaw> = [
     path: '/store/:id',
     name: 'SellerStore',
     component: SellerStorePage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/cart',
+    name: 'Cart',
+    component: CartPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/checkout',
+    name: 'Checkout',
+    component: CheckoutPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/tip',
+    name: 'Tip',
+    component: TipPage,
     meta: { requiresAuth: true }
   },
 ];
