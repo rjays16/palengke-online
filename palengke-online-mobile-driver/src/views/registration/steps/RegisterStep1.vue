@@ -107,16 +107,16 @@
               <ion-icon :icon="lockClosedOutline" class="input-icon"></ion-icon>
               <input 
                 v-model="confirmPassword" 
-                :type="showPassword ? 'text' : 'password'" 
+                :type="showConfirmPassword ? 'text' : 'password'" 
                 placeholder="Confirm your password"
-                class="custom-input with-icon"
+                class="custom-input with-icon with-toggle"
                 @input="onConfirmPasswordInput"
                 @blur="validateField('confirmPassword')"
               >
               <ion-icon 
-                v-if="isConfirmPasswordValid" 
-                :icon="checkmarkCircleOutline" 
-                class="success-icon"
+                :icon="showConfirmPassword ? eyeOffOutline : eyeOutline" 
+                class="password-toggle"
+                @click="showConfirmPassword = !showConfirmPassword"
               ></ion-icon>
             </div>
             <span v-if="errors.confirmPassword" class="error-message">{{ errors.confirmPassword }}</span>
@@ -251,6 +251,7 @@ const phone = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const showPassword = ref(false);
+const showConfirmPassword = ref(false);
 const isEmailVerified = ref(false);
 
 const showOtpSection = ref(false);
