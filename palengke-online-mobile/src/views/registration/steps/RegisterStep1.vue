@@ -546,7 +546,7 @@ const verifyOtp = async () => {
 
 // Navigation
 const goBack = () => {
-  router.push('/signup-welcome');
+  router.push('/signup');
 };
 
 const handleNext = () => {
