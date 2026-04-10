@@ -28,23 +28,25 @@
           <!-- Email Input -->
           <div class="input-group">
             <label class="input-label">Email Address *</label>
-            <div class="input-wrapper" :class="{ error: errors.email, success: isEmailValid }">
+            <div class="input-wrapper" :class="{ error: errors.email, success: isEmailValid && !isEmailVerified, verified: isEmailVerified }">
               <ion-icon :icon="mailOutline" class="input-icon"></ion-icon>
               <input 
                 v-model="email" 
                 type="email" 
-                placeholder="juan@example.com"
+                placeholder="driver@example.com"
                 class="custom-input with-icon"
+                :disabled="isEmailVerified"
                 @input="onEmailInput"
                 @blur="validateField('email')"
               >
               <ion-icon 
-                v-if="isEmailValid" 
+                v-if="isEmailVerified" 
                 :icon="checkmarkCircleOutline" 
-                class="success-icon"
+                class="verified-icon"
               ></ion-icon>
             </div>
             <span v-if="errors.email" class="error-message">{{ errors.email }}</span>
+            <span v-else-if="isEmailVerified" class="verified-text">Email verified</span>
             <span v-else class="helper-text">We'll send verification to this email</span>
           </div>
 
@@ -105,20 +107,20 @@
               <ion-icon :icon="lockClosedOutline" class="input-icon"></ion-icon>
               <input 
                 v-model="confirmPassword" 
-                :type="showPassword ? 'text' : 'password'" 
+                :type="showConfirmPassword ? 'text' : 'password'" 
                 placeholder="Confirm your password"
-                class="custom-input with-icon"
+                class="custom-input with-icon with-toggle"
                 @input="onConfirmPasswordInput"
                 @blur="validateField('confirmPassword')"
               >
               <ion-icon 
-                v-if="isConfirmPasswordValid" 
-                :icon="checkmarkCircleOutline" 
-                class="success-icon"
+                :icon="showConfirmPassword ? eyeOffOutline : eyeOutline" 
+                class="password-toggle"
+                @click="showConfirmPassword = !showConfirmPassword"
               ></ion-icon>
             </div>
             <span v-if="errors.confirmPassword" class="error-message">{{ errors.confirmPassword }}</span>
-            <span v-else-if="isConfirmPasswordValid" class="success-message"><font-awesome-icon icon="check" /> Passwords match</span>
+            <span v-else-if="isConfirmPasswordValid" class="success-message">Passwords match</span>
             <span v-else class="helper-text">Re-enter your password</span>
           </div>
 
@@ -250,6 +252,7 @@ const phone = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const showPassword = ref(false);
+const showConfirmPassword = ref(false);
 const isEmailVerified = ref(false);
 
 // OTP data
