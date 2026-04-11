@@ -85,6 +85,19 @@
               </ion-button>
             </div>
 
+            <!-- Cancel Button -->
+            <div class="cancel-row" v-if="order.status === 'pending'">
+              <ion-button
+                fill="outline"
+                color="danger"
+                size="small"
+                class="cancel-btn"
+                @click="cancelOrder(order)"
+              >
+                Cancel Order
+              </ion-button>
+            </div>
+
             <!-- Rebook Button -->
             <div class="reorder-row" v-if="order.status === 'cancelled'">
               <ion-button
@@ -146,7 +159,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage, IonContent, IonFooter, IonToolbar,
-  IonButton, IonIcon, toastController
+  IonButton, IonIcon, toastController, alertController
 } from '@ionic/vue';
 import {
   timeOutline, chevronForwardOutline,
@@ -160,36 +173,75 @@ const activeOrder = ref({
   id: 'ORD-001',
   storeName: "Juan's Fresh Market",
   storeEmoji: '🥦',
-  status: '🏍️ Driver is on the way',
+  status: 'Picking up from Palengke',
   eta: 'Arriving by 1:05 PM'
 });
 
 const recentOrders = ref([
   {
-    id: 'ORD-001', storeName: "Juan's Fresh Market",
-    storeEmoji: '🥦', type: 'market',
-    date: '22 Mar 2026, 11:59 AM',
-    total: 207.00, status: 'completed'
-  },
-  {
-    id: 'ORD-002', storeName: "Ana's Palengke - Cogon",
+    id: 'ORD-006', storeName: "Ana's Palengke - Cogon",
     storeEmoji: '🍎', type: 'fruits',
-    date: '20 Mar 2026, 06:48 PM',
-    total: 291.00, status: 'cancelled'
+    date: 'Today, 11:59 AM',
+    total: 291.00, status: 'pending',
+    items: ['Apple', 'Banana']
   },
   {
-    id: 'ORD-003', storeName: "Rosa's Seafoods & Meats",
+    id: 'ORD-005', storeName: "Juan's Fresh Market",
+    storeEmoji: '🥦', type: 'market',
+    date: 'Today, 10:30 AM',
+    total: 207.00, status: 'delivering',
+    items: ['Bawang/Garlic', 'Kamatis/Tomato']
+  },
+  {
+    id: 'ORD-004', storeName: "Mario's Meat Shop",
+    storeEmoji: '🥩', type: 'meat',
+    date: 'Today, 09:30 AM',
+    total: 450.00, status: 'completed',
+    items: ['Pork Belly', 'Chicken']
+  },
+  {
+    id: 'ORD-003', storeName: "Rosa's Seafoods",
     storeEmoji: '🐟', type: 'seafood',
-    date: '18 Mar 2026, 05:19 PM',
-    total: 556.00, status: 'completed'
+    date: 'Yesterday, 06:48 PM',
+    total: 320.00, status: 'cancelled',
+    items: ['Tilapia', 'Shrimp']
+  },
+  {
+    id: 'ORD-002', storeName: "Lily's Vegetables",
+    storeEmoji: '🥬', type: 'vegetables',
+    date: 'Mar 18, 2026, 05:19 PM',
+    total: 180.00, status: 'completed',
+    items: ['Kangkong', 'Spinach']
+  },
+  {
+    id: 'ORD-001', storeName: "Tito's Variety Store",
+    storeEmoji: '🛒', type: 'variety',
+    date: 'Mar 15, 2026, 02:30 PM',
+    total: 250.00, status: 'completed',
+    items: ['Sugar', 'Salt']
   },
 ]);
 
 const getStatusLabel = (status) => {
-  if (status === 'completed') return '✅ Delivered';
-  if (status === 'cancelled') return '❌ Cancelled';
-  if (status === 'active') return '🏍️ On the way';
+  if (status === 'completed') return 'Delivered';
+  if (status === 'cancelled') return 'Cancelled';
+  if (status === 'delivering') return 'Delivering';
+  if (status === 'pending') return 'Pending';
   return status;
+};
+
+const getStatusIcon = (status) => {
+  if (status === 'completed') return 'checkmark-circle';
+  if (status === 'cancelled') return 'close-circle';
+  if (status === 'delivering') return 'bicycle';
+  return 'time';
+};
+
+const getStatusColor = (status) => {
+  if (status === 'completed') return 'success';
+  if (status === 'cancelled') return 'danger';
+  if (status === 'delivering') return 'warning';
+  return 'medium';
 };
 
 const trackOrder = () => router.push('/order-tracking/1234');
@@ -197,6 +249,8 @@ const trackOrder = () => router.push('/order-tracking/1234');
 const viewOrder = (order) => {
   if (order.status === 'completed') {
     router.push(`/order-rating/${order.id}`);
+  } else if (order.status === 'delivering' || order.status === 'pending') {
+    router.push(`/order-tracking/${order.id}`);
   }
 };
 
@@ -207,6 +261,33 @@ const reorder = async (order) => {
   });
   await toast.present();
   router.push(`/seller/1`);
+};
+
+const cancelOrder = async (order) => {
+  const alert = await alertController.create({
+    header: 'Cancel Order?',
+    message: `Are you sure you want to cancel your order from ${order.storeName}? Your refund will be processed within 3-5 business days.`,
+    buttons: [
+      { text: 'No, Keep Order', role: 'cancel' },
+      { 
+        text: 'Yes, Cancel', 
+        handler: async () => {
+          // Find and update the order status
+          const idx = recentOrders.value.findIndex(o => o.id === order.id);
+          if (idx !== -1) {
+            recentOrders.value[idx].status = 'cancelled';
+          }
+          
+          const toast = await toastController.create({
+            message: 'Order cancelled. Refund will be processed in 3-5 days.',
+            duration: 3000, color: 'success', position: 'top'
+          });
+          await toast.present();
+        }
+      }
+    ]
+  });
+  await alert.present();
 };
 
 const goToHome = () => router.push('/home');
@@ -314,7 +395,23 @@ const goToProfile = () => router.push('/profile');
 .store-name { font-size: 15px; font-weight: 700; color: #1a1a1a; margin: 0 0 4px 0; }
 .order-date { font-size: 12px; color: #999; margin: 0 0 6px 0; }
 .order-status-row { display: flex; }
-.order-status { font-size: 12px; font-weight: 600; }
+.order-status { 
+  font-size: 12px; font-weight: 600; 
+  padding: 4px 10px; border-radius: 20px;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.order-status.completed { 
+  background: #E8F5E9; color: #2E7D32; 
+}
+.order-status.cancelled { 
+  background: #FFEBEE; color: #C62828; 
+}
+.order-status.delivering { 
+  background: #FFF3E0; color: #E65100; 
+}
+.order-status.pending { 
+  background: #E3F2FD; color: #1565C0; 
+}
 
 .order-right { text-align: right; }
 .order-amount { font-size: 15px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px 0; }
@@ -326,6 +423,20 @@ const goToProfile = () => router.push('/profile');
   padding-top: 8px;
 }
 .reorder-btn { --padding-start: 0; font-size: 14px; font-weight: 700; text-transform: none; height: 36px; }
+
+.cancel-row {
+  padding: 8px 16px 12px;
+  border-top: 1px solid #f5f5f5;
+}
+.cancel-btn {
+  --border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: none;
+  height: 36px;
+  --border-color: #f44336;
+  --color: #f44336;
+}
 
 .view-history-link {
   text-align: center; padding: 20px;

@@ -45,6 +45,8 @@
           </div>
         </div>
 
+
+
         <!-- Progress Bar -->
         <div class="progress-bar-section">
           <div class="progress-track">
@@ -141,6 +143,43 @@ let simulationInterval = null;
 
 const currentStep = ref(3);
 const showPromo = ref(true);
+
+const cancelOrder = async () => {
+  const alert = await alertController.create({
+    header: 'Cancel Order?',
+    message: 'Are you sure you want to cancel this order? Your refund will be processed within 3-5 business days.',
+    buttons: [
+      { text: 'No, Keep Order', role: 'cancel' },
+      { 
+        text: 'Yes, Cancel', 
+        cssClass: 'cancel-confirm',
+        handler: async () => {
+          // Show cancellation in progress
+          const loadingToast = await toastController.create({
+            message: 'Cancelling order...',
+            duration: 1500,
+            color: 'warning',
+            position: 'top'
+          });
+          await loadingToast.present();
+          
+          // Simulate cancellation then redirect
+          setTimeout(async () => {
+            const toast = await toastController.create({
+              message: 'Order cancelled. Refund will be processed within 3-5 days.',
+              duration: 3000,
+              color: 'success',
+              position: 'top'
+            });
+            await toast.present();
+            router.push('/activity');
+          }, 1500);
+        }
+      }
+    ]
+  });
+  await alert.present();
+};
 
 const orderStatus = ref({
   eta: 'Arriving by 1:05 PM',
@@ -249,11 +288,11 @@ const showDriverInfo = async () => {
 
 const goBack = async () => {
   const alert = await alertController.create({
-    header: 'Leave tracking?',
-    message: 'Your order is still being delivered. You can come back anytime.',
+    header: 'Go back?',
+    message: 'You can track your order anytime from Activity.',
     buttons: [
       { text: 'Stay', role: 'cancel' },
-      { text: 'Leave', handler: () => router.push('/home') }
+      { text: 'Go Back', handler: () => router.push('/activity') }
     ]
   });
   await alert.present();

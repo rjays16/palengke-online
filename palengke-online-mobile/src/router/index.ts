@@ -19,6 +19,7 @@ import CheckoutPage from '@/views/CheckoutPage.vue';
 import TipPage from '@/views/TipPage.vue';
 import OrderTrackingPage from '@/views/OrderTrackingPage.vue';
 import MessagesPage from '@/views/MessagesPage.vue';
+import ActivityPage from '@/views/ActivityPage.vue';
 
 const routes: Array<RouteRecordRaw> = [
   { path: '/', redirect: '/login' },
@@ -100,6 +101,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/cart',
     name: 'Cart',
     component: CartPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/activity',
+    name: 'Activity',
+    component: ActivityPage,
     meta: { requiresAuth: true }
   },
   {
