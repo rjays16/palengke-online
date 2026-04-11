@@ -29,6 +29,10 @@
         <!-- Delivery Type Badge -->
         <div class="delivery-badge-row">
           <div class="delivery-type-badge">{{ orderStatus.deliveryType }}</div>
+          <div class="payment-badge" :class="paymentMethod">
+            <span v-if="paymentMethod === 'gcash'">📱 GCash</span>
+            <span v-else>💵 Cash On Delivery</span>
+          </div>
         </div>
 
         <!-- ETA -->
@@ -114,6 +118,20 @@
           </div>
         </div>
 
+        <!-- Cancel Order Button (only for pending/preparing status) -->
+        <div class="cancel-order-section" v-if="canCancelOrder">
+          <ion-button
+            expand="block"
+            fill="outline"
+            color="danger"
+            class="cancel-order-btn"
+            @click="cancelOrder"
+          >
+            <ion-icon slot="start" :icon="closeOutline"></ion-icon>
+            Cancel Order
+          </ion-button>
+        </div>
+
       </div>
 
     </ion-content>
@@ -121,7 +139,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import {
   IonPage, IonContent, IonIcon,
@@ -129,7 +147,7 @@ import {
 } from '@ionic/vue';
 import {
   arrowBackOutline, shareOutline, chevronForwardOutline,
-  chatbubbleOutline, callOutline
+  chatbubbleOutline, callOutline, closeOutline
 } from 'ionicons/icons';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -143,18 +161,27 @@ let simulationInterval = null;
 
 const currentStep = ref(3);
 const showPromo = ref(true);
+const orderState = ref('delivery'); // pending = not yet accepted (can cancel), delivery/delivering = accepted (cannot cancel), completed = arrived
+const paymentMethod = ref('gcash'); // 'gcash' or 'cod'
+
+const canCancelOrder = computed(() => {
+  // Only allow cancel if order is not yet accepted by driver
+  return orderState.value === 'pending';
+});
 
 const cancelOrder = async () => {
+  const isCOD = paymentMethod.value === 'cod' || paymentMethod.value === 'cash';
   const alert = await alertController.create({
     header: 'Cancel Order?',
-    message: 'Are you sure you want to cancel this order? Your refund will be processed within 3-5 business days.',
+    message: isCOD 
+      ? 'Are you sure you want to cancel your order? You will not be charged since this is Cash On Delivery.'
+      : 'Are you sure you want to cancel this order? Your refund will be processed within 1-2 business days.',
     buttons: [
       { text: 'No, Keep Order', role: 'cancel' },
       { 
         text: 'Yes, Cancel', 
         cssClass: 'cancel-confirm',
         handler: async () => {
-          // Show cancellation in progress
           const loadingToast = await toastController.create({
             message: 'Cancelling order...',
             duration: 1500,
@@ -163,10 +190,9 @@ const cancelOrder = async () => {
           });
           await loadingToast.present();
           
-          // Simulate cancellation then redirect
           setTimeout(async () => {
             const toast = await toastController.create({
-              message: 'Order cancelled. Refund will be processed within 3-5 days.',
+              message: isCOD ? 'Order cancelled successfully!' : 'Order cancelled. Refund will be processed in 1-2 days.',
               duration: 3000,
               color: 'success',
               position: 'top'
@@ -244,8 +270,10 @@ const initMap = () => {
   // Fit bounds
   map.fitBounds(L.latLngBounds([storeLocation, customerLocation, driverPos.value]), { padding: [60, 60] });
 
-  // Simulate driver movement
-  simulateDriverMovement();
+  // Only simulate driver movement if order is already in delivery
+  if (orderState.value === 'delivery') {
+    simulateDriverMovement();
+  }
 };
 
 const simulateDriverMovement = () => {
@@ -286,16 +314,8 @@ const showDriverInfo = async () => {
   await alert.present();
 };
 
-const goBack = async () => {
-  const alert = await alertController.create({
-    header: 'Go back?',
-    message: 'You can track your order anytime from Activity.',
-    buttons: [
-      { text: 'Stay', role: 'cancel' },
-      { text: 'Go Back', handler: () => router.push('/activity') }
-    ]
-  });
-  await alert.present();
+const goBack = () => {
+  router.push('/activity');
 };
 
 onMounted(() => { setTimeout(() => initMap(), 100); });
@@ -342,11 +362,22 @@ onUnmounted(() => {
 .handle-bar { width: 40px; height: 4px; background: #ddd; border-radius: 2px; }
 
 /* Delivery Badge */
-.delivery-badge-row { padding: 0 20px 12px; }
+.delivery-badge-row { padding: 0 20px 12px; display: flex; gap: 8px; }
 .delivery-type-badge {
   display: inline-block; background: #1a1a1a; color: white;
   padding: 6px 16px; border-radius: 20px;
   font-size: 13px; font-weight: 700;
+}
+.payment-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 6px 12px; border-radius: 20px;
+  font-size: 13px; font-weight: 700;
+}
+.payment-badge.gcash {
+  background: #E3F2FD; color: #1976D2;
+}
+.payment-badge.cod {
+  background: #E8F5E9; color: #388E3C;
 }
 
 /* ETA */
@@ -441,4 +472,19 @@ onUnmounted(() => {
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 .driver-action-btn ion-icon { font-size: 22px; color: #1a1a1a; }
+
+/* Cancel Order Section */
+.cancel-order-section {
+  margin: 16px 20px 0;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+.cancel-order-btn {
+  --border-radius: 12px;
+  --border-color: #f44336;
+  --color: #f44336;
+  height: 48px;
+  font-weight: 600;
+  text-transform: none;
+}
 </style>

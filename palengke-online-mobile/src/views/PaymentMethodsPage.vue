@@ -115,7 +115,7 @@ const showInsufficientModal = ref(false);
 const linkedMethods = ref([
   { id: 'wallet', name: 'Palengke Wallet', icon: '💚', type: 'wallet', balance: '152.00', isDefault: true },
   { id: 'gcash', name: 'GCash ••••5370', icon: '📱', type: 'gcash', balance: null, isDefault: false },
-  { id: 'cash', name: 'Cash', icon: '💵', type: 'cash', balance: null, isDefault: false },
+  { id: 'cash', name: 'Cash On Delivery', icon: '💵', type: 'cash', balance: null, isDefault: false },
 ]);
 
 const addMethods = ref([

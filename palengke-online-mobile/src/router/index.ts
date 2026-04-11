@@ -20,6 +20,7 @@ import TipPage from '@/views/TipPage.vue';
 import OrderTrackingPage from '@/views/OrderTrackingPage.vue';
 import MessagesPage from '@/views/MessagesPage.vue';
 import ActivityPage from '@/views/ActivityPage.vue';
+import PaymentMethodsPage from '@/views/PaymentMethodsPage.vue';
 
 const routes: Array<RouteRecordRaw> = [
   { path: '/', redirect: '/login' },
@@ -131,6 +132,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/messages',
     name: 'Messages',
     component: MessagesPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/payment-methods',
+    name: 'PaymentMethods',
+    component: PaymentMethodsPage,
     meta: { requiresAuth: true }
   },
 ];

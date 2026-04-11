@@ -279,7 +279,7 @@ const cancelOrder = async (order) => {
           }
           
           const toast = await toastController.create({
-            message: 'Order cancelled. Refund will be processed in 3-5 days.',
+            message: 'Order cancelled. Refund will be processed in 1-2 days.',
             duration: 3000, color: 'success', position: 'top'
           });
           await toast.present();

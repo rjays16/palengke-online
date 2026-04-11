@@ -408,7 +408,20 @@ const handleCancel = async (reason) => {
   router.push('/home');
 };
 
-const goBack = () => router.push('/home');
+const goBack = async () => {
+  const alert = await alertController.create({
+    header: 'Go Back?',
+    message: 'You can come back to track this delivery anytime from your orders.',
+    buttons: [
+      { text: 'Stay', role: 'cancel' },
+      { 
+        text: 'Go Back', 
+        handler: () => router.push('/home')
+      }
+    ]
+  });
+  await alert.present();
+};
 
 onMounted(() => {
   setTimeout(() => initMap(), 100);
