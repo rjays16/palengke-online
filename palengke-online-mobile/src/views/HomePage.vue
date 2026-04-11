@@ -90,13 +90,6 @@
             </div>
             <div class="feature-icon">⭐</div>
           </div>
-          <div class="feature-card free-delivery" @click="browseFreeDelivery">
-            <div class="feature-content">
-              <h4>Free Delivery</h4>
-              <p>Save more</p>
-            </div>
-            <div class="feature-icon">🛵</div>
-          </div>
           <div class="feature-card bundle-deals" @click="browseBundles">
             <div class="feature-content">
               <h4>Bundles</h4>
