@@ -28,6 +28,7 @@ import OffersPage from '@/views/OffersPage.vue';
 import HelpSupportPage from '@/views/HelpSupportPage.vue';
 import OrderHistoryPage from '@/views/OrderHistoryPage.vue';
 import OrderRatingPage from '@/views/OrderRatingPage.vue';
+import FavoriteSellersPage from '@/views/FavoriteSellersPage.vue';
 
 const routes: Array<RouteRecordRaw> = [
   { path: '/', redirect: '/login' },
@@ -157,6 +158,42 @@ const routes: Array<RouteRecordRaw> = [
     path: '/profile',
     name: 'Profile',
     component: ProfilePage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/addresses',
+    name: 'Addresses',
+    component: AddressesPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/offers',
+    name: 'Offers',
+    component: OffersPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/help-support',
+    name: 'HelpSupport',
+    component: HelpSupportPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/order-history',
+    name: 'OrderHistory',
+    component: OrderHistoryPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/order-rating/:id',
+    name: 'OrderRating',
+    component: OrderRatingPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/favorite-sellers',
+    name: 'FavoriteSellers',
+    component: FavoriteSellersPage,
     meta: { requiresAuth: true }
   },
 ];
