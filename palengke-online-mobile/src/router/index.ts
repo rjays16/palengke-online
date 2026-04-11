@@ -21,6 +21,13 @@ import OrderTrackingPage from '@/views/OrderTrackingPage.vue';
 import MessagesPage from '@/views/MessagesPage.vue';
 import ActivityPage from '@/views/ActivityPage.vue';
 import PaymentMethodsPage from '@/views/PaymentMethodsPage.vue';
+import NotificationsPage from '@/views/NotificationsPage.vue';
+import ProfilePage from '@/views/ProfilePage.vue';
+import AddressesPage from '@/views/AddressesPage.vue';
+import OffersPage from '@/views/OffersPage.vue';
+import HelpSupportPage from '@/views/HelpSupportPage.vue';
+import OrderHistoryPage from '@/views/OrderHistoryPage.vue';
+import OrderRatingPage from '@/views/OrderRatingPage.vue';
 
 const routes: Array<RouteRecordRaw> = [
   { path: '/', redirect: '/login' },
@@ -138,6 +145,18 @@ const routes: Array<RouteRecordRaw> = [
     path: '/payment-methods',
     name: 'PaymentMethods',
     component: PaymentMethodsPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/notifications',
+    name: 'Notifications',
+    component: NotificationsPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: ProfilePage,
     meta: { requiresAuth: true }
   },
 ];
