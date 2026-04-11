@@ -179,6 +179,12 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/help',
+    name: 'Help',
+    component: HelpSupportPage,
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/order-history',
     name: 'OrderHistory',
     component: OrderHistoryPage,
