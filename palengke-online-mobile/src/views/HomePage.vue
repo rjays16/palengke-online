@@ -12,12 +12,12 @@
           </div>
         </div>
         <div class="header-actions">
+          <div class="header-btn" @click="goToMessages">
+            <ion-icon :icon="chatbubblesOutline"></ion-icon>
+          </div>
           <div class="header-btn" @click="goToNotifications">
             <ion-icon :icon="notificationsOutline"></ion-icon>
             <span class="notif-dot" v-if="notifCount > 0">{{ notifCount }}</span>
-          </div>
-          <div class="avatar-btn" @click="goToProfile">
-            <ion-icon :icon="personCircleOutline"></ion-icon>
           </div>
         </div>
       </div>
@@ -216,7 +216,8 @@ import {
   actionSheetController, toastController
 } from '@ionic/vue';
 import {
-  chevronDownOutline, notificationsOutline, personCircleOutline,
+  chevronDownOutline, notificationsOutline,
+  chatbubblesOutline,
   searchOutline, homeOutline, cartOutline, receiptOutline, personOutline
 } from 'ionicons/icons';
 
@@ -239,14 +240,6 @@ const banners = ref([
   },
   {
     tag: '⚡ FLASH SALE',
-    title: 'Free Delivery\nThis Weekend!',
-    subtitle: 'Min. order ₱200',
-    cta: 'Grab Now →',
-    emoji: '🛵',
-    gradient: 'linear-gradient(135deg, #FF9800 0%, #E65100 100%)'
-  },
-  {
-    tag: '🌟 NEW',
     title: 'Bundle Deals\nSave More!',
     subtitle: 'Tipid Bundle starting ₱257',
     cta: 'See Bundles →',
@@ -357,7 +350,6 @@ const openBanner = (banner) => { router.push('/browse'); };
 const browseCategory = (cat) => { router.push(`/browse?category=${cat.route}`); };
 const browseNearMe = () => { router.push('/browse?filter=nearby'); };
 const browseTopRated = () => { router.push('/browse?filter=top-rated'); };
-const browseFreeDelivery = () => { router.push('/browse?filter=free-delivery'); };
 const browseBundles = () => { router.push('/browse?category=bundles'); };
 const openSeller = (seller) => {
   if (!seller.isOpen) {
@@ -381,6 +373,7 @@ const goToBrowse = () => router.push('/browse');
 const goToCart = () => router.push('/cart');
 const goToActivity = () => router.push('/activity');
 const goToProfile = () => router.push('/profile');
+const goToMessages = () => router.push('/messages');
 const goToNotifications = () => router.push('/notifications');
 </script>
 
@@ -509,7 +502,6 @@ const goToNotifications = () => router.push('/notifications');
 
 .near-me { background: linear-gradient(135deg, #4CAF50, #2E7D32); }
 .top-rated { background: linear-gradient(135deg, #FF9800, #E65100); }
-.free-delivery { background: linear-gradient(135deg, #2196F3, #1565C0); }
 .bundle-deals { background: linear-gradient(135deg, #9C27B0, #4A148C); }
 
 /* ─── Sellers Scroll (Order Again) ───────────── */
