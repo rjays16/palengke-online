@@ -215,7 +215,7 @@ const goToPayment = () => router.push('/payment-methods');
 const goToNotifications = () => router.push('/notifications');
 const goToMessages = () => router.push('/messages');
 const goToHelp = () => router.push('/help');
-const goToFavorites = () => {};
+const goToFavorites = () => router.push('/favorite-sellers');
 </script>
 
 <style scoped>
