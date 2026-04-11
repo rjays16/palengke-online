@@ -34,7 +34,7 @@
         <div class="delivery-progress">
           <div class="progress-step" :class="{ active: currentStep >= 1, done: currentStep > 1 }">
             <div class="step-circle">
-              <ion-icon :icon="currentStep > 1 ? checkmarkOutline : storefrontOutline"></ion-icon>
+              <ion-icon :icon="currentStep > 1 ? checkmarkOutline : basketOutline"></ion-icon>
             </div>
             <span>Pickup</span>
           </div>
@@ -60,7 +60,7 @@
           <!-- Step 1: Pickup -->
           <div v-if="currentStep === 1" class="step-detail">
             <div class="step-badge pickup">
-              <ion-icon :icon="storefrontOutline"></ion-icon>
+              <ion-icon :icon="basketOutline"></ion-icon>
               <span>Pickup Location</span>
             </div>
             <h3 class="location-name">{{ orderData.sellerName }}</h3>
@@ -187,7 +187,7 @@ import {
 } from '@ionic/vue';
 import {
   arrowBackOutline, timeOutline, ellipsisVerticalOutline,
-  storefrontOutline, bicycleOutline, homeOutline,
+  basketOutline, bicycleOutline, homeOutline,
   checkmarkOutline, checkmarkCircleOutline, cubeOutline,
   cashOutline, chatbubbleOutline, callOutline,
   helpCircleOutline, ellipsisHorizontalOutline, locationOutline

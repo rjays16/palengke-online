@@ -65,7 +65,7 @@
             <!-- Prep Step -->
             <div class="progress-step" :class="{ done: currentStep >= 2, active: currentStep === 2 }">
               <div class="step-icon prep">
-                <span>🍳</span>
+                <span>🧺</span>
               </div>
             </div>
             <!-- Line 2 -->
