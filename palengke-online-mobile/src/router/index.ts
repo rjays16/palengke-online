@@ -103,7 +103,13 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/store/:id',
-    name: 'SellerStore',
+    name: 'StoreDetail',
+    component: SellerStorePage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/seller/:id',
+    name: 'SellerDetail',
     component: SellerStorePage,
     meta: { requiresAuth: true }
   },
@@ -201,12 +207,6 @@ const routes: Array<RouteRecordRaw> = [
     path: '/favorite-sellers',
     name: 'FavoriteSellers',
     component: FavoriteSellersPage,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/seller/:id',
-    name: 'SellerStore',
-    component: SellerStorePage,
     meta: { requiresAuth: true }
   },
   {
