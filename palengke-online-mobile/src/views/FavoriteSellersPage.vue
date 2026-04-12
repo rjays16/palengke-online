@@ -30,7 +30,7 @@
           @click="openSeller(seller)"
         >
           <div class="seller-banner" :style="{ background: seller.color }">
-            <span class="seller-emoji">{{ seller.emoji }}</span>
+            <span class="seller-emoji" v-if="false">{{ seller.emoji }}</span>
             <button class="favorite-btn active" @click.stop="toggleFavorite(seller)">
               ❤️
             </button>
@@ -66,7 +66,7 @@ const favoriteSellers = ref([
   {
     id: 1,
     name: "Juan's Fresh Market",
-    emoji: '🥦',
+    emoji: '',
     color: 'linear-gradient(135deg, #4CAF50, #2E7D32)',
     rating: '4.8',
     deliveryTime: '15-25 min',
@@ -76,7 +76,7 @@ const favoriteSellers = ref([
   {
     id: 2,
     name: "Ana's Palengke",
-    emoji: '🍎',
+    emoji: '',
     color: 'linear-gradient(135deg, #FF9800, #E65100)',
     rating: '4.6',
     deliveryTime: '10-20 min',

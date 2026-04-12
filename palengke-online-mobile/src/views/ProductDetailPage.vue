@@ -5,7 +5,7 @@
       <!-- ─── Product Image ──────────────────── -->
       <div class="product-hero">
         <div class="product-image-bg">
-          <span class="product-emoji-large">{{ product.emoji }}</span>
+          <span class="product-emoji-large" v-if="false">{{ product.emoji }}</span>
         </div>
 
         <!-- Actions -->
@@ -65,7 +65,7 @@
             <div class="detail-row">
               <span class="detail-label">Availability</span>
               <span class="detail-value" :class="product.available ? 'available' : 'unavailable'">
-                {{ product.available ? '✅ Available' : '❌ Unavailable' }}
+                {{ product.available ? 'Available' : 'Unavailable' }}
               </span>
             </div>
           </div>
@@ -148,7 +148,7 @@ const quantity = ref(1);
 const product = ref({
   id: route.params.id || 1,
   name: 'Bawang/Garlic',
-  emoji: '🧄',
+  emoji: '',
   price: 66.00,
   unit: '250g',
   category: 'Vegetables',
@@ -156,17 +156,17 @@ const product = ref({
   discount: null,
   description: 'Fresh garlic sourced directly from local farmers. Perfect for cooking Filipino dishes. Rich in flavor and nutrients.',
   sellerName: "Juan's Fresh Market",
-  sellerEmoji: '🥦',
+  sellerEmoji: '',
   sellerRating: '4.8',
   sellerDistance: '2.3 km',
   sellerId: 1
 });
 
 const similarProducts = ref([
-  { id: 2, name: 'Sibuyas/Onion', emoji: '🧅', price: 110.00, unit: '250g' },
-  { id: 3, name: 'Luya/Ginger', emoji: '🫚', price: 73.00, unit: '250g' },
-  { id: 4, name: 'Kamatis/Tomato', emoji: '🍅', price: 48.00, unit: '250g' },
-  { id: 5, name: 'Pechay', emoji: '🥬', price: 66.00, unit: '250g' },
+  { id: 2, name: 'Sibuyas/Onion', emoji: '', price: 110.00, unit: '250g' },
+  { id: 3, name: 'Luya/Ginger', emoji: '', price: 73.00, unit: '250g' },
+  { id: 4, name: 'Kamatis/Tomato', emoji: '', price: 48.00, unit: '250g' },
+  { id: 5, name: 'Pechay', emoji: '', price: 66.00, unit: '250g' },
 ]);
 
 // Methods
@@ -175,7 +175,7 @@ const decreaseQty = () => { if (quantity.value > 1) quantity.value--; };
 
 const addToCart = async () => {
   const toast = await toastController.create({
-    message: `✅ ${quantity.value}x ${product.value.name} added to basket!`,
+    message: `${quantity.value}x ${product.value.name} added to basket!`,
     duration: 2000, color: 'success', position: 'bottom'
   });
   await toast.present();
@@ -184,7 +184,7 @@ const addToCart = async () => {
 
 const addSimilarToCart = async (item) => {
   const toast = await toastController.create({
-    message: `✅ ${item.name} added to basket!`,
+    message: `${item.name} added to basket!`,
     duration: 1500, color: 'success', position: 'bottom'
   });
   await toast.present();

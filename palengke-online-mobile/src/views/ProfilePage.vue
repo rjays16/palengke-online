@@ -6,7 +6,7 @@
       <div class="profile-header">
         <div class="avatar-wrap" @click="changeAvatar">
           <div class="avatar">{{ profileData.name.charAt(0) }}</div>
-          <div class="avatar-edit">✏️</div>
+          <div class="avatar-edit"><ion-icon :icon="createOutline"></ion-icon></div>
         </div>
         <h2 class="profile-name">{{ profileData.name }}</h2>
         <p class="profile-email">{{ profileData.email }}</p>

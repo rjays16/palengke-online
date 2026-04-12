@@ -35,7 +35,7 @@
             <span class="contact-status">24hrs</span>
           </div>
           <div class="contact-card" @click="reportIssue">
-            <span class="contact-icon">⚠️</span>
+            <span class="contact-icon"><ion-icon :icon="alertCircleOutline"></ion-icon></span>
             <p>Report</p>
             <span class="contact-status">Issue</span>
           </div>
@@ -131,7 +131,7 @@ const reportIssue = async () => {
     buttons: [
       { text: 'Cancel', role: 'cancel' },
       { text: 'Submit', handler: async () => {
-        const toast = await toastController.create({ message: '✅ Report submitted!', duration: 2000, color: 'success', position: 'top' });
+        const toast = await toastController.create({ message: 'Report submitted!', duration: 2000, color: 'success', position: 'top' });
         await toast.present();
       }}
     ]

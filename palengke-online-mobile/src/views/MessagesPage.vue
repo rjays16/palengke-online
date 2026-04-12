@@ -46,7 +46,7 @@
         </div>
         <div v-else class="chat-list">
           <div v-for="chat in chats" :key="chat.id" class="chat-item" @click="openChat(chat)">
-            <div class="chat-avatar">{{ chat.emoji }}</div>
+            <div class="chat-avatar" v-if="false">{{ chat.emoji }}</div>
             <div class="chat-info">
               <div class="chat-header">
                 <h4>{{ chat.name }}</h4>
@@ -77,20 +77,20 @@ const router = useRouter();
 const selectedTab = ref('notifications');
 
 const notifications = ref([
-  { id: 1, type: 'order', title: '🛵 Driver is on the way!', message: 'Your order from Juan\'s Fresh Market is being delivered.', time: '5 mins ago', read: false },
-  { id: 2, type: 'promo', title: '🏷️ New Promo Available!', message: 'Get ₱50 off on your next order. Use code PALENGKE50.', time: '1 hour ago', read: false },
-  { id: 3, type: 'order', title: '✅ Order Delivered!', message: 'Your order from Rosa\'s Seafoods has been delivered.', time: 'Yesterday', read: true },
+  { id: 1, type: 'order', title: 'Driver is on the way!', message: 'Your order from Juan\'s Fresh Market is being delivered.', time: '5 mins ago', read: false },
+  { id: 2, type: 'promo', title: 'New Promo Available!', message: 'Get off on your next order. Use code PALENGKE50.', time: '1 hour ago', read: false },
+  { id: 3, type: 'order', title: 'Order Delivered!', message: 'Your order from Rosa\'s Seafoods has been delivered.', time: 'Yesterday', read: true },
 ]);
 
 const chats = ref([
-  { id: 1, name: "Juan's Fresh Market", emoji: '🥦', lastMessage: 'Your order is ready for pickup!', time: '5 mins ago', unread: 2 },
-  { id: 2, name: 'Juan Dela Cruz (Driver)', emoji: '🏍️', lastMessage: 'I am on my way to your location', time: '10 mins ago', unread: 1 },
+  { id: 1, name: "Juan's Fresh Market", emoji: '', lastMessage: 'Your order is ready for pickup!', time: '5 mins ago', unread: 2 },
+  { id: 2, name: 'Juan Dela Cruz (Driver)', emoji: '', lastMessage: 'I am on my way to your location', time: '10 mins ago', unread: 1 },
 ]);
 
 const getIcon = (type) => {
-  if (type === 'order') return '📦';
-  if (type === 'promo') return '🏷️';
-  return '🔔';
+  if (type === 'order') return '';
+  if (type === 'promo') return '';
+  return '';
 };
 
 const openChat = (chat) => {};

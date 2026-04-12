@@ -124,7 +124,7 @@ const isSubmitting = ref(false);
 
 const orderData = ref({
   storeName: "Juan's Fresh Market",
-  storeEmoji: '🥦',
+  storeEmoji: '',
   items: 'Bawang/Garlic, Kamatis/Tomato',
   total: 207.00
 });
@@ -161,7 +161,7 @@ const submitRating = async () => {
   try {
     await new Promise(resolve => setTimeout(resolve, 1500));
     const toast = await toastController.create({
-      message: '✅ Thank you for your feedback!',
+      message: 'Thank you for your feedback!',
       duration: 2000, color: 'success', position: 'top'
     });
     await toast.present();

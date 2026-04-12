@@ -52,7 +52,7 @@
           @click="selectOffer(offer)"
         >
           <div class="offer-icon-wrap" :style="{ background: offer.color }">
-            <span>{{ offer.emoji }}</span>
+            <span v-if="false">{{ offer.emoji }}</span>
           </div>
           <div class="offer-info">
             <h4>{{ offer.title }}</h4>
@@ -124,8 +124,8 @@ const applyPromo = async () => {
   if (!promoCode.value) return;
   const toast = await toastController.create({
     message: promoCode.value.toUpperCase() === 'PALENGKE20'
-      ? '✅ Promo code applied! ₱50 discount'
-      : '❌ Invalid promo code',
+      ? 'Promo code applied! discount'
+      : 'Invalid promo code',
     duration: 2000,
     color: promoCode.value.toUpperCase() === 'PALENGKE20' ? 'success' : 'danger',
     position: 'top'

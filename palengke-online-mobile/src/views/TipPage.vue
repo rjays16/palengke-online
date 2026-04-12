@@ -173,10 +173,10 @@ const tipAmounts = [25, 50, 100, 150, 200, 250];
 
 const orderData = ref({
   storeName: "Juan's Fresh Market",
-  storeEmoji: '🥦',
+  storeEmoji: '',
   storeAddress: 'Stall #15, CDO City Palengke',
-  paymentIcon: '📱',
-  paymentLabel: 'GCash ••••5370',
+  paymentIcon: '',
+  paymentLabel: 'GCash',
   subtotal: 162.00,
   deliveryFee: 45.00,
   deliveryAddress: 'Brgy. Carmen, CDO City',

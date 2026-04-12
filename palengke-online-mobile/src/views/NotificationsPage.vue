@@ -48,19 +48,19 @@ import { checkmarkDoneOutline } from 'ionicons/icons';
 const router = useRouter();
 
 const notifications = ref([
-  { id: 1, type: 'order', title: '🛵 Driver is on the way!', message: 'Your order from Juan\'s Fresh Market is being delivered. ETA: 15 mins', time: '5 mins ago', read: false },
-  { id: 2, type: 'promo', title: '🏷️ Flash Sale!', message: 'Get 20% off on all vegetables today only!', time: '1 hour ago', read: false },
-  { id: 3, type: 'order', title: '✅ Order Delivered!', message: 'Your order from Rosa\'s Seafoods has been successfully delivered.', time: 'Yesterday', read: true },
-  { id: 4, type: 'promo', title: '🎁 New Promo!', message: 'Use code PALENGKE50 for ₱50 off your next order.', time: '2 days ago', read: true },
-  { id: 5, type: 'order', title: '📦 Order Confirmed!', message: 'Your order from Ana\'s Palengke has been confirmed.', time: '3 days ago', read: true },
+  { id: 1, type: 'system', title: 'Welcome to Palengke Online!', message: 'Start ordering fresh produce from your local market.', time: 'Just now', read: false },
+  { id: 2, type: 'promo', title: 'Flash Sale!', message: 'Get 20% off on all vegetables today only!', time: '1 hour ago', read: false },
+  { id: 3, type: 'order', title: 'Order Delivered!', message: 'Your order from Rosa\'s Seafoods has been successfully delivered.', time: 'Yesterday', read: true },
+  { id: 4, type: 'promo', title: 'New Promo!', message: 'Use code PALENGKE50 for off your next order.', time: '2 days ago', read: true },
+  { id: 5, type: 'order', title: 'Order Confirmed!', message: 'Your order from Ana\'s Palengke has been confirmed.', time: '3 days ago', read: true },
 ]);
 
 const unreadCount = computed(() => notifications.value.filter(n => !n.read).length);
 
 const getIcon = (type) => {
-  if (type === 'order') return '📦';
-  if (type === 'promo') return '🏷️';
-  return '🔔';
+  if (type === 'order') return '';
+  if (type === 'promo') return '';
+  return '';
 };
 
 const handleNotif = (notif) => {
@@ -71,7 +71,7 @@ const handleNotif = (notif) => {
 const markAllRead = async () => {
   notifications.value.forEach(n => n.read = true);
   const toast = await toastController.create({
-    message: '✅ All marked as read', duration: 2000, color: 'success', position: 'top'
+    message: 'All marked as read', duration: 2000, color: 'success', position: 'top'
   });
   await toast.present();
 };

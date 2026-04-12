@@ -51,14 +51,15 @@
             :class="{ active: activeFilter === 'free-delivery' }"
             @click="toggleFilter('free-delivery')"
           >
-            <span>🛵 Free Delivery</span>
+            <ion-icon :icon="bicycleOutline"></ion-icon>
+            <span>Free Delivery</span>
           </div>
           <div
             class="filter-chip"
             :class="{ active: activeFilter === 'open' }"
             @click="toggleFilter('open')"
           >
-            <span>✅ Open Now</span>
+            <span>Open Now</span>
           </div>
         </div>
       </div>
@@ -89,12 +90,12 @@
           >
             <!-- Banner -->
             <div class="seller-banner" :style="{ background: seller.color }">
-              <span class="banner-emoji">{{ seller.emoji }}</span>
+              <span class="banner-emoji" v-if="false">{{ seller.emoji }}</span>
               <div class="closed-badge" v-if="!seller.isOpen">
                 <span>Closed</span>
               </div>
               <div class="discount-badge" v-if="seller.discount">{{ seller.discount }}</div>
-              <div class="free-delivery-badge" v-if="seller.freeDelivery">🛵 Free Delivery</div>
+              <div class="free-delivery-badge" v-if="seller.freeDelivery"><ion-icon :icon="bicycleOutline"></ion-icon> Free Delivery</div>
             </div>
 
             <!-- Info -->
@@ -198,16 +199,16 @@ const selectedCategory = ref('all');
 // All sellers data
 const allSellers = ref([
   {
-    id: 1, name: "Juan's Fresh Market", emoji: '🥦',
+    id: 1, name: "Juan's Fresh Market", emoji: '',
     color: 'linear-gradient(135deg, #4CAF50, #2E7D32)',
     rating: '4.8', reviewCount: 124, category: 'Vegetables & Fruits',
     deliveryTime: '15-25 min', distance: '2.3 km',
     deliveryFee: 45, freeDelivery: false,
-    isOpen: true, discount: '₱50 OFF', promo: '₱50 off min. ₱300 order',
+    isOpen: true, discount: 'OFF', promo: 'off min. 300 order',
     tags: ['vegetables', 'fruits']
   },
   {
-    id: 2, name: "Ana's Palengke - Cogon", emoji: '🍎',
+    id: 2, name: "Ana's Palengke - Cogon", emoji: '',
     color: 'linear-gradient(135deg, #FF9800, #E65100)',
     rating: '4.6', reviewCount: 89, category: 'Fruits & Vegetables',
     deliveryTime: '10-20 min', distance: '1.5 km',
@@ -216,7 +217,7 @@ const allSellers = ref([
     tags: ['fruits', 'vegetables']
   },
   {
-    id: 3, name: "Rosa's Seafoods & Meats", emoji: '🐟',
+    id: 3, name: "Rosa's Seafoods & Meats", emoji: '',
     color: 'linear-gradient(135deg, #2196F3, #1565C0)',
     rating: '4.9', reviewCount: 203, category: 'Seafoods & Meats',
     deliveryTime: '20-35 min', distance: '3.1 km',
@@ -225,16 +226,16 @@ const allSellers = ref([
     tags: ['seafoods', 'pork', 'chicken']
   },
   {
-    id: 4, name: "Mario's Meat Shop", emoji: '🥩',
+    id: 4, name: "Mario's Meat Shop", emoji: '',
     color: 'linear-gradient(135deg, #f44336, #b71c1c)',
     rating: '4.7', reviewCount: 156, category: 'Pork & Beef',
     deliveryTime: '15-30 min', distance: '2.8 km',
     deliveryFee: 0, freeDelivery: true,
-    isOpen: true, discount: '₱30 OFF', promo: '₱30 off your first order',
+    isOpen: true, discount: 'OFF', promo: 'off your first order',
     tags: ['pork', 'beef', 'chicken']
   },
   {
-    id: 5, name: "Palengke Bundle Deals", emoji: '📦',
+    id: 5, name: "Palengke Bundle Deals", emoji: '',
     color: 'linear-gradient(135deg, #9C27B0, #4A148C)',
     rating: '4.5', reviewCount: 67, category: 'Bundle Deals',
     deliveryTime: '25-40 min', distance: '4.2 km',
@@ -243,7 +244,7 @@ const allSellers = ref([
     tags: ['bundles']
   },
   {
-    id: 6, name: "CDO Fresh Chicken Hub", emoji: '🍗',
+    id: 6, name: "CDO Fresh Chicken Hub", emoji: '',
     color: 'linear-gradient(135deg, #FF9800, #F57F17)',
     rating: '4.4', reviewCount: 91, category: 'Chicken & Poultry',
     deliveryTime: '15-25 min', distance: '1.8 km',
@@ -303,10 +304,10 @@ const showSortSheet = async () => {
   const actionSheet = await actionSheetController.create({
     header: 'Sort By',
     buttons: [
-      { text: selectedSort.value === 'recommended' ? '✅ Recommended' : 'Recommended', handler: () => { selectedSort.value = 'recommended'; } },
-      { text: selectedSort.value === 'rating' ? '✅ Rating' : 'Rating', handler: () => { selectedSort.value = 'rating'; } },
-      { text: selectedSort.value === 'delivery-fee' ? '✅ Delivery Fee' : 'Delivery Fee', handler: () => { selectedSort.value = 'delivery-fee'; } },
-      { text: selectedSort.value === 'delivery-time' ? '✅ Delivery Time' : 'Delivery Time', handler: () => { selectedSort.value = 'delivery-time'; } },
+      { text: selectedSort.value === 'recommended' ? 'Recommended' : 'Recommended', handler: () => { selectedSort.value = 'recommended'; } },
+      { text: selectedSort.value === 'rating' ? 'Rating' : 'Rating', handler: () => { selectedSort.value = 'rating'; } },
+      { text: selectedSort.value === 'delivery-fee' ? 'Delivery Fee' : 'Delivery Fee', handler: () => { selectedSort.value = 'delivery-fee'; } },
+      { text: selectedSort.value === 'delivery-time' ? 'Delivery Time' : 'Delivery Time', handler: () => { selectedSort.value = 'delivery-time'; } },
       { text: 'Cancel', role: 'cancel' }
     ]
   });
@@ -318,12 +319,12 @@ const showCategorySheet = async () => {
     header: 'Category',
     buttons: [
       { text: 'All', handler: () => { selectedCategory.value = 'all'; } },
-      { text: '🥦 Vegetables', handler: () => { selectedCategory.value = 'vegetables'; } },
-      { text: '🍎 Fruits', handler: () => { selectedCategory.value = 'fruits'; } },
-      { text: '🐟 Seafoods', handler: () => { selectedCategory.value = 'seafoods'; } },
-      { text: '🥩 Pork & Beef', handler: () => { selectedCategory.value = 'pork'; } },
-      { text: '🍗 Chicken', handler: () => { selectedCategory.value = 'chicken'; } },
-      { text: '📦 Bundles', handler: () => { selectedCategory.value = 'bundles'; } },
+      { text: 'Vegetables', handler: () => { selectedCategory.value = 'vegetables'; } },
+      { text: 'Fruits', handler: () => { selectedCategory.value = 'fruits'; } },
+      { text: 'Seafoods', handler: () => { selectedCategory.value = 'seafoods'; } },
+      { text: 'Pork & Beef', handler: () => { selectedCategory.value = 'pork'; } },
+      { text: 'Chicken', handler: () => { selectedCategory.value = 'chicken'; } },
+      { text: 'Bundles', handler: () => { selectedCategory.value = 'bundles'; } },
       { text: 'Cancel', role: 'cancel' }
     ]
   });
@@ -334,7 +335,7 @@ const showSellerOptions = async (seller) => {
   const actionSheet = await actionSheetController.create({
     header: seller.name,
     buttons: [
-      { text: '❤️ Add to Favorites', handler: () => {} },
+      { text: 'Add to Favorites', handler: () => {} },
       { text: '🔗 Share', handler: () => {} },
       { text: 'Cancel', role: 'cancel' }
     ]

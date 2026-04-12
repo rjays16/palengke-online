@@ -22,7 +22,7 @@
 
         <div class="order-items">
           <div v-for="item in orderItems" :key="item.id" class="order-item">
-            <div class="item-img">{{ item.emoji }}</div>
+            <div class="item-img" v-if="false">{{ item.emoji }}</div>
             <div class="item-info">
               <p class="item-name">{{ item.name }}</p>
               <p class="item-variant" v-if="item.variant">{{ item.variant }}</p>
@@ -102,7 +102,7 @@
             <ion-icon :icon="chevronForwardOutline"></ion-icon>
           </div>
           <div class="pickup-notice">
-            <span class="pickup-time-icon">⏱️</span>
+            <span class="pickup-time-icon"><ion-icon :icon="timeOutline"></ion-icon></span>
             <strong>Pick up in {{ storeData.pickupTime }} mins</strong>
           </div>
           <div class="pickup-reminder">
@@ -118,7 +118,7 @@
       <!-- ─── Delivery Options ───────────────── -->
       <div class="section-card" v-if="deliveryMode === 'delivery'">
         <div class="delivery-options-header">
-          <span class="delivery-icon-wrap">🛵</span>
+          <span class="delivery-icon-wrap"><ion-icon :icon="bicycleOutline"></ion-icon></span>
           <div>
             <p class="delivery-options-title">Delivery options</p>
             <p class="delivery-options-sub">Distance from you: {{ storeData.distance }}</p>
@@ -162,12 +162,12 @@
       <div class="section-card">
         <h3>Use offers and more</h3>
         <div class="offer-row" @click="goToOffers">
-          <span class="offer-icon">🏷️</span>
+          <span class="offer-icon"><ion-icon :icon="flagOutline"></ion-icon></span>
           <span class="offer-label">Offers</span>
           <ion-icon :icon="chevronForwardOutline"></ion-icon>
         </div>
         <div class="offer-row" v-if="appliedPromo">
-          <span class="offer-icon">✅</span>
+          <span class="offer-icon"></span>
           <span class="offer-label promo-applied">{{ appliedPromo }}</span>
           <span class="remove-promo" @click="appliedPromo = ''">Remove</span>
         </div>
@@ -226,7 +226,7 @@ import {
   alertController, toastController
 } from '@ionic/vue';
 import {
-  closeOutline, addOutline, chevronForwardOutline
+  closeOutline, addOutline, chevronForwardOutline, timeOutline, bicycleOutline, flagOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -250,15 +250,15 @@ const storeData = ref({
 
 // Order Items
 const orderItems = ref([
-  { id: 1, name: 'Bawang/Garlic', emoji: '🧄', price: 66.00, quantity: 1, variant: '250g' },
-  { id: 2, name: 'Kamatis/Tomato', emoji: '🍅', price: 48.00, quantity: 2, variant: '250g' },
+  { id: 1, name: 'Bawang/Garlic', emoji: '', price: 66.00, quantity: 1, variant: '250g' },
+  { id: 2, name: 'Kamatis/Tomato', emoji: '', price: 48.00, quantity: 2, variant: '250g' },
 ]);
 
 // Suggested Items
 const suggestedItems = ref([
-  { id: 5, name: 'Sibuyas/Onion', emoji: '🧅', price: 110.00 },
-  { id: 6, name: 'Luya/Ginger', emoji: '🫚', price: 73.00 },
-  { id: 7, name: 'Pechay', emoji: '🥬', price: 66.00 },
+  { id: 5, name: 'Sibuyas/Onion', emoji: '', price: 110.00 },
+  { id: 6, name: 'Luya/Ginger', emoji: '', price: 73.00 },
+  { id: 7, name: 'Pechay', emoji: '', price: 66.00 },
 ]);
 
 // Delivery Address
@@ -275,7 +275,7 @@ const deliveryOptions = ref([
 ]);
 
 // Payment
-const selectedPayment = ref({ icon: '📱', label: 'GCash ••••5370' });
+const selectedPayment = ref({ icon: 'gcash', label: 'GCash' });
 
 // Computed
 const subtotal = computed(() =>

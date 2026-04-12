@@ -46,7 +46,7 @@
               <p class="banner-subtitle">{{ banner.subtitle }}</p>
               <div class="banner-btn">{{ banner.cta }}</div>
             </div>
-            <div class="banner-emoji">{{ banner.emoji }}</div>
+            <div class="banner-emoji" v-if="false">{{ banner.emoji }}</div>
           </div>
         </div>
         <!-- Dots -->
@@ -66,7 +66,7 @@
             @click="browseCategory(cat)"
           >
             <div class="category-circle" :style="{ background: cat.color }">
-              <span class="category-emoji">{{ cat.emoji }}</span>
+              <span class="category-emoji" v-if="false">{{ cat.emoji }}</span>
             </div>
             <span class="category-name">{{ cat.name }}</span>
           </div>
@@ -115,7 +115,7 @@
           >
             <div class="seller-img-wrap">
               <div class="seller-img" :style="{ background: seller.color }">
-                <span>{{ seller.emoji }}</span>
+                <span v-if="false">{{ seller.emoji }}</span>
               </div>
               <div class="seller-status" :class="seller.isOpen ? 'open' : 'closed'">
                 {{ seller.isOpen ? 'Open' : 'Closed' }}
@@ -123,7 +123,7 @@
             </div>
             <p class="seller-name-small">{{ seller.name }}</p>
             <p class="seller-dist-small">{{ seller.distance }}</p>
-            <p class="seller-promo" v-if="seller.promo">🏷️ {{ seller.promo }}</p>
+            <p class="seller-promo" v-if="seller.promo">{{ seller.promo }}</p>
           </div>
         </div>
       </div>
@@ -144,7 +144,7 @@
           >
             <!-- Seller Image -->
             <div class="seller-banner" :style="{ background: seller.color }">
-              <span class="seller-banner-emoji">{{ seller.emoji }}</span>
+              <span class="seller-banner-emoji" v-if="false">{{ seller.emoji }}</span>
               <div class="seller-badge" v-if="!seller.isOpen">Closed</div>
               <div class="seller-discount" v-if="seller.discount">{{ seller.discount }}</div>
             </div>
@@ -231,40 +231,40 @@ const cartCount = ref(0);
 // Banners
 const banners = ref([
   {
-    tag: '🔥 LIMITED TIME',
+    tag: 'LIMITED TIME',
     title: 'Fresh Veggies\nUp to 20% OFF!',
     subtitle: 'Promo code: PALENGKE20',
-    cta: 'Order Now →',
-    emoji: '🥦',
+    cta: 'Order Now',
+    emoji: '',
     gradient: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)'
   },
   {
-    tag: '⚡ FLASH SALE',
+    tag: 'FLASH SALE',
     title: 'Bundle Deals\nSave More!',
-    subtitle: 'Tipid Bundle starting ₱257',
-    cta: 'See Bundles →',
-    emoji: '📦',
+    subtitle: 'Tipid Bundle starting 257',
+    cta: 'See Bundles',
+    emoji: '',
     gradient: 'linear-gradient(135deg, #2196F3 0%, #1565C0 100%)'
   }
 ]);
 
 // Categories
 const categories = ref([
-  { id: 1, name: 'Vegetables', emoji: '🥦', color: '#E8F5E9', route: 'vegetables' },
-  { id: 2, name: 'Fruits', emoji: '🍎', color: '#FCE4EC', route: 'fruits' },
-  { id: 3, name: 'Seafoods', emoji: '🐟', color: '#E3F2FD', route: 'seafoods' },
-  { id: 4, name: 'Pork', emoji: '🥩', color: '#FFF3E0', route: 'pork' },
-  { id: 5, name: 'Chicken', emoji: '🍗', color: '#FFF8E1', route: 'chicken' },
-  { id: 6, name: 'Bundles', emoji: '📦', color: '#F3E5F5', route: 'bundles' },
-  { id: 7, name: 'Rice', emoji: '🍚', color: '#E0F2F1', route: 'rice' },
-  { id: 8, name: 'All Items', emoji: '🛒', color: '#f5f5f5', route: 'all' },
+  { id: 1, name: 'Vegetables', emoji: '', color: '#E8F5E9', route: 'vegetables' },
+  { id: 2, name: 'Fruits', emoji: '', color: '#FCE4EC', route: 'fruits' },
+  { id: 3, name: 'Seafoods', emoji: '', color: '#E3F2FD', route: 'seafoods' },
+  { id: 4, name: 'Pork', emoji: '', color: '#FFF3E0', route: 'pork' },
+  { id: 5, name: 'Chicken', emoji: '', color: '#FFF8E1', route: 'chicken' },
+  { id: 6, name: 'Bundles', emoji: '', color: '#F3E5F5', route: 'bundles' },
+  { id: 7, name: 'Rice', emoji: '', color: '#E0F2F1', route: 'rice' },
+  { id: 8, name: 'All Items', emoji: '', color: '#f5f5f5', route: 'all' },
 ]);
 
 // Order Again sellers
 const orderAgain = ref([
-  { id: 1, name: "Juan's Market", distance: '2.3 km', emoji: '🥦', color: '#E8F5E9', isOpen: true, promo: '₱50 off' },
-  { id: 2, name: "Ana's Palengke", distance: '1.5 km', emoji: '🍎', color: '#FCE4EC', isOpen: true, promo: null },
-  { id: 3, name: "Rosa's Seafoods", distance: '3.1 km', emoji: '🐟', color: '#E3F2FD', isOpen: false, promo: null },
+  { id: 1, name: "Juan's Market", distance: '2.3 km', emoji: '', color: '#E8F5E9', isOpen: true, promo: '50 off' },
+  { id: 2, name: "Ana's Palengke", distance: '1.5 km', emoji: '', color: '#FCE4EC', isOpen: true, promo: null },
+  { id: 3, name: "Rosa's Seafoods", distance: '3.1 km', emoji: '', color: '#E3F2FD', isOpen: false, promo: null },
 ]);
 
 // Nearby Sellers
@@ -272,19 +272,19 @@ const nearbySellers = ref([
   {
     id: 1,
     name: "Juan's Fresh Market",
-    emoji: '🥦',
+    emoji: '',
     color: 'linear-gradient(135deg, #4CAF50, #2E7D32)',
     rating: '4.8',
     deliveryTime: '15-25 min',
     distance: '2.3 km',
     isOpen: true,
-    discount: '₱50 OFF',
+    discount: '50 OFF',
     tags: ['Vegetables', 'Fruits', 'Fresh']
   },
   {
     id: 2,
     name: "Ana's Palengke - Cogon",
-    emoji: '🍎',
+    emoji: '',
     color: 'linear-gradient(135deg, #FF9800, #E65100)',
     rating: '4.6',
     deliveryTime: '10-20 min',
@@ -296,7 +296,7 @@ const nearbySellers = ref([
   {
     id: 3,
     name: "Rosa's Seafoods & Meats",
-    emoji: '🐟',
+    emoji: '',
     color: 'linear-gradient(135deg, #2196F3, #1565C0)',
     rating: '4.9',
     deliveryTime: '20-35 min',
@@ -305,22 +305,22 @@ const nearbySellers = ref([
     discount: null,
     tags: ['Seafoods', 'Pork', 'Chicken']
   },
-  {
+{
     id: 4,
     name: "Mario's Meat Shop",
-    emoji: '🥩',
+    emoji: '',
     color: 'linear-gradient(135deg, #f44336, #b71c1c)',
     rating: '4.7',
     deliveryTime: '15-30 min',
     distance: '2.8 km',
     isOpen: true,
-    discount: '₱30 OFF',
+    discount: '30 OFF',
     tags: ['Pork', 'Beef', 'Chicken']
   },
   {
     id: 5,
     name: "Palengke Bundle Deals",
-    emoji: '📦',
+    emoji: '',
     color: 'linear-gradient(135deg, #9C27B0, #4A148C)',
     rating: '4.5',
     deliveryTime: '25-40 min',

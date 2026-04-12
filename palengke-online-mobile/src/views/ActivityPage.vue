@@ -172,7 +172,7 @@ const router = useRouter();
 const activeOrder = ref({
   id: 'ORD-001',
   storeName: "Juan's Fresh Market",
-  storeEmoji: '🥦',
+  storeEmoji: '',
   status: 'Picking up from Palengke',
   eta: 'Arriving by 1:05 PM'
 });
@@ -180,42 +180,42 @@ const activeOrder = ref({
 const recentOrders = ref([
   {
     id: 'ORD-006', storeName: "Ana's Palengke - Cogon",
-    storeEmoji: '🍎', type: 'fruits',
+    storeEmoji: '', type: 'fruits',
     date: 'Today, 11:59 AM',
     total: 291.00, status: 'pending',
     items: ['Apple', 'Banana']
   },
   {
     id: 'ORD-005', storeName: "Juan's Fresh Market",
-    storeEmoji: '🥦', type: 'market',
+    storeEmoji: '', type: 'market',
     date: 'Today, 10:30 AM',
     total: 207.00, status: 'delivering',
     items: ['Bawang/Garlic', 'Kamatis/Tomato']
   },
   {
     id: 'ORD-004', storeName: "Mario's Meat Shop",
-    storeEmoji: '🥩', type: 'meat',
+    storeEmoji: '', type: 'meat',
     date: 'Today, 09:30 AM',
     total: 450.00, status: 'completed',
     items: ['Pork Belly', 'Chicken']
   },
   {
     id: 'ORD-003', storeName: "Rosa's Seafoods",
-    storeEmoji: '🐟', type: 'seafood',
+    storeEmoji: '', type: 'seafood',
     date: 'Yesterday, 06:48 PM',
     total: 320.00, status: 'cancelled',
     items: ['Tilapia', 'Shrimp']
   },
   {
     id: 'ORD-002', storeName: "Lily's Vegetables",
-    storeEmoji: '🥬', type: 'vegetables',
+    storeEmoji: '', type: 'vegetables',
     date: 'Mar 18, 2026, 05:19 PM',
     total: 180.00, status: 'completed',
     items: ['Kangkong', 'Spinach']
   },
   {
     id: 'ORD-001', storeName: "Tito's Variety Store",
-    storeEmoji: '🛒', type: 'variety',
+    storeEmoji: '', type: 'variety',
     date: 'Mar 15, 2026, 02:30 PM',
     total: 250.00, status: 'completed',
     items: ['Sugar', 'Salt']

@@ -36,7 +36,7 @@
         >
           <!-- Store Header -->
           <div class="store-cart-header">
-            <div class="store-cart-icon" :style="{ background: store.color }">{{ store.emoji }}</div>
+            <div class="store-cart-icon" :style="{ background: store.color }" v-if="false">{{ store.emoji }}</div>
             <div class="store-cart-info">
               <h3>{{ store.name }}</h3>
               <p>{{ store.itemCount }} items • {{ store.deliveryTime }} • {{ store.distance }}</p>
@@ -50,14 +50,14 @@
           <!-- Items List -->
           <div class="items-list">
             <div v-for="item in store.items" :key="item.id" class="cart-item">
-              <span class="item-emoji">{{ item.emoji }}</span>
+              <span class="item-emoji" v-if="false">{{ item.emoji }}</span>
               <div class="item-details">
                 <span class="item-name">{{ item.name }}</span>
                 <span class="item-price">₱{{ item.price.toFixed(2) }}</span>
               </div>
               <div class="quantity-controls">
                 <button class="qty-btn" @click.stop="updateQuantity(store.id, item.id, -1)">
-                  {{ item.quantity > 1 ? '−' : '🗑️' }}
+                  {{ item.quantity > 1 ? '−' : '' }}
                 </button>
                 <span class="qty-value">{{ item.quantity }}</span>
                 <button class="qty-btn" @click.stop="updateQuantity(store.id, item.id, 1)">+</button>
@@ -114,7 +114,7 @@ const cartStores = ref([
   {
     id: 1,
     name: "Juan's Fresh Market",
-    emoji: '🥦',
+    emoji: '',
     color: 'linear-gradient(135deg, #4CAF50, #2E7D32)',
     itemCount: 3,
     deliveryTime: 'From 25 mins',
@@ -122,15 +122,15 @@ const cartStores = ref([
     deliveryFee: 45,
     freeDelivery: false,
     items: [
-      { id: 1, name: 'Bawang/Garlic (100g)', emoji: '🧄', price: 66.00, quantity: 1 },
-      { id: 2, name: 'Kamatis/Tomato (1kg)', emoji: '🍅', price: 48.00, quantity: 2 },
-      { id: 3, name: 'Siling Labuyo (50g)', emoji: '🌶️', price: 35.00, quantity: 1 }
+      { id: 1, name: 'Bawang/Garlic (100g)', emoji: '', price: 66.00, quantity: 1 },
+      { id: 2, name: 'Kamatis/Tomato (1kg)', emoji: '', price: 48.00, quantity: 2 },
+      { id: 3, name: 'Siling Labuyo (50g)', emoji: '', price: 35.00, quantity: 1 }
     ]
   },
   {
     id: 2,
     name: "Ana's Palengke - Cogon",
-    emoji: '🍎',
+    emoji: '',
     color: 'linear-gradient(135deg, #FF9800, #E65100)',
     itemCount: 2,
     deliveryTime: 'From 20 mins',
@@ -138,8 +138,8 @@ const cartStores = ref([
     deliveryFee: 0,
     freeDelivery: true,
     items: [
-      { id: 10, name: 'Apple Med. Size', emoji: '🍎', price: 162.00, quantity: 1 },
-      { id: 11, name: 'Banana (Large)', emoji: '🍌', price: 129.00, quantity: 1 }
+      { id: 10, name: 'Apple Med. Size', emoji: '', price: 162.00, quantity: 1 },
+      { id: 11, name: 'Banana (Large)', emoji: '', price: 129.00, quantity: 1 }
     ]
   }
 ]);
