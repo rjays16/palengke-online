@@ -155,6 +155,9 @@
                   <p class="product-price">₱{{ product.price.toFixed(2) }}</p>
                   <p class="product-name">{{ product.name }}</p>
                   <p class="product-unit">{{ product.unit }}</p>
+                  <p class="product-stock" v-if="product.stock !== undefined && product.stock > 0">
+                    {{ product.stock }} left
+                  </p>
                   <p class="product-unavailable" v-if="!storeData.isOpen || !product.available">
                     Unavailable
                   </p>
@@ -240,63 +243,63 @@ const productCategories = ref([
     id: 'vegetables',
     name: 'Vegetable',
     products: [
-      { id: 1, name: 'Bawang/Garlic', emoji: '🧄', price: 66.00, unit: '250g', available: true },
-      { id: 2, name: 'Patatas/Potato', emoji: '🥔', price: 191.00, unit: '500g', available: true },
-      { id: 3, name: 'Sibuyas/Onion', emoji: '🧅', price: 110.00, unit: '250g', available: true },
-      { id: 4, name: 'Pipino/Cucumber', emoji: '🥒', price: 73.00, unit: '500g', available: true },
-      { id: 5, name: 'Luya/Ginger', emoji: '🫚', price: 73.00, unit: '250g', available: true },
-      { id: 6, name: 'Pechay', emoji: '🥬', price: 66.00, unit: '250g', available: true },
-      { id: 7, name: 'Kamatis/Tomato', emoji: '🍅', price: 48.00, unit: '250g', available: true },
-      { id: 8, name: 'Batong/String Beans', emoji: '🫘', price: 95.00, unit: '500g', available: true },
-      { id: 9, name: 'Talong/Eggplant', emoji: '🍆', price: 88.00, unit: '500g', available: true },
+      { id: 1, name: 'Bawang/Garlic', emoji: '🧄', price: 66.00, unit: '250g', available: true, stock: 15 },
+      { id: 2, name: 'Patatas/Potato', emoji: '🥔', price: 191.00, unit: '500g', available: true, stock: 8 },
+      { id: 3, name: 'Sibuyas/Onion', emoji: '🧅', price: 110.00, unit: '250g', available: true, stock: 20 },
+      { id: 4, name: 'Pipino/Cucumber', emoji: '🥒', price: 73.00, unit: '500g', available: true, stock: 12 },
+      { id: 5, name: 'Luya/Ginger', emoji: '🫚', price: 73.00, unit: '250g', available: true, stock: 6 },
+      { id: 6, name: 'Pechay', emoji: '🥬', price: 66.00, unit: '250g', available: true, stock: 25 },
+      { id: 7, name: 'Kamatis/Tomato', emoji: '🍅', price: 48.00, unit: '250g', available: true, stock: 30 },
+      { id: 8, name: 'Batong/String Beans', emoji: '🫘', price: 95.00, unit: '500g', available: true, stock: 10 },
+      { id: 9, name: 'Talong/Eggplant', emoji: '🍆', price: 88.00, unit: '500g', available: true, stock: 18 },
     ]
   },
   {
     id: 'fruits',
     name: 'Fruits',
     products: [
-      { id: 10, name: 'Apple Med. Size (3pcs)', emoji: '🍎', price: 162.00, unit: '3pcs', available: true },
-      { id: 11, name: 'Kiat-Kiat', emoji: '🍊', price: 184.00, unit: '1 per pack', available: true },
-      { id: 12, name: 'Banana (Large)', emoji: '🍌', price: 129.00, unit: '1000g', available: true },
-      { id: 13, name: 'Mango', emoji: '🥭', price: 155.00, unit: '500g', available: true },
-      { id: 14, name: 'Watermelon', emoji: '🍉', price: 89.00, unit: '1kg', available: true },
+      { id: 10, name: 'Apple Med. Size (3pcs)', emoji: '🍎', price: 162.00, unit: '3pcs', available: true, stock: 20 },
+      { id: 11, name: 'Kiat-Kiat', emoji: '🍊', price: 184.00, unit: '1 per pack', available: true, stock: 15 },
+      { id: 12, name: 'Banana (Large)', emoji: '🍌', price: 129.00, unit: '1000g', available: true, stock: 25 },
+      { id: 13, name: 'Mango', emoji: '🥭', price: 155.00, unit: '500g', available: true, stock: 12 },
+      { id: 14, name: 'Watermelon', emoji: '🍉', price: 89.00, unit: '1kg', available: true, stock: 8 },
     ]
   },
   {
     id: 'seafoods',
     name: 'Fresh Frozen Seafoods',
     products: [
-      { id: 15, name: 'Tuna Cubes', emoji: '🐟', price: 253.00, unit: '500g', available: true },
-      { id: 16, name: 'Pampano', emoji: '🐠', price: 303.00, unit: '1 per pack', available: true },
-      { id: 17, name: 'Salmon Strips', emoji: '🐡', price: 203.00, unit: '500g', available: true },
-      { id: 18, name: 'Hipon/Shrimp', emoji: '🦐', price: 320.00, unit: '500g', available: true },
+      { id: 15, name: 'Tuna Cubes', emoji: '🐟', price: 253.00, unit: '500g', available: true, stock: 10 },
+      { id: 16, name: 'Pampano', emoji: '🐠', price: 303.00, unit: '1 per pack', available: true, stock: 8 },
+      { id: 17, name: 'Salmon Strips', emoji: '🐡', price: 203.00, unit: '500g', available: true, stock: 6 },
+      { id: 18, name: 'Hipon/Shrimp', emoji: '🦐', price: 320.00, unit: '500g', available: true, stock: 5 },
     ]
   },
   {
     id: 'pork',
     name: 'Fresh Frozen Pork Meats',
     products: [
-      { id: 19, name: 'Pork Belly', emoji: '🥩', price: 287.00, unit: '500g', available: true },
-      { id: 20, name: 'Pork Adobo Cut', emoji: '🍖', price: 265.00, unit: '500g', available: true },
-      { id: 21, name: 'Pork Ribs', emoji: '🍗', price: 310.00, unit: '500g', available: true },
+      { id: 19, name: 'Pork Belly', emoji: '🥩', price: 287.00, unit: '500g', available: true, stock: 12 },
+      { id: 20, name: 'Pork Adobo Cut', emoji: '🍖', price: 265.00, unit: '500g', available: true, stock: 8 },
+      { id: 21, name: 'Pork Ribs', emoji: '🍗', price: 310.00, unit: '500g', available: true, stock: 10 },
     ]
   },
   {
     id: 'chicken',
     name: 'Fresh Frozen Chicken',
     products: [
-      { id: 22, name: 'Whole Dressed Chicken', emoji: '🍗', price: 304.00, unit: '1 per pack', available: true },
-      { id: 23, name: 'Chicken Wings', emoji: '🍗', price: 320.00, unit: '1 per pack', available: true },
-      { id: 24, name: 'Chicken Drumsticks', emoji: '🍗', price: 257.00, unit: '1 per pack', available: true },
+      { id: 22, name: 'Whole Dressed Chicken', emoji: '🍗', price: 304.00, unit: '1 per pack', available: true, stock: 15 },
+      { id: 23, name: 'Chicken Wings', emoji: '🍗', price: 320.00, unit: '1 per pack', available: true, stock: 20 },
+      { id: 24, name: 'Chicken Drumsticks', emoji: '🍗', price: 257.00, unit: '1 per pack', available: true, stock: 18 },
     ]
   },
   {
     id: 'bundles',
     name: 'TIPID Bundle Deals',
     products: [
-      { id: 25, name: 'Fresh Vegetable Bundle (Family)', emoji: '🥬', price: 257.00, unit: '1 per bundle', available: true },
-      { id: 26, name: 'Sour Soup Package (Sinigang)', emoji: '🍋', price: 270.00, unit: '1 per pack', available: true },
-      { id: 27, name: 'Stew Package (Afritada Style)', emoji: '🥫', price: 252.00, unit: '1 per pack', available: true },
+      { id: 25, name: 'Fresh Vegetable Bundle (Family)', emoji: '🥬', price: 257.00, unit: '1 per bundle', available: true, stock: 10 },
+      { id: 26, name: 'Sour Soup Package (Sinigang)', emoji: '🍋', price: 270.00, unit: '1 per pack', available: true, stock: 8 },
+      { id: 27, name: 'Stew Package (Afritada Style)', emoji: '🥫', price: 252.00, unit: '1 per pack', available: true, stock: 12 },
     ]
   },
 ]);
@@ -621,6 +624,7 @@ const goToCart = () => router.push('/cart');
 .product-price { font-size: 16px; font-weight: 800; color: #1a1a1a; margin: 0 0 3px 0; }
 .product-name { font-size: 13px; color: #333; margin: 0 0 2px 0; line-height: 1.3; font-weight: 600; }
 .product-unit { font-size: 12px; color: #999; margin: 0 0 2px 0; }
+.product-stock { font-size: 11px; color: #4CAF50; font-weight: 600; margin: 0; }
 .product-unavailable { font-size: 12px; color: #999; margin: 0; }
 
 /* ─── Floating Basket ────────────────────────── */
