@@ -20,17 +20,17 @@
         <h3>Contact Us</h3>
         <div class="contact-grid">
           <div class="contact-card" @click="liveChat">
-            <span class="contact-icon">💬</span>
+            <span class="contact-icon"><ion-icon :icon="chatbubblesOutline"></ion-icon></span>
             <p>Live Chat</p>
             <span class="contact-status green">Online</span>
           </div>
           <div class="contact-card" @click="callSupport">
-            <span class="contact-icon">📞</span>
+            <span class="contact-icon"><ion-icon :icon="callOutline"></ion-icon></span>
             <p>Call Us</p>
             <span class="contact-status">24/7</span>
           </div>
           <div class="contact-card" @click="emailSupport">
-            <span class="contact-icon">📧</span>
+            <span class="contact-icon"><ion-icon :icon="mailOutline"></ion-icon></span>
             <p>Email</p>
             <span class="contact-status">24hrs</span>
           </div>
@@ -70,7 +70,7 @@ import {
   IonButtons, IonBackButton, IonIcon,
   alertController, toastController
 } from '@ionic/vue';
-import { searchOutline, chevronUpOutline, chevronDownOutline } from 'ionicons/icons';
+import { searchOutline, chevronUpOutline, chevronDownOutline, alertCircleOutline, chatbubblesOutline, callOutline, mailOutline } from 'ionicons/icons';
 
 const router = useRouter();
 const searchQuery = ref('');
@@ -98,14 +98,14 @@ const toggleFaq = (id) => {
 };
 
 const liveChat = async () => {
-  const toast = await toastController.create({ message: '💬 Connecting to live chat...', duration: 2000, color: 'medium', position: 'top' });
+  const toast = await toastController.create({ message: 'Connecting to live chat...', duration: 2000, color: 'medium', position: 'top' });
   await toast.present();
 };
 
 const callSupport = async () => {
   const alert = await alertController.create({
     header: 'Call Support',
-    message: '📞 1800-PALENGKE\nAvailable 24/7',
+    message: '1800-PALENGKE\nAvailable 24/7',
     buttons: [{ text: 'Cancel', role: 'cancel' }, { text: 'Call Now', handler: () => { window.location.href = 'tel:1800-PALENGKE'; } }]
   });
   await alert.present();
@@ -113,7 +113,7 @@ const callSupport = async () => {
 
 const emailSupport = async () => {
   const toast = await toastController.create({ 
-    message: '📧 Opening email app...', 
+    message: 'Opening email app...', 
     duration: 1500, 
     color: 'medium', 
     position: 'top' 
