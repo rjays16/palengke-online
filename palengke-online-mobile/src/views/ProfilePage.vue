@@ -41,12 +41,12 @@
             <ion-icon :icon="chevronForwardOutline" class="menu-arrow"></ion-icon>
           </div>
           <div class="menu-item" @click="goToAddresses">
-            <div class="menu-icon blue"><ion-icon :icon="locationOutline"></ion-icon></div>
+            <div class="menu-icon green"><ion-icon :icon="locationOutline"></ion-icon></div>
             <div class="menu-label"><p>Saved Addresses</p></div>
             <ion-icon :icon="chevronForwardOutline" class="menu-arrow"></ion-icon>
           </div>
           <div class="menu-item" @click="goToPayment">
-            <div class="menu-icon orange"><ion-icon :icon="cardOutline"></ion-icon></div>
+            <div class="menu-icon green"><ion-icon :icon="cardOutline"></ion-icon></div>
             <div class="menu-label"><p>Payment Methods</p></div>
             <ion-icon :icon="chevronForwardOutline" class="menu-arrow"></ion-icon>
           </div>
@@ -73,7 +73,7 @@
         <h3 class="menu-title">Support</h3>
         <div class="menu-list">
           <div class="menu-item" @click="goToNotifications">
-            <div class="menu-icon blue"><ion-icon :icon="notificationsOutline"></ion-icon></div>
+            <div class="menu-icon green"><ion-icon :icon="notificationsOutline"></ion-icon></div>
             <div class="menu-label"><p>Notifications</p></div>
             <ion-icon :icon="chevronForwardOutline" class="menu-arrow"></ion-icon>
           </div>

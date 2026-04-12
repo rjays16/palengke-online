@@ -98,7 +98,7 @@ const toggleFaq = (id) => {
 };
 
 const liveChat = async () => {
-  const toast = await toastController.create({ message: '💬 Connecting to live chat...', duration: 2000, color: 'primary', position: 'top' });
+  const toast = await toastController.create({ message: '💬 Connecting to live chat...', duration: 2000, color: 'medium', position: 'top' });
   await toast.present();
 };
 
@@ -111,7 +111,18 @@ const callSupport = async () => {
   await alert.present();
 };
 
-const emailSupport = () => { window.location.href = 'mailto:support@palengkeonline.com'; };
+const emailSupport = async () => {
+  const toast = await toastController.create({ 
+    message: '📧 Opening email app...', 
+    duration: 1500, 
+    color: 'medium', 
+    position: 'top' 
+  });
+  await toast.present();
+  setTimeout(() => {
+    window.location.href = 'mailto:support@palengke-online.com';
+  }, 500);
+};
 
 const reportIssue = async () => {
   const alert = await alertController.create({
