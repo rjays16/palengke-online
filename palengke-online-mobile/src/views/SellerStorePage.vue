@@ -294,9 +294,9 @@ const productCategories = ref([
     id: 'bundles',
     name: 'TIPID Bundle Deals',
     products: [
-      { id: 25, name: 'Pinakbet Bundle w/o Pork', emoji: '📦', price: 257.00, unit: '1 per pack', available: true },
-      { id: 26, name: 'Sinigang Bundle w/o Pork', emoji: '📦', price: 270.00, unit: '1 per pack', available: true },
-      { id: 27, name: 'Afritada Bundle w/o Pork', emoji: '📦', price: 252.00, unit: '1 per pack', available: true },
+      { id: 25, name: 'Fresh Vegetable Bundle (Family)', emoji: '🥬', price: 257.00, unit: '1 per bundle', available: true },
+      { id: 26, name: 'Sour Soup Package (Sinigang)', emoji: '🍋', price: 270.00, unit: '1 per pack', available: true },
+      { id: 27, name: 'Stew Package (Afritada Style)', emoji: '🥫', price: 252.00, unit: '1 per pack', available: true },
     ]
   },
 ]);

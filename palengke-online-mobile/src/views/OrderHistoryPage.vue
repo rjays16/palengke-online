@@ -77,7 +77,7 @@ const orders = ref([
   { id: 'ORD-002', storeName: "Ana's Palengke", storeEmoji: '🍎', iconBg: '#FCE4EC', date: '20 Mar 2026, 06:48 PM', items: 'Apple Med. Size, Banana', total: 291.00, status: 'cancelled' },
   { id: 'ORD-003', storeName: "Rosa's Seafoods", storeEmoji: '🐟', iconBg: '#E3F2FD', date: '18 Mar 2026, 05:19 PM', items: 'Tuna Cubes, Pampano', total: 556.00, status: 'completed' },
   { id: 'ORD-004', storeName: "Mario's Meat Shop", storeEmoji: '🥩', iconBg: '#FFEBEE', date: '15 Mar 2026, 02:30 PM', items: 'Pork Belly, Pork Ribs', total: 597.00, status: 'completed' },
-  { id: 'ORD-005', storeName: "Palengke Bundles", storeEmoji: '📦', iconBg: '#F3E5F5', date: '10 Mar 2026, 09:15 AM', items: 'Pinakbet Bundle', total: 257.00, status: 'completed' },
+  { id: 'ORD-005', storeName: "Palengke Bundles", storeEmoji: '📦', iconBg: '#F3E5F5', date: '10 Mar 2026, 09:15 AM', items: 'Fresh Vegetable Bundle', total: 257.00, status: 'completed' },
 ]);
 
 const filteredOrders = computed(() => {
