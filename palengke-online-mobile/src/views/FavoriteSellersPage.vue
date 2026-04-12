@@ -86,7 +86,7 @@ const favoriteSellers = ref([
 ]);
 
 const openSeller = (seller) => {
-  router.push(`/seller/${seller.id}`);
+  router.push(`/store/${seller.id}`);
 };
 
 const toggleFavorite = async (seller) => {

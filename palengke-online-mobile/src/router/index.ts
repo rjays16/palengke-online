@@ -202,6 +202,12 @@ const routes: Array<RouteRecordRaw> = [
     component: FavoriteSellersPage,
     meta: { requiresAuth: true }
   },
+  {
+    path: '/seller/:id',
+    name: 'SellerStore',
+    component: SellerStorePage,
+    meta: { requiresAuth: true }
+  },
 ];
 
 const router = createRouter({
