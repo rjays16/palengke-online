@@ -115,24 +115,24 @@ const cartStores = ref([
     id: 1,
     name: "Juan's Fresh Market",
     emoji: '',
-    image: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=200&h=200&fit=crop',
+    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e',
     color: 'linear-gradient(135deg, #4CAF50, #2E7D32)',
     itemCount: 3,
     deliveryTime: 'From 25 mins',
     distance: '2.3 km',
     deliveryFee: 45,
     freeDelivery: false,
-    items: [
-      { id: 1, name: 'Bawang/Garlic (100g)', emoji: '', image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=100&h=100&fit=crop', price: 66.00, quantity: 1 },
-      { id: 2, name: 'Kamatis/Tomato (1kg)', emoji: '', image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=100&h=100&fit=crop', price: 48.00, quantity: 2 },
-      { id: 3, name: 'Siling Labuyo (50g)', emoji: '', image: 'https://images.unsplash.com/photo-1518843875459-f738682238a6?w=100&h=100&fit=crop', price: 35.00, quantity: 1 }
+items: [
+      { id: 1, name: 'Bawang/Garlic (100g)', emoji: '', image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999', price: 66.00, quantity: 1 },
+      { id: 2, name: 'Kamatis/Tomato (1kg)', emoji: '', image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea', price: 48.00, quantity: 2 },
+      { id: 3, name: 'Siling Labuyo (50g)', emoji: '', image: 'https://images.unsplash.com/photo-1582273951336-1123d4b4d93c', price: 35.00, quantity: 1 }
     ]
   },
   {
     id: 2,
     name: "Ana's Palengke - Cogon",
     emoji: '',
-    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&h=200&fit=crop',
+    image: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9',
     color: 'linear-gradient(135deg, #FF9800, #E65100)',
     itemCount: 2,
     deliveryTime: 'From 20 mins',
@@ -140,8 +140,8 @@ const cartStores = ref([
     deliveryFee: 0,
     freeDelivery: true,
     items: [
-      { id: 10, name: 'Apple Med. Size', emoji: '', image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=100&h=100&fit=crop', price: 162.00, quantity: 1 },
-      { id: 11, name: 'Banana (Large)', emoji: '', image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=100&h=100&fit=crop', price: 129.00, quantity: 1 }
+      { id: 10, name: 'Apple Med. Size', emoji: '', image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6', price: 162.00, quantity: 1 },
+      { id: 11, name: 'Banana (Large)', emoji: '', image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e', price: 129.00, quantity: 1 }
     ]
   }
 ]);

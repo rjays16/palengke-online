@@ -22,7 +22,7 @@
 
         <div class="order-items">
           <div v-for="item in orderItems" :key="item.id" class="order-item">
-            <div class="item-img" v-if="false">{{ item.emoji }}</div>
+            <img :src="item.image" :alt="item.name" class="item-img">
             <div class="item-info">
               <p class="item-name">{{ item.name }}</p>
               <p class="item-variant" v-if="item.variant">{{ item.variant }}</p>
@@ -45,7 +45,7 @@
             :key="item.id"
             class="suggestion-card"
           >
-            <div class="suggestion-img">{{ item.emoji }}</div>
+            <img :src="item.image" :alt="item.name" class="suggestion-img" @error="handleImageError($event)">
             <div class="suggestion-add" @click="addSuggestion(item)">
               <ion-icon :icon="addOutline"></ion-icon>
             </div>
@@ -152,8 +152,7 @@
           <span class="see-all-btn" @click="goToPaymentMethods">See all</span>
         </div>
         <div class="payment-method" @click="goToPaymentMethods">
-          <div class="payment-icon">{{ selectedPayment.icon }}</div>
-          <span class="payment-label">{{ selectedPayment.label }}</span>
+          <img :src="selectedPayment.image" alt="Payment" class="payment-icon-img">
           <ion-icon :icon="chevronForwardOutline" class="payment-arrow"></ion-icon>
         </div>
       </div>
@@ -245,20 +244,21 @@ const storeData = ref({
   name: "Juan's Fresh Market",
   address: 'Stall #15, CDO City Palengke',
   distance: '2.3 km',
-  pickupTime: '13'
+  pickupTime: '13',
+  image: 'https://images.unsplash.com/photo-1542838132-92c53300491e'
 });
 
 // Order Items
 const orderItems = ref([
-  { id: 1, name: 'Bawang/Garlic', emoji: '', price: 66.00, quantity: 1, variant: '250g' },
-  { id: 2, name: 'Kamatis/Tomato', emoji: '', price: 48.00, quantity: 2, variant: '250g' },
+  { id: 1, name: 'Bawang/Garlic', emoji: '', image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999', price: 66.00, quantity: 1, variant: '250g' },
+  { id: 2, name: 'Kamatis/Tomato', emoji: '', image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea', price: 48.00, quantity: 2, variant: '250g' },
 ]);
 
 // Suggested Items
 const suggestedItems = ref([
-  { id: 5, name: 'Sibuyas/Onion', emoji: '', price: 110.00 },
-  { id: 6, name: 'Luya/Ginger', emoji: '', price: 73.00 },
-  { id: 7, name: 'Pechay', emoji: '', price: 66.00 },
+  { id: 5, name: 'Sibuyas/Onion', emoji: '', image: 'https://images.unsplash.com/photo-1607305387299-a3d9611cd469', price: 110.00 },
+  { id: 6, name: 'Luya/Ginger', emoji: '', image: 'https://images.unsplash.com/photo-1615485500704-8e990f9900f7', price: 73.00 },
+  { id: 7, name: 'Pechay', emoji: '', image: 'https://images.unsplash.com/photo-1582284540020-8acbe03f4924', price: 66.00 },
 ]);
 
 // Delivery Address
@@ -275,7 +275,7 @@ const deliveryOptions = ref([
 ]);
 
 // Payment
-const selectedPayment = ref({ icon: 'gcash', label: 'GCash' });
+const selectedPayment = ref({ icon: 'card', label: 'GCash', image: '/assets/images/payment-methods-logo/gcash.png' });
 
 // Computed
 const subtotal = computed(() =>
@@ -296,6 +296,10 @@ const grandTotal = computed(() =>
 
 // Methods
 const selectDelivery = (option) => { selectedDelivery.value = option.id; };
+
+const handleImageError = (event) => {
+  event.target.src = 'https://via.placeholder.com/110x90?text=Image';
+};
 
 const showDeliveryInfo = async (option) => {
   const messages = {
@@ -403,10 +407,10 @@ const goToOffers = () => router.push('/offers');
 /* Order Items */
 .order-items { display: flex; flex-direction: column; gap: 16px; }
 .order-item { display: flex; align-items: flex-start; gap: 14px; }
-.item-img {
-  width: 56px; height: 56px; background: #f8f9fa;
-  border-radius: 12px; display: flex; align-items: center;
-  justify-content: center; font-size: 30px; flex-shrink: 0;
+.order-item .item-img {
+  width: 56px; height: 56px;
+  border-radius: 12px; object-fit: cover;
+  flex-shrink: 0;
   border: 1px solid #f0f0f0;
 }
 .item-info { flex: 1; }
@@ -427,10 +431,12 @@ const goToOffers = () => router.push('/offers');
 .suggestions-scroll::-webkit-scrollbar { display: none; }
 .suggestion-card { flex-shrink: 0; width: 110px; position: relative; }
 .suggestion-img {
-  width: 110px; height: 90px; background: #f8f9fa;
-  border-radius: 12px; display: flex; align-items: center;
-  justify-content: center; font-size: 40px; margin-bottom: 6px;
+  width: 110px; height: 90px;
+  border-radius: 12px; object-fit: cover;
+  margin-bottom: 6px;
   border: 1px solid #f0f0f0;
+  background-color: #f5f5f5;
+  display: block;
 }
 .suggestion-add {
   position: absolute; top: 56px; right: 4px;
@@ -521,7 +527,8 @@ const goToOffers = () => router.push('/offers');
 .payment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .payment-header h3 { margin: 0; }
 .see-all-btn { font-size: 14px; color: #4CAF50; font-weight: 600; cursor: pointer; }
-.payment-method { display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 8px 0; }
+.payment-method { display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; padding: 12px 0; }
+.payment-icon-img { width: 140px; height: 60px; object-fit: contain; border-radius: 10px; background: #f5f5f5; padding: 8px; }
 .payment-icon { font-size: 28px; }
 .payment-label { flex: 1; font-size: 15px; font-weight: 600; color: #1a1a1a; }
 .payment-arrow { font-size: 18px; color: #ccc; }
