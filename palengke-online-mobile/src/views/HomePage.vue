@@ -116,9 +116,7 @@
             @click="openSeller(seller)"
           >
             <div class="seller-img-wrap">
-              <div class="seller-img" :style="{ background: seller.color }">
-                <span v-if="false">{{ seller.emoji }}</span>
-              </div>
+              <img :src="seller.image" :alt="seller.name" class="seller-img">
               <div class="seller-status" :class="seller.isOpen ? 'open' : 'closed'">
                 {{ seller.isOpen ? 'Open' : 'Closed' }}
               </div>
@@ -145,8 +143,8 @@
             @click="openSeller(seller)"
           >
             <!-- Seller Image -->
-            <div class="seller-banner" :style="{ background: seller.color }">
-              <span class="seller-banner-emoji" v-if="false">{{ seller.emoji }}</span>
+            <div class="seller-banner">
+              <img :src="seller.image" :alt="seller.name" class="seller-banner-img">
               <div class="seller-badge" v-if="!seller.isOpen">Closed</div>
               <div class="seller-discount" v-if="seller.discount">{{ seller.discount }}</div>
             </div>
@@ -266,9 +264,9 @@ const categories = ref([
 
 // Order Again sellers
 const orderAgain = ref([
-  { id: 1, name: "Juan's Market", distance: '2.3 km', emoji: '', color: '#E8F5E9', isOpen: true, promo: '50 off' },
-  { id: 2, name: "Ana's Palengke", distance: '1.5 km', emoji: '', color: '#FCE4EC', isOpen: true, promo: null },
-  { id: 3, name: "Rosa's Seafoods", distance: '3.1 km', emoji: '', color: '#E3F2FD', isOpen: false, promo: null },
+  { id: 1, name: "Juan's Market", distance: '2.3 km', emoji: '', color: '#E8F5E9', isOpen: true, promo: '50 off', image: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=200&h=150&fit=crop' },
+  { id: 2, name: "Ana's Palengke", distance: '1.5 km', emoji: '', color: '#FCE4EC', isOpen: true, promo: null, image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&h=150&fit=crop' },
+  { id: 3, name: "Rosa's Seafoods", distance: '3.1 km', emoji: '', color: '#E3F2FD', isOpen: false, promo: null, image: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?w=200&h=150&fit=crop' },
 ]);
 
 // Nearby Sellers
@@ -277,6 +275,7 @@ const nearbySellers = ref([
     id: 1,
     name: "Juan's Fresh Palengke",
     emoji: '',
+    image: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=400&h=200&fit=crop',
     color: 'linear-gradient(135deg, #4CAF50, #2E7D32)',
     rating: '4.8',
     deliveryTime: '15-25 min',
@@ -289,6 +288,7 @@ const nearbySellers = ref([
     id: 2,
     name: "Ana's Palengke - Cogon",
     emoji: '',
+    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&h=200&fit=crop',
     color: 'linear-gradient(135deg, #FF9800, #E65100)',
     rating: '4.6',
     deliveryTime: '10-20 min',
@@ -301,6 +301,7 @@ const nearbySellers = ref([
     id: 3,
     name: "Rosa's Seafoods & Meats",
     emoji: '',
+    image: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?w=400&h=200&fit=crop',
     color: 'linear-gradient(135deg, #2196F3, #1565C0)',
     rating: '4.9',
     deliveryTime: '20-35 min',
@@ -313,6 +314,7 @@ const nearbySellers = ref([
     id: 4,
     name: "Mario's Meat Shop",
     emoji: '',
+    image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=400&h=200&fit=crop',
     color: 'linear-gradient(135deg, #f44336, #b71c1c)',
     rating: '4.7',
     deliveryTime: '15-30 min',
@@ -325,6 +327,7 @@ const nearbySellers = ref([
     id: 5,
     name: "Palengke Bundle Deals",
     emoji: '',
+    image: 'https://images.unsplash.com/photo-1550989460-0adf9ea622e2?w=400&h=200&fit=crop',
     color: 'linear-gradient(135deg, #9C27B0, #4A148C)',
     rating: '4.5',
     deliveryTime: '25-40 min',
@@ -535,6 +538,7 @@ const goToNotifications = () => router.push('/notifications');
   width: 120px; height: 90px; border-radius: 14px;
   display: flex; align-items: center; justify-content: center;
   font-size: 36px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  object-fit: cover;
 }
 .seller-status {
   position: absolute; top: 6px; left: 6px;
@@ -561,9 +565,13 @@ const goToNotifications = () => router.push('/notifications');
 
 .seller-banner {
   height: 140px; display: flex; align-items: center;
-  justify-content: center; position: relative;
+  justify-content: center; position: relative; overflow: hidden;
+  border-radius: 18px 18px 0 0;
 }
-.seller-banner-emoji { font-size: 64px; }
+.seller-banner-img {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  object-fit: cover;
+}
 .seller-badge {
   position: absolute; top: 12px; left: 12px;
   background: rgba(0,0,0,0.6); color: white;
