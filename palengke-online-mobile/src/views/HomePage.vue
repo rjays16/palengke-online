@@ -46,7 +46,9 @@
               <p class="banner-subtitle">{{ banner.subtitle }}</p>
               <div class="banner-btn">{{ banner.cta }}</div>
             </div>
-            <div class="banner-emoji" v-if="false">{{ banner.emoji }}</div>
+            <div class="banner-img">
+              <img :src="banner.image" :alt="banner.title">
+            </div>
           </div>
         </div>
         <!-- Dots -->
@@ -232,19 +234,21 @@ const cartCount = ref(0);
 const banners = ref([
   {
     tag: 'LIMITED TIME',
-    title: 'Fresh Veggies\nUp to 20% OFF!',
-    subtitle: 'Promo code: PALENGKE20',
+    title: 'Fresh from Palengke\nUp to 20% OFF!',
+    subtitle: 'Direct from local vendors',
     cta: 'Order Now',
     emoji: '',
-    gradient: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)'
+    gradient: 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)',
+    image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=200&h=200&fit=crop'
   },
   {
     tag: 'FLASH SALE',
-    title: 'Bundle Deals\nSave More!',
-    subtitle: 'Tipid Bundle starting 257',
+    title: 'Palengke Bundles\nSave More!',
+    subtitle: 'Best deals from the market',
     cta: 'See Bundles',
     emoji: '',
-    gradient: 'linear-gradient(135deg, #2196F3 0%, #1565C0 100%)'
+    gradient: 'linear-gradient(135deg, #2196F3 0%, #1565C0 100%)',
+    image: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=200&h=200&fit=crop'
   }
 ]);
 
@@ -271,7 +275,7 @@ const orderAgain = ref([
 const nearbySellers = ref([
   {
     id: 1,
-    name: "Juan's Fresh Market",
+    name: "Juan's Fresh Palengke",
     emoji: '',
     color: 'linear-gradient(135deg, #4CAF50, #2E7D32)',
     rating: '4.8',
@@ -445,7 +449,7 @@ const goToNotifications = () => router.push('/notifications');
   cursor: pointer; position: relative; overflow: hidden;
 }
 
-.banner-text { color: white; z-index: 1; }
+.banner-text { color: white; z-index: 1; flex: 1; }
 .banner-tag { font-size: 11px; font-weight: 700; opacity: 0.9; margin: 0 0 6px 0; letter-spacing: 0.5px; }
 .banner-title { font-size: 20px; font-weight: 800; margin: 0 0 6px 0; white-space: pre-line; line-height: 1.2; }
 .banner-subtitle { font-size: 12px; opacity: 0.85; margin: 0 0 12px 0; }
@@ -454,7 +458,13 @@ const goToNotifications = () => router.push('/notifications');
   padding: 8px 16px; border-radius: 20px;
   font-size: 13px; font-weight: 700; color: white;
 }
-.banner-emoji { font-size: 64px; opacity: 0.9; }
+.banner-img { z-index: 1; }
+.banner-img img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px;
+}
 
 .banner-dots { display: flex; justify-content: center; gap: 6px; margin-top: 12px; }
 .dot { width: 6px; height: 6px; border-radius: 50%; background: #ddd; transition: all 0.2s; }
