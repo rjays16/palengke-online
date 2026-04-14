@@ -68,7 +68,7 @@
             @click="browseCategory(cat)"
           >
             <div class="category-circle" :style="{ background: cat.color }">
-              <span class="category-emoji" v-if="false">{{ cat.emoji }}</span>
+              <img :src="cat.image" :alt="cat.name" class="category-img">
             </div>
             <span class="category-name">{{ cat.name }}</span>
           </div>
@@ -254,14 +254,14 @@ const banners = ref([
 
 // Categories
 const categories = ref([
-  { id: 1, name: 'Vegetables', emoji: '', color: '#E8F5E9', route: 'vegetables' },
-  { id: 2, name: 'Fruits', emoji: '', color: '#FCE4EC', route: 'fruits' },
-  { id: 3, name: 'Seafoods', emoji: '', color: '#E3F2FD', route: 'seafoods' },
-  { id: 4, name: 'Pork', emoji: '', color: '#FFF3E0', route: 'pork' },
-  { id: 5, name: 'Chicken', emoji: '', color: '#FFF8E1', route: 'chicken' },
-  { id: 6, name: 'Bundles', emoji: '', color: '#F3E5F5', route: 'bundles' },
-  { id: 7, name: 'Rice', emoji: '', color: '#E0F2F1', route: 'rice' },
-  { id: 8, name: 'All Items', emoji: '', color: '#f5f5f5', route: 'all' },
+  { id: 1, name: 'Vegetables', emoji: '', color: '#E8F5E9', route: 'vegetables', image: 'https://images.unsplash.com/photo-1518843875459-f738682238a6?w=120&h=120&fit=crop' },
+  { id: 2, name: 'Fruits', emoji: '', color: '#FCE4EC', route: 'fruits', image: 'https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=120&h=120&fit=crop' },
+  { id: 3, name: 'Seafoods', emoji: '', color: '#E3F2FD', route: 'seafoods', image: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3?w=120&h=120&fit=crop' },
+  { id: 4, name: 'Pork', emoji: '', color: '#FFF3E0', route: 'pork', image: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=120&h=120&fit=crop' },
+  { id: 5, name: 'Chicken', emoji: '', color: '#FFF8E1', route: 'chicken', image: 'https://images.unsplash.com/photo-1587593810167-a84920ea0781?w=120&h=120&fit=crop' },
+  { id: 6, name: 'Bundles', emoji: '', color: '#F3E5F5', route: 'bundles', image: 'https://images.unsplash.com/photo-1550989460-0adf9ea622e2?w=120&h=120&fit=crop' },
+  { id: 7, name: 'Rice', emoji: '', color: '#E0F2F1', route: 'rice', image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=120&h=120&fit=crop' },
+  { id: 8, name: 'All Items', emoji: '', color: '#f5f5f5', route: 'all', image: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=120&h=120&fit=crop' },
 ]);
 
 // Order Again sellers
@@ -493,7 +493,10 @@ const goToNotifications = () => router.push('/notifications');
   width: 60px; height: 60px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  overflow: hidden;
+  border: 2px solid white;
 }
+.category-img { width: 100%; height: 100%; object-fit: cover; }
 .category-emoji { font-size: 28px; }
 .category-name { font-size: 11px; font-weight: 600; color: #333; white-space: nowrap; }
 
