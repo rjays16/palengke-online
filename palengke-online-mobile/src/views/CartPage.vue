@@ -36,7 +36,7 @@
         >
           <!-- Store Header -->
           <div class="store-cart-header">
-            <div class="store-cart-icon" :style="{ background: store.color }" v-if="false">{{ store.emoji }}</div>
+            <img :src="store.image" :alt="store.name" class="store-cart-img">
             <div class="store-cart-info">
               <h3>{{ store.name }}</h3>
               <p>{{ store.itemCount }} items • {{ store.deliveryTime }} • {{ store.distance }}</p>
@@ -50,7 +50,7 @@
           <!-- Items List -->
           <div class="items-list">
             <div v-for="item in store.items" :key="item.id" class="cart-item">
-              <span class="item-emoji" v-if="false">{{ item.emoji }}</span>
+              <img :src="item.image" :alt="item.name" class="item-img">
               <div class="item-details">
                 <span class="item-name">{{ item.name }}</span>
                 <span class="item-price">₱{{ item.price.toFixed(2) }}</span>
@@ -115,6 +115,7 @@ const cartStores = ref([
     id: 1,
     name: "Juan's Fresh Market",
     emoji: '',
+    image: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=200&h=200&fit=crop',
     color: 'linear-gradient(135deg, #4CAF50, #2E7D32)',
     itemCount: 3,
     deliveryTime: 'From 25 mins',
@@ -122,15 +123,16 @@ const cartStores = ref([
     deliveryFee: 45,
     freeDelivery: false,
     items: [
-      { id: 1, name: 'Bawang/Garlic (100g)', emoji: '', price: 66.00, quantity: 1 },
-      { id: 2, name: 'Kamatis/Tomato (1kg)', emoji: '', price: 48.00, quantity: 2 },
-      { id: 3, name: 'Siling Labuyo (50g)', emoji: '', price: 35.00, quantity: 1 }
+      { id: 1, name: 'Bawang/Garlic (100g)', emoji: '', image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=100&h=100&fit=crop', price: 66.00, quantity: 1 },
+      { id: 2, name: 'Kamatis/Tomato (1kg)', emoji: '', image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=100&h=100&fit=crop', price: 48.00, quantity: 2 },
+      { id: 3, name: 'Siling Labuyo (50g)', emoji: '', image: 'https://images.unsplash.com/photo-1518843875459-f738682238a6?w=100&h=100&fit=crop', price: 35.00, quantity: 1 }
     ]
   },
   {
     id: 2,
     name: "Ana's Palengke - Cogon",
     emoji: '',
+    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&h=200&fit=crop',
     color: 'linear-gradient(135deg, #FF9800, #E65100)',
     itemCount: 2,
     deliveryTime: 'From 20 mins',
@@ -138,8 +140,8 @@ const cartStores = ref([
     deliveryFee: 0,
     freeDelivery: true,
     items: [
-      { id: 10, name: 'Apple Med. Size', emoji: '', price: 162.00, quantity: 1 },
-      { id: 11, name: 'Banana (Large)', emoji: '', price: 129.00, quantity: 1 }
+      { id: 10, name: 'Apple Med. Size', emoji: '', image: 'https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=100&h=100&fit=crop', price: 162.00, quantity: 1 },
+      { id: 11, name: 'Banana (Large)', emoji: '', image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=100&h=100&fit=crop', price: 129.00, quantity: 1 }
     ]
   }
 ]);
@@ -223,6 +225,12 @@ const goToBrowse = () => router.push('/browse');
 
 .store-cart-header { display: flex; align-items: center; gap: 14px; }
 
+.store-cart-img {
+  width: 52px; height: 52px;
+  border-radius: 14px; object-fit: cover;
+  flex-shrink: 0;
+}
+
 .store-cart-icon {
   width: 52px; height: 52px; background: #E8F5E9;
   border-radius: 14px; display: flex; align-items: center;
@@ -273,6 +281,12 @@ const goToBrowse = () => router.push('/browse');
   padding: 12px 0; border-bottom: 1px solid #f0f0f0;
 }
 .cart-item:last-child { border-bottom: none; }
+
+.item-img {
+  width: 48px; height: 48px;
+  border-radius: 10px; object-fit: cover;
+  margin-right: 12px;
+}
 
 .item-emoji { font-size: 28px; margin-right: 12px; }
 
