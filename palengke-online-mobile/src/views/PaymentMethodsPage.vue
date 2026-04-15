@@ -19,7 +19,7 @@
       <!-- QR Payment -->
       <div class="section-group">
         <div class="payment-item" @click="selectMethod('qrph')">
-          <div class="payment-logo qrph">QR</div>
+          <img src="/assets/images/payment-methods-logo/qrph.png" class="payment-img" alt="QRPh">
           <div class="payment-info">
             <h4>QRPh</h4>
             <p>Scan the driver's QR to pay</p>
@@ -39,7 +39,8 @@
           class="payment-item"
           @click="selectMethod(method.id)"
         >
-          <div class="payment-logo" :class="method.type">
+          <img v-if="method.image" :src="method.image" class="payment-img" :alt="method.name">
+          <div v-else class="payment-logo" :class="method.type">
             <span>{{ method.icon }}</span>
           </div>
           <div class="payment-info">
@@ -61,7 +62,8 @@
           class="payment-item"
           @click="addPaymentMethod(method)"
         >
-          <div class="payment-logo" :class="method.type">
+          <img v-if="method.image" :src="method.image" class="payment-img" :alt="method.name">
+          <div v-else class="payment-logo" :class="method.type">
             <span>{{ method.icon }}</span>
           </div>
           <div class="payment-info">
@@ -113,15 +115,16 @@ const selectedMethod = ref('gcash');
 const showInsufficientModal = ref(false);
 
 const linkedMethods = ref([
-  { id: 'wallet', name: 'Palengke Wallet', icon: '💚', type: 'wallet', balance: '152.00', isDefault: true },
-  { id: 'gcash', name: 'GCash', icon: '', type: 'gcash', balance: null, isDefault: false },
-  { id: 'cash', name: 'Cash On Delivery', icon: '💵', type: 'cash', balance: null, isDefault: false },
+  { id: 'wallet', name: 'Palengke Wallet', icon: '💚', type: 'wallet', balance: '152.00', isDefault: true, image: '/assets/images/payment-methods-logo/palengke-wallet.png' },
+  { id: 'gcash', name: 'GCash', icon: '', type: 'gcash', balance: null, isDefault: false, image: '/assets/images/payment-methods-logo/gcash.png' },
+  { id: 'cash', name: 'Cash On Delivery', icon: '💵', type: 'cash', balance: null, isDefault: false, image: null },
 ]);
 
 const addMethods = ref([
-  { id: 'add-wallet', name: 'Cash in Balance', icon: '💚', type: 'wallet', description: 'Earn up to 0.8% back in PalengkePoints' },
-  { id: 'add-card', name: 'Cards', icon: '💳', type: 'card', description: null },
-  { id: 'add-maya', name: 'Maya', icon: '🟣', type: 'maya', description: null },
+  { id: 'add-wallet', name: 'Cash in Balance', icon: '💚', type: 'wallet', description: 'Earn up to 0.8% back in PalengkePoints', image: '/assets/images/payment-methods-logo/palengke-wallet.png' },
+  { id: 'add-card', name: 'Cards', icon: '💳', type: 'card', description: null, image: '/assets/images/payment-methods-logo/cards.png' },
+  { id: 'add-maya', name: 'Maya', icon: '🟣', type: 'maya', description: null, image: '/assets/images/payment-methods-logo/maya.png' },
+  { id: 'add-paypal', name: 'PayPal', icon: '🔵', type: 'paypal', description: null, image: '/assets/images/payment-methods-logo/paypal.png' },
 ]);
 
 const selectMethod = (methodId) => { selectedMethod.value = methodId; };
@@ -183,6 +186,11 @@ const topUpNow = () => {
   width: 48px; height: 48px; border-radius: 14px;
   display: flex; align-items: center; justify-content: center;
   font-size: 24px; flex-shrink: 0; font-weight: 800;
+}
+.payment-img {
+  width: 48px; height: 48px; border-radius: 14px;
+  object-fit: contain; background: #f5f5f5; padding: 4px;
+  flex-shrink: 0;
 }
 .payment-logo.qrph { background: #E3F2FD; color: #2196F3; font-size: 14px; }
 .payment-logo.gcash { background: #E3F2FD; }

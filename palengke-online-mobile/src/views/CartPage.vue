@@ -125,7 +125,7 @@ const cartStores = ref([
 items: [
       { id: 1, name: 'Bawang/Garlic (100g)', emoji: '', image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999', price: 66.00, quantity: 1 },
       { id: 2, name: 'Kamatis/Tomato (1kg)', emoji: '', image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea', price: 48.00, quantity: 2 },
-      { id: 3, name: 'Siling Labuyo (50g)', emoji: '', image: 'https://images.unsplash.com/photo-1582273951336-1123d4b4d93c', price: 35.00, quantity: 1 }
+      { id: 3, name: 'Siling Labuyo (50g)', emoji: '', image: 'https://images.unsplash.com/photo-1582284540020-8acbe03f4924', price: 35.00, quantity: 1 }
     ]
   },
   {
