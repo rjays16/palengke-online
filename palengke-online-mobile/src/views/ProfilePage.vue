@@ -72,6 +72,11 @@
       <div class="menu-section">
         <h3 class="menu-title">Support</h3>
         <div class="menu-list">
+          <div class="menu-item" @click="goToNotifications">
+            <div class="menu-icon green"><ion-icon :icon="notificationsOutline"></ion-icon></div>
+            <div class="menu-label"><p>Notifications</p></div>
+            <ion-icon :icon="chevronForwardOutline" class="menu-arrow"></ion-icon>
+          </div>
           <div class="menu-item" @click="goToMessages">
             <div class="menu-icon green"><ion-icon :icon="chatbubblesOutline"></ion-icon></div>
             <div class="menu-label"><p>Messages</p></div>
@@ -131,7 +136,7 @@ import {
 } from '@ionic/vue';
 import {
   personOutline, locationOutline, cardOutline, receiptOutline,
-  heartOutline, chatbubblesOutline,
+  heartOutline, notificationsOutline, chatbubblesOutline,
   helpCircleOutline, starOutline, logOutOutline, chevronForwardOutline,
   homeOutline, searchOutline, cartOutline
 } from 'ionicons/icons';
@@ -207,6 +212,7 @@ const goToCart = () => router.push('/cart');
 const goToActivity = () => router.push('/activity');
 const goToAddresses = () => router.push('/addresses');
 const goToPayment = () => router.push('/payment-methods');
+const goToNotifications = () => router.push('/notifications');
 const goToMessages = () => router.push('/messages');
 const goToHelp = () => router.push('/help-support');
 const goToFavorites = () => router.push('/favorite-sellers');

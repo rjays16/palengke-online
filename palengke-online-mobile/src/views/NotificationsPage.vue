@@ -66,7 +66,13 @@ const getIcon = (type) => {
 
 const handleNotif = (notif) => {
   notif.read = true;
-  if (notif.type === 'order') router.push('/activity');
+  if (notif.type === 'order') {
+    router.push('/activity');
+  } else if (notif.type === 'promo') {
+    router.push('/browse');
+  } else if (notif.type === 'system') {
+    router.push('/home');
+  }
 };
 
 const markAllRead = async () => {

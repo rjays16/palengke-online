@@ -51,44 +51,16 @@
     <div v-else class="messages-view">
       <ion-header>
         <ion-toolbar color="success">
-          <ion-buttons slot="start"><ion-button @click="goBack"><ion-icon :icon="arrowBackOutline"></ion-icon></ion-button></ion-buttons>
+          <ion-buttons slot="start">
+            <ion-button @click="goBack">
+              <ion-icon :icon="arrowBackOutline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
           <ion-title>Messages</ion-title>
-        </ion-toolbar>
-        <ion-toolbar>
-          <ion-segment v-model="selectedTab">
-            <ion-segment-button value="notifications"><ion-label>Notifications</ion-label></ion-segment-button>
-            <ion-segment-button value="chats"><ion-label>Chats</ion-label></ion-segment-button>
-          </ion-segment>
         </ion-toolbar>
       </ion-header>
 
       <ion-content class="msg-content" :fullscreen="true">
-
-      <!-- Notifications Tab -->
-      <div v-if="selectedTab === 'notifications'">
-        <div v-if="notifications.length === 0" class="empty-state">
-          <div class="empty-icon">🔔</div>
-          <h3>No notifications</h3>
-          <p>You're all caught up!</p>
-        </div>
-        <div v-else class="notif-list">
-          <div v-for="notif in notifications" :key="notif.id"
-            class="notif-item" :class="{ unread: !notif.read }"
-            @click="notif.read = true">
-            <div v-if="notif.image" class="notif-img"><img :src="notif.image"></div>
-            <div v-else class="notif-icon" :class="notif.type">{{ getIcon(notif.type) }}</div>
-            <div class="notif-body">
-              <h4>{{ notif.title }}</h4>
-              <p>{{ notif.message }}</p>
-              <span class="notif-time">{{ notif.time }}</span>
-            </div>
-            <div class="unread-dot" v-if="!notif.read"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Chats Tab -->
-      <div v-if="selectedTab === 'chats'">
         <div v-if="chats.length === 0" class="empty-state">
           <div class="empty-icon">💬</div>
           <h3>No chats yet</h3>
@@ -97,7 +69,7 @@
         <div v-else class="chat-list">
           <div v-for="chat in chats" :key="chat.id" class="chat-item" @click="openChat(chat)">
             <div class="chat-avatar" v-if="chat.image"><img :src="chat.image"></div>
-            <div class="chat-avatar" v-else v-if="false">{{ chat.emoji }}</div>
+            <div class="chat-avatar" v-else><ion-icon :icon="personOutline"></ion-icon></div>
             <div class="chat-info">
               <div class="chat-header">
                 <h4>{{ chat.name }}</h4>
@@ -110,9 +82,7 @@
             </div>
           </div>
         </div>
-      </div>
-
-    </ion-content>
+      </ion-content>
     </div>
   </ion-page>
 </template>
@@ -122,21 +92,14 @@ import { ref, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonFooter,
-  IonButtons, IonBackButton, IonButton, IonIcon, IonSegment, IonSegmentButton, IonLabel, IonTextarea
+  IonButtons, IonBackButton, IonButton, IonIcon, IonTextarea
 } from '@ionic/vue';
 import { arrowBackOutline, personOutline, sendOutline, checkmarkDoneOutline } from 'ionicons/icons';
 
 const router = useRouter();
-const selectedTab = ref('chats');
 const selectedChat = ref(null);
 const newMessage = ref('');
 const chatContent = ref(null);
-
-const notifications = ref([
-  { id: 1, type: 'order', title: 'Driver is on the way!', message: 'Your order from Juan\'s Fresh Market is being delivered.', time: '5 mins ago', read: false, image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=100&h=100&fit=crop' },
-  { id: 2, type: 'promo', title: 'New Promo Available!', message: 'Get off on your next order. Use code PALENGKE50.', time: '1 hour ago', read: false, image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=100&h=100&fit=crop' },
-  { id: 3, type: 'order', title: 'Order Delivered!', message: 'Your order from Rosa\'s Seafoods has been delivered.', time: 'Yesterday', read: true, image: 'https://images.unsplash.com/photo-1534482421-64566f976cfa?w=100&h=100&fit=crop' },
-]);
 
 const chats = ref([
   { 
@@ -168,12 +131,6 @@ const chats = ref([
   },
 ]);
 
-const getIcon = (type) => {
-  if (type === 'order') return '';
-  if (type === 'promo') return '';
-  return '';
-};
-
 const openChat = (chat) => {
   selectedChat.value = chat;
   chat.unread = 0;
@@ -190,11 +147,7 @@ const closeChat = () => {
 };
 
 const goBack = () => {
-  if (selectedChat.value) {
-    closeChat();
-  } else {
-    router.push('/home');
-  }
+  router.push('/profile');
 };
 
 const sendMessage = () => {
@@ -221,30 +174,15 @@ const sendMessage = () => {
 
 <style scoped>
 .msg-content { --background: #f8f9fa; overflow-y: auto; flex: 1; }
-ion-segment { padding: 8px 16px; background: white; gap: 8px; }
-ion-segment-button { --color: #666 !important; --color-checked: #ffffff !important; --indicator-color: transparent !important; --indicator-height: 0px !important; --background: #f0f0f0 !important; --background-checked: #4CAF50 !important; --border-width: 0px !important; --border-radius: 20px !important; font-size: 13px !important; font-weight: 700 !important; min-height: 36px !important; text-transform: none !important; }
-ion-segment::before, ion-segment::after { display: none !important; }
 
 .empty-state { text-align: center; padding: 80px 40px; }
 .empty-icon { font-size: 64px; margin-bottom: 16px; }
 .empty-state h3 { font-size: 20px; font-weight: 700; color: #1a1a1a; margin: 0 0 8px 0; }
 .empty-state p { font-size: 14px; color: #999; margin: 0; }
 
-.notif-list { padding: 8px 0; }
-.notif-item { display: flex; align-items: flex-start; gap: 14px; padding: 16px 20px; background: white; border-bottom: 1px solid #f0f0f0; cursor: pointer; position: relative; }
-.notif-item.unread { background: #F1F8E9; border-left: 4px solid #4CAF50; }
-.notif-icon { width: 44px; height: 44px; border-radius: 12px; background: #E8F5E9; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
-.notif-img { width: 44px; height: 44px; border-radius: 12px; overflow: hidden; flex-shrink: 0; }
-.notif-img img { width: 100%; height: 100%; object-fit: cover; }
-.notif-body { flex: 1; }
-.notif-body h4 { font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 0 0 4px 0; }
-.notif-body p { font-size: 13px; color: #666; margin: 0 0 6px 0; line-height: 1.4; }
-.notif-time { font-size: 11px; color: #999; }
-.unread-dot { width: 10px; height: 10px; background: #4CAF50; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
-
 .chat-list { padding: 8px 0; }
 .chat-item { display: flex; align-items: center; gap: 14px; padding: 14px 20px; background: white; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
-.chat-avatar { width: 52px; height: 52px; border-radius: 50%; background: #E8F5E9; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; overflow: hidden; }
+.chat-avatar { width: 52px; height: 52px; border-radius: 50%; background: #E8F5E9; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; overflow: hidden; color: #4CAF50; }
 .chat-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .chat-info { flex: 1; }
 .chat-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
