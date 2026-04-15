@@ -16,7 +16,7 @@
         <div class="active-order-card" @click="trackOrder">
           <div class="active-badge">● LIVE</div>
           <div class="active-order-info">
-            <div class="active-store-icon">{{ activeOrder.storeEmoji }}</div>
+            <img :src="activeOrder.storeImage" class="active-store-icon">
             <div class="active-details">
               <h3>{{ activeOrder.storeName }}</h3>
               <p class="active-status">{{ activeOrder.status }}</p>
@@ -54,9 +54,7 @@
             class="order-card"
           >
             <div class="order-main" @click="viewOrder(order)">
-              <div class="store-icon-wrap" :class="order.type">
-                <span>{{ order.storeEmoji }}</span>
-              </div>
+              <img :src="order.storeImage" class="store-icon-img">
               <div class="order-info">
                 <h3 class="store-name">{{ order.storeName }}</h3>
                 <p class="order-date">{{ order.date }}</p>
@@ -173,6 +171,7 @@ const activeOrder = ref({
   id: 'ORD-001',
   storeName: "Juan's Fresh Market",
   storeEmoji: '',
+  storeImage: 'https://images.unsplash.com/photo-1542838132-92c53300491e',
   status: 'Picking up from Palengke',
   eta: 'Arriving by 1:05 PM'
 });
@@ -180,42 +179,42 @@ const activeOrder = ref({
 const recentOrders = ref([
   {
     id: 'ORD-006', storeName: "Ana's Palengke - Cogon",
-    storeEmoji: '', type: 'fruits',
+    storeEmoji: '', storeImage: 'https://images.unsplash.com/photo-1542838132-92c53300491e', type: 'fruits',
     date: 'Today, 11:59 AM',
     total: 291.00, status: 'pending',
     items: ['Apple', 'Banana']
   },
   {
     id: 'ORD-005', storeName: "Juan's Fresh Market",
-    storeEmoji: '', type: 'market',
+    storeEmoji: '', storeImage: 'https://images.unsplash.com/photo-1542838132-92c53300491e', type: 'market',
     date: 'Today, 10:30 AM',
     total: 207.00, status: 'delivering',
     items: ['Bawang/Garlic', 'Kamatis/Tomato']
   },
   {
     id: 'ORD-004', storeName: "Mario's Meat Shop",
-    storeEmoji: '', type: 'meat',
+    storeEmoji: '', storeImage: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791', type: 'meat',
     date: 'Today, 09:30 AM',
     total: 450.00, status: 'completed',
     items: ['Pork Belly', 'Chicken']
   },
   {
     id: 'ORD-003', storeName: "Rosa's Seafoods",
-    storeEmoji: '', type: 'seafood',
+    storeEmoji: '', storeImage: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3', type: 'seafood',
     date: 'Yesterday, 06:48 PM',
     total: 320.00, status: 'cancelled',
     items: ['Tilapia', 'Shrimp']
   },
   {
     id: 'ORD-002', storeName: "Lily's Vegetables",
-    storeEmoji: '', type: 'vegetables',
+    storeEmoji: '', storeImage: 'https://images.unsplash.com/photo-1540420773420-3366772f4999', type: 'vegetables',
     date: 'Mar 18, 2026, 05:19 PM',
     total: 180.00, status: 'completed',
     items: ['Kangkong', 'Spinach']
   },
   {
     id: 'ORD-001', storeName: "Tito's Variety Store",
-    storeEmoji: '', type: 'variety',
+    storeEmoji: '', storeImage: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9', type: 'variety',
     date: 'Mar 15, 2026, 02:30 PM',
     total: 250.00, status: 'completed',
     items: ['Sugar', 'Salt']
@@ -336,6 +335,9 @@ const goToProfile = () => router.push('/profile');
   border-radius: 14px; display: flex; align-items: center;
   justify-content: center; font-size: 26px; flex-shrink: 0;
 }
+.active-store-icon, .store-icon-img {
+  width: 48px; height: 48px; border-radius: 14px; object-fit: cover;
+}
 .active-details { flex: 1; }
 .active-details h3 { font-size: 15px; font-weight: 700; color: #1a1a1a; margin: 0 0 4px 0; }
 .active-status { font-size: 13px; color: #4CAF50; font-weight: 600; margin: 0 0 2px 0; }
@@ -390,6 +392,9 @@ const goToProfile = () => router.push('/profile');
 .store-icon-wrap.fruits { background: #FCE4EC; }
 .store-icon-wrap.seafood { background: #E3F2FD; }
 .store-icon-wrap.pork { background: #FFF3E0; }
+.store-icon-wrap.vegetables { background: #E8F5E9; }
+.store-icon-wrap.variety { background: #F3E5F5; }
+.store-icon-img { width: 52px; height: 52px; border-radius: 14px; object-fit: cover; flex-shrink: 0; }
 
 .order-info { flex: 1; }
 .store-name { font-size: 15px; font-weight: 700; color: #1a1a1a; margin: 0 0 4px 0; }
