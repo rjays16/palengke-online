@@ -27,9 +27,7 @@
       <div v-else class="history-list">
         <div v-for="order in filteredOrders" :key="order.id" class="history-card">
           <div class="history-main" @click="viewOrderDetail(order)">
-            <div class="history-icon" :style="{ background: order.iconBg }">
-              <span>{{ order.storeEmoji }}</span>
-            </div>
+            <img :src="order.storeImage" class="history-icon-img">
             <div class="history-info">
               <h3>{{ order.storeName }}</h3>
               <p class="history-date">{{ order.date }}</p>
@@ -73,11 +71,11 @@ const router = useRouter();
 const selectedFilter = ref('all');
 
 const orders = ref([
-  { id: 'ORD-001', storeName: "Juan's Fresh Market", storeEmoji: '', iconBg: '#E8F5E9', date: '22 Mar 2026, 11:59 AM', items: 'Bawang/Garlic, Kamatis/Tomato', total: 207.00, status: 'completed' },
-  { id: 'ORD-002', storeName: "Ana's Palengke", storeEmoji: '', iconBg: '#FCE4EC', date: '20 Mar 2026, 06:48 PM', items: 'Apple Med. Size, Banana', total: 291.00, status: 'cancelled' },
-  { id: 'ORD-003', storeName: "Rosa's Seafoods", storeEmoji: '', iconBg: '#E3F2FD', date: '18 Mar 2026, 05:19 PM', items: 'Tuna Cubes, Pampano', total: 556.00, status: 'completed' },
-  { id: 'ORD-004', storeName: "Mario's Meat Shop", storeEmoji: '', iconBg: '#FFEBEE', date: '15 Mar 2026, 02:30 PM', items: 'Pork Belly, Pork Ribs', total: 597.00, status: 'completed' },
-  { id: 'ORD-005', storeName: "Palengke Bundles", storeEmoji: '', iconBg: '#F3E5F5', date: '10 Mar 2026, 09:15 AM', items: 'Fresh Vegetable Bundle', total: 257.00, status: 'completed' },
+  { id: 'ORD-001', storeName: "Juan's Fresh Market", storeEmoji: '', storeImage: 'https://images.unsplash.com/photo-1542838132-92c53300491e', iconBg: '#E8F5E9', date: '22 Mar 2026, 11:59 AM', items: 'Bawang/Garlic, Kamatis/Tomato', total: 207.00, status: 'completed' },
+  { id: 'ORD-002', storeName: "Ana's Palengke", storeEmoji: '', storeImage: 'https://images.unsplash.com/photo-1542838132-92c53300491e', iconBg: '#FCE4EC', date: '20 Mar 2026, 06:48 PM', items: 'Apple Med. Size, Banana', total: 291.00, status: 'cancelled' },
+  { id: 'ORD-003', storeName: "Rosa's Seafoods", storeEmoji: '', storeImage: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3', iconBg: '#E3F2FD', date: '18 Mar 2026, 05:19 PM', items: 'Tuna Cubes, Pampano', total: 556.00, status: 'completed' },
+  { id: 'ORD-004', storeName: "Mario's Meat Shop", storeEmoji: '', storeImage: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791', iconBg: '#FFEBEE', date: '15 Mar 2026, 02:30 PM', items: 'Pork Belly, Pork Ribs', total: 597.00, status: 'completed' },
+  { id: 'ORD-005', storeName: "Palengke Bundles", storeEmoji: '', storeImage: 'https://images.unsplash.com/photo-1550989460-0adf9ea622e2', iconBg: '#F3E5F5', date: '10 Mar 2026, 09:15 AM', items: 'Fresh Vegetable Bundle', total: 257.00, status: 'completed' },
 ]);
 
 const filteredOrders = computed(() => {
@@ -125,6 +123,7 @@ ion-segment-button { --color: #666; --color-checked: #4CAF50; --indicator-color:
 .history-main { display: flex; align-items: center; gap: 14px; padding: 16px; cursor: pointer; }
 
 .history-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
+.history-icon-img { width: 52px; height: 52px; border-radius: 14px; object-fit: cover; flex-shrink: 0; }
 
 .history-info { flex: 1; }
 .history-info h3 { font-size: 15px; font-weight: 700; color: #1a1a1a; margin: 0 0 3px 0; }
