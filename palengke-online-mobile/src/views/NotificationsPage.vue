@@ -22,7 +22,8 @@
         <div v-for="notif in notifications" :key="notif.id"
           class="notif-page-item" :class="{ unread: !notif.read }"
           @click="handleNotif(notif)">
-          <div class="notif-page-icon" :class="notif.type">{{ getIcon(notif.type) }}</div>
+          <img v-if="notif.image" :src="notif.image" class="notif-page-img">
+          <div v-else class="notif-page-icon" :class="notif.type">{{ getIcon(notif.type) }}</div>
           <div class="notif-page-body">
             <h4>{{ notif.title }}</h4>
             <p>{{ notif.message }}</p>
@@ -48,11 +49,11 @@ import { checkmarkDoneOutline } from 'ionicons/icons';
 const router = useRouter();
 
 const notifications = ref([
-  { id: 1, type: 'system', title: 'Welcome to Palengke Online!', message: 'Start ordering fresh produce from your local market.', time: 'Just now', read: false },
-  { id: 2, type: 'promo', title: 'Flash Sale!', message: 'Get 20% off on all vegetables today only!', time: '1 hour ago', read: false },
-  { id: 3, type: 'order', title: 'Order Delivered!', message: 'Your order from Rosa\'s Seafoods has been successfully delivered.', time: 'Yesterday', read: true },
-  { id: 4, type: 'promo', title: 'New Promo!', message: 'Use code PALENGKE50 for off your next order.', time: '2 days ago', read: true },
-  { id: 5, type: 'order', title: 'Order Confirmed!', message: 'Your order from Ana\'s Palengke has been confirmed.', time: '3 days ago', read: true },
+  { id: 1, type: 'system', title: 'Welcome to Palengke Online!', message: 'Start ordering fresh produce from your local market.', time: 'Just now', read: false, image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=100&h=100&fit=crop' },
+  { id: 2, type: 'promo', title: 'Flash Sale!', message: 'Get 20% off on all vegetables today only!', time: '1 hour ago', read: false, image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=100&h=100&fit=crop' },
+  { id: 3, type: 'order', title: 'Order Delivered!', message: 'Your order from Rosa\'s Seafoods has been successfully delivered.', time: 'Yesterday', read: true, image: 'https://images.unsplash.com/photo-1534482421-64566f976cfa?w=100&h=100&fit=crop' },
+  { id: 4, type: 'promo', title: 'New Promo!', message: 'Use code PALENGKE50 for off your next order.', time: '2 days ago', read: true, image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=100&h=100&fit=crop' },
+  { id: 5, type: 'order', title: 'Order Confirmed!', message: 'Your order from Ana\'s Palengke has been confirmed.', time: '3 days ago', read: true, image: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=100&h=100&fit=crop' },
 ]);
 
 const unreadCount = computed(() => notifications.value.filter(n => !n.read).length);
@@ -92,4 +93,5 @@ const markAllRead = async () => {
 .notif-page-body p { font-size: 13px; color: #666; margin: 0 0 6px 0; line-height: 1.4; }
 .notif-page-time { font-size: 11px; color: #999; }
 .unread-dot { width: 10px; height: 10px; background: #4CAF50; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+.notif-page-img { width: 44px; height: 44px; border-radius: 12px; object-fit: cover; flex-shrink: 0; }
 </style>
