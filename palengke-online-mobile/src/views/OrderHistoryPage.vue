@@ -108,8 +108,41 @@ const viewReceipt = async (order) => {
 
 <style scoped>
 .history-content { --background: #f8f9fa; }
-ion-segment { padding: 8px 16px; }
-ion-segment-button { --color: #666; --color-checked: #4CAF50; --indicator-color: #4CAF50; font-size: 13px; font-weight: 600; min-height: 36px; }
+ion-segment { 
+  padding: 8px 16px; 
+  background: white; 
+  gap: 8px;
+}
+ion-segment-button { 
+  --color: #666 !important;
+  --color-checked: #ffffff !important;
+  --indicator-color: transparent !important;
+  --indicator-height: 0px !important;
+  --background: #f0f0f0 !important;
+  --background-checked: #4CAF50 !important;
+  --border-width: 0px !important;
+  --border-radius: 20px !important;
+  font-size: 13px !important; font-weight: 700 !important; 
+  min-height: 36px !important; 
+  text-transform: none !important;
+}
+ion-segment::before, ion-segment::after {
+  display: none !important;
+}
+ion-segment-button { 
+  --color: #666; 
+  --color-checked: #ffffff; 
+  --indicator-color: transparent;
+  --background: #f0f0f0;
+  --background-checked: #4CAF50;
+  font-size: 11px; font-weight: 700; 
+  min-height: 32px; 
+  border-radius: 20px;
+  flex: 1;
+  --padding-start: 4px;
+  --padding-end: 4px;
+  text-transform: none;
+}
 
 .empty-state { text-align: center; padding: 80px 40px; }
 .empty-icon { font-size: 64px; margin-bottom: 16px; }
