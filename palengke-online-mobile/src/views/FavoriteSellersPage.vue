@@ -29,8 +29,8 @@
           class="seller-card"
           @click="openSeller(seller)"
         >
-          <div class="seller-banner" :style="{ background: seller.color }">
-            <span class="seller-emoji" v-if="false">{{ seller.emoji }}</span>
+          <div class="seller-banner">
+            <img :src="seller.image" class="seller-img" :alt="seller.name">
             <button class="favorite-btn active" @click.stop="toggleFavorite(seller)">
               ❤️
             </button>
@@ -67,6 +67,7 @@ const favoriteSellers = ref([
     id: 1,
     name: "Juan's Fresh Market",
     emoji: '',
+    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e',
     color: 'linear-gradient(135deg, #4CAF50, #2E7D32)',
     rating: '4.8',
     deliveryTime: '15-25 min',
@@ -77,6 +78,7 @@ const favoriteSellers = ref([
     id: 2,
     name: "Ana's Palengke",
     emoji: '',
+    image: 'https://images.unsplash.com/photo-1540420773420-3366772f4999',
     color: 'linear-gradient(135deg, #FF9800, #E65100)',
     rating: '4.6',
     deliveryTime: '10-20 min',
@@ -128,6 +130,10 @@ const goToBrowse = () => router.push('/browse');
 .seller-banner {
   height: 120px; display: flex; align-items: center;
   justify-content: center; position: relative;
+  overflow: hidden;
+}
+.seller-img {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
 }
 .seller-emoji { font-size: 56px; }
 
