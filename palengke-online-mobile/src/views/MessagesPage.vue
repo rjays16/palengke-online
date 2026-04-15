@@ -14,9 +14,12 @@
               <img v-if="selectedChat.image" :src="selectedChat.image">
               <ion-icon v-else :icon="personOutline"></ion-icon>
             </div>
-            <div>
-              <ion-title class="chat-title">{{ selectedChat.name }}</ion-title>
-              <p class="chat-subtitle">Online</p>
+            <div class="chat-details">
+              <span class="chat-title">{{ selectedChat.name }}</span>
+              <span class="chat-subtitle" :class="{ online: selectedChat.online }">
+                <span class="status-dot" :class="{ online: selectedChat.online }"></span>
+                {{ selectedChat.online ? 'Online' : 'Offline' }}
+              </span>
             </div>
           </div>
         </ion-toolbar>
@@ -68,11 +71,17 @@
         </div>
         <div v-else class="chat-list">
           <div v-for="chat in chats" :key="chat.id" class="chat-item" @click="openChat(chat)">
-            <div class="chat-avatar" v-if="chat.image"><img :src="chat.image"></div>
+            <div class="chat-avatar" v-if="chat.image">
+              <img :src="chat.image">
+              <span class="status-dot" :class="{ online: chat.online }"></span>
+            </div>
             <div class="chat-avatar" v-else><ion-icon :icon="personOutline"></ion-icon></div>
             <div class="chat-info">
               <div class="chat-header">
                 <h4>{{ chat.name }}</h4>
+              </div>
+              <div class="chat-header-right">
+                <span class="online-status" :class="{ online: chat.online }">{{ chat.online ? 'Online' : 'Offline' }}</span>
                 <span class="chat-time">{{ chat.time }}</span>
               </div>
               <div class="chat-preview">
@@ -109,6 +118,7 @@ const chats = ref([
     lastMessage: 'Your order is ready for pickup!', 
     time: '5 mins ago', 
     unread: 2,
+    online: true,
     messages: [
       { text: 'Hello! Thank you for your order', sent: false, time: '10:00 AM', status: 'read' },
       { text: 'Hi! When will my order be ready?', sent: true, time: '10:05 AM', status: 'read' },
@@ -123,10 +133,24 @@ const chats = ref([
     lastMessage: 'I am on my way to your location', 
     time: '10 mins ago', 
     unread: 1,
+    online: true,
     messages: [
       { text: 'Good morning! I\'m your driver today', sent: false, time: '9:30 AM', status: 'read' },
       { text: 'Hi! How far are you?', sent: true, time: '9:35 AM', status: 'read' },
       { text: 'I am on my way to your location', sent: false, time: '9:40 AM', status: 'delivered' }
+    ]
+  },
+  { 
+    id: 3, 
+    name: "Rosa's Seafoods", 
+    image: 'https://images.unsplash.com/photo-1534482421-64566f976cfa?w=100&h=100&fit=crop', 
+    lastMessage: 'Thank you for ordering!', 
+    time: '1 hour ago', 
+    unread: 0,
+    online: false,
+    messages: [
+      { text: 'Good morning!', sent: false, time: '8:00 AM', status: 'read' },
+      { text: 'Thanks Rosa!', sent: true, time: '8:05 AM', status: 'read' }
     ]
   },
 ]);
@@ -182,12 +206,18 @@ const sendMessage = () => {
 
 .chat-list { padding: 8px 0; }
 .chat-item { display: flex; align-items: center; gap: 14px; padding: 14px 20px; background: white; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
-.chat-avatar { width: 52px; height: 52px; border-radius: 50%; background: #E8F5E9; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; overflow: hidden; color: #4CAF50; }
-.chat-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.chat-avatar { width: 52px; height: 52px; border-radius: 50%; background: #E8F5E9; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; overflow: visible; color: #4CAF50; position: relative; }
+.chat-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.chat-avatar .status-dot { position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; min-width: 16px; background: #BDBDBD; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+.chat-avatar .status-dot.online { background: #4CAF50; }
 .chat-info { flex: 1; }
-.chat-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
-.chat-header h4 { font-size: 15px; font-weight: 700; color: #1a1a1a; margin: 0; }
-.chat-time { font-size: 12px; color: #999; }
+.chat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+.chat-header h4 { font-size: 15px; font-weight: 600; color: #212121; margin: 0; }
+.chat-header-right { display: flex; align-items: center; gap: 8px; }
+.chat-time { font-size: 11px; color: #616161; font-weight: 500; }
+.online-status { font-size: 11px; font-weight: 700; }
+.online-status.online { color: #2E7D32; }
+.online-status:not(.online) { color: #757575; }
 .chat-preview { display: flex; justify-content: space-between; align-items: center; }
 .chat-preview p { font-size: 13px; color: #666; margin: 0; flex: 1; }
 .unread-badge { background: #4CAF50; color: white; border-radius: 10px; padding: 2px 7px; font-size: 11px; font-weight: 700; }
@@ -196,19 +226,23 @@ const sendMessage = () => {
 .chat-view { height: 100%; display: flex; flex-direction: column; overflow: hidden; }
 .messages-view { height: 100%; overflow: hidden; display: flex; flex-direction: column; }
 
-.chat-header-info { display: flex; align-items: center; gap: 12px; flex: 1; }
+.chat-header-info { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
 
-.chat-avatar-small { width: 40px; height: 40px; border-radius: 50%; background: #E8F5E9; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.chat-details { display: flex; flex-direction: column; min-width: 0; flex: 1; gap: 2px; overflow: hidden; }
+.chat-title { font-size: 16px; font-weight: 700; color: white; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chat-subtitle { font-size: 12px; font-weight: 600; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+.chat-subtitle.online { color: #A5D6A; }
+.chat-subtitle.offline { color: #E0E0E0; }
+.status-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex-shrink: 0; background: #00E676; border: 2px solid white; }
+.status-dot:not(.online) { background: #BDBDBD; border: 2px solid #616161; }
+
+.chat-avatar-small { width: 40px; height: 40px; border-radius: 50%; background: #E8F5E9; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
 .chat-avatar-small img { width: 100%; height: 100%; object-fit: cover; }
 .chat-avatar-small ion-icon { font-size: 20px; color: #4CAF50; }
 
-.chat-title { font-size: 16px; font-weight: 700; padding: 0; }
+.chat-messages { --background: #f0f2f5; flex: 1; overflow-y: auto; --padding-top: 16px; --padding-bottom: 16px; }
 
-.chat-subtitle { font-size: 12px; color: rgba(255,255,255,0.8); margin: 0; }
-
-.chat-messages { --background: #f0f2f5; flex: 1; overflow-y: auto; --padding-top: 0; --padding-bottom: 0; }
-
-.messages-container { padding: 16px; }
+.messages-container { padding: 16px; padding-top: 20px; }
 
 .message-wrapper { display: flex; margin-bottom: 12px; }
 .message-wrapper.message-sent { justify-content: flex-end; }
