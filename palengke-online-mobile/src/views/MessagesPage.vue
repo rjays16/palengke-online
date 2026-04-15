@@ -1,19 +1,68 @@
 <template>
   <ion-page>
-    <ion-header>
-      <ion-toolbar color="success">
-        <ion-buttons slot="start"><ion-back-button default-href="/home"></ion-back-button></ion-buttons>
-        <ion-title>Messages</ion-title>
-      </ion-toolbar>
-      <ion-toolbar>
-        <ion-segment v-model="selectedTab">
-          <ion-segment-button value="notifications"><ion-label>Notifications</ion-label></ion-segment-button>
-          <ion-segment-button value="chats"><ion-label>Chats</ion-label></ion-segment-button>
-        </ion-segment>
-      </ion-toolbar>
-    </ion-header>
+    <!-- Chat View (when chat is open) -->
+    <div v-if="selectedChat" class="chat-view">
+      <ion-header>
+        <ion-toolbar color="success">
+          <ion-buttons slot="start">
+            <ion-button @click="closeChat">
+              <ion-icon :icon="arrowBackOutline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+          <div class="chat-header-info">
+            <div class="chat-avatar-small">
+              <img v-if="selectedChat.image" :src="selectedChat.image">
+              <ion-icon v-else :icon="personOutline"></ion-icon>
+            </div>
+            <div>
+              <ion-title class="chat-title">{{ selectedChat.name }}</ion-title>
+              <p class="chat-subtitle">Online</p>
+            </div>
+          </div>
+        </ion-toolbar>
+      </ion-header>
 
-    <ion-content class="msg-content">
+      <ion-content class="chat-messages" ref="chatContent" :fullscreen="true">
+        <div class="messages-container">
+          <div v-for="(message, index) in selectedChat.messages" :key="index"
+            class="message-wrapper" :class="{ 'message-sent': message.sent, 'message-received': !message.sent }">
+            <div class="message-bubble" :class="{ sent: message.sent }">
+              <p class="message-text">{{ message.text }}</p>
+              <span class="message-time">{{ message.time }}</span>
+              <ion-icon v-if="message.sent && message.status === 'read'" :icon="checkmarkDoneOutline" class="read-status"></ion-icon>
+            </div>
+          </div>
+        </div>
+      </ion-content>
+
+      <ion-footer>
+        <ion-toolbar>
+          <div class="message-input-container">
+            <ion-textarea v-model="newMessage" placeholder="Type a message..." :auto-grow="true" :rows="1" @keyup.enter="sendMessage" class="message-input"></ion-textarea>
+            <ion-button :disabled="!newMessage.trim()" @click="sendMessage" class="send-button" :class="{ active: newMessage.trim() }">
+              <ion-icon :icon="sendOutline"></ion-icon>
+            </ion-button>
+          </div>
+        </ion-toolbar>
+      </ion-footer>
+    </div>
+
+    <!-- Messages List View -->
+    <div v-else class="messages-view">
+      <ion-header>
+        <ion-toolbar color="success">
+          <ion-buttons slot="start"><ion-button @click="goBack"><ion-icon :icon="arrowBackOutline"></ion-icon></ion-button></ion-buttons>
+          <ion-title>Messages</ion-title>
+        </ion-toolbar>
+        <ion-toolbar>
+          <ion-segment v-model="selectedTab">
+            <ion-segment-button value="notifications"><ion-label>Notifications</ion-label></ion-segment-button>
+            <ion-segment-button value="chats"><ion-label>Chats</ion-label></ion-segment-button>
+          </ion-segment>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="msg-content" :fullscreen="true">
 
       <!-- Notifications Tab -->
       <div v-if="selectedTab === 'notifications'">
@@ -26,7 +75,8 @@
           <div v-for="notif in notifications" :key="notif.id"
             class="notif-item" :class="{ unread: !notif.read }"
             @click="notif.read = true">
-            <div class="notif-icon" :class="notif.type">{{ getIcon(notif.type) }}</div>
+            <div v-if="notif.image" class="notif-img"><img :src="notif.image"></div>
+            <div v-else class="notif-icon" :class="notif.type">{{ getIcon(notif.type) }}</div>
             <div class="notif-body">
               <h4>{{ notif.title }}</h4>
               <p>{{ notif.message }}</p>
@@ -46,7 +96,8 @@
         </div>
         <div v-else class="chat-list">
           <div v-for="chat in chats" :key="chat.id" class="chat-item" @click="openChat(chat)">
-            <div class="chat-avatar" v-if="false">{{ chat.emoji }}</div>
+            <div class="chat-avatar" v-if="chat.image"><img :src="chat.image"></div>
+            <div class="chat-avatar" v-else v-if="false">{{ chat.emoji }}</div>
             <div class="chat-info">
               <div class="chat-header">
                 <h4>{{ chat.name }}</h4>
@@ -62,29 +113,59 @@
       </div>
 
     </ion-content>
+    </div>
   </ion-page>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import {
-  IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
-  IonButtons, IonBackButton, IonSegment, IonSegmentButton, IonLabel
+  IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonFooter,
+  IonButtons, IonBackButton, IonButton, IonIcon, IonSegment, IonSegmentButton, IonLabel, IonTextarea
 } from '@ionic/vue';
+import { arrowBackOutline, personOutline, sendOutline, checkmarkDoneOutline } from 'ionicons/icons';
 
 const router = useRouter();
-const selectedTab = ref('notifications');
+const selectedTab = ref('chats');
+const selectedChat = ref(null);
+const newMessage = ref('');
+const chatContent = ref(null);
 
 const notifications = ref([
-  { id: 1, type: 'order', title: 'Driver is on the way!', message: 'Your order from Juan\'s Fresh Market is being delivered.', time: '5 mins ago', read: false },
-  { id: 2, type: 'promo', title: 'New Promo Available!', message: 'Get off on your next order. Use code PALENGKE50.', time: '1 hour ago', read: false },
-  { id: 3, type: 'order', title: 'Order Delivered!', message: 'Your order from Rosa\'s Seafoods has been delivered.', time: 'Yesterday', read: true },
+  { id: 1, type: 'order', title: 'Driver is on the way!', message: 'Your order from Juan\'s Fresh Market is being delivered.', time: '5 mins ago', read: false, image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=100&h=100&fit=crop' },
+  { id: 2, type: 'promo', title: 'New Promo Available!', message: 'Get off on your next order. Use code PALENGKE50.', time: '1 hour ago', read: false, image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=100&h=100&fit=crop' },
+  { id: 3, type: 'order', title: 'Order Delivered!', message: 'Your order from Rosa\'s Seafoods has been delivered.', time: 'Yesterday', read: true, image: 'https://images.unsplash.com/photo-1534482421-64566f976cfa?w=100&h=100&fit=crop' },
 ]);
 
 const chats = ref([
-  { id: 1, name: "Juan's Fresh Market", emoji: '', lastMessage: 'Your order is ready for pickup!', time: '5 mins ago', unread: 2 },
-  { id: 2, name: 'Juan Dela Cruz (Driver)', emoji: '', lastMessage: 'I am on my way to your location', time: '10 mins ago', unread: 1 },
+  { 
+    id: 1, 
+    name: "Juan's Fresh Market", 
+    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=100&h=100&fit=crop', 
+    lastMessage: 'Your order is ready for pickup!', 
+    time: '5 mins ago', 
+    unread: 2,
+    messages: [
+      { text: 'Hello! Thank you for your order', sent: false, time: '10:00 AM', status: 'read' },
+      { text: 'Hi! When will my order be ready?', sent: true, time: '10:05 AM', status: 'read' },
+      { text: 'Your order is ready for pickup!', sent: false, time: '10:10 AM', status: 'read' },
+      { text: 'Thank you! I\'ll pick it up now', sent: true, time: '10:15 AM', status: 'read' }
+    ]
+  },
+  { 
+    id: 2, 
+    name: 'Juan Dela Cruz (Driver)', 
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop', 
+    lastMessage: 'I am on my way to your location', 
+    time: '10 mins ago', 
+    unread: 1,
+    messages: [
+      { text: 'Good morning! I\'m your driver today', sent: false, time: '9:30 AM', status: 'read' },
+      { text: 'Hi! How far are you?', sent: true, time: '9:35 AM', status: 'read' },
+      { text: 'I am on my way to your location', sent: false, time: '9:40 AM', status: 'delivered' }
+    ]
+  },
 ]);
 
 const getIcon = (type) => {
@@ -93,13 +174,56 @@ const getIcon = (type) => {
   return '';
 };
 
-const openChat = (chat) => {};
+const openChat = (chat) => {
+  selectedChat.value = chat;
+  chat.unread = 0;
+  nextTick(() => {
+    if (chatContent.value && chatContent.value.$el) {
+      chatContent.value.$el.scrollToBottom(300);
+    }
+  });
+};
+
+const closeChat = () => {
+  selectedChat.value = null;
+  newMessage.value = '';
+};
+
+const goBack = () => {
+  if (selectedChat.value) {
+    closeChat();
+  } else {
+    router.push('/home');
+  }
+};
+
+const sendMessage = () => {
+  if (!newMessage.value.trim() || !selectedChat.value) return;
+  
+  const message = {
+    text: newMessage.value.trim(),
+    sent: true,
+    time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+    status: 'delivered'
+  };
+  
+  selectedChat.value.messages.push(message);
+  selectedChat.value.lastMessage = message.text;
+  newMessage.value = '';
+  
+  nextTick(() => {
+    if (chatContent.value && chatContent.value.$el) {
+      chatContent.value.$el.scrollToBottom(300);
+    }
+  });
+};
 </script>
 
 <style scoped>
-.msg-content { --background: #f8f9fa; }
-ion-segment { padding: 8px 16px; }
-ion-segment-button { --color: #666; --color-checked: #4CAF50; --indicator-color: #4CAF50; font-size: 13px; font-weight: 600; }
+.msg-content { --background: #f8f9fa; overflow-y: auto; flex: 1; }
+ion-segment { padding: 8px 16px; background: white; gap: 8px; }
+ion-segment-button { --color: #666 !important; --color-checked: #ffffff !important; --indicator-color: transparent !important; --indicator-height: 0px !important; --background: #f0f0f0 !important; --background-checked: #4CAF50 !important; --border-width: 0px !important; --border-radius: 20px !important; font-size: 13px !important; font-weight: 700 !important; min-height: 36px !important; text-transform: none !important; }
+ion-segment::before, ion-segment::after { display: none !important; }
 
 .empty-state { text-align: center; padding: 80px 40px; }
 .empty-icon { font-size: 64px; margin-bottom: 16px; }
@@ -110,6 +234,8 @@ ion-segment-button { --color: #666; --color-checked: #4CAF50; --indicator-color:
 .notif-item { display: flex; align-items: flex-start; gap: 14px; padding: 16px 20px; background: white; border-bottom: 1px solid #f0f0f0; cursor: pointer; position: relative; }
 .notif-item.unread { background: #F1F8E9; border-left: 4px solid #4CAF50; }
 .notif-icon { width: 44px; height: 44px; border-radius: 12px; background: #E8F5E9; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.notif-img { width: 44px; height: 44px; border-radius: 12px; overflow: hidden; flex-shrink: 0; }
+.notif-img img { width: 100%; height: 100%; object-fit: cover; }
 .notif-body { flex: 1; }
 .notif-body h4 { font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 0 0 4px 0; }
 .notif-body p { font-size: 13px; color: #666; margin: 0 0 6px 0; line-height: 1.4; }
@@ -118,7 +244,8 @@ ion-segment-button { --color: #666; --color-checked: #4CAF50; --indicator-color:
 
 .chat-list { padding: 8px 0; }
 .chat-item { display: flex; align-items: center; gap: 14px; padding: 14px 20px; background: white; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
-.chat-avatar { width: 52px; height: 52px; border-radius: 50%; background: #E8F5E9; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
+.chat-avatar { width: 52px; height: 52px; border-radius: 50%; background: #E8F5E9; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; overflow: hidden; }
+.chat-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .chat-info { flex: 1; }
 .chat-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
 .chat-header h4 { font-size: 15px; font-weight: 700; color: #1a1a1a; margin: 0; }
@@ -126,4 +253,42 @@ ion-segment-button { --color: #666; --color-checked: #4CAF50; --indicator-color:
 .chat-preview { display: flex; justify-content: space-between; align-items: center; }
 .chat-preview p { font-size: 13px; color: #666; margin: 0; flex: 1; }
 .unread-badge { background: #4CAF50; color: white; border-radius: 10px; padding: 2px 7px; font-size: 11px; font-weight: 700; }
+
+/* Chat View */
+.chat-view { height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+.messages-view { height: 100%; overflow: hidden; display: flex; flex-direction: column; }
+
+.chat-header-info { display: flex; align-items: center; gap: 12px; flex: 1; }
+
+.chat-avatar-small { width: 40px; height: 40px; border-radius: 50%; background: #E8F5E9; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.chat-avatar-small img { width: 100%; height: 100%; object-fit: cover; }
+.chat-avatar-small ion-icon { font-size: 20px; color: #4CAF50; }
+
+.chat-title { font-size: 16px; font-weight: 700; padding: 0; }
+
+.chat-subtitle { font-size: 12px; color: rgba(255,255,255,0.8); margin: 0; }
+
+.chat-messages { --background: #f0f2f5; flex: 1; overflow-y: auto; --padding-top: 0; --padding-bottom: 0; }
+
+.messages-container { padding: 16px; }
+
+.message-wrapper { display: flex; margin-bottom: 12px; }
+.message-wrapper.message-sent { justify-content: flex-end; }
+.message-wrapper.message-received { justify-content: flex-start; }
+
+.message-bubble { max-width: 75%; padding: 10px 14px; border-radius: 18px; position: relative; }
+.message-bubble.sent { background: #4CAF50; color: white; border-bottom-right-radius: 4px; }
+.message-wrapper.message-received .message-bubble { background: white; color: #1a1a1a; border-bottom-left-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+
+.message-text { margin: 0; font-size: 15px; line-height: 1.4; }
+
+.message-time { font-size: 11px; opacity: 0.7; margin-top: 4px; display: block; }
+.message-bubble.sent .message-time { text-align: right; }
+
+.read-status { font-size: 14px; margin-left: 4px; vertical-align: middle; }
+
+.message-input-container { display: flex; align-items: flex-end; gap: 8px; padding: 8px; background: white; }
+.message-input { flex: 1; --padding-start: 12px; --padding-end: 12px; --padding-top: 8px; --padding-bottom: 8px; background: #f0f0f0; border-radius: 20px; font-size: 15px; }
+.send-button { --border-radius: 50%; width: 44px; height: 44px; margin: 0; --background: #f0f0f0; --color: #999; }
+.send-button.active { --background: #4CAF50; --color: white; }
 </style>

@@ -12,8 +12,9 @@
           </div>
         </div>
         <div class="header-actions">
-          <div class="header-btn" @click="goToMessages">
-            <ion-icon :icon="chatbubblesOutline"></ion-icon>
+          <div class="header-btn wallet-btn" @click="goToWallet">
+            <ion-icon :icon="walletOutline" class="wallet-icon"></ion-icon>
+            <span class="wallet-balance">₱{{ walletBalance }}</span>
           </div>
           <div class="header-btn" @click="goToNotifications">
             <ion-icon :icon="notificationsOutline"></ion-icon>
@@ -216,8 +217,7 @@ import {
   actionSheetController, toastController
 } from '@ionic/vue';
 import {
-  chevronDownOutline, notificationsOutline,
-  chatbubblesOutline,
+  chevronDownOutline, notificationsOutline, walletOutline,
   searchOutline, homeOutline, cartOutline, receiptOutline, personOutline
 } from 'ionicons/icons';
 
@@ -225,6 +225,7 @@ const router = useRouter();
 
 // State
 const currentAddress = ref('Brgy. Carmen, CDO City');
+const walletBalance = ref('1,250.00');
 const notifCount = ref(3);
 const cartCount = ref(0);
 
@@ -380,7 +381,7 @@ const goToBrowse = () => router.push('/browse');
 const goToCart = () => router.push('/cart');
 const goToActivity = () => router.push('/activity');
 const goToProfile = () => router.push('/profile');
-const goToMessages = () => router.push('/messages');
+const goToWallet = () => router.push('/payment-methods');
 const goToNotifications = () => router.push('/notifications');
 </script>
 
@@ -411,6 +412,9 @@ const goToNotifications = () => router.push('/notifications');
   display: flex; align-items: center; justify-content: center; cursor: pointer;
 }
 .header-btn ion-icon { font-size: 22px; color: white; }
+.wallet-btn { width: auto; padding: 6px 14px; border-radius: 20px; gap: 4px; background: rgba(255,255,255,0.25); display: flex; align-items: center; }
+.wallet-icon { font-size: 16px; color: white; }
+.wallet-balance { font-size: 14px; font-weight: 600; color: white; }
 .notif-dot {
   position: absolute; top: -2px; right: -2px;
   background: #f44336; color: white; border-radius: 10px;

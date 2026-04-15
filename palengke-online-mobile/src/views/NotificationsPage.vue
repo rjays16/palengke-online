@@ -79,7 +79,7 @@ const markAllRead = async () => {
 </script>
 
 <style scoped>
-.notif-page-content { --background: #f8f9fa; }
+.notif-page-content { --background: #f8f9fa; overflow-y: auto; }
 .empty-state { text-align: center; padding: 80px 40px; }
 .empty-icon { font-size: 64px; margin-bottom: 16px; }
 .empty-state h3 { font-size: 20px; font-weight: 700; color: #1a1a1a; margin: 0 0 8px 0; }
