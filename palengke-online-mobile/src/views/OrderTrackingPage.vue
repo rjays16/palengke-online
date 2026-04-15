@@ -45,7 +45,7 @@
             </p>
           </div>
           <div class="driver-avatar-wrap" @click="showDriverInfo">
-            <div class="driver-avatar">🏍️</div>
+            <img :src="driverInfo.image" class="driver-avatar-img">
           </div>
         </div>
 
@@ -100,7 +100,7 @@
 
         <!-- Driver Info -->
         <div class="driver-card">
-          <div class="driver-photo">🧑</div>
+          <img :src="driverInfo.image" class="driver-photo-img">
           <div class="driver-info">
             <p class="driver-name">{{ driverInfo.name }}</p>
             <p class="driver-meta">
@@ -217,7 +217,8 @@ const orderStatus = ref({
 const driverInfo = ref({
   name: 'Juan Dela Cruz',
   rating: '5.0',
-  vehicleId: 'ABC 1234 · Honda Click'
+  vehicleId: 'ABC 1234 · Honda Click',
+  image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d'
 });
 
 const promoBanner = ref({
@@ -398,6 +399,10 @@ onUnmounted(() => {
   justify-content: center; font-size: 26px;
   border: 3px solid #2196F3;
 }
+.driver-avatar-img {
+  width: 52px; height: 52px; border-radius: 50%; object-fit: cover;
+  border: 3px solid #2196F3;
+}
 
 /* Progress Bar */
 .progress-bar-section { padding: 0 20px 16px; }
@@ -458,6 +463,10 @@ onUnmounted(() => {
   width: 56px; height: 56px; background: #e0e0e0;
   border-radius: 50%; display: flex; align-items: center;
   justify-content: center; font-size: 28px; flex-shrink: 0;
+  border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.driver-photo-img {
+  width: 56px; height: 56px; border-radius: 50%; object-fit: cover;
   border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 .driver-info { flex: 1; }
