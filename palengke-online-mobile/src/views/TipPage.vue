@@ -76,7 +76,7 @@
 
       <!-- Store Info Card -->
       <div class="store-info-card">
-        <div class="store-avatar">{{ orderData.storeEmoji }}</div>
+        <img :src="orderData.storeImage" class="store-avatar-img">
         <div class="store-details">
           <h4>{{ orderData.storeName }}</h4>
           <div class="save-fav" @click="toggleFavorite">
@@ -90,7 +90,7 @@
       <!-- Payment Info -->
       <div class="payment-info-card">
         <div class="payment-row">
-          <div class="payment-icon-wrap">{{ orderData.paymentIcon }}</div>
+          <img :src="orderData.paymentImage" class="payment-icon-img">
           <span class="payment-text">{{ orderData.paymentLabel }}</span>
         </div>
         <div class="total-row">
@@ -174,9 +174,11 @@ const tipAmounts = [25, 50, 100, 150, 200, 250];
 const orderData = ref({
   storeName: "Juan's Fresh Market",
   storeEmoji: '',
+  storeImage: 'https://images.unsplash.com/photo-1542838132-92c53300491e',
   storeAddress: 'Stall #15, CDO City Palengke',
   paymentIcon: '',
   paymentLabel: 'GCash',
+  paymentImage: '/assets/images/payment-methods-logo/gcash.png',
   subtotal: 162.00,
   deliveryFee: 45.00,
   deliveryAddress: 'Brgy. Carmen, CDO City',
@@ -338,6 +340,9 @@ const goBack = () => router.back();
   border-radius: 14px; display: flex; align-items: center;
   justify-content: center; font-size: 30px; flex-shrink: 0;
 }
+.store-avatar-img {
+  width: 56px; height: 56px; border-radius: 14px; object-fit: cover;
+}
 .store-details { flex: 1; }
 .store-details h4 { font-size: 16px; font-weight: 700; color: #1a1a1a; margin: 0 0 8px 0; }
 .save-fav { display: flex; align-items: center; gap: 8px; cursor: pointer; }
@@ -352,6 +357,7 @@ const goBack = () => router.back();
 }
 .payment-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
 .payment-icon-wrap { font-size: 28px; }
+.payment-icon-img { width: 40px; height: 28px; object-fit: contain; border-radius: 6px; }
 .payment-text { font-size: 15px; font-weight: 600; color: #1a1a1a; }
 .total-row { display: flex; justify-content: space-between; margin-bottom: 14px; }
 .total-label { font-size: 16px; color: #555; }
