@@ -396,25 +396,26 @@ const goToNotifications = () => router.push('/notifications');
 /* ─── Top Header ────────────────────────────── */
 .top-header {
   background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);
-  padding: 12px 20px 16px;
+  padding: 16px 20px 20px;
   display: flex; justify-content: space-between; align-items: flex-start;
 }
 
 .deliver-to { cursor: pointer; }
-.deliver-label { font-size: 11px; color: rgba(255,255,255,0.8); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-.deliver-address { display: flex; align-items: center; gap: 6px; color: white; font-size: 15px; font-weight: 700; }
-.deliver-address ion-icon { font-size: 18px; }
+.deliver-label { font-size: 10px; color: rgba(255,255,255,0.7); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.deliver-address { display: flex; align-items: center; gap: 8px; color: white; font-size: 14px; font-weight: 600; }
+.deliver-address span { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.deliver-address ion-icon { font-size: 16px; color: rgba(255,255,255,0.8); }
 
-.header-actions { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+.header-actions { display: flex; align-items: center; gap: 8px; }
 .header-btn {
-  position: relative; width: 40px; height: 40px;
+  position: relative; width: 36px; height: 36px;
   background: rgba(255,255,255,0.2); border-radius: 50%;
   display: flex; align-items: center; justify-content: center; cursor: pointer;
 }
-.header-btn ion-icon { font-size: 22px; color: white; }
-.wallet-btn { width: auto; padding: 6px 14px; border-radius: 20px; gap: 4px; background: rgba(255,255,255,0.25); display: flex; align-items: center; }
-.wallet-icon { font-size: 16px; color: white; }
-.wallet-balance { font-size: 14px; font-weight: 600; color: white; }
+.header-btn ion-icon { font-size: 20px; color: white; }
+.wallet-btn { width: auto; padding: 6px 12px; border-radius: 20px; gap: 4px; background: rgba(255,255,255,0.25); display: flex; align-items: center; }
+.wallet-icon { font-size: 14px; color: white; }
+.wallet-balance { font-size: 13px; font-weight: 600; color: white; }
 .notif-dot {
   position: absolute; top: -2px; right: -2px;
   background: #f44336; color: white; border-radius: 10px;
