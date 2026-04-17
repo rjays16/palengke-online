@@ -5,7 +5,7 @@
       <!-- ─── Product Image ──────────────────── -->
       <div class="product-hero">
         <div class="product-image-bg">
-          <span class="product-emoji-large" v-if="false">{{ product.emoji }}</span>
+          <img :src="product.image" :alt="product.name" class="product-image">
         </div>
 
         <!-- Actions -->
@@ -36,7 +36,9 @@
 
         <!-- Seller Info -->
         <div class="seller-row" @click="goToStore">
-          <div class="seller-icon">{{ product.sellerEmoji }}</div>
+          <div class="seller-icon-wrap">
+            <img :src="product.sellerImage" alt="Seller" class="seller-icon-img">
+          </div>
           <div class="seller-info">
             <p class="seller-name">{{ product.sellerName }}</p>
             <p class="seller-meta">⭐ {{ product.sellerRating }} • {{ product.sellerDistance }}</p>
@@ -82,7 +84,7 @@
               @click="openSimilar(item)"
             >
               <div class="similar-img">
-                <span>{{ item.emoji }}</span>
+                <img :src="item.image" :alt="item.name" class="similar-img-src">
               </div>
               <p class="similar-price">₱{{ item.price.toFixed(2) }}</p>
               <p class="similar-name">{{ item.name }}</p>
@@ -148,7 +150,7 @@ const quantity = ref(1);
 const product = ref({
   id: route.params.id || 1,
   name: 'Bawang/Garlic',
-  emoji: '',
+  image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=600&h=600&fit=crop',
   price: 66.00,
   unit: '250g',
   category: 'Vegetables',
@@ -156,17 +158,17 @@ const product = ref({
   discount: null,
   description: 'Fresh garlic sourced directly from local farmers. Perfect for cooking Filipino dishes. Rich in flavor and nutrients.',
   sellerName: "Juan's Fresh Market",
-  sellerEmoji: '',
+  sellerImage: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=60&h=60&fit=crop',
   sellerRating: '4.8',
   sellerDistance: '2.3 km',
   sellerId: 1
 });
 
 const similarProducts = ref([
-  { id: 2, name: 'Sibuyas/Onion', emoji: '', price: 110.00, unit: '250g' },
-  { id: 3, name: 'Luya/Ginger', emoji: '', price: 73.00, unit: '250g' },
-  { id: 4, name: 'Kamatis/Tomato', emoji: '', price: 48.00, unit: '250g' },
-  { id: 5, name: 'Pechay', emoji: '', price: 66.00, unit: '250g' },
+  { id: 2, name: 'Sibuyas/Onion', image: 'https://images.unsplash.com/photo-1590005354167-6da97870c757?w=200&h=200&fit=crop', price: 110.00, unit: '250g' },
+  { id: 3, name: 'Luya/Ginger', image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=200&h=200&fit=crop', price: 73.00, unit: '250g' },
+  { id: 4, name: 'Kamatis/Tomato', image: 'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=200&h=200&fit=crop', price: 48.00, unit: '250g' },
+  { id: 5, name: 'Pechay', image: 'https://images.unsplash.com/photo-1584270354949-c26b0d5b4a0c?w=200&h=200&fit=crop', price: 66.00, unit: '250g' },
 ]);
 
 // Methods
@@ -176,7 +178,7 @@ const decreaseQty = () => { if (quantity.value > 1) quantity.value--; };
 const addToCart = async () => {
   const toast = await toastController.create({
     message: `${quantity.value}x ${product.value.name} added to basket!`,
-    duration: 2000, color: 'success', position: 'bottom'
+    duration: 2000, color: 'success', position: 'top'
   });
   await toast.present();
   router.back();
@@ -185,7 +187,7 @@ const addToCart = async () => {
 const addSimilarToCart = async (item) => {
   const toast = await toastController.create({
     message: `${item.name} added to basket!`,
-    duration: 1500, color: 'success', position: 'bottom'
+    duration: 1500, color: 'success', position: 'top'
   });
   await toast.present();
 };
@@ -205,6 +207,12 @@ const shareProduct = () => {};
 .product-image-bg {
   height: 280px; background: white;
   display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .product-emoji-large { font-size: 120px; }
 
@@ -245,13 +253,17 @@ const shareProduct = () => {};
   display: flex; align-items: center; gap: 14px;
   padding: 16px 20px; border-bottom: 1px solid #f0f0f0; cursor: pointer;
 }
-.seller-icon {
-  width: 48px; height: 48px; background: #E8F5E9;
-  border-radius: 14px; display: flex; align-items: center;
-  justify-content: center; font-size: 26px; flex-shrink: 0;
+.seller-icon-wrap {
+  width: 48px; height: 48px; flex-shrink: 0;
+}
+.seller-icon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 .seller-info { flex: 1; }
-.seller-name { font-size: 15px; font-weight: 700; color: #1a1a1a; margin: 0 0 3px 0; }
+.seller-name { font-size: 13px; font-weight: 600; color: #1a1a1a; margin: 0 0 2px 0; }
 .seller-meta { font-size: 13px; color: #666; margin: 0; }
 .seller-arrow { font-size: 20px; color: #ccc; }
 
@@ -280,7 +292,12 @@ const shareProduct = () => {};
   width: 120px; height: 100px; background: #f8f9fa;
   border-radius: 12px; display: flex; align-items: center;
   justify-content: center; font-size: 44px; margin-bottom: 8px;
-  border: 1px solid #f0f0f0;
+  border: 1px solid #f0f0f0; overflow: hidden;
+}
+.similar-img-src {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .similar-price { font-size: 15px; font-weight: 800; color: #1a1a1a; margin: 0 0 2px 0; }
 .similar-name { font-size: 12px; color: #333; margin: 0 0 2px 0; font-weight: 600; }

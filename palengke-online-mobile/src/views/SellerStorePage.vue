@@ -369,7 +369,7 @@ const addToCart = async (product) => {
   }
   const toast = await toastController.create({
     message: `${product.name} added to basket`,
-    duration: 1500, color: 'success', position: 'bottom'
+    duration: 1500, color: 'success', position: 'top'
   });
   await toast.present();
 };
