@@ -161,6 +161,32 @@ export default {
   color: white;
 }
 
+/* Success Alert */
+:deep(.success-alert .alert-wrapper) {
+  text-align: center;
+  padding: 30px 20px 20px;
+  background: white;
+  border-radius: 20px;
+}
+
+:deep(.success-alert .alert-head) {
+  display: none;
+}
+
+:deep(.success-alert .alert-message) {
+  padding: 10px;
+}
+
+:deep(.success-alert .alert-button-group) {
+  padding: 16px 20px 20px;
+}
+
+:deep(.success-alert .alert-button) {
+  background: var(--color-primary);
+  color: white;
+  border-radius: 12px;
+}
+
 /* Dark Mode */
 @media (prefers-color-scheme: dark) {
   :deep(.alert-wrapper) {

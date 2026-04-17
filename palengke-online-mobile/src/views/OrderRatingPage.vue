@@ -77,7 +77,7 @@
         <!-- Order Summary -->
         <div class="order-summary-card">
           <div class="summary-store">
-            <div class="summary-store-icon">{{ orderData.storeEmoji }}</div>
+            <img :src="orderData.storeImage" alt="Store" class="summary-store-icon">
             <div class="summary-info">
               <p class="summary-store-name">{{ orderData.storeName }}</p>
               <p class="summary-items">{{ orderData.items }}</p>
@@ -124,7 +124,7 @@ const isSubmitting = ref(false);
 
 const orderData = ref({
   storeName: "Juan's Fresh Market",
-  storeEmoji: '',
+  storeImage: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=100&h=100&fit=crop',
   items: 'Bawang/Garlic, Kamatis/Tomato',
   total: 207.00
 });
@@ -251,9 +251,9 @@ const contactSupport = () => router.push('/help');
 }
 .summary-store { display: flex; align-items: center; gap: 14px; }
 .summary-store-icon {
-  width: 52px; height: 52px; background: #E8F5E9;
-  border-radius: 14px; display: flex; align-items: center;
-  justify-content: center; font-size: 28px; flex-shrink: 0;
+  width: 52px; height: 52px;
+  border-radius: 14px; flex-shrink: 0;
+  object-fit: cover;
 }
 .summary-info { flex: 1; }
 .summary-store-name { font-size: 15px; font-weight: 700; color: #1a1a1a; margin: 0 0 3px 0; }

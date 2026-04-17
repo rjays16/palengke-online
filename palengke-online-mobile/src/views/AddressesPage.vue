@@ -1,9 +1,12 @@
 <template>
-<!-- AddressesPage.vue - Save as src/views/AddressesPage.vue -->
   <ion-page>
     <ion-header>
       <ion-toolbar color="success">
-        <ion-buttons slot="start"><ion-back-button default-href="/profile"></ion-back-button></ion-buttons>
+        <ion-buttons slot="start">
+            <ion-button @click="goBack">
+              <ion-icon :icon="arrowBackOutline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
         <ion-title>Saved Addresses</ion-title>
       </ion-toolbar>
     </ion-header>
@@ -39,44 +42,18 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import {
-  IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
-  IonButtons, IonBackButton, IonButton, IonIcon,
-  alertController, toastController
+  IonPage, IonContent, IonIcon, IonButton, alertController
 } from '@ionic/vue';
-import { createOutline, addCircleOutline } from 'ionicons/icons';
+import {
+  arrowBackOutline, chevronForwardOutline, addOutline, locationOutline
+} from 'ionicons/icons';
 
 const router = useRouter();
 
 const addresses = ref([
-  { id: 1, type: 'home', name: 'Home', address: 'Brgy. Carmen, Cagayan de Oro City', isDefault: true },
-  { id: 2, type: 'work', name: 'Work', address: 'Divisoria, CDO City', isDefault: false },
+  { id: 1, type: 'home', name: 'Home', address: '123 Main Street, Brgy. Carmen, CDO City', isDefault: true },
+  { id: 2, type: 'work', name: 'Work', address: '456 Office Building, Brgy. Cogon, CDO City', isDefault: false },
 ]);
-
-const selectAddress = async (addr) => {
-  addresses.value.forEach(a => a.isDefault = false);
-  addr.isDefault = true;
-  const toast = await toastController.create({
-    message: `${addr.name} set as default address`,
-    duration: 2000, color: 'success', position: 'top'
-  });
-  await toast.present();
-  router.back();
-};
-
-const editAddress = async (addr) => {
-  const alert = await alertController.create({
-    header: `Edit ${addr.name}`,
-    inputs: [{ name: 'address', type: 'text', value: addr.address, placeholder: 'Address' }],
-    buttons: [
-      { text: 'Delete', role: 'destructive', handler: () => {
-        addresses.value = addresses.value.filter(a => a.id !== addr.id);
-      }},
-      { text: 'Cancel', role: 'cancel' },
-      { text: 'Save', handler: (data) => { if (data.address) addr.address = data.address; } }
-    ]
-  });
-  await alert.present();
-};
 
 const addNewAddress = async () => {
   const alert = await alertController.create({
@@ -96,6 +73,27 @@ const addNewAddress = async () => {
   });
   await alert.present();
 };
+
+const editAddress = async (addr) => {
+  const alert = await alertController.create({
+    header: `Edit ${addr.name}`,
+    inputs: [{ name: 'address', type: 'text', value: addr.address, placeholder: 'Address' }],
+    buttons: [
+      { text: 'Delete', role: 'destructive', handler: () => {
+        addresses.value = addresses.value.filter(a => a.id !== addr.id);
+      }},
+      { text: 'Cancel', role: 'cancel' },
+      { text: 'Save', handler: (data) => { if (data.address) addr.address = data.address; } }
+    ]
+  });
+  await alert.present();
+};
+
+const selectAddress = (addr) => {
+  console.log('Selected address:', addr);
+};
+
+const goBack = () => router.back();
 </script>
 
 <style scoped>

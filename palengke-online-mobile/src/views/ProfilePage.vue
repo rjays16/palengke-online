@@ -119,6 +119,16 @@
       </ion-toolbar>
     </ion-footer>
 
+    <!-- Success Modal -->
+    <div class="custom-modal-overlay" v-if="showSuccessModal" @click="closeSuccessModal">
+      <div class="custom-modal" @click.stop>
+        <img src="/assets/images/checkmark_success.png" alt="Success" class="success-img">
+        <h3>Profile updated!</h3>
+        <p>Your changes have been saved</p>
+        <ion-button expand="block" class="modal-btn" @click="closeSuccessModal">OK</ion-button>
+      </div>
+    </div>
+
   </ion-page>
 </template>
 
@@ -147,6 +157,8 @@ const profileData = ref({
   favoriteCount: 5
 });
 
+const showSuccessModal = ref(false);
+
 const changeAvatar = async () => {
   const actionSheet = await actionSheetController.create({
     header: 'Change Profile Photo',
@@ -171,10 +183,17 @@ const editProfile = async () => {
       { text: 'Save', handler: (data) => {
         if (data.name) profileData.value.name = data.name;
         if (data.phone) profileData.value.phone = data.phone;
+        setTimeout(() => {
+          showSuccessModal.value = true;
+        }, 100);
       }}
     ]
   });
   await alert.present();
+};
+
+const closeSuccessModal = () => {
+  showSuccessModal.value = false;
 };
 
 const handleLogout = async () => {
@@ -273,4 +292,52 @@ const goToFavorites = () => router.push('/favorite-sellers');
 .nav-item ion-icon { font-size: 22px; }
 .nav-item span { font-size: 10px; font-weight: 600; }
 .nav-item.active { color: #4CAF50; }
+
+/* Custom Modal */
+.custom-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.custom-modal {
+  background: white;
+  border-radius: 20px;
+  padding: 40px 30px;
+  text-align: center;
+  width: 80%;
+  max-width: 320px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+.success-img {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 16px;
+}
+
+.custom-modal h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.custom-modal p {
+  margin: 0 0 24px;
+  font-size: 14px;
+  color: #666;
+}
+
+.modal-btn {
+  --background: #4CAF50;
+  --border-radius: 12px;
+  height: 48px;
+  font-weight: 600;
+  text-transform: none;
+}
 </style>

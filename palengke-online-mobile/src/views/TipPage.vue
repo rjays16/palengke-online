@@ -144,6 +144,16 @@
       </ion-button>
     </div>
 
+    <!-- Success Modal -->
+    <div class="custom-modal-overlay" v-if="showSuccessModal" @click="closeSuccessModal">
+      <div class="custom-modal" @click.stop>
+        <img src="/assets/images/checkmark_success.png" alt="Success" class="success-img">
+        <h3>Order placed successfully!</h3>
+        <p>Your order has been confirmed</p>
+        <ion-button expand="block" class="modal-btn" @click="closeSuccessModal">OK</ion-button>
+      </div>
+    </div>
+
   </ion-page>
 </template>
 
@@ -168,6 +178,7 @@ const isCustom = ref(false);
 const customAmount = ref('');
 const isFavorite = ref(false);
 const isPlacing = ref(false);
+const showSuccessModal = ref(false);
 
 const tipAmounts = [25, 50, 100, 150, 200, 250];
 
@@ -232,15 +243,15 @@ const confirmOrder = async () => {
   isPlacing.value = true;
   try {
     await new Promise(resolve => setTimeout(resolve, 2000));
-    const toast = await toastController.create({
-      message: '🎉 Order placed successfully!',
-      duration: 2000, color: 'success', position: 'top'
-    });
-    await toast.present();
-    router.push('/order-tracking/1234');
+    showSuccessModal.value = true;
   } finally {
     isPlacing.value = false;
   }
+};
+
+const closeSuccessModal = () => {
+  showSuccessModal.value = false;
+  router.push('/order-tracking/1234');
 };
 
 const goBack = () => router.back();
@@ -406,5 +417,58 @@ const goBack = () => router.back();
 .place-order-btn {
   --background: #4CAF50; --border-radius: 16px;
   height: 56px; font-size: 16px; font-weight: 700; text-transform: none;
+}
+
+.success-alert .alert-message {
+  text-align: center;
+  padding: 20px;
+}
+
+/* Custom Modal */
+.custom-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.custom-modal {
+  background: white;
+  border-radius: 20px;
+  padding: 40px 30px;
+  text-align: center;
+  width: 80%;
+  max-width: 320px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+.success-img {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 16px;
+}
+
+.custom-modal h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.custom-modal p {
+  margin: 0 0 24px;
+  font-size: 14px;
+  color: #666;
+}
+
+.modal-btn {
+  --background: #4CAF50;
+  --border-radius: 12px;
+  height: 48px;
+  font-weight: 600;
+  text-transform: none;
 }
 </style>
