@@ -379,7 +379,7 @@ const openProduct = (product) => {
 };
 
 const viewAllCategory = (cat) => {
-  selectedCategory.value = cat.id;
+  router.push(`/category/${cat.id}`);
 };
 
 const toggleFavorite = async () => {
