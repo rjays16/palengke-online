@@ -119,7 +119,8 @@
             <div class="section-header">
               <h2 class="section-title">{{ category.name }}</h2>
               <span class="see-all-btn" @click="viewAllCategory(category)">
-                <ion-icon :icon="arrowForwardOutline"></ion-icon>
+                View All
+                <ion-icon :icon="chevronForwardOutline" class="see-all-arrow"></ion-icon>
               </span>
             </div>
 
@@ -581,12 +582,13 @@ const goToCart = () => router.push('/cart');
 }
 .section-title { font-size: 18px; font-weight: 700; color: #1a1a1a; margin: 0; }
 .see-all-btn {
-  width: 32px; height: 32px;
-  background: #E8F5E9; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: center; gap: 4px;
+  padding: 6px 12px;
+  background: #E8F5E9; border-radius: 20px;
   cursor: pointer; color: #4CAF50;
+  font-size: 13px; font-weight: 600;
 }
-.see-all-btn ion-icon { font-size: 18px; }
+.see-all-arrow { font-size: 16px; }
 
 /* Products horizontal scroll */
 .products-scroll {
