@@ -3,7 +3,9 @@
     <ion-header>
       <ion-toolbar color="success">
         <ion-buttons slot="start">
-          <ion-back-button default-href="/activity"></ion-back-button>
+          <ion-button @click="goBack">
+            <ion-icon :icon="arrowBackOutline"></ion-icon>
+          </ion-button>
         </ion-buttons>
         <ion-title>Order History</ion-title>
       </ion-toolbar>
@@ -62,20 +64,19 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
-  IonButtons, IonBackButton, IonButton, IonLabel,
-  IonSegment, IonSegmentButton, IonIcon,
-  alertController, toastController
+  IonButtons, IonButton, IonLabel, IonSegment, IonSegmentButton, IonIcon
 } from '@ionic/vue';
+import { arrowBackOutline } from 'ionicons/icons';
 
 const router = useRouter();
 const selectedFilter = ref('all');
 
 const orders = ref([
-  { id: 'ORD-001', storeName: "Juan's Fresh Market", storeEmoji: '', storeImage: 'https://images.unsplash.com/photo-1542838132-92c53300491e', iconBg: '#E8F5E9', date: '22 Mar 2026, 11:59 AM', items: 'Bawang/Garlic, Kamatis/Tomato', total: 207.00, status: 'completed' },
-  { id: 'ORD-002', storeName: "Ana's Palengke", storeEmoji: '', storeImage: 'https://images.unsplash.com/photo-1542838132-92c53300491e', iconBg: '#FCE4EC', date: '20 Mar 2026, 06:48 PM', items: 'Apple Med. Size, Banana', total: 291.00, status: 'cancelled' },
-  { id: 'ORD-003', storeName: "Rosa's Seafoods", storeEmoji: '', storeImage: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3', iconBg: '#E3F2FD', date: '18 Mar 2026, 05:19 PM', items: 'Tuna Cubes, Pampano', total: 556.00, status: 'completed' },
-  { id: 'ORD-004', storeName: "Mario's Meat Shop", storeEmoji: '', storeImage: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791', iconBg: '#FFEBEE', date: '15 Mar 2026, 02:30 PM', items: 'Pork Belly, Pork Ribs', total: 597.00, status: 'completed' },
-  { id: 'ORD-005', storeName: "Palengke Bundles", storeEmoji: '', storeImage: 'https://images.unsplash.com/photo-1550989460-0adf9ea622e2', iconBg: '#F3E5F5', date: '10 Mar 2026, 09:15 AM', items: 'Fresh Vegetable Bundle', total: 257.00, status: 'completed' },
+  { id: 'ORD-001', storeName: "Juan's Fresh Market", storeImage: 'https://images.unsplash.com/photo-1542838132-92c53300491e', date: '22 Mar 2026, 11:59 AM', items: 'Bawang/Garlic, Kamatis/Tomato', total: 207.00, status: 'completed' },
+  { id: 'ORD-002', storeName: "Ana's Palengke", storeImage: 'https://images.unsplash.com/photo-1542838132-92c53300491e', date: '20 Mar 2026, 06:48 PM', items: 'Apple Med. Size, Banana', total: 291.00, status: 'cancelled' },
+  { id: 'ORD-003', storeName: "Rosa's Seafoods", storeImage: 'https://images.unsplash.com/photo-1535399831218-d5bd36d1a6b3', date: '18 Mar 2026, 05:19 PM', items: 'Tuna Cubes, Pampano', total: 556.00, status: 'completed' },
+  { id: 'ORD-004', storeName: "Mario's Meat Shop", storeImage: 'https://images.unsplash.com/photo-1604503468506-a8da13d82791', date: '15 Mar 2026, 02:30 PM', items: 'Pork Belly, Pork Ribs', total: 597.00, status: 'completed' },
+  { id: 'ORD-005', storeName: "Palengke Bundles", storeImage: 'https://images.unsplash.com/photo-1550989460-0adf9ea622e2', date: '10 Mar 2026, 09:15 AM', items: 'Fresh Vegetable Bundle', total: 257.00, status: 'completed' },
 ]);
 
 const filteredOrders = computed(() => {
@@ -83,94 +84,52 @@ const filteredOrders = computed(() => {
   return orders.value.filter(o => o.status === selectedFilter.value);
 });
 
-const handleFilter = (e) => { selectedFilter.value = e.detail.value; };
+const handleFilter = () => {};
 
-const viewOrderDetail = (order) => {};
-
-const reorder = async (order) => {
-  const toast = await toastController.create({
-    message: `Reordering from ${order.storeName}...`,
-    duration: 2000, color: 'success', position: 'top'
-  });
-  await toast.present();
-  router.push('/seller/1');
+const viewOrderDetail = (order) => {
+  router.push(`/order-tracking/${order.id}`);
 };
 
-const viewReceipt = async (order) => {
-  const alert = await alertController.create({
-    header: `Receipt - ${order.id}`,
-    message: `Store: ${order.storeName}\nItems: ${order.items}\nTotal: ₱${order.total.toFixed(2)}\nDate: ${order.date}`,
-    buttons: ['Close']
-  });
-  await alert.present();
+const reorder = (order) => {
+  router.push(`/seller/${order.id}`);
 };
+
+const viewReceipt = (order) => {
+  router.push(`/order-receipt/${order.id}`);
+};
+
+const goBack = () => router.back();
 </script>
 
 <style scoped>
 .history-content { --background: #f8f9fa; }
-ion-segment { 
-  padding: 8px 16px; 
-  background: white; 
-  gap: 8px;
-}
-ion-segment-button { 
-  --color: #666 !important;
-  --color-checked: #ffffff !important;
-  --indicator-color: transparent !important;
-  --indicator-height: 0px !important;
-  --background: #f0f0f0 !important;
-  --background-checked: #4CAF50 !important;
-  --border-width: 0px !important;
-  --border-radius: 20px !important;
-  font-size: 13px !important; font-weight: 700 !important; 
-  min-height: 36px !important; 
-  text-transform: none !important;
-}
-ion-segment::before, ion-segment::after {
-  display: none !important;
-}
-ion-segment-button { 
-  --color: #666; 
-  --color-checked: #ffffff; 
-  --indicator-color: transparent;
-  --background: #f0f0f0;
-  --background-checked: #4CAF50;
-  font-size: 11px; font-weight: 700; 
-  min-height: 32px; 
-  border-radius: 20px;
-  flex: 1;
-  --padding-start: 4px;
-  --padding-end: 4px;
-  text-transform: none;
-}
+ion-segment { padding: 8px 16px; background: white; gap: 8px; }
+ion-segment-button { --border-radius: 20px; }
 
-.empty-state { text-align: center; padding: 80px 40px; }
+.empty-state { text-align: center; padding: 80px 20px; }
 .empty-icon { font-size: 64px; margin-bottom: 16px; }
-.empty-state h3 { font-size: 20px; font-weight: 700; color: #1a1a1a; margin: 0 0 8px 0; }
-.empty-state p { font-size: 14px; color: #999; margin: 0; }
+.empty-state h3 { font-size: 18px; font-weight: 700; color: #1a1a1a; margin: 0 0 8px; }
+.empty-state p { font-size: 14px; color: #666; margin: 0; }
 
 .history-list { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 
 .history-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
 
-.history-main { display: flex; align-items: center; gap: 14px; padding: 16px; cursor: pointer; }
+.history-main { display: flex; gap: 14px; padding: 16px; cursor: pointer; }
 
-.history-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
-.history-icon-img { width: 52px; height: 52px; border-radius: 14px; object-fit: cover; flex-shrink: 0; }
+.history-icon-img { width: 60px; height: 60px; border-radius: 14px; object-fit: cover; flex-shrink: 0; }
 
-.history-info { flex: 1; }
-.history-info h3 { font-size: 15px; font-weight: 700; color: #1a1a1a; margin: 0 0 3px 0; }
-.history-date { font-size: 12px; color: #999; margin: 0 0 3px 0; }
-.history-items { font-size: 12px; color: #666; margin: 0; }
+.history-info { flex: 1; min-width: 0; }
+.history-info h3 { font-size: 15px; font-weight: 700; color: #1a1a1a; margin: 0 0 4px; }
+.history-date { font-size: 12px; color: #999; margin: 0 0 4px; }
+.history-items { font-size: 13px; color: #666; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .history-right { text-align: right; }
-.history-amount { font-size: 15px; font-weight: 700; color: #1a1a1a; margin: 0 0 6px 0; }
-.history-status { font-size: 18px; }
+.history-amount { font-size: 16px; font-weight: 800; color: #1a1a1a; margin: 0 0 4px; }
+.history-status { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 10px; }
+.history-status.completed { background: #E8F5E9; color: #4CAF50; }
+.history-status.cancelled { background: #FFEBEE; color: #f44336; }
 
-.history-actions {
-  display: flex; justify-content: space-between;
-  padding: 8px 16px 12px;
-  border-top: 1px solid #f5f5f5;
-}
-.reorder-btn { --padding-start: 0; font-size: 14px; font-weight: 700; text-transform: none; height: 36px; }
+.history-actions { display: flex; justify-content: space-between; padding: 8px 16px; border-top: 1px solid #f0f0f0; }
+.reorder-btn { font-size: 13px; font-weight: 600; }
 </style>

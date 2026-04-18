@@ -31,6 +31,7 @@ import OrderRatingPage from '@/views/OrderRatingPage.vue';
 import FavoriteSellersPage from '@/views/FavoriteSellersPage.vue';
 import ProductDetailPage from '@/views/ProductDetailPage.vue';
 import CategoryProductsPage from '@/views/CategoryProductsPage.vue';
+import OrderReceiptPage from '@/views/OrderReceiptPage.vue';
 
 const routes: Array<RouteRecordRaw> = [
   { path: '/', redirect: '/login' },
@@ -220,6 +221,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/category/:categoryId',
     name: 'CategoryProducts',
     component: CategoryProductsPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/order-receipt/:id',
+    name: 'OrderReceipt',
+    component: OrderReceiptPage,
     meta: { requiresAuth: true }
   },
 ];
