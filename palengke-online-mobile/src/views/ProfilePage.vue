@@ -5,7 +5,7 @@
       <!-- Profile Header -->
       <div class="profile-header">
         <div class="avatar-wrap" @click="changeAvatar">
-          <div class="avatar">{{ profileData.name.charAt(0) }}</div>
+          <img :src="profileData.avatar" alt="Profile" class="avatar-img">
           <div class="avatar-edit"><ion-icon :icon="createOutline"></ion-icon></div>
         </div>
         <h2 class="profile-name">{{ profileData.name }}</h2>
@@ -143,13 +143,15 @@ import {
   personOutline, locationOutline, cardOutline, receiptOutline,
   heartOutline, chatbubblesOutline,
   helpCircleOutline, starOutline, logOutOutline, chevronForwardOutline,
-  homeOutline, searchOutline, cartOutline
+  homeOutline, searchOutline, cartOutline,
+  createOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
 
 const profileData = ref({
   name: 'Maria Santos',
+  avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop',
   email: 'maria.santos@email.com',
   phone: '+63 912 345 6789',
   totalOrders: 28,
@@ -236,20 +238,26 @@ const goToFavorites = () => router.push('/favorite-sellers');
 
 .profile-header {
   background: linear-gradient(135deg, #4CAF50, #388E3C);
-  padding: 52px 20px 32px; text-align: center; color: white;
+  padding: 48px 20px 28px; text-align: center; color: white;
 }
 .avatar-wrap { position: relative; display: inline-block; margin-bottom: 14px; cursor: pointer; }
-.avatar {
-  width: 84px; height: 84px; border-radius: 50%;
-  background: rgba(255,255,255,0.3); border: 3px solid white;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 36px; font-weight: 700; color: white;
+.avatar-img {
+  width: 90px; height: 90px; border-radius: 50%;
+  border: 4px solid white;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 .avatar-edit {
-  position: absolute; bottom: 0; right: 0;
-  width: 28px; height: 28px; background: white;
+  position: absolute; bottom: 2px; right: 2px;
+  width: 32px; height: 32px; background: #4CAF50;
   border-radius: 50%; display: flex; align-items: center;
-  justify-content: center; font-size: 14px;
+  justify-content: center;
+  border: 3px solid white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.avatar-edit ion-icon {
+  font-size: 16px;
+  color: white;
 }
 .profile-name { font-size: 22px; font-weight: 700; margin: 0 0 4px 0; }
 .profile-email { font-size: 14px; opacity: 0.85; margin: 0 0 2px 0; }

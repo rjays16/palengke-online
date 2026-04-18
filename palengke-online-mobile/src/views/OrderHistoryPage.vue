@@ -38,7 +38,7 @@
             <div class="history-right">
               <p class="history-amount">₱{{ order.total.toFixed(2) }}</p>
               <span class="history-status" :class="order.status">
-                {{ order.status === 'completed' ? '' : '' }}
+                {{ order.status === 'completed' ? 'Completed' : 'Cancelled' }}
               </span>
             </div>
           </div>
@@ -124,9 +124,9 @@ ion-segment-button { --border-radius: 20px; }
 .history-date { font-size: 12px; color: #999; margin: 0 0 4px; }
 .history-items { font-size: 13px; color: #666; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.history-right { text-align: right; }
-.history-amount { font-size: 16px; font-weight: 800; color: #1a1a1a; margin: 0 0 4px; }
-.history-status { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 10px; }
+.history-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.history-amount { font-size: 16px; font-weight: 800; color: #1a1a1a; margin: 0; }
+.history-status { font-size: 10px; font-weight: 600; padding: 4px 10px; border-radius: 12px; white-space: nowrap; }
 .history-status.completed { background: #E8F5E9; color: #4CAF50; }
 .history-status.cancelled { background: #FFEBEE; color: #f44336; }
 
