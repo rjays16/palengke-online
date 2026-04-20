@@ -84,21 +84,21 @@
               <h4>Near Me</h4>
               <p>Get it quick</p>
             </div>
-            <div class="feature-icon">📍</div>
+            <ion-icon :icon="locationOutline" class="feature-icon"></ion-icon>
           </div>
           <div class="feature-card top-rated" @click="browseTopRated">
             <div class="feature-content">
               <h4>Top Rated</h4>
               <p>Best sellers</p>
             </div>
-            <div class="feature-icon">⭐</div>
+            <ion-icon :icon="starOutline" class="feature-icon"></ion-icon>
           </div>
           <div class="feature-card bundle-deals" @click="browseBundles">
             <div class="feature-content">
               <h4>Bundles</h4>
               <p>Best value</p>
             </div>
-            <div class="feature-icon">📦</div>
+            <ion-icon :icon="cubeOutline" class="feature-icon"></ion-icon>
           </div>
         </div>
       </div>
@@ -218,7 +218,8 @@ import {
 } from '@ionic/vue';
 import {
   chevronDownOutline, notificationsOutline, walletOutline,
-  searchOutline, homeOutline, cartOutline, receiptOutline, personOutline
+  searchOutline, homeOutline, cartOutline, receiptOutline, personOutline,
+  locationOutline, starOutline, cubeOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -519,7 +520,7 @@ const goToNotifications = () => router.push('/notifications');
 .feature-card:active { transform: scale(0.97); }
 .feature-content h4 { font-size: 15px; font-weight: 700; color: white; margin: 0 0 4px 0; }
 .feature-content p { font-size: 12px; color: rgba(255,255,255,0.85); margin: 0; }
-.feature-icon { font-size: 32px; }
+.feature-icon { font-size: 32px; color: white; }
 
 .near-me { background: linear-gradient(135deg, #4CAF50, #2E7D32); }
 .top-rated { background: linear-gradient(135deg, #FF9800, #E65100); }
