@@ -30,7 +30,7 @@
         <div class="delivery-badge-row">
           <div class="delivery-type-badge">{{ orderStatus.deliveryType }}</div>
           <div class="payment-badge" :class="paymentMethod">
-            <span v-if="paymentMethod === 'gcash'">📱 GCash</span>
+            <span v-if="paymentMethod === 'gcash'">GCash</span>
             <span v-else>💵 Cash On Delivery</span>
           </div>
         </div>
