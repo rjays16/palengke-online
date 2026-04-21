@@ -485,8 +485,8 @@ ion-header ion-toolbar ion-buttons ion-button {
 }
 
 .online-toggle-card.online {
-  background: rgba(255,255,255,0.2);
-  border-color: rgba(255,255,255,0.4);
+  background: rgba(76, 175, 80, 0.3);
+  border-color: rgba(76, 175, 80, 0.6);
 }
 
 .toggle-info { display: flex; align-items: center; gap: 12px; }
@@ -500,14 +500,14 @@ ion-header ion-toolbar ion-buttons ion-button {
 }
 
 .toggle-status-dot.online {
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+  background: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76,175,80,0.4);
   animation: pulse-dot 2s infinite;
 }
 
 @keyframes pulse-dot {
-  0%, 100% { box-shadow: 0 0 0 3px rgba(255,255,255,0.3); }
-  50% { box-shadow: 0 0 0 6px rgba(255,255,255,0.1); }
+  0%, 100% { box-shadow: 0 0 0 3px rgba(76,175,80,0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(76,175,80,0.15); }
 }
 
 .toggle-status-text { font-size: 15px; font-weight: 700; color: white; margin: 0 0 2px 0; }
