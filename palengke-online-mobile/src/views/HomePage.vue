@@ -8,16 +8,16 @@
           <div class="deliver-label">DELIVER TO</div>
           <div class="deliver-address">
             <span>{{ currentAddress }}</span>
-            <ion-icon :icon="chevronDownOutline"></ion-icon>
+            <ion-icon :icon="chevronDown"></ion-icon>
           </div>
         </div>
         <div class="header-actions">
           <div class="header-btn wallet-btn" @click="goToWallet">
-            <ion-icon :icon="walletOutline" class="wallet-icon"></ion-icon>
+            <ion-icon :icon="wallet" class="wallet-icon"></ion-icon>
             <span class="wallet-balance">₱{{ walletBalance }}</span>
           </div>
           <div class="header-btn" @click="goToNotifications">
-            <ion-icon :icon="notificationsOutline"></ion-icon>
+            <ion-icon :icon="notifications"></ion-icon>
             <span class="notif-dot" v-if="notifCount > 0">{{ notifCount }}</span>
           </div>
         </div>
@@ -26,7 +26,7 @@
       <!-- ─── Search Bar ─────────────────────────── -->
       <div class="search-section" @click="goToBrowse">
         <div class="search-bar">
-          <ion-icon :icon="searchOutline"></ion-icon>
+          <ion-icon :icon="search"></ion-icon>
           <span class="search-placeholder">What shall we deliver?</span>
         </div>
       </div>
@@ -180,26 +180,26 @@
       <ion-toolbar class="bottom-nav-toolbar">
         <div class="bottom-nav">
           <div class="nav-item active" @click="goToHome">
-            <ion-icon :icon="homeOutline"></ion-icon>
+            <ion-icon :icon="home"></ion-icon>
             <span>Home</span>
           </div>
           <div class="nav-item" @click="goToBrowse">
-            <ion-icon :icon="searchOutline"></ion-icon>
+            <ion-icon :icon="search"></ion-icon>
             <span>Browse</span>
           </div>
           <div class="nav-item" @click="goToCart">
             <div class="cart-icon-wrap">
-              <ion-icon :icon="cartOutline"></ion-icon>
+              <ion-icon :icon="cart"></ion-icon>
               <span class="cart-badge" v-if="cartCount > 0">{{ cartCount }}</span>
             </div>
             <span>Cart</span>
           </div>
           <div class="nav-item" @click="goToActivity">
-            <ion-icon :icon="receiptOutline"></ion-icon>
+            <ion-icon :icon="receipts"></ion-icon>
             <span>Activity</span>
           </div>
           <div class="nav-item" @click="goToProfile">
-            <ion-icon :icon="personOutline"></ion-icon>
+            <ion-icon :icon="person"></ion-icon>
             <span>Profile</span>
           </div>
         </div>
@@ -217,9 +217,9 @@ import {
   actionSheetController, toastController
 } from '@ionic/vue';
 import {
-  chevronDownOutline, notificationsOutline, walletOutline,
-  searchOutline, homeOutline, cartOutline, receiptOutline, personOutline,
-  locationOutline, starOutline, cubeOutline
+  chevronDown, notifications, wallet,
+  home, cart, receipts, person, search,
+  location, star, cube
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -617,12 +617,20 @@ const goToNotifications = () => router.push('/notifications');
 .nav-item {
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  gap: 3px; cursor: pointer; color: #999;
-  position: relative; transition: color 0.2s;
+  gap: 3px; cursor: pointer; color: #888;
+  position: relative; transition: all 0.2s;
+  background: transparent !important;
+  border-radius: 12px;
+  padding: 4px 8px;
 }
 .nav-item ion-icon { font-size: 22px; }
 .nav-item span { font-size: 10px; font-weight: 600; }
-.nav-item.active { color: #4CAF50; }
+.nav-item.active { 
+  color: white !important; 
+  background: #4CAF50 !important; 
+}
+:deep(.nav-item.active ion-icon) { color: white !important; }
+:deep(.nav-item.active span) { color: white !important; }
 .nav-item:active { transform: scale(0.95); }
 
 .cart-icon-wrap { position: relative; }
