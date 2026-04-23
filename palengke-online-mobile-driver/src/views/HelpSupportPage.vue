@@ -216,7 +216,7 @@ const onSearch = () => { selectedTopic.value = 'all'; };
 
 const chatSupport = async () => {
   const toast = await toastController.create({
-    message: 'Connecting to live chat...', duration: 2000, color: 'primary', position: 'top'
+    message: 'Connecting to live chat...', duration: 2000, color: 'medium', position: 'top'
   });
   await toast.present();
 };

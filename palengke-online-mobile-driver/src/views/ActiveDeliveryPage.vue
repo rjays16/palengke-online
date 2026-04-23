@@ -13,165 +13,129 @@
         <div class="top-info-card">
           <div class="eta-info">
             <ion-icon :icon="timeOutline"></ion-icon>
-            <span class="eta-time">{{ etaTime }}</span>
-            <span class="eta-distance">• {{ etaDistance }}</span>
+            <span class="eta-label">{{ etaTime }}</span>
+            <span class="eta-dist">• {{ etaDistance }}</span>
           </div>
         </div>
-        <div class="more-btn" @click="showMoreActions">
-          <ion-icon :icon="ellipsisVerticalOutline"></ion-icon>
+        <div class="center-btn" @click="centerOnDriver">
+          <ion-icon :icon="locateOutline"></ion-icon>
         </div>
       </div>
 
-      <!-- Bottom Sheet -->
+<!-- Bottom Sheet - scrollable -->
       <div class="bottom-sheet" :class="{ expanded: sheetExpanded }">
-
-        <!-- Handle -->
         <div class="sheet-handle" @click="sheetExpanded = !sheetExpanded">
           <div class="handle-bar"></div>
         </div>
-
-        <!-- Delivery Steps Progress -->
+        
+        <!-- Delivery Progress -->
         <div class="delivery-progress">
           <div class="progress-step" :class="{ active: currentStep >= 1, done: currentStep > 1 }">
-            <div class="step-circle">
-              <ion-icon :icon="currentStep > 1 ? checkmarkOutline : basketOutline"></ion-icon>
+            <div class="step-icon">
+              <ion-icon :icon="currentStep > 1 ? checkmarkCircleOutline : storefrontOutline"></ion-icon>
             </div>
             <span>Pickup</span>
           </div>
           <div class="progress-line" :class="{ done: currentStep > 1 }"></div>
           <div class="progress-step" :class="{ active: currentStep >= 2, done: currentStep > 2 }">
-            <div class="step-circle">
-              <ion-icon :icon="currentStep > 2 ? checkmarkOutline : bicycleOutline"></ion-icon>
+            <div class="step-icon">
+              <ion-icon :icon="currentStep > 2 ? checkmarkCircleOutline : bicycleOutline"></ion-icon>
             </div>
             <span>On the Way</span>
           </div>
           <div class="progress-line" :class="{ done: currentStep > 2 }"></div>
           <div class="progress-step" :class="{ active: currentStep >= 3 }">
-            <div class="step-circle">
+            <div class="step-icon">
               <ion-icon :icon="homeOutline"></ion-icon>
             </div>
             <span>Delivered</span>
           </div>
         </div>
-
-        <!-- Current Step Info -->
-        <div class="step-info-card">
-
+        
+        <!-- Scrollable Content -->
+        <div class="sheet-content">
           <!-- Step 1: Pickup -->
           <div v-if="currentStep === 1" class="step-detail">
             <div class="step-badge pickup">
-              <ion-icon :icon="basketOutline"></ion-icon>
-              <span>Pickup Location</span>
+              <ion-icon :icon="storefrontOutline"></ion-icon>
+              Pickup from Vendor
             </div>
-            <h3 class="location-name">{{ orderData.sellerName }}</h3>
-            <p class="location-address">{{ orderData.pickupAddress }}</p>
-            <div class="order-summary">
-              <div class="summary-item">
+            <h3>{{ orderData.sellerName }}</h3>
+            <p>{{ orderData.pickupAddress }}</p>
+            <p class="phone">
+              <ion-icon :icon="callOutline"></ion-icon>
+              {{ orderData.pickupPhone }}
+            </p>
+            <p class="instructions">
+              <ion-icon :icon="documentTextOutline"></ion-icon>
+              {{ orderData.pickupInstructions }}
+            </p>
+            <div class="items-row">
+              <span>
                 <ion-icon :icon="cubeOutline"></ion-icon>
-                <span>{{ orderData.itemCount }} items to pickup</span>
-              </div>
-              <div class="summary-item">
-                <ion-icon :icon="cashOutline"></ion-icon>
-                <span>₱{{ orderData.totalAmount.toLocaleString() }} {{ orderData.paymentMethod === 'cash' ? '(Cash)' : '(GCash)' }}</span>
+                Items:
+              </span>
+              <div class="item-tags">
+                <span v-for="item in orderData.items" :key="item" class="item-tag">{{ item }}</span>
               </div>
             </div>
+            <p class="collect">
+              <ion-icon :icon="cashOutline"></ion-icon>
+              Collect: ₱{{ orderData.totalAmount }} ({{ orderData.paymentMethod }})
+            </p>
           </div>
-
+          
           <!-- Step 2: Delivering -->
           <div v-if="currentStep === 2" class="step-detail">
             <div class="step-badge delivering">
               <ion-icon :icon="bicycleOutline"></ion-icon>
-              <span>Delivering</span>
+              Delivering to Customer
             </div>
-            <h3 class="location-name">{{ orderData.customerName }}</h3>
-            <p class="location-address">{{ orderData.deliveryAddress }}</p>
-            <div class="order-summary">
-              <div class="summary-item">
-                <ion-icon :icon="timeOutline"></ion-icon>
-                <span>ETA: {{ etaTime }}</span>
-              </div>
-              <div class="summary-item">
-                <ion-icon :icon="cashOutline"></ion-icon>
-                <span>Collect ₱{{ orderData.totalAmount.toLocaleString() }} on arrival</span>
-              </div>
-            </div>
+            <h3>{{ orderData.customerName }}</h3>
+            <p>{{ orderData.deliveryAddress }}</p>
+            <p class="phone">
+              <ion-icon :icon="callOutline"></ion-icon>
+              {{ orderData.customerPhone }}
+            </p>
+            <p class="eta">
+              <ion-icon :icon="timeOutline"></ion-icon>
+              ETA: {{ etaTime }} ({{ etaDistance }})
+            </p>
+            <p class="collect">
+              <ion-icon :icon="cashOutline"></ion-icon>
+              Collect: ₱{{ orderData.totalAmount }} on arrival
+            </p>
           </div>
-
+          
           <!-- Step 3: Arrived -->
           <div v-if="currentStep === 3" class="step-detail">
             <div class="step-badge arrived">
               <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
-              <span>Arrived!</span>
+              You have arrived!
             </div>
-            <h3 class="location-name">You have arrived!</h3>
-            <p class="location-address">{{ orderData.deliveryAddress }}</p>
-            <div class="order-summary">
-              <div class="summary-item highlight">
-                <ion-icon :icon="cashOutline"></ion-icon>
-                <span>Collect ₱{{ orderData.totalAmount.toLocaleString() }} from {{ orderData.customerName }}</span>
-              </div>
-            </div>
+            <p>{{ orderData.deliveryAddress }}</p>
+            <p class="collect">
+              <ion-icon :icon="cashOutline"></ion-icon>
+              Collect ₱{{ orderData.totalAmount }} from {{ orderData.customerName }}
+            </p>
           </div>
-
         </div>
-
-        <!-- Contact Buttons -->
-        <div class="contact-buttons">
-          <button class="contact-btn" @click="chatCustomer">
-            <ion-icon :icon="chatbubbleOutline"></ion-icon>
-            <span>{{ currentStep === 1 ? 'Chat Seller' : 'Chat Buyer' }}</span>
+        
+        <!-- Quick Action Button -->
+        <div class="action-row">
+          <button v-if="currentStep === 1" class="action-btn pickup-btn" @click="confirmPickup">
+            <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
+            I've Picked Up
           </button>
-          <button class="contact-btn" @click="callCustomer">
-            <ion-icon :icon="callOutline"></ion-icon>
-            <span>{{ currentStep === 1 ? 'Call Seller' : 'Call Buyer' }}</span>
-          </button>
-          <button class="contact-btn" @click="openHelpCenter">
-            <ion-icon :icon="helpCircleOutline"></ion-icon>
-            <span>Help</span>
-          </button>
-          <button class="contact-btn" @click="showMoreActions">
-            <ion-icon :icon="ellipsisHorizontalOutline"></ion-icon>
-            <span>More</span>
-          </button>
-        </div>
-
-        <!-- Main Action Button -->
-        <div class="main-action">
-          <!-- Step 1: Picked Up -->
-          <ion-button
-            v-if="currentStep === 1"
-            expand="block"
-            class="action-btn pickup-btn"
-            @click="confirmPickup"
-          >
-            <ion-icon slot="start" :icon="checkmarkCircleOutline"></ion-icon>
-            I've Picked Up the Order
-          </ion-button>
-
-          <!-- Step 2: Arrived at Destination -->
-          <ion-button
-            v-if="currentStep === 2"
-            expand="block"
-            class="action-btn arrived-btn"
-            @click="confirmArrived"
-          >
-            <ion-icon slot="start" :icon="locationOutline"></ion-icon>
+          <button v-if="currentStep === 2" class="action-btn arrived-btn" @click="confirmArrived">
+            <ion-icon :icon="locationOutline"></ion-icon>
             Arrived at Destination
-          </ion-button>
-
-          <!-- Step 3: Confirm Delivery -->
-          <div v-if="currentStep === 3" class="confirm-delivery">
-            <ion-button
-              expand="block"
-              class="action-btn complete-btn"
-              @click="confirmDelivery"
-            >
-              <ion-icon slot="start" :icon="checkmarkCircleOutline"></ion-icon>
-              Confirm Delivery Complete
-            </ion-button>
-          </div>
+          </button>
+          <button v-if="currentStep === 3" class="action-btn complete-btn" @click="confirmDelivery">
+            <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
+            Confirm Complete
+          </button>
         </div>
-
       </div>
 
     </ion-content>
@@ -186,11 +150,12 @@ import {
   alertController, actionSheetController, toastController
 } from '@ionic/vue';
 import {
-  arrowBackOutline, timeOutline, ellipsisVerticalOutline,
+  arrowBackOutline, timeOutline,
   basketOutline, bicycleOutline, homeOutline,
   checkmarkOutline, checkmarkCircleOutline, cubeOutline,
   cashOutline, chatbubbleOutline, callOutline,
-  helpCircleOutline, ellipsisHorizontalOutline, locationOutline
+  locationOutline, locateOutline, storefrontOutline,
+  documentTextOutline
 } from 'ionicons/icons';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -199,9 +164,10 @@ const router = useRouter();
 
 let map = null;
 let driverMarker = null;
-let sellerMarker = null;
 let customerMarker = null;
-let routeLine = null;
+let vendorMarker = null;
+let pickupRouteLine = null;
+let deliveryRouteLine = null;
 
 // Delivery state
 const currentStep = ref(1); // 1=pickup, 2=delivering, 3=arrived
@@ -214,89 +180,267 @@ const orderData = ref({
   id: '1234',
   sellerName: "Juan's Fresh Market",
   pickupAddress: 'Stall #15, CDO City Palengke, Cagayan de Oro',
+  pickupPhone: '0912 345 6789',
   customerName: 'Maria Santos',
   deliveryAddress: 'Brgy. Carmen, Cagayan de Oro City',
+  customerPhone: '0918 765 4321',
   itemCount: 5,
   totalAmount: 850,
   paymentMethod: 'cash',
-  driverEarnings: 85
+  driverEarnings: 85,
+  pickupInstructions: 'Ask for Juan at Stall #15',
+  items: ['2kg Pork', '1kg Tomatoes', '3pcs Cabbage']
 });
 
-// Locations
-const sellerLocation = [8.4820, 124.6472];
+// Vendor/Driver/Customer Locations (mock coordinates - CDO area)
+const driverStartLocation = [8.4850, 124.6510];
+const vendorLocation = [8.4820, 124.6472];
 const customerLocation = [8.4920, 124.6600];
 const driverLocation = ref([8.4850, 124.6510]);
 
-// Init Map
+// Init Map with both pickup and delivery locations
 const initMap = () => {
-  map = L.map('delivery-map', { zoomControl: false }).setView(driverLocation.value, 15);
+  map = L.map('delivery-map', { 
+    zoomControl: false, 
+    dragging: true, 
+    tap: true,
+    bounceZoom: false
+  }).setView(driverLocation.value, 15);
+
+  // Track drag state to prevent auto-pan while user is dragging
+  map.on('movestart', onMapDragStart);
+  map.on('moveend', onMapDragEnd);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors', maxZoom: 19
+    attribution: '© OpenStreetMap', maxZoom: 19
   }).addTo(map);
 
-  const sellerIconHtml = '<div style="background:#4CAF50;color:white;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:3px solid white;box-shadow:0 3px 10px rgba(0,0,0,0.3);"><i class="fas fa-store"></i></div>';
-  const sellerIcon = L.divIcon({
-    className: 'custom-marker',
-    html: sellerIconHtml,
+  // Custom vendor icon (green store)
+  const vendorIconHtml = `
+    <div style="background:#4CAF50;color:white;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;border:3px solid white;box-shadow:0 3px 12px rgba(0,0,0,0.4)">🏪</div>`;
+  const vendorIcon = L.divIcon({
+    className: 'vendor-marker',
+    html: vendorIconHtml,
     iconSize: [44, 44], iconAnchor: [22, 22]
   });
 
-  const customerIconHtml = '<div style="background:#f44336;color:white;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:3px solid white;box-shadow:0 3px 10px rgba(0,0,0,0.3);"><i class="fas fa-home"></i></div>';
+  // Custom customer icon (red home)
+  const customerIconHtml = `
+    <div style="background:#f44336;color:white;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;border:3px solid white;box-shadow:0 3px 12px rgba(0,0,0,0.4)">🏠</div>`;
   const customerIcon = L.divIcon({
-    className: 'custom-marker',
+    className: 'customer-marker',
     html: customerIconHtml,
     iconSize: [44, 44], iconAnchor: [22, 22]
   });
 
-  const driverIconHtml = '<div style="background:#2196F3;color:white;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;border:3px solid white;box-shadow:0 3px 10px rgba(0,0,0,0.3);"><i class="fas fa-motorcycle"></i></div>';
+  // Driver icon (blue motorcycle)
+  const driverIconHtml = `
+    <div style="background:#2196F3;color:white;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;border:4px solid white;box-shadow:0 4px 16px rgba(33,150,243,0.5)">🏍️</div>`;
   const driverIcon = L.divIcon({
-    className: 'custom-marker',
+    className: 'driver-marker',
     html: driverIconHtml,
     iconSize: [48, 48], iconAnchor: [24, 24]
   });
 
-  sellerMarker = L.marker(sellerLocation, { icon: sellerIcon })
-    .addTo(map).bindPopup(`<b>${orderData.value.sellerName}</b><br>Pickup here`);
+  // Add all markers
+  vendorMarker = L.marker(vendorLocation, { icon: vendorIcon })
+    .addTo(map).bindPopup(`
+      <div style="text-align:center;min-width:160px;">
+        <strong style="color:#4CAF50;font-size:14px;">🏪 PICKUP HERE</strong><br>
+        <span style="color:#666;font-size:12px;">${orderData.value.sellerName}</span><br>
+        <span style="color:#888;font-size:11px;">${orderData.value.pickupAddress}</span><br>
+        <hr style="margin:6px 0;border:none;border-top:1px solid #eee;">
+        <span style="color:#4CAF50;font-size:11px;">📞 ${orderData.value.pickupPhone}</span>
+      </div>
+    `);
 
   customerMarker = L.marker(customerLocation, { icon: customerIcon })
-    .addTo(map).bindPopup(`<b>${orderData.value.customerName}</b><br>Deliver here`);
+    .addTo(map).bindPopup(`
+      <div style="text-align:center;min-width:160px;">
+        <strong style="color:#f44336;font-size:14px;">🏠 DELIVER HERE</strong><br>
+        <span style="color:#666;font-size:12px;">${orderData.value.customerName}</span><br>
+        <span style="color:#888;font-size:11px;">${orderData.value.deliveryAddress}</span><br>
+        <hr style="margin:6px 0;border:none;border-top:1px solid #eee;">
+        <span style="color:#f44336;font-size:11px;">📞 ${orderData.value.customerPhone}</span>
+      </div>
+    `);
 
-  driverMarker = L.marker(driverLocation.value, { icon: driverIcon })
-    .addTo(map).bindPopup('<b>You are here</b>');
+  driverMarker = L.marker(driverStartLocation, { icon: driverIcon })
+    .addTo(map).bindPopup('<b>🏍️ Driver</b>');
 
-  drawRoute();
-  fitMap();
+  // Draw route from driver to vendor
+  drawPickupRoute();
+  
+  // Fit map to show all locations
+  fitMapToShowAll();
+  
+  // Start driver moving to vendor for pickup
+  simulateDriverMovement(driverStartLocation, vendorLocation);
 };
 
-const drawRoute = () => {
-  if (routeLine) map.removeLayer(routeLine);
-  const dest = currentStep.value === 1 ? sellerLocation : customerLocation;
-  routeLine = L.polyline([driverLocation.value, dest], {
-    color: currentStep.value === 1 ? '#4CAF50' : '#2196F3',
-    weight: 5, opacity: 0.8, dashArray: '10, 5'
+// Draw route from driver to vendor (pickup phase)
+const drawPickupRoute = () => {
+  // Remove existing route
+  if (pickupRouteLine) map.removeLayer(pickupRouteLine);
+  if (deliveryRouteLine) map.removeLayer(deliveryRouteLine);
+  
+  if (currentStep.value === 1) {
+    // Pickup phase: show driver → vendor route (green dashed)
+    pickupRouteLine = L.polyline([driverLocation.value, vendorLocation], {
+      color: '#4CAF50',
+      weight: 5,
+      opacity: 0.9,
+      dashArray: '12, 8',
+      lineCap: 'round'
+    }).addTo(map);
+    
+    // Also show dotted line from vendor to customer (as reference)
+    deliveryRouteLine = L.polyline([vendorLocation, customerLocation], {
+      color: '#ccc',
+      weight: 3,
+      opacity: 0.6,
+      dashArray: '8, 8',
+      lineCap: 'round'
+    }).addTo(map);
+    
+    // Start driver moving to vendor
+    simulateDriverMovement(driverLocation.value, vendorLocation);
+  }
+};
+
+// Simulate driver movement to destination
+let movementInterval = null;
+let currentDriverPos = null;
+let userIsDragging = false;
+
+const simulateDriverMovement = (from, to) => {
+  // Clear any existing movement
+  if (movementInterval) clearInterval(movementInterval);
+  
+  currentDriverPos = [...from];
+  const endLat = to[0];
+  const endLng = to[1];
+  
+  let progress = 0;
+  const steps = 20;
+  const stepLat = (endLat - from[0]) / steps;
+  const stepLng = (endLng - from[1]) / steps;
+  
+  movementInterval = setInterval(() => {
+    progress++;
+    currentDriverPos[0] = from[0] + (stepLat * progress);
+    currentDriverPos[1] = from[1] + (stepLng * progress);
+    
+// Update driver marker position
+    if (driverMarker) {
+      driverMarker.setLatLng(currentDriverPos);
+      driverMarker.setPopupContent('<b>🏍️ On the way</b>');
+    }
+    
+    // Stop when reached
+    if (progress >= steps) {
+      clearInterval(movementInterval);
+      movementInterval = null;
+      etaTime.value = 'Arrived';
+      etaDistance.value = '0 km';
+      if (driverMarker) {
+        driverMarker.setPopupContent('<b>🏍️ Arrived!</b>');
+      }
+    }
+    
+    // Only pan if user is NOT manually dragging
+    if (map && currentDriverPos && !userIsDragging) {
+      map.panTo(currentDriverPos);
+    }
+    
+    // Update ETA based on progress
+    const remainingSteps = steps - progress;
+    if (remainingSteps > 0) {
+      etaTime.value = Math.ceil(remainingSteps * 0.6) + ' min';
+      const distanceRemaining = (remainingSteps / steps * 2.3).toFixed(1);
+      etaDistance.value = distanceRemaining + ' km';
+    }
+    
+    // Stop when reached
+    if (progress >= steps) {
+      clearInterval(movementInterval);
+      movementInterval = null;
+      etaTime.value = 'Arrived';
+      etaDistance.value = '0 km';
+      if (driverMarker) {
+        driverMarker.setPopupContent('<b>Arrived!</b>');
+      }
+    }
+  }, 800);
+};
+
+// Track when user is dragging the map
+const onMapDragStart = () => { userIsDragging = true; };
+const onMapDragEnd = () => { 
+  // Don't auto-pan after user manually drags - let them explore
+  userIsDragging = true;
+};
+
+// Stop driver movement simulation
+const stopDriverMovement = () => {
+  if (movementInterval) {
+    clearInterval(movementInterval);
+    movementInterval = null;
+  }
+};
+
+// Draw route from driver to customer (delivery phase)  
+const drawDeliveryRoute = () => {
+  if (pickupRouteLine) map.removeLayer(pickupRouteLine);
+  if (deliveryRouteLine) map.removeLayer(deliveryRouteLine);
+  
+  // Delivery phase: show driver → customer route (blue)
+  pickupRouteLine = L.polyline([driverLocation.value, customerLocation], {
+    color: '#2196F3',
+    weight: 5,
+    opacity: 0.9,
+    dashArray: '12, 8',
+    lineCap: 'round'
   }).addTo(map);
 };
 
-const fitMap = () => {
-  const dest = currentStep.value === 1 ? sellerLocation : customerLocation;
-  const bounds = L.latLngBounds([driverLocation.value, dest]);
-  map.fitBounds(bounds, { padding: [60, 60] });
+// Fit map to show all locations
+const fitMapToShowAll = () => {
+  const allPoints = [driverLocation.value, vendorLocation, customerLocation];
+  const bounds = L.latLngBounds(allPoints);
+  map.fitBounds(bounds, { padding: [80, 80] });
+};
+
+// Update map when step changes
+const updateMapForStep = () => {
+  if (currentStep.value === 1) {
+    // Focus on vendor for pickup
+    const bounds = L.latLngBounds([driverLocation.value, vendorLocation]);
+    map.fitBounds(bounds, { padding: [80, 80] });
+    drawPickupRoute();
+  } else if (currentStep.value >= 2) {
+    // Focus on customer for delivery
+    const bounds = L.latLngBounds([vendorLocation, customerLocation]);
+    map.fitBounds(bounds, { padding: [80, 80] });
+    drawDeliveryRoute();
+    
+    // Start moving from vendor to customer
+    simulateDriverMovement(vendorLocation, customerLocation);
+  }
 };
 
 // Actions
 const confirmPickup = async () => {
   const alert = await alertController.create({
     header: 'Confirm Pickup',
-    message: `Have you picked up all ${orderData.value.itemCount} items from ${orderData.value.sellerName}?`,
+message: `Pickup from: ${orderData.value.sellerName}<br>${orderData.value.pickupAddress}<br><br>Items: ${orderData.value.items.join(', ')}<br><br>Collect: ₱${orderData.value.totalAmount.toLocaleString()} (${orderData.value.paymentMethod})`,
     buttons: [
       { text: 'Not Yet', role: 'cancel' },
       {
         text: 'Yes, Picked Up!',
         handler: async () => {
           currentStep.value = 2;
-          drawRoute();
-          fitMap();
+          updateMapForStep();
           etaTime.value = '8 min';
           etaDistance.value = '1.5 km';
           const toast = await toastController.create({
@@ -332,6 +476,9 @@ const confirmDelivery = async () => {
       {
         text: 'Complete!',
         handler: async () => {
+          // Stop driver movement
+          stopDriverMovement();
+          
           // Show success and navigate back
           const toast = await toastController.create({
             message: `Delivery complete! You earned ₱${orderData.value.driverEarnings}`,
@@ -349,7 +496,17 @@ const confirmDelivery = async () => {
 const chatCustomer = () => router.push('/messages');
 
 const callCustomer = () => {
-  window.location.href = 'tel:+639123456789';
+  const phone = currentStep.value === 1 ? orderData.value.pickupPhone : orderData.value.customerPhone;
+  window.location.href = `tel:${phone.replace(/\s/g, '')}`;
+};
+
+const openNavigation = () => {
+  // Open Google Maps navigation to current destination
+  const dest = currentStep.value === 1 ? vendorLocation : customerLocation;
+  const name = currentStep.value === 1 ? orderData.value.sellerName : orderData.value.customerName;
+  const address = currentStep.value === 1 ? orderData.value.pickupAddress : orderData.value.deliveryAddress;
+  const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
+  window.open(url, '_blank');
 };
 
 const openHelpCenter = () => router.push('/help');
@@ -363,13 +520,6 @@ const showMoreActions = async () => {
         role: 'destructive',
         icon: 'close-circle-outline',
         handler: () => showCancelReasons()
-      },
-      {
-        text: 'Open in Google Maps',
-        handler: () => {
-          const dest = currentStep.value === 1 ? sellerLocation : customerLocation;
-          window.open(`https://www.google.com/maps/dir/?api=1&destination=${dest[0]},${dest[1]}`, '_blank');
-        }
       },
       { text: 'Close', role: 'cancel' }
     ]
@@ -423,6 +573,23 @@ const goBack = async () => {
   await alert.present();
 };
 
+const centerOnDriver = () => {
+  if (map) {
+    // Stop following temporarily when user taps center button
+    userIsDragging = true;
+    setTimeout(() => { userIsDragging = false; }, 3000);
+    
+    if (currentDriverPos) {
+      map.panTo(currentDriverPos);
+      map.setZoom(16);
+    } else if (driverMarker) {
+      const pos = driverMarker.getLatLng();
+      map.panTo(pos);
+      map.setZoom(16);
+    }
+  }
+};
+
 onMounted(() => {
   setTimeout(() => initMap(), 100);
 });
@@ -448,14 +615,14 @@ onUnmounted(() => {
   z-index: 1000;
 }
 
-.back-btn, .more-btn {
+.back-btn, .center-btn {
   width: 44px; height: 44px;
   background: white; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 3px 12px rgba(0,0,0,0.15);
   cursor: pointer; flex-shrink: 0;
 }
-.back-btn ion-icon, .more-btn ion-icon { font-size: 22px; color: #1a1a1a; }
+.back-btn ion-icon, .center-btn ion-icon { font-size: 22px; color: #1a1a1a; }
 
 .top-info-card {
   flex: 1; background: white; border-radius: 20px;
@@ -464,139 +631,144 @@ onUnmounted(() => {
 }
 
 .eta-info { display: flex; align-items: center; gap: 6px; }
-.eta-info ion-icon { font-size: 18px; color: #4CAF50; }
-.eta-time { font-size: 16px; font-weight: 800; color: #1a1a1a; }
-.eta-distance { font-size: 14px; color: #666; font-weight: 500; }
+.eta-label { font-size: 16px; font-weight: 800; color: #1a1a1a; }
+.eta-dist { font-size: 14px; color: #666; font-weight: 500; }
 
-/* Bottom Sheet */
+/* Bottom Sheet - scrollable */
 .bottom-sheet {
   position: absolute; left: 0; right: 0; bottom: 0;
   background: white; border-radius: 24px 24px 0 0;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
-  z-index: 1000; padding: 0 0 20px 0;
-  transition: transform 0.3s ease;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.2);
+  z-index: 1000;
+  display: flex; flex-direction: column;
+  max-height: 55%;
 }
 
-/* Handle */
 .sheet-handle {
-  padding: 12px 0 8px;
-  display: flex; justify-content: center; cursor: pointer;
+  padding: 12px 0 10px;
+  display: flex; justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
 }
+
 .handle-bar {
   width: 40px; height: 4px;
-  background: #ddd; border-radius: 2px;
+  background: #ccc; border-radius: 2px;
 }
 
 /* Delivery Progress */
 .delivery-progress {
   display: flex; align-items: center;
-  padding: 0 24px 16px;
-  border-bottom: 1px solid #f0f0f0;
-  margin-bottom: 16px;
+  padding: 0 20px 12px;
+  flex-shrink: 0;
 }
 
 .progress-step {
   display: flex; flex-direction: column;
-  align-items: center; gap: 6px;
-  opacity: 0.4; transition: opacity 0.3s;
+  align-items: center; gap: 4px;
 }
 
-.progress-step.active, .progress-step.done { opacity: 1; }
-
-.step-circle {
-  width: 40px; height: 40px;
+.step-icon {
+  width: 36px; height: 36px;
   border-radius: 50%; background: #f0f0f0;
   display: flex; align-items: center; justify-content: center;
-  font-size: 20px; transition: all 0.3s;
 }
 
-.progress-step.active .step-circle {
-  background: #4CAF50; color: white;
-  box-shadow: 0 0 0 4px rgba(76,175,80,0.2);
-  animation: pulse-circle 2s infinite;
+.step-icon ion-icon {
+  font-size: 18px;
+  color: #999;
 }
 
-.progress-step.done .step-circle {
-  background: #4CAF50; color: white;
+.progress-step.active .step-icon {
+  background: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76,175,80,0.2);
 }
 
-@keyframes pulse-circle {
-  0%, 100% { box-shadow: 0 0 0 4px rgba(76,175,80,0.2); }
-  50% { box-shadow: 0 0 0 8px rgba(76,175,80,0.1); }
+.progress-step.active .step-icon ion-icon {
+  color: white;
 }
 
-.progress-step span { font-size: 11px; font-weight: 700; color: #333; }
+.progress-step.done .step-icon {
+  background: #4CAF50;
+}
+
+.progress-step.done .step-icon ion-icon {
+  color: white;
+}
+
+.progress-step span {
+  font-size: 10px; font-weight: 600; color: #666;
+}
 
 .progress-line {
   flex: 1; height: 3px; background: #e0e0e0;
-  margin: 0 4px 16px; border-radius: 2px;
-  transition: background 0.3s;
+  margin: 0 8px;
 }
 .progress-line.done { background: #4CAF50; }
 
-/* Step Info Card */
-.step-info-card { padding: 0 20px 16px; }
+/* Scrollable Content */
+.sheet-content {
+  flex: 1; overflow-y: auto;
+  padding: 0 20px 12px;
+}
+
+.step-detail { }
 
 .step-badge {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 6px 14px; border-radius: 20px;
-  font-size: 13px; font-weight: 700;
+  padding: 6px 12px; border-radius: 16px;
+  font-size: 12px; font-weight: 700;
   margin-bottom: 10px;
 }
+.step-badge.pickup { background: #E8F5E9; color: #2E7D32; }
+.step-badge.delivering { background: #E3F2FD; color: #1565C0; }
+.step-badge.arrived { background: #E8F5E9; color: #2E7D32; }
 
-.step-badge.pickup { background: #E8F5E9; color: #4CAF50; }
-.step-badge.delivering { background: #E3F2FD; color: #2196F3; }
-.step-badge.arrived { background: #E8F5E9; color: #4CAF50; }
-
-.location-name { font-size: 18px; font-weight: 800; color: #1a1a1a; margin: 0 0 4px 0; }
-.location-address { font-size: 14px; color: #666; margin: 0 0 12px 0; line-height: 1.4; }
-
-.order-summary { display: flex; flex-direction: column; gap: 8px; }
-
-.summary-item {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 14px; color: #555;
+.step-detail h3 {
+  font-size: 16px; font-weight: 700; color: #1a1a1a; margin: 0 0 4px 0;
 }
-.summary-item ion-icon { font-size: 18px; color: #4CAF50; }
-
-.summary-item.highlight {
-  background: #FFF3E0; border-radius: 10px;
-  padding: 10px 12px; font-weight: 600; color: #E65100;
+.step-detail p {
+  font-size: 13px; color: #666; margin: 0 0 8px 0;
 }
-.summary-item.highlight ion-icon { color: #FF9800; }
-
-/* Contact Buttons */
-.contact-buttons {
-  display: flex; justify-content: space-around;
-  padding: 0 20px 16px;
-  border-bottom: 1px solid #f0f0f0;
-  margin-bottom: 16px;
+.step-detail .phone { color: #333; font-weight: 600; }
+.step-detail .instructions {
+  background: #FFF3E0; padding: 10px 12px; border-radius: 10px;
+  color: #E65100;
+}
+.step-detail .eta {
+  background: #E3F2FD; padding: 10px 12px; border-radius: 10px;
+  color: #1565C0;
+}
+.step-detail .collect {
+  font-size: 14px; font-weight: 700; color: #1a1a1a;
+  padding: 10px 12px; background: #f5f5f5; border-radius: 10px;
 }
 
-.contact-btn {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 6px;
-  padding: 10px 12px;
-  background: #f8f9fa; border: none;
-  border-radius: 14px; cursor: pointer;
-  font-family: inherit;
-  transition: all 0.2s; min-width: 64px;
+.items-row {
+  display: flex; flex-direction: column; gap: 6px;
+  margin-bottom: 10px;
+}
+.items-row > span { font-size: 12px; color: #666; font-weight: 600; }
+
+.item-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.item-tag {
+  background: #E8F5E9; color: #2E7D32;
+  padding: 4px 10px; border-radius: 12px;
+  font-size: 11px; font-weight: 600;
 }
 
-.contact-btn:active { transform: scale(0.95); background: #e0e0e0; }
-.contact-btn ion-icon { font-size: 24px; color: #4CAF50; }
-.contact-btn span { font-size: 11px; font-weight: 600; color: #333; }
-
-/* Main Action */
-.main-action { padding: 0 20px; }
+/* Action Row */
+.action-row {
+  padding: 12px 20px 20px;
+  flex-shrink: 0;
+}
 
 .action-btn {
-  height: 56px; font-size: 16px;
-  font-weight: 700; text-transform: none;
-  --border-radius: 16px;
+  width: 100%; padding: 14px; border-radius: 14px;
+  font-size: 14px; font-weight: 700; border: none;
+  cursor: pointer; font-family: inherit;
 }
-
-.pickup-btn { --background: #4CAF50; --box-shadow: 0 4px 16px rgba(76,175,80,0.3); }
-.arrived-btn { --background: #2196F3; --box-shadow: 0 4px 16px rgba(33,150,243,0.3); }
-.complete-btn { --background: #4CAF50; --box-shadow: 0 4px 16px rgba(76,175,80,0.3); }
+.pickup-btn { background: #4CAF50; color: white; }
+.arrived-btn { background: #2196F3; color: white; }
+.complete-btn { background: #4CAF50; color: white; }
 </style>
