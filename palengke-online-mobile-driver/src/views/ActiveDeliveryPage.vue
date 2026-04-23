@@ -431,9 +431,12 @@ const updateMapForStep = () => {
 
 // Actions
 const confirmPickup = async () => {
+  const itemsList = orderData.value.items.join(', ');
+  const message = `Pickup from: ${orderData.value.sellerName}\n${orderData.value.pickupAddress}\n\nItems: ${itemsList}\n\nCollect: ₱${orderData.value.totalAmount.toLocaleString()} (${orderData.value.paymentMethod})`;
+  
   const alert = await alertController.create({
     header: 'Confirm Pickup',
-message: `Pickup from: ${orderData.value.sellerName}<br>${orderData.value.pickupAddress}<br><br>Items: ${orderData.value.items.join(', ')}<br><br>Collect: ₱${orderData.value.totalAmount.toLocaleString()} (${orderData.value.paymentMethod})`,
+    message: message,
     buttons: [
       { text: 'Not Yet', role: 'cancel' },
       {
