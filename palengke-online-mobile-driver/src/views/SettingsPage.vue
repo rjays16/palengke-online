@@ -146,7 +146,7 @@
             <ion-icon :icon="chevronForwardOutline" class="item-arrow"></ion-icon>
           </div>
 
-          <div class="settings-item">
+          <div class="settings-item" @click="goToAbout">
             <div class="item-left">
               <div class="item-icon purple"><ion-icon :icon="informationCircleOutline"></ion-icon></div>
               <div class="item-info">
@@ -268,6 +268,7 @@ const goToDocuments = () => router.push('/documents');
 const goToServiceType = () => router.push('/service-type');
 const goToMyDestination = () => router.push('/my-destination');
 const goToHelp = () => router.push('/help');
+const goToAbout = () => router.push('/about');
 </script>
 
 <style scoped>
