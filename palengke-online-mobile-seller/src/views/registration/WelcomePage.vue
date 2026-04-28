@@ -8,7 +8,7 @@
           <div class="logos-wrapper">
             <img src="/assets/images/logo.png" alt="Palengke Online" class="logo-main">
             <div class="plus-sign">+</div>
-            <img src="/assets/images/palengke-seller.png" alt="Seller" class="logo-seller">
+            <img src="/assets/images/palengke-seller-boy.png" alt="Seller" class="logo-seller">
           </div>
           <h1 class="portal-title">Seller Portal</h1>
           <p class="portal-subtitle">Empowering Filipino Sellers</p>

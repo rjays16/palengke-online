@@ -25,7 +25,7 @@
               <h1 class="welcome-title">Welcome back!</h1>
               <p class="seller-name">{{ sellerName }}</p>
             </div>
-            <img src="/assets/images/palengke-seller.png" alt="Seller" class="welcome-avatar">
+            <img src="/assets/images/palengke-seller-boy.png" alt="Seller" class="welcome-avatar">
           </div>
           
           <!-- Trial Badge -->
