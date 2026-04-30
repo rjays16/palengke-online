@@ -156,8 +156,14 @@ const showOptions = async () => {
 <style scoped>
 .notif-content { --background: #f8f9fa; }
 
-ion-segment { padding: 8px 16px; }
-ion-segment-button { --color: #666; --color-checked: #4CAF50; --indicator-color: #4CAF50; font-size: 12px; font-weight: 600; min-height: 36px; }
+ion-segment { padding: 8px 16px; background: white; gap: 8px; }
+ion-segment-button {
+  --color: #666; --color-checked: white;
+  --indicator-color: #4CAF50;
+  --background-checked: #4CAF50;
+  --border-radius: 20px;
+  font-size: 12px; font-weight: 600; min-height: 36px;
+}
 
 .notif-list { padding: 8px 16px 16px; }
 
