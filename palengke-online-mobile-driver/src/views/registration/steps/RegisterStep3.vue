@@ -137,7 +137,6 @@ import {
   barcodeOutline,
   documentTextOutline,
   calendarOutline,
-  keyOutline,
   informationCircleOutline
 } from 'ionicons/icons';
 
@@ -146,8 +145,7 @@ const router = useRouter();
 const formData = ref({
   licenseNumber: '',
   licenseType: '',
-  expiryDate: '',
-  restrictionCode: ''
+  expiryDate: ''
 });
 
 const errors = ref({
