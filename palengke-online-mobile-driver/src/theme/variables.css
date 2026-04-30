@@ -120,6 +120,43 @@
   font-weight: 700 !important;
 }
 
+/* Success Modal with Checkmark Image */
+.success-modal .alert-wrapper {
+  border-radius: 24px !important;
+  padding: 24px 0 16px 0 !important;
+}
+
+.success-modal .alert-head {
+  display: none !important;
+}
+
+.success-modal .alert-message {
+  padding: 0 24px 20px 24px !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: #1a1a1a !important;
+  text-align: center !important;
+}
+
+.success-modal .alert-message img {
+  width: 80px !important;
+  height: 80px !important;
+  margin: 0 auto 16px auto !important;
+  display: block !important;
+}
+
+.success-modal .alert-message div {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+
+.success-modal .alert-button-group {
+  justify-content: center !important;
+  padding: 0 24px 16px 24px !important;
+}
+
 /* Toast styling for both modes */
 .ion-toast {
   --border-radius: 12px;
@@ -248,6 +285,14 @@
   /* Ionic Alert/Modal dark mode overrides */
   .alert-wrapper {
     background: var(--color-modal-bg) !important;
+  }
+
+  .success-modal .alert-wrapper {
+    background: var(--color-modal-bg) !important;
+  }
+
+  .success-modal .alert-message {
+    color: var(--color-text-primary) !important;
   }
 
   .alert-head {
