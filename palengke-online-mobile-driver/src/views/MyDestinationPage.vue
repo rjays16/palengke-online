@@ -123,7 +123,7 @@ const filteredRecent = computed(() => {
 const selectDestination = async (dest) => {
   const toast = await toastController.create({
     message: `Destination set: ${dest.name}`,
-    duration: 2000, color: 'success', position: 'top'
+    duration: 2000, color: 'medium', position: 'top'
   });
   await toast.present();
   router.back();

@@ -160,7 +160,7 @@ const readNotification = (notif) => {
 
 const markAllRead = async () => {
   notifications.value.forEach(n => n.read = true);
-  const toast = await toastController.create({ message: 'All marked as read', duration: 2000, color: 'success', position: 'top' });
+  const toast = await toastController.create({ message: 'All marked as read', duration: 2000, color: 'medium', position: 'top' });
   await toast.present();
 };
 

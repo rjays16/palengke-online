@@ -198,7 +198,7 @@ const handleLogin = async () => {
     const toast = await toastController.create({
       message: `Verification code sent to ${maskedEmail.value}`,
       duration: 3000,
-      color: 'success',
+      color: 'medium',
       position: 'top'
     });
     await toast.present();

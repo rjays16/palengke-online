@@ -132,7 +132,7 @@ const handleNotifClick = (notif) => {
 
 const markAllRead = async () => {
   notifications.value.forEach(n => n.read = true);
-  const toast = await toastController.create({ message: 'All marked as read', duration: 2000, color: 'success', position: 'top' });
+  const toast = await toastController.create({ message: 'All marked as read', duration: 2000, color: 'medium', position: 'top' });
   await toast.present();
 };
 
@@ -143,7 +143,7 @@ const showOptions = async () => {
       { text: 'Mark All as Read', handler: () => markAllRead() },
       { text: 'Clear All', role: 'destructive', handler: async () => {
         notifications.value = [];
-        const toast = await toastController.create({ message: 'All notifications cleared', duration: 2000, color: 'dark', position: 'top' });
+        const toast = await toastController.create({ message: 'All notifications cleared', duration: 2000, color: 'medium', position: 'top' });
         await toast.present();
       }},
       { text: 'Cancel', role: 'cancel' }

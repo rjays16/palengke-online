@@ -86,7 +86,7 @@ const services = ref([
 const onServiceToggle = async (service) => {
   const toast = await toastController.create({
     message: `${service.name} ${service.enabled ? 'enabled' : 'disabled'}`,
-    duration: 2000, color: service.enabled ? 'success' : 'dark', position: 'top'
+    duration: 2000, color: 'medium', position: 'top'
   });
   await toast.present();
 };

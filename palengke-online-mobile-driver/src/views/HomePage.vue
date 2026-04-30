@@ -336,7 +336,7 @@ const toggleActiveStatus = async () => {
             const toast = await toastController.create({
               message: 'You are now inactive',
               duration: 2000,
-              color: 'dark',
+              color: 'medium',
               position: 'top'
             });
             await toast.present();
@@ -351,7 +351,7 @@ const toggleActiveStatus = async () => {
     const toast = await toastController.create({
       message: 'You are now active! Finding orders...',
       duration: 2500,
-      color: 'success',
+      color: 'medium',
       position: 'top'
     });
     await toast.present();

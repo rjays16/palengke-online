@@ -231,7 +231,7 @@ const showSuccessToast = async () => {
   const toast = await toastController.create({
     message: 'Application submitted! Please check your email for updates.',
     duration: 3000,
-    color: 'success',
+    color: 'medium',
     position: 'top'
   });
   await toast.present();
@@ -241,7 +241,7 @@ const contactSupport = async () => {
   const toast = await toastController.create({
     message: 'Support: support@palengke-online.com',
     duration: 3000,
-    color: 'primary',
+    color: 'medium',
     position: 'bottom'
   });
   await toast.present();

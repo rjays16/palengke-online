@@ -392,7 +392,7 @@ const sendOtp = async () => {
     const toast = await toastController.create({
       message: `Verification code sent to ${maskedEmail.value}`,
       duration: 3000,
-      color: 'success',
+      color: 'medium',
       position: 'top'
     });
     await toast.present();
@@ -491,7 +491,7 @@ const verifyOtp = async () => {
       const toast = await toastController.create({
         message: 'Email verified successfully!',
         duration: 2500,
-        color: 'success',
+        color: 'medium',
         position: 'top'
       });
       await toast.present();

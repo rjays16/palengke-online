@@ -448,7 +448,7 @@ const confirmPickup = async () => {
           etaDistance.value = '1.5 km';
           const toast = await toastController.create({
             message: 'Order picked up! Now deliver to customer.',
-            duration: 2500, color: 'success', position: 'top'
+            duration: 2500, color: 'medium', position: 'top'
           });
           await toast.present();
         }
@@ -465,7 +465,7 @@ const confirmArrived = async () => {
   if (driverMarker) driverMarker.setLatLng(customerLocation);
   const toast = await toastController.create({
     message: 'You have arrived! Confirm delivery with customer.',
-    duration: 2500, color: 'primary', position: 'top'
+    duration: 2500, color: 'medium', position: 'top'
   });
   await toast.present();
 };
@@ -479,21 +479,60 @@ const confirmDelivery = async () => {
       {
         text: 'Complete!',
         handler: async () => {
-          // Stop driver movement
           stopDriverMovement();
-          
-          // Show success and navigate back
-          const toast = await toastController.create({
-            message: `Delivery complete! You earned ₱${orderData.value.driverEarnings}`,
-            duration: 3000, color: 'success', position: 'top'
-          });
-          await toast.present();
-          setTimeout(() => router.push('/home'), 1000);
+          await showSuccessModal(`Delivery complete!\nYou earned ₱${orderData.value.driverEarnings}`);
+          setTimeout(() => router.push('/home'), 2000);
         }
       }
     ]
   });
   await alert.present();
+};
+
+const showSuccessModal = async (message) => {
+  const alert = await alertController.create({
+    cssClass: 'success-modal',
+    header: ' ',
+    message: message,
+    buttons: ['OK']
+  });
+  
+  await alert.present();
+  
+  setTimeout(() => {
+    const alertElement = document.querySelector('.success-modal .alert-message');
+    if (alertElement) {
+      const textContent = alertElement.textContent;
+      alertElement.innerHTML = '';
+      
+      const wrapper = document.createElement('div');
+      wrapper.style.display = 'flex';
+      wrapper.style.flexDirection = 'column';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.textAlign = 'center';
+      
+      const img = document.createElement('img');
+      img.src = '/assets/images/checkmark_success.png';
+      img.style.width = '80px';
+      img.style.height = '80px';
+      img.style.margin = '0 auto 16px auto';
+      img.style.display = 'block';
+      
+      const textDiv = document.createElement('div');
+      textDiv.textContent = textContent;
+      textDiv.style.fontSize = '18px';
+      textDiv.style.fontWeight = '600';
+      textDiv.style.color = '#1a1a1a';
+      textDiv.style.textAlign = 'center';
+      textDiv.style.whiteSpace = 'pre-line';
+      
+      wrapper.appendChild(img);
+      wrapper.appendChild(textDiv);
+      alertElement.appendChild(wrapper);
+    }
+  }, 50);
+  
+  await alert.onDidDismiss();
 };
 
 const chatCustomer = () => router.push('/messages');

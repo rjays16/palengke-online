@@ -322,13 +322,7 @@ const acceptOrder = async (order) => {
         text: 'Accept',
         handler: async () => {
           order.status = 'active';
-          const toast = await toastController.create({
-            message: 'Order accepted! Head to pickup location.',
-            duration: 2500,
-            color: 'success',
-            position: 'top'
-          });
-          await toast.present();
+          await showSuccessModal('Order accepted!\nHead to pickup location.');
           selectedTab.value = 'active';
           router.push('/active-delivery');
         }
@@ -336,6 +330,52 @@ const acceptOrder = async (order) => {
     ]
   });
   await alert.present();
+};
+
+const showSuccessModal = async (message) => {
+  const alert = await alertController.create({
+    cssClass: 'success-modal',
+    header: ' ',
+    message: message,
+    buttons: ['OK']
+  });
+  
+  await alert.present();
+  
+  setTimeout(() => {
+    const alertElement = document.querySelector('.success-modal .alert-message');
+    if (alertElement) {
+      const textContent = alertElement.textContent;
+      alertElement.innerHTML = '';
+      
+      const wrapper = document.createElement('div');
+      wrapper.style.display = 'flex';
+      wrapper.style.flexDirection = 'column';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.textAlign = 'center';
+      
+      const img = document.createElement('img');
+      img.src = '/assets/images/checkmark_success.png';
+      img.style.width = '80px';
+      img.style.height = '80px';
+      img.style.margin = '0 auto 16px auto';
+      img.style.display = 'block';
+      
+      const textDiv = document.createElement('div');
+      textDiv.textContent = textContent;
+      textDiv.style.fontSize = '18px';
+      textDiv.style.fontWeight = '600';
+      textDiv.style.color = '#1a1a1a';
+      textDiv.style.textAlign = 'center';
+      textDiv.style.whiteSpace = 'pre-line';
+      
+      wrapper.appendChild(img);
+      wrapper.appendChild(textDiv);
+      alertElement.appendChild(wrapper);
+    }
+  }, 50);
+  
+  await alert.onDidDismiss();
 };
 
 const declineOrder = async (order) => {
@@ -352,7 +392,7 @@ const declineOrder = async (order) => {
           const toast = await toastController.create({
             message: 'Order declined',
             duration: 2000,
-            color: 'dark',
+            color: 'medium',
             position: 'top'
           });
           await toast.present();
@@ -370,7 +410,7 @@ const goActive = async () => {
   const toast = await toastController.create({
     message: 'You are now active!',
     duration: 2000,
-    color: 'success',
+    color: 'medium',
     position: 'top'
   });
   await toast.present();
