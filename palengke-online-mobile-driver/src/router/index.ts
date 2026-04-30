@@ -22,6 +22,7 @@ import MessagesPage from '@/views/MessagesPage.vue';
 import NotificationsPage from '@/views/NotificationsPage.vue';
 import HelpSupportPage from '@/views/HelpSupportPage.vue';
 import AboutPage from '@/views/AboutPage.vue';
+import OrderDetailsPage from '@/views/OrderDetailsPage.vue';
 
 // ============================================
 // REGISTRATION STEP IMPORTS
@@ -149,6 +150,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/history',
     name: 'History',
     component: HistoryPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/history/:job',
+    name: 'OrderDetails',
+    component: OrderDetailsPage,
     meta: { requiresAuth: true }
   },
   {

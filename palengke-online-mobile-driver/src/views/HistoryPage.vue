@@ -265,13 +265,9 @@ const currentPeriodEarnings = computed(() => {
 // Methods
 const selectDate = (date) => { selectedDate.value = date; };
 
-const viewJobDetails = async (job) => {
-  const alert = await alertController.create({
-    header: `Order Details`,
-    message: `From: ${job.sellerName}\nTo: ${job.deliveryAddress}\nAmount: ₱${job.amount.toFixed(2)}\nPayment: ${job.paymentMethod === 'cash' ? 'Cash' : 'GCash'}${job.tipped ? '\nCustomer gave a tip!' : ''}`,
-    buttons: ['Close']
-  });
-  await alert.present();
+const viewJobDetails = (job) => {
+  const jobData = encodeURIComponent(JSON.stringify(job));
+  router.push(`/history/${jobData}`);
 };
 
 const showHelp = async () => {
