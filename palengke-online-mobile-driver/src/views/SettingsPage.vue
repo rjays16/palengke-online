@@ -197,7 +197,7 @@ const navProvider = ref('Google Maps');
 const onAutoAcceptChange = async () => {
   const toast = await toastController.create({
     message: autoAccept.value ? 'Auto Accept is ON' : 'Auto Accept is OFF',
-    duration: 2000, color: autoAccept.value ? 'success' : 'dark', position: 'top'
+    duration: 2000, color: 'medium', position: 'top'
   });
   await toast.present();
 };

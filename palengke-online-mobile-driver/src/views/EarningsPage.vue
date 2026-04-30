@@ -184,8 +184,8 @@
         </div>
 
         <!-- Wallet Section -->
-        <div class="wallet-card" @click="showWalletInfo">
-          <div class="wallet-header">
+        <div class="wallet-card">
+          <div class="wallet-header" @click="showWalletInfo">
             <div class="wallet-icon">
               <ion-icon :icon="walletOutline"></ion-icon>
             </div>
@@ -194,7 +194,10 @@
               <p class="wallet-balance">₱{{ cashWallet.toLocaleString() }}</p>
             </div>
           </div>
-          <ion-icon :icon="chevronForwardOutline" class="wallet-arrow"></ion-icon>
+          <ion-button size="small" color="success" @click.stop="showCashoutModal">
+            Cash Out
+            <ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon>
+          </ion-button>
         </div>
 
       </div>
@@ -236,9 +239,9 @@ import {
 } from '@ionic/vue';
 import {
   helpCircleOutline, cashOutline, chevronDownOutline,
-  chevronUpOutline, chevronForwardOutline, checkmarkCircleOutline,
+  chevronUpOutline, checkmarkCircleOutline,
   starOutline, flashOutline, bicycleOutline, walletOutline,
-  homeOutline, cubeOutline, personOutline
+  homeOutline, cubeOutline, personOutline, arrowForwardOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -347,6 +350,79 @@ const showWalletInfo = async () => {
     buttons: ['OK']
   });
   await alert.present();
+};
+
+const showCashoutModal = async () => {
+  const alert = await alertController.create({
+    header: 'Cash Out',
+    message: `How much do you want to cash out?\n\nAvailable balance: ₱${cashWallet.value.toLocaleString()}`,
+    inputs: [{ name: 'amount', type: 'number', placeholder: 'Enter amount', min: 50, max: cashWallet.value }],
+    buttons: [
+      { text: 'Cancel', role: 'cancel' },
+      {
+        text: 'Cash Out',
+        handler: async (data) => {
+          if (data.amount && data.amount > 0 && data.amount <= cashWallet.value) {
+            cashWallet.value -= parseFloat(data.amount);
+            await showSuccessModal(`₱${parseFloat(data.amount).toLocaleString()} cashed out successfully!`);
+          } else if (data.amount > cashWallet.value) {
+            await alertController.create({
+              header: 'Error',
+              message: 'Amount exceeds your available balance.',
+              buttons: ['OK']
+            }).then(a => a.present());
+          }
+        }
+      }
+    ]
+  });
+  await alert.present();
+};
+
+const showSuccessModal = async (message) => {
+  const alert = await alertController.create({
+    cssClass: 'success-modal',
+    header: ' ',
+    message: message,
+    buttons: ['OK']
+  });
+  
+  await alert.present();
+  
+  setTimeout(() => {
+    const alertElement = document.querySelector('.success-modal .alert-message');
+    if (alertElement) {
+      const textContent = alertElement.textContent;
+      alertElement.innerHTML = '';
+      
+      const wrapper = document.createElement('div');
+      wrapper.style.display = 'flex';
+      wrapper.style.flexDirection = 'column';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.textAlign = 'center';
+      
+      const img = document.createElement('img');
+      img.src = '/assets/images/checkmark_success.png';
+      img.style.width = '80px';
+      img.style.height = '80px';
+      img.style.margin = '0 auto 16px auto';
+      img.style.display = 'block';
+      
+      const textDiv = document.createElement('div');
+      textDiv.textContent = textContent;
+      textDiv.style.fontSize = '18px';
+      textDiv.style.fontWeight = '600';
+      textDiv.style.color = '#1a1a1a';
+      textDiv.style.textAlign = 'center';
+      textDiv.style.whiteSpace = 'pre-line';
+      
+      wrapper.appendChild(img);
+      wrapper.appendChild(textDiv);
+      alertElement.appendChild(wrapper);
+    }
+  }, 50);
+  
+  await alert.onDidDismiss();
 };
 
 // Navigation
@@ -549,13 +625,13 @@ const goToProfile = () => router.push('/profile');
   background: white; border-radius: 16px;
   padding: 16px 20px; margin-bottom: 16px;
   display: flex; align-items: center;
-  justify-content: space-between;
+  justify-content: space-between; gap: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  cursor: pointer;
 }
 .wallet-card:active { transform: scale(0.98); }
 
-.wallet-header { display: flex; align-items: center; gap: 14px; }
+.wallet-header { display: flex; align-items: center; gap: 14px; cursor: pointer; flex: 1; }
+.wallet-header:active { opacity: 0.7; }
 .wallet-icon {
   width: 48px; height: 48px;
   background: #E8F5E9; border-radius: 14px;
@@ -564,7 +640,7 @@ const goToProfile = () => router.push('/profile');
 .wallet-icon ion-icon { font-size: 26px; color: #4CAF50; }
 .wallet-info h3 { font-size: 15px; font-weight: 700; color: #1a1a1a; margin: 0 0 4px 0; }
 .wallet-balance { font-size: 18px; font-weight: 800; color: #4CAF50; margin: 0; }
-.wallet-arrow { font-size: 20px; color: #ccc; }
+.wallet-card ion-button { --border-radius: 10px; height: 36px; font-size: 13px; font-weight: 600; text-transform: none; flex-shrink: 0; }
 
 /* Bottom Nav */
 .bottom-nav { display: grid; grid-template-columns: repeat(4, 1fr); height: 60px; }
