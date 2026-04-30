@@ -349,9 +349,41 @@ const editProfile = async () => {
   const alert = await alertController.create({
     header: 'Edit Profile',
     buttons: [
-      { text: 'Personal Info', handler: () => {} },
-      { text: 'Vehicle Info', handler: () => {} },
+      {
+        text: 'Personal Info',
+        handler: () => editField('name')
+      },
+      {
+        text: 'Vehicle Info',
+        handler: () => editVehicleInfo()
+      },
       { text: 'Cancel', role: 'cancel' }
+    ]
+  });
+  await alert.present();
+};
+
+const editVehicleInfo = async () => {
+  const alert = await alertController.create({
+    header: 'Edit Vehicle Info',
+    inputs: [
+      { name: 'vehicleType', type: 'text', value: profileData.value.vehicleType, placeholder: 'Vehicle Type' },
+      { name: 'vehicleModel', type: 'text', value: profileData.value.vehicleModel, placeholder: 'Vehicle Model' },
+      { name: 'plateNumber', type: 'text', value: profileData.value.plateNumber, placeholder: 'Plate Number' },
+      { name: 'vehicleColor', type: 'text', value: profileData.value.vehicleColor, placeholder: 'Vehicle Color' }
+    ],
+    buttons: [
+      { text: 'Cancel', role: 'cancel' },
+      {
+        text: 'Save',
+        handler: async (data) => {
+          if (data.vehicleType) profileData.value.vehicleType = data.vehicleType;
+          if (data.vehicleModel) profileData.value.vehicleModel = data.vehicleModel;
+          if (data.plateNumber) profileData.value.plateNumber = data.plateNumber;
+          if (data.vehicleColor) profileData.value.vehicleColor = data.vehicleColor;
+          await showSuccessModal('Vehicle info updated!');
+        }
+      }
     ]
   });
   await alert.present();
@@ -361,8 +393,13 @@ const changePhoto = async () => {
   const actionSheet = await actionSheetController.create({
     header: 'Change Profile Photo',
     buttons: [
-      { text: 'Take Photo', icon: cameraOutline, handler: () => {} },
-      { text: 'Choose from Gallery', handler: () => {} },
+      {
+        text: 'Use Default Photo',
+        icon: personOutline,
+        handler: () => {
+          profileData.value.avatar = 'https://randomuser.me/api/portraits/men/32.jpg';
+        }
+      },
       { text: 'Cancel', role: 'cancel' }
     ]
   });
