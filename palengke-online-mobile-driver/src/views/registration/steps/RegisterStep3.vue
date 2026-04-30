@@ -82,21 +82,6 @@
             <span v-else class="helper-text">License must not be expired</span>
           </div>
 
-          <!-- Restriction Code -->
-          <div class="input-group">
-            <label class="input-label">Restriction Code *</label>
-            <div class="input-wrapper">
-              <ion-icon :icon="keyOutline" class="input-icon"></ion-icon>
-              <input 
-                v-model="formData.restrictionCode" 
-                type="text" 
-                placeholder="e.g., B1, B2"
-                class="custom-input with-icon"
-              >
-            </div>
-            <span class="helper-text">Enter restriction codes (e.g., B1, B2)</span>
-          </div>
-
           <!-- Info Box -->
           <div class="info-box">
             <ion-icon :icon="informationCircleOutline"></ion-icon>
