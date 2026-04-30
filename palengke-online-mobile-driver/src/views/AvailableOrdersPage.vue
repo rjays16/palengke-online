@@ -448,20 +448,13 @@ const goToProfile = () => router.push('/profile');
 .offline-warning p { font-size: 12px; color: #666; margin: 0; }
 
 /* Segment */
-ion-segment {
-  padding: 8px 16px;
-  background: white;
-  gap: 8px;
-}
+ion-segment { padding: 8px 16px; background: white; gap: 8px; }
 ion-segment-button {
-  --color: #666;
-  --color-checked: white;
+  --color: #666; --color-checked: white;
   --indicator-color: #4CAF50;
   --background-checked: #4CAF50;
   --border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-  min-height: 36px;
+  font-size: 13px; font-weight: 600; min-height: 36px;
 }
 
 /* Orders List */

@@ -168,6 +168,17 @@
   --border-radius: 12px;
 }
 
+/* Remove segment separator lines */
+ion-segment-button {
+  border: none !important;
+}
+ion-segment-button::after {
+  content: none !important;
+}
+ion-segment-button::before {
+  content: none !important;
+}
+
 /* Dark Mode Styles */
 @media (prefers-color-scheme: dark) {
   /* Brand Colors (slightly adjusted for dark mode visibility) */
