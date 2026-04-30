@@ -85,9 +85,82 @@ const viewDocument = async (doc) => {
   const alert = await alertController.create({
     header: doc.name,
     message: `Status: ${doc.status === 'verified' ? 'Verified' : 'Pending'}\n${doc.expiry ? `Expires: ${doc.expiry}` : 'No expiry date'}`,
-    buttons: [{ text: 'Update Document', handler: () => {} }, { text: 'Close', role: 'cancel' }]
+    buttons: [
+      { text: 'Close', role: 'cancel' },
+      {
+        text: 'Update Document',
+        handler: async () => {
+          await uploadDocument(doc);
+        }
+      }
+    ]
   });
   await alert.present();
+};
+
+const uploadDocument = async (doc) => {
+  const confirmAlert = await alertController.create({
+    header: 'Update Document',
+    message: `Are you sure you want to update your ${doc.name}? This will require review by our team.`,
+    buttons: [
+      { text: 'Cancel', role: 'cancel' },
+      {
+        text: 'Upload',
+        handler: async () => {
+          doc.status = 'pending';
+          await showSuccessModal(`${doc.name} uploaded!\nAwaiting review...`);
+          doc.status = 'verified';
+        }
+      }
+    ]
+  });
+  await confirmAlert.present();
+};
+
+const showSuccessModal = async (message) => {
+  const alert = await alertController.create({
+    cssClass: 'success-modal',
+    header: ' ',
+    message: message,
+    buttons: ['OK']
+  });
+  
+  await alert.present();
+  
+  setTimeout(() => {
+    const alertElement = document.querySelector('.success-modal .alert-message');
+    if (alertElement) {
+      const textContent = alertElement.textContent;
+      alertElement.innerHTML = '';
+      
+      const wrapper = document.createElement('div');
+      wrapper.style.display = 'flex';
+      wrapper.style.flexDirection = 'column';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.textAlign = 'center';
+      
+      const img = document.createElement('img');
+      img.src = '/assets/images/checkmark_success.png';
+      img.style.width = '80px';
+      img.style.height = '80px';
+      img.style.margin = '0 auto 16px auto';
+      img.style.display = 'block';
+      
+      const textDiv = document.createElement('div');
+      textDiv.textContent = textContent;
+      textDiv.style.fontSize = '18px';
+      textDiv.style.fontWeight = '600';
+      textDiv.style.color = '#1a1a1a';
+      textDiv.style.textAlign = 'center';
+      textDiv.style.whiteSpace = 'pre-line';
+      
+      wrapper.appendChild(img);
+      wrapper.appendChild(textDiv);
+      alertElement.appendChild(wrapper);
+    }
+  }, 50);
+  
+  await alert.onDidDismiss();
 };
 </script>
 
