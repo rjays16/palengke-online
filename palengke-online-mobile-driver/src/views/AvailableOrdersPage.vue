@@ -12,17 +12,29 @@
 
       <!-- Status Tabs -->
       <ion-toolbar>
-        <ion-segment v-model="selectedTab" @ionChange="handleTabChange">
-          <ion-segment-button value="available">
-            <ion-label>Available ({{ availableCount }})</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="active">
-            <ion-label>Active ({{ activeCount }})</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="completed">
-            <ion-label>Completed ({{ completedCount }})</ion-label>
-          </ion-segment-button>
-        </ion-segment>
+        <div class="custom-tabs">
+          <div
+            class="custom-tab"
+            :class="{ active: selectedTab === 'available' }"
+            @click="selectedTab = 'available'"
+          >
+            Available ({{ availableCount }})
+          </div>
+          <div
+            class="custom-tab"
+            :class="{ active: selectedTab === 'active' }"
+            @click="selectedTab = 'active'"
+          >
+            Active ({{ activeCount }})
+          </div>
+          <div
+            class="custom-tab"
+            :class="{ active: selectedTab === 'completed' }"
+            @click="selectedTab = 'completed'"
+          >
+            Completed ({{ completedCount }})
+          </div>
+        </div>
       </ion-toolbar>
     </ion-header>
 
@@ -303,8 +315,6 @@ const emptyMessage = computed(() => {
 });
 
 // Methods
-const handleTabChange = (e) => { selectedTab.value = e.detail.value; };
-
 const getStatusLabel = (status) => {
   if (status === 'available') return 'New Order';
   if (status === 'active') return 'Active';
@@ -437,6 +447,31 @@ const goToProfile = () => router.push('/profile');
 <style scoped>
 .orders-content { --background: #f8f9fa; }
 
+/* Custom Tabs */
+.custom-tabs {
+  display: flex; gap: 8px;
+  padding: 8px 16px;
+  overflow-x: auto;
+}
+.custom-tabs::-webkit-scrollbar { display: none; }
+
+.custom-tab {
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 13px; font-weight: 600;
+  color: #666;
+  background: #f0f0f0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  user-select: none;
+}
+.custom-tab.active {
+  background: #4CAF50;
+  color: white;
+}
+.custom-tab:active { transform: scale(0.95); }
+
 /* Inactive Warning */
 .offline-warning {
   display: flex; align-items: center; gap: 12px;
@@ -446,16 +481,6 @@ const goToProfile = () => router.push('/profile');
 .offline-warning ion-icon { font-size: 28px; color: #FF9800; flex-shrink: 0; }
 .offline-warning strong { display: block; font-size: 14px; color: #1a1a1a; margin-bottom: 2px; }
 .offline-warning p { font-size: 12px; color: #666; margin: 0; }
-
-/* Segment */
-ion-segment { padding: 8px 16px; background: white; gap: 8px; }
-ion-segment-button {
-  --color: #666; --color-checked: white;
-  --indicator-color: #4CAF50;
-  --background-checked: #4CAF50;
-  --border-radius: 20px;
-  font-size: 13px; font-weight: 600; min-height: 36px;
-}
 
 /* Orders List */
 .orders-list { padding: 16px; }

@@ -168,15 +168,9 @@
   --border-radius: 12px;
 }
 
-/* Remove segment separator lines */
+/* Remove segment separator lines and prevent text truncation */
 ion-segment-button {
   border: none !important;
-}
-ion-segment-button::after {
-  content: none !important;
-}
-ion-segment-button::before {
-  content: none !important;
 }
 
 /* Dark Mode Styles */

@@ -18,20 +18,36 @@
 
       <!-- Filter Tabs -->
       <ion-toolbar>
-        <ion-segment v-model="selectedFilter" @ionChange="handleFilterChange">
-          <ion-segment-button value="all">
-            <ion-label>All ({{ notifications.length }})</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="unread">
-            <ion-label>Unread ({{ unreadCount }})</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="orders">
-            <ion-label>Orders</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="earnings">
-            <ion-label>Earnings</ion-label>
-          </ion-segment-button>
-        </ion-segment>
+        <div class="custom-tabs">
+          <div
+            class="custom-tab"
+            :class="{ active: selectedFilter === 'all' }"
+            @click="selectedFilter = 'all'"
+          >
+            All ({{ notifications.length }})
+          </div>
+          <div
+            class="custom-tab"
+            :class="{ active: selectedFilter === 'unread' }"
+            @click="selectedFilter = 'unread'"
+          >
+            Unread ({{ unreadCount }})
+          </div>
+          <div
+            class="custom-tab"
+            :class="{ active: selectedFilter === 'orders' }"
+            @click="selectedFilter = 'orders'"
+          >
+            Orders
+          </div>
+          <div
+            class="custom-tab"
+            :class="{ active: selectedFilter === 'earnings' }"
+            @click="selectedFilter = 'earnings'"
+          >
+            Earnings
+          </div>
+        </div>
       </ion-toolbar>
     </ion-header>
 
@@ -113,8 +129,6 @@ const filteredNotifications = computed(() => {
   return notifications.value;
 });
 
-const handleFilterChange = (e) => { selectedFilter.value = e.detail.value; };
-
 const getNotifIcon = (type) => {
   const icons = {
     order: cartOutline, payment: cashOutline,
@@ -156,14 +170,34 @@ const showOptions = async () => {
 <style scoped>
 .notif-content { --background: #f8f9fa; }
 
-ion-segment { padding: 8px 16px; background: white; gap: 8px; }
-ion-segment-button {
-  --color: #666; --color-checked: white;
-  --indicator-color: #4CAF50;
-  --background-checked: #4CAF50;
-  --border-radius: 20px;
-  font-size: 12px; font-weight: 600; min-height: 36px;
+.notif-content { --background: #f8f9fa; }
+
+/* Custom Tabs */
+.custom-tabs {
+  display: flex; gap: 8px;
+  padding: 8px 16px;
+  overflow-x: auto;
 }
+.custom-tabs::-webkit-scrollbar { display: none; }
+
+.custom-tab {
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 13px; font-weight: 600;
+  color: #666;
+  background: #f0f0f0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  user-select: none;
+}
+.custom-tab.active {
+  background: #4CAF50;
+  color: white;
+}
+.custom-tab:active { transform: scale(0.95); }
+
+/* Notifications */
 
 .notif-list { padding: 8px 16px 16px; }
 

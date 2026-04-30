@@ -15,14 +15,22 @@
 
       <!-- Tabs -->
       <ion-toolbar>
-        <ion-segment v-model="selectedTab" @ionChange="handleTabChange">
-          <ion-segment-button value="notifications">
-            <ion-label>Notifications</ion-label>
-          </ion-segment-button>
-          <ion-segment-button value="chats">
-            <ion-label>Chats</ion-label>
-          </ion-segment-button>
-        </ion-segment>
+        <div class="custom-tabs">
+          <div
+            class="custom-tab"
+            :class="{ active: selectedTab === 'notifications' }"
+            @click="selectedTab = 'notifications'"
+          >
+            Notifications
+          </div>
+          <div
+            class="custom-tab"
+            :class="{ active: selectedTab === 'chats' }"
+            @click="selectedTab = 'chats'"
+          >
+            Chats
+          </div>
+        </div>
       </ion-toolbar>
     </ion-header>
 
@@ -142,8 +150,6 @@ const chats = ref([
 
 const unreadCount = computed(() => notifications.value.filter(n => !n.read).length);
 
-const handleTabChange = (e) => { selectedTab.value = e.detail.value; };
-
 const getNotifIcon = (type) => {
   const icons = {
     order: cartOutline, payment: cashOutline,
@@ -172,14 +178,32 @@ const openChat = (chat) => {
 <style scoped>
 .messages-content { --background: #f8f9fa; }
 
-ion-segment { padding: 8px 16px; background: white; gap: 8px; }
-ion-segment-button {
-  --color: #666; --color-checked: white;
-  --indicator-color: #4CAF50;
-  --background-checked: #4CAF50;
-  --border-radius: 20px;
-  font-size: 13px; font-weight: 600; min-height: 36px;
+/* Custom Tabs */
+.custom-tabs {
+  display: flex; gap: 8px;
+  padding: 8px 16px;
+  overflow-x: auto;
 }
+.custom-tabs::-webkit-scrollbar { display: none; }
+
+.custom-tab {
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 13px; font-weight: 600;
+  color: #666;
+  background: #f0f0f0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+  user-select: none;
+}
+.custom-tab.active {
+  background: #4CAF50;
+  color: white;
+}
+.custom-tab:active { transform: scale(0.95); }
+
+/* Notifications */
 
 /* Notifications */
 .notif-list { padding: 8px 0; }
