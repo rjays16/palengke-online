@@ -307,7 +307,7 @@ const profileData = ref({
   plateNumber: 'ABC 1234',
   vehicleModel: 'Honda Click 125i',
   vehicleColor: 'Black',
-  avatar: null,
+  avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
   totalTrips: 142,
   rating: 5.00,
   joinedDays: 45
