@@ -221,77 +221,92 @@ const router = useRouter();
 const selectedTab = ref('available');
 const isActive = ref(true);
 
-// Mock Orders Data
-const orders = ref([
-  {
-    id: '1234',
-    status: 'available',
-    sellerName: "Juan's Fresh Market",
-    pickupAddress: 'Stall #15, CDO City Palengke',
-    customerName: 'Maria Santos',
-    deliveryAddress: 'Brgy. Carmen, CDO City',
-    distance: 2.3,
-    estimatedTime: 15,
-    itemCount: 5,
-    totalAmount: 850,
-    driverEarnings: 85,
-    paymentMethod: 'cash',
-    time: '2 mins ago',
-    tipped: false,
-    completedTime: null
-  },
-  {
-    id: '1235',
-    status: 'available',
-    sellerName: "Ana's Palengke",
-    pickupAddress: 'Stall #8, Divisoria Market',
-    customerName: 'Pedro Cruz',
-    deliveryAddress: 'Brgy. Lapasan, CDO City',
-    distance: 3.5,
-    estimatedTime: 20,
-    itemCount: 3,
-    totalAmount: 450,
-    driverEarnings: 65,
-    paymentMethod: 'gcash',
-    time: '5 mins ago',
-    tipped: false,
-    completedTime: null
-  },
-  {
-    id: '1233',
-    status: 'active',
-    sellerName: "Rosa's Veggies",
-    pickupAddress: 'Stall #22, Cogon Market',
-    customerName: 'Ana Lopez',
-    deliveryAddress: 'Brgy. Macasandig, CDO City',
-    distance: 1.8,
-    estimatedTime: 10,
-    itemCount: 7,
-    totalAmount: 620,
-    driverEarnings: 75,
-    paymentMethod: 'cash',
-    time: '15 mins ago',
-    tipped: false,
-    completedTime: null
-  },
-  {
-    id: '1232',
-    status: 'completed',
-    sellerName: "Mario's Fresh Fish",
-    pickupAddress: 'Stall #5, CDO City Palengke',
-    customerName: 'Jose Reyes',
-    deliveryAddress: 'Brgy. Bulua, CDO City',
-    distance: 4.2,
-    estimatedTime: 25,
-    itemCount: 2,
-    totalAmount: 380,
-    driverEarnings: 60,
-    paymentMethod: 'gcash',
-    time: '1 hour ago',
-    tipped: true,
-    completedTime: '1 hour ago'
+// Orders Data - Load from localStorage (bridged from Seller App) + static fallback
+const loadOrders = () => {
+  try {
+    const savedOrders = localStorage.getItem('driverOrders');
+    if (savedOrders) {
+      const parsed = JSON.parse(savedOrders);
+      if (parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.log('No driver orders in localStorage');
   }
-]);
+  
+  // Fallback static data
+  return [
+    {
+      id: '1234',
+      status: 'available',
+      sellerName: "Juan's Fresh Market",
+      pickupAddress: 'Stall #15, CDO City Palengke',
+      customerName: 'Maria Santos',
+      deliveryAddress: 'Brgy. Carmen, CDO City',
+      distance: 2.3,
+      estimatedTime: 15,
+      itemCount: 5,
+      totalAmount: 850,
+      driverEarnings: 85,
+      paymentMethod: 'cash',
+      time: '2 mins ago',
+      tipped: false,
+      completedTime: null
+    },
+    {
+      id: '1235',
+      status: 'available',
+      sellerName: "Ana's Palengke",
+      pickupAddress: 'Stall #8, Divisoria Market',
+      customerName: 'Pedro Cruz',
+      deliveryAddress: 'Brgy. Lapasan, CDO City',
+      distance: 3.5,
+      estimatedTime: 20,
+      itemCount: 3,
+      totalAmount: 450,
+      driverEarnings: 65,
+      paymentMethod: 'gcash',
+      time: '5 mins ago',
+      tipped: false,
+      completedTime: null
+    },
+    {
+      id: '1233',
+      status: 'active',
+      sellerName: "Rosa's Veggies",
+      pickupAddress: 'Stall #22, Cogon Market',
+      customerName: 'Ana Lopez',
+      deliveryAddress: 'Brgy. Macasandig, CDO City',
+      distance: 1.8,
+      estimatedTime: 10,
+      itemCount: 7,
+      totalAmount: 620,
+      driverEarnings: 75,
+      paymentMethod: 'cash',
+      time: '15 mins ago',
+      tipped: false,
+      completedTime: null
+    },
+    {
+      id: '1232',
+      status: 'completed',
+      sellerName: "Mario's Fresh Fish",
+      pickupAddress: 'Stall #5, CDO City Palengke',
+      customerName: 'Jose Reyes',
+      deliveryAddress: 'Brgy. Bulua, CDO City',
+      distance: 4.2,
+      estimatedTime: 25,
+      itemCount: 2,
+      totalAmount: 380,
+      driverEarnings: 60,
+      paymentMethod: 'gcash',
+      time: '1 hour ago',
+      tipped: true,
+      completedTime: '1 hour ago'
+    }
+  ];
+};
+
+const orders = ref(loadOrders());
 
 // Computed
 const filteredOrders = computed(() => {
@@ -331,7 +346,13 @@ const acceptOrder = async (order) => {
       {
         text: 'Accept',
         handler: async () => {
+          // Update order status in driver's localStorage
           order.status = 'active';
+          updateDriverOrdersInStorage();
+          
+          // 🚀 SYNC TO SELLER APP - Update seller's order to "processing"
+          syncToSellerApp(order.id, 'processing');
+          
           await showSuccessModal('Order accepted!\nHead to pickup location.');
           selectedTab.value = 'active';
           router.push('/active-delivery');
@@ -340,6 +361,25 @@ const acceptOrder = async (order) => {
     ]
   });
   await alert.present();
+};
+
+// Helper: Update driver orders in localStorage
+const updateDriverOrdersInStorage = () => {
+  localStorage.setItem('driverOrders', JSON.stringify(orders.value));
+};
+
+// Helper: Sync status back to Seller App
+const syncToSellerApp = (orderId, newStatus) => {
+  try {
+    const sellerOrders = JSON.parse(localStorage.getItem('sellerOrders') || '[]');
+    const orderIndex = sellerOrders.findIndex(o => o.id === orderId);
+    if (orderIndex !== -1) {
+      sellerOrders[orderIndex].status = newStatus;
+      localStorage.setItem('sellerOrders', JSON.stringify(sellerOrders));
+    }
+  } catch (e) {
+    console.log('Seller app not available');
+  }
 };
 
 const showSuccessModal = async (message) => {

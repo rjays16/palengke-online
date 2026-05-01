@@ -480,6 +480,19 @@ const confirmDelivery = async () => {
         text: 'Complete!',
         handler: async () => {
           stopDriverMovement();
+          
+          // 🚀 UPDATE DRIVER ORDERS IN LOCALSTORAGE
+          const driverOrders = JSON.parse(localStorage.getItem('driverOrders') || '[]');
+          const orderIndex = driverOrders.findIndex(o => o.id === orderData.value.id);
+          if (orderIndex !== -1) {
+            driverOrders[orderIndex].status = 'completed';
+            driverOrders[orderIndex].completedTime = 'Just now';
+            localStorage.setItem('driverOrders', JSON.stringify(driverOrders));
+          }
+          
+          // 🚀 SYNC TO SELLER APP - Mark seller's order as "completed"
+          syncCompletionToSeller(orderData.value.id);
+          
           await showSuccessModal(`Delivery complete!\nYou earned ₱${orderData.value.driverEarnings}`);
           setTimeout(() => router.push('/home'), 2000);
         }
@@ -487,6 +500,20 @@ const confirmDelivery = async () => {
     ]
   });
   await alert.present();
+};
+
+// Helper: Sync completion to Seller App
+const syncCompletionToSeller = (orderId) => {
+  try {
+    const sellerOrders = JSON.parse(localStorage.getItem('sellerOrders') || '[]');
+    const orderIndex = sellerOrders.findIndex(o => o.id === orderId);
+    if (orderIndex !== -1) {
+      sellerOrders[orderIndex].status = 'completed';
+      localStorage.setItem('sellerOrders', JSON.stringify(sellerOrders));
+    }
+  } catch (e) {
+    console.log('Seller app not available');
+  }
 };
 
 const showSuccessModal = async (message) => {
