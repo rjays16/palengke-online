@@ -1,0 +1,984 @@
+<template>
+  <div class="admin-shell">
+
+    <!-- ── SIDEBAR ─────────────────────────── -->
+    <aside class="sidebar">
+
+      <!-- Logo -->
+      <div class="sidebar-logo">
+        <img src="/assets/images/logo.png" alt="Palengke Online" class="sidebar-logo-img" />
+        <div class="sidebar-logo-text">
+          <span class="sidebar-brand">Palengke</span>
+          <span class="sidebar-brand-sub">Admin Portal</span>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="sidebar-nav">
+
+        <div class="nav-section-label">Overview</div>
+        <NuxtLink to="/dashboard" class="nav-item" active-class="active">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+            </svg>
+          </span>
+          <span class="nav-label">Dashboard</span>
+        </NuxtLink>
+
+        <NuxtLink to="/map" class="nav-item" active-class="active">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
+              <line x1="9" y1="3" x2="9" y2="18"/>
+              <line x1="15" y1="6" x2="15" y2="21"/>
+            </svg>
+          </span>
+          <span class="nav-label">Live Map</span>
+          <span class="nav-badge live">Live</span>
+        </NuxtLink>
+
+        <div class="nav-section-label">Management</div>
+
+        <NuxtLink to="/orders" class="nav-item" active-class="active">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+          </span>
+          <span class="nav-label">Orders</span>
+          <span class="nav-badge count" v-if="pendingOrders > 0">{{ pendingOrders }}</span>
+        </NuxtLink>
+
+        <NuxtLink to="/sellers" class="nav-item" active-class="active">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </span>
+          <span class="nav-label">Sellers</span>
+        </NuxtLink>
+
+        <NuxtLink to="/drivers" class="nav-item" active-class="active">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v4l3 3"/>
+            </svg>
+          </span>
+          <span class="nav-label">Drivers</span>
+        </NuxtLink>
+
+        <NuxtLink to="/customers" class="nav-item" active-class="active">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </span>
+          <span class="nav-label">Customers</span>
+        </NuxtLink>
+
+        <NuxtLink to="/products" class="nav-item" active-class="active">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="8" y1="6" x2="21" y2="6"/>
+              <line x1="8" y1="12" x2="21" y2="12"/>
+              <line x1="8" y1="18" x2="21" y2="18"/>
+              <line x1="3" y1="6" x2="3.01" y2="6"/>
+              <line x1="3" y1="12" x2="3.01" y2="12"/>
+              <line x1="3" y1="18" x2="3.01" y2="18"/>
+            </svg>
+          </span>
+          <span class="nav-label">Products</span>
+        </NuxtLink>
+
+        <div class="nav-section-label">Finance</div>
+
+        <NuxtLink to="/analytics" class="nav-item" active-class="active">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+          </span>
+          <span class="nav-label">Analytics</span>
+        </NuxtLink>
+
+        <NuxtLink to="/payouts" class="nav-item" active-class="active">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="5" width="20" height="14" rx="2"/>
+              <line x1="2" y1="10" x2="22" y2="10"/>
+            </svg>
+          </span>
+          <span class="nav-label">Payouts</span>
+        </NuxtLink>
+
+        <NuxtLink to="/disputes" class="nav-item" active-class="active">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </span>
+          <span class="nav-label">Disputes</span>
+          <span class="nav-badge warn" v-if="openDisputes > 0">{{ openDisputes }}</span>
+        </NuxtLink>
+
+        <div class="nav-section-label">System</div>
+
+        <NuxtLink to="/notifications" class="nav-item" active-class="active">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+          </span>
+          <span class="nav-label">Notifications</span>
+        </NuxtLink>
+
+        <NuxtLink to="/settings" class="nav-item" active-class="active">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </span>
+          <span class="nav-label">Settings</span>
+        </NuxtLink>
+
+      </nav>
+
+      <!-- Sidebar Footer: Admin Profile -->
+      <div class="sidebar-user">
+        <div class="user-avatar">
+          <span>A</span>
+        </div>
+        <div class="user-info">
+          <span class="user-name">Super Admin</span>
+          <span class="user-role">admin@palengke.com</span>
+        </div>
+        <button class="user-logout" @click="handleLogout" title="Logout">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </button>
+      </div>
+
+    </aside>
+
+    <!-- ── MAIN CONTENT AREA ───────────────── -->
+    <div class="main-area">
+
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h1 class="topbar-title">{{ pageTitle }}</h1>
+          <div class="topbar-breadcrumb">
+            <span>Admin</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            <span class="breadcrumb-current">{{ pageTitle }}</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+
+          <!-- Search -->
+          <div class="topbar-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" placeholder="Search orders, sellers…" class="search-input" />
+            <kbd class="search-kbd">⌘K</kbd>
+          </div>
+
+          <!-- Notifications Bell -->
+          <button class="topbar-btn" @click="toggleNotifPanel">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <span class="btn-dot" v-if="unreadNotifs > 0">{{ unreadNotifs }}</span>
+          </button>
+
+          <!-- Admin Avatar -->
+          <button class="topbar-avatar" @click="toggleUserMenu">
+            <span>A</span>
+          </button>
+
+          <!-- User dropdown -->
+          <div class="user-dropdown" v-if="showUserMenu" v-click-outside="() => showUserMenu = false">
+            <div class="dropdown-header">
+              <strong>Super Admin</strong>
+              <span>admin@palengke.com</span>
+            </div>
+            <div class="dropdown-divider"></div>
+            <NuxtLink to="/settings" class="dropdown-item" @click="showUserMenu = false">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Settings
+            </NuxtLink>
+            <div class="dropdown-divider"></div>
+            <button class="dropdown-item danger" @click="handleLogout">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Logout
+            </button>
+          </div>
+
+        </div>
+      </header>
+
+      <!-- Page Content -->
+      <main class="page-content">
+        <slot />
+        <NuxtPage />
+      </main>
+
+    </div>
+
+    <!-- Notification Panel (slide-in) -->
+    <div class="notif-overlay" v-if="showNotifPanel" @click="showNotifPanel = false"></div>
+    <div class="notif-panel" :class="{ open: showNotifPanel }">
+      <div class="notif-panel-header">
+        <h3>Notifications</h3>
+        <button @click="showNotifPanel = false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="notif-list">
+        <div class="notif-item unread" v-for="n in notifications" :key="n.id">
+          <div class="notif-dot" :class="n.type"></div>
+          <div class="notif-body">
+            <p class="notif-text">{{ n.message }}</p>
+            <span class="notif-time">{{ n.time }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</template>
+
+<script setup>
+const route = useRoute()
+const router = useRouter()
+
+const showUserMenu = ref(false)
+const showNotifPanel = ref(false)
+
+// Mock counts — replace with real API data
+const pendingOrders = ref(12)
+const openDisputes = ref(3)
+const unreadNotifs = ref(5)
+
+// Mock notifications
+const notifications = ref([
+  { id: 1, type: 'order', message: 'New order #ORD-1042 placed by Maria Santos', time: '2 mins ago' },
+  { id: 2, type: 'driver', message: 'Driver Juan Dela Cruz went active', time: '5 mins ago' },
+  { id: 3, type: 'dispute', message: 'Dispute opened on Order #ORD-1038', time: '14 mins ago' },
+  { id: 4, type: 'seller', message: "New seller registration: Ana's Palengke", time: '1 hour ago' },
+  { id: 5, type: 'system', message: 'System backup completed successfully', time: '2 hours ago' },
+])
+
+// Derive page title from route
+const pageTitle = computed(() => {
+  const map = {
+    '/dashboard': 'Dashboard',
+    '/map': 'Live Map',
+    '/orders': 'Orders',
+    '/sellers': 'Sellers',
+    '/drivers': 'Drivers',
+    '/customers': 'Customers',
+    '/products': 'Products',
+    '/analytics': 'Analytics',
+    '/payouts': 'Payouts',
+    '/disputes': 'Disputes',
+    '/notifications': 'Notifications',
+    '/settings': 'Settings',
+  }
+  // Match dynamic routes like /sellers/123
+  const base = '/' + route.path.split('/')[1]
+  return map[base] || 'Admin'
+})
+
+const toggleNotifPanel = () => {
+  showNotifPanel.value = !showNotifPanel.value
+  showUserMenu.value = false
+}
+
+const toggleUserMenu = () => {
+  showUserMenu.value = !showUserMenu.value
+  showNotifPanel.value = false
+}
+
+const handleLogout = () => {
+  showUserMenu.value = false
+  router.push('/login')
+}
+
+// Close menus on route change
+watch(() => route.path, () => {
+  showUserMenu.value = false
+  showNotifPanel.value = false
+})
+
+// Click outside directive
+const vClickOutside = {
+  mounted(el, binding) {
+    el._clickOutside = (e) => {
+      if (!el.contains(e.target)) binding.value(e)
+    }
+    document.addEventListener('click', el._clickOutside)
+  },
+  unmounted(el) {
+    document.removeEventListener('click', el._clickOutside)
+  }
+}
+</script>
+
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+
+:global(html), :global(body) {
+  margin: 0; padding: 0; height: 100%;
+  background: #f3f4f6;
+  font-family: 'Inter', sans-serif;
+}
+:global(#__nuxt) { height: 100%; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:global(a) { text-decoration: none; color: inherit; }
+
+/* ── SHELL ─────────────────────────────────── */
+.admin-shell {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: #f3f4f6;
+}
+
+/* ── SIDEBAR ───────────────────────────────── */
+.sidebar {
+  width: 256px;
+  min-width: 256px;
+  height: 100vh;
+  background: #fff;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 50;
+  flex-shrink: 0;
+}
+
+/* Logo */
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  flex-shrink: 0;
+}
+
+.sidebar-logo-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.sidebar-logo-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  overflow: hidden;
+}
+
+.sidebar-brand {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.sidebar-brand-sub {
+  font-size: 11px;
+  color: #9ca3af;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  white-space: nowrap;
+}
+
+/* Nav */
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidebar-nav::-webkit-scrollbar { width: 4px; }
+.sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+.sidebar-nav::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
+
+.nav-section-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 14px 8px 6px;
+  margin-top: 4px;
+}
+
+.nav-section-label:first-child { padding-top: 4px; margin-top: 0; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  text-decoration: none;
+}
+
+.nav-item:hover {
+  background: #f9fafb;
+  color: #111827;
+}
+
+.nav-item.active {
+  background: #f0fdf4;
+  color: #059669;
+  font-weight: 600;
+}
+
+.nav-item.active .nav-icon {
+  color: #059669;
+}
+
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: #9ca3af;
+  transition: color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.nav-item:hover .nav-icon { color: #374151; }
+
+.nav-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Badges */
+.nav-badge {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  line-height: 1.4;
+}
+
+.nav-badge.count {
+  background: #f0fdf4;
+  color: #059669;
+  border: 1px solid #bbf7d0;
+}
+
+.nav-badge.warn {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.nav-badge.live {
+  background: #f0fdf4;
+  color: #059669;
+  border: 1px solid #bbf7d0;
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Active left border accent */
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  background: #059669;
+  border-radius: 0 3px 3px 0;
+}
+
+/* Sidebar User Footer */
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-top: 1px solid #f3f4f6;
+  flex-shrink: 0;
+  background: #fff;
+}
+
+.user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #059669, #047857);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.user-info {
+  flex: 1;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.user-name {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-role {
+  display: block;
+  font-size: 11px;
+  color: #9ca3af;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-logout {
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.user-logout:hover { background: #fef2f2; color: #dc2626; }
+.user-logout svg { width: 16px; height: 16px; }
+
+/* ── MAIN AREA ─────────────────────────────── */
+.main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ── TOPBAR ────────────────────────────────── */
+.topbar {
+  height: 64px;
+  min-height: 64px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  gap: 24px;
+  position: relative;
+  z-index: 40;
+  flex-shrink: 0;
+}
+
+.topbar-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.topbar-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.topbar-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.topbar-breadcrumb svg {
+  width: 12px;
+  height: 12px;
+}
+
+.breadcrumb-current {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* Search */
+.topbar-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f9fafb;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px 12px;
+  min-width: 240px;
+  transition: border-color 0.2s;
+}
+
+.topbar-search:focus-within {
+  border-color: #059669;
+  background: #fff;
+}
+
+.topbar-search svg {
+  width: 16px;
+  height: 16px;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  color: #111827;
+  outline: none;
+  min-width: 0;
+}
+
+.search-input::placeholder { color: #9ca3af; }
+
+.search-kbd {
+  font-size: 10px;
+  color: #9ca3af;
+  background: #e5e7eb;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-family: 'Inter', sans-serif;
+  flex-shrink: 0;
+}
+
+/* Topbar buttons */
+.topbar-btn {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border: 1.5px solid #e5e7eb;
+  background: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  transition: all 0.15s;
+}
+
+.topbar-btn:hover {
+  border-color: #059669;
+  color: #059669;
+  background: #f0fdf4;
+}
+
+.topbar-btn svg { width: 18px; height: 18px; }
+
+.btn-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  background: #dc2626;
+  border-radius: 8px;
+  font-size: 9px;
+  font-weight: 700;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid white;
+}
+
+.topbar-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #059669, #047857);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  transition: box-shadow 0.15s;
+  font-family: 'Inter', sans-serif;
+}
+
+.topbar-avatar:hover {
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+}
+
+/* User Dropdown */
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 220px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  z-index: 100;
+  animation: dropIn 0.15s ease;
+}
+
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-header {
+  padding: 14px 16px;
+  background: #f9fafb;
+}
+
+.dropdown-header strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 2px;
+}
+
+.dropdown-header span {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: #f3f4f6;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: background 0.15s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: 'Inter', sans-serif;
+  text-decoration: none;
+}
+
+.dropdown-item:hover { background: #f9fafb; }
+.dropdown-item.danger { color: #dc2626; }
+.dropdown-item.danger:hover { background: #fef2f2; }
+.dropdown-item svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+/* ── PAGE CONTENT ──────────────────────────── */
+.page-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px;
+  background: #f3f4f6;
+}
+
+.page-content::-webkit-scrollbar { width: 6px; }
+.page-content::-webkit-scrollbar-track { background: transparent; }
+.page-content::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+
+/* ── NOTIFICATION PANEL ───────────────────── */
+.notif-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  z-index: 90;
+  backdrop-filter: blur(1px);
+}
+
+.notif-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 360px;
+  height: 100vh;
+  background: #fff;
+  border-left: 1px solid #e5e7eb;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.08);
+}
+
+.notif-panel.open { transform: translateX(0); }
+
+.notif-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  flex-shrink: 0;
+}
+
+.notif-panel-header h3 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.notif-panel-header button {
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.15s;
+}
+
+.notif-panel-header button:hover { background: #f3f4f6; color: #374151; }
+.notif-panel-header button svg { width: 18px; height: 18px; }
+
+.notif-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid #f9fafb;
+  transition: background 0.15s;
+  cursor: pointer;
+}
+
+.notif-item:hover { background: #f9fafb; }
+.notif-item.unread { background: #f0fdf4; }
+.notif-item.unread:hover { background: #dcfce7; }
+
+.notif-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.notif-dot.order { background: #059669; }
+.notif-dot.driver { background: #3b82f6; }
+.notif-dot.dispute { background: #dc2626; }
+.notif-dot.seller { background: #f59e0b; }
+.notif-dot.system { background: #9ca3af; }
+
+.notif-body { flex: 1; min-width: 0; }
+.notif-text {
+  font-size: 13px;
+  color: #374151;
+  font-weight: 500;
+  line-height: 1.45;
+  margin-bottom: 4px;
+}
+.notif-time {
+  font-size: 11px;
+  color: #9ca3af;
+}
+</style>

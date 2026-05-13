@@ -144,6 +144,7 @@
 </template>
 
 <script setup>
+definePageMeta({ layout: 'auth' })
 const form = ref({ email: '', password: '' })
 const errors = ref({ email: '', password: '' })
 const showPassword = ref(false)
@@ -189,7 +190,7 @@ const handleLogin = async () => {
   try {
     await new Promise(resolve => setTimeout(resolve, 2000))
     if (form.value.email === 'admin@palengke.com' && form.value.password === 'admin123') {
-      alert('Login successful! Redirecting to dashboard...')
+      navigateTo('/dashboard')
     } else {
       loginError.value = 'Invalid email or password. Please try again.'
     }
