@@ -30,7 +30,7 @@
             <td>₱{{ d.earnings.toLocaleString() }}</td>
             <td><span class="status-badge" :class="d.status">{{ d.status === 'active' ? 'Active' : d.status === 'idle' ? 'Idle' : 'Offline' }}</span></td>
             <td class="date-cell">{{ d.joined }}</td>
-            <td><button class="action-btn">...</button></td>
+            <td><button class="action-btn" @click="goToDriver(d.id)">...</button></td>
           </tr>
         </tbody>
       </table>
@@ -58,6 +58,8 @@ const filteredDrivers = computed(() => {
   const q = search.value.toLowerCase()
   return drivers.value.filter(d => d.name.toLowerCase().includes(q) || d.plate.toLowerCase().includes(q))
 })
+
+const goToDriver = (id) => navigateTo('/drivers/' + id)
 </script>
 
 <style scoped>

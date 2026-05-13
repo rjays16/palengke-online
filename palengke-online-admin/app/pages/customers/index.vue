@@ -28,7 +28,7 @@
             <td>{{ c.orders }}</td>
             <td>₱{{ c.spent.toLocaleString() }}</td>
             <td class="date-cell">{{ c.joined }}</td>
-            <td><button class="action-btn">...</button></td>
+            <td><button class="action-btn" @click="goToCustomer(c.id)">...</button></td>
           </tr>
         </tbody>
       </table>
@@ -59,6 +59,8 @@ const filteredCustomers = computed(() => {
   const q = search.value.toLowerCase()
   return customers.value.filter(c => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q))
 })
+
+const goToCustomer = (id) => navigateTo('/customers/' + id)
 </script>
 
 <style scoped>

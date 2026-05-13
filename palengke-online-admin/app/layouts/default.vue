@@ -241,7 +241,6 @@
       <!-- Page Content -->
       <main class="page-content">
         <slot />
-        <NuxtPage />
       </main>
 
     </div>

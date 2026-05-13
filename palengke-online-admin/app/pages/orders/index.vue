@@ -33,7 +33,7 @@
             <td><span class="method-badge" :class="o.payment">{{ o.payment === 'cod' ? 'COD' : 'GCash' }}</span></td>
             <td><span class="status-badge" :class="o.status">{{ o.status }}</span></td>
             <td class="date-cell">{{ o.date }}</td>
-            <td><button class="action-btn">...</button></td>
+            <td><button class="action-btn" @click="goToOrder(o.id)">...</button></td>
           </tr>
         </tbody>
       </table>
@@ -67,6 +67,8 @@ const filteredOrders = computed(() => {
     return matchSearch && matchStatus
   })
 })
+
+const goToOrder = (id) => navigateTo('/orders/' + id)
 </script>
 
 <style scoped>

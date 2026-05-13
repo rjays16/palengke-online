@@ -30,7 +30,7 @@
             <td><span class="stars">★</span> {{ s.rating }}</td>
             <td><span class="status-badge" :class="s.status">{{ s.status === 'active' ? 'Active' : 'Inactive' }}</span></td>
             <td class="date-cell">{{ s.joined }}</td>
-            <td><button class="action-btn">...</button></td>
+            <td><button class="action-btn" @click="goToSeller(s.id)">...</button></td>
           </tr>
         </tbody>
       </table>
@@ -59,6 +59,8 @@ const filteredSellers = computed(() => {
   const q = search.value.toLowerCase()
   return sellers.value.filter(s => s.name.toLowerCase().includes(q) || s.owner.toLowerCase().includes(q) || s.category.toLowerCase().includes(q))
 })
+
+const goToSeller = (id) => navigateTo('/sellers/' + id)
 </script>
 
 <style scoped>
