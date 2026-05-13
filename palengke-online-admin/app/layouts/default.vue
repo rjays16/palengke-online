@@ -155,6 +155,12 @@
           </span>
           <span class="nav-label">Settings</span>
         </NuxtLink>
+        <NuxtLink to="/settings/fees" class="nav-item sub" active-class="active">
+          <span class="nav-label" style="padding-left:30px;font-size:12px">Delivery Fees</span>
+        </NuxtLink>
+        <NuxtLink to="/settings/commissions" class="nav-item sub" active-class="active">
+          <span class="nav-label" style="padding-left:30px;font-size:12px">Commissions</span>
+        </NuxtLink>
 
       </nav>
 
@@ -477,6 +483,11 @@ const vClickOutside = {
 .nav-item.active .nav-icon {
   color: #059669;
 }
+
+.nav-item.sub { padding: 6px 10px; }
+.nav-item.sub:hover { background: transparent; color: #059669; }
+.nav-item.sub.active { background: transparent; font-weight: 500; }
+.nav-item.sub.active::before { display: none; }
 
 .nav-icon {
   width: 20px;

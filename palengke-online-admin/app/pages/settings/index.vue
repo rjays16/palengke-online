@@ -1,5 +1,11 @@
 <template>
   <div class="page-shell">
+    <div class="settings-subnav">
+      <NuxtLink to="/settings" class="subnav-item" active-class="active" exact-active-class="active">General</NuxtLink>
+      <NuxtLink to="/settings/fees" class="subnav-item" active-class="active">Delivery Fees</NuxtLink>
+      <NuxtLink to="/settings/commissions" class="subnav-item" active-class="active">Commissions</NuxtLink>
+    </div>
+
     <div class="settings-grid">
       <div class="settings-section">
         <h3>Profile Settings</h3>
@@ -74,37 +80,6 @@
       </div>
 
       <div class="settings-section">
-        <h3>Commission Settings</h3>
-        <div class="settings-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Seller Commission (%)</label>
-              <input v-model="commission.seller" type="number" class="form-input" />
-            </div>
-            <div class="form-group">
-              <label>Driver Commission (%)</label>
-              <input v-model="commission.driver" type="number" class="form-input" />
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Minimum Payout (₱)</label>
-              <input v-model="commission.minPayout" type="number" class="form-input" />
-            </div>
-            <div class="form-group">
-              <label>Payout Schedule</label>
-              <select v-model="commission.schedule" class="form-input">
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-                <option value="biweekly">Bi-Weekly</option>
-                <option value="monthly">Monthly</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="settings-section">
         <h3>Security</h3>
         <div class="settings-form">
           <div class="form-row">
@@ -139,20 +114,22 @@ definePageMeta({ layout: 'default' })
 
 const profile = ref({ name: 'Super Admin', email: 'admin@palengke.com', phone: '+63 912 345 6789', role: 'Administrator' })
 const prefs = ref({ emailNotifs: true, smsAlerts: false, autoApprove: true, darkMode: false })
-const commission = ref({ seller: 10, driver: 15, minPayout: 500, schedule: 'weekly' })
-const original = JSON.stringify({ profile, prefs, commission })
+const original = JSON.stringify({ profile, prefs })
 
 const saveSettings = () => { alert('Settings saved successfully!') }
 const resetSettings = () => {
   const o = JSON.parse(original)
   profile.value = o.profile
   prefs.value = o.prefs
-  commission.value = o.commission
 }
 </script>
 
 <style scoped>
 .page-shell { display: flex; flex-direction: column; gap: 24px; max-width: 900px; }
+.settings-subnav { display: flex; gap: 4px; background: #fff; border-radius: 12px; padding: 6px; border: 1px solid #e5e7eb; }
+.subnav-item { padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #6b7280; text-decoration: none; transition: all 0.15s; }
+.subnav-item:hover { color: #374151; background: #f9fafb; }
+.subnav-item.active { background: #f0fdf4; color: #059669; font-weight: 600; }
 .settings-grid { display: flex; flex-direction: column; gap: 20px; }
 .settings-section { background: #fff; border-radius: 12px; padding: 24px; border: 1px solid #e5e7eb; }
 .settings-section h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 600; color: #111827; margin-bottom: 20px; }
@@ -181,8 +158,5 @@ const resetSettings = () => {
 .save-btn:hover { background: #047857; }
 .reset-btn { padding: 12px 24px; background: #fff; color: #374151; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }
 .reset-btn:hover { border-color: #9ca3af; }
-
-@media (max-width: 600px) {
-  .form-row { grid-template-columns: 1fr; }
-}
+@media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
 </style>
