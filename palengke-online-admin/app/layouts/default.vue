@@ -41,6 +41,17 @@
 
         <div class="nav-section-label">Management</div>
 
+        <NuxtLink to="/approvals" class="nav-item" active-class="active">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 12l2 2 4-4"/>
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </span>
+          <span class="nav-label">Approvals</span>
+          <span class="nav-badge count" v-if="pendingApprovals > 0">{{ pendingApprovals }}</span>
+        </NuxtLink>
+
         <NuxtLink to="/orders" class="nav-item" active-class="active">
           <span class="nav-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -320,9 +331,11 @@ const showNotifPanel = ref(false)
 // Mock counts — replace with real API data
 const pendingOrders = ref(12)
 const complaintsStore = useComplaintsStore()
+const registrationsStore = useRegistrationsStore()
 const openDisputes = ref(3)
 const openReports = ref(4)
 const pendingComplaints = computed(() => complaintsStore.pendingHighPriority.length)
+const pendingApprovals = computed(() => registrationsStore.pending.length)
 const unreadNotifs = ref(5)
 
 // Mock notifications
@@ -338,6 +351,7 @@ const notifications = ref([
 const pageTitle = computed(() => {
   const map = {
     '/dashboard': 'Dashboard',
+    '/approvals': 'Approvals',
     '/map': 'Live Map',
     '/orders': 'Orders',
     '/sellers': 'Sellers',
