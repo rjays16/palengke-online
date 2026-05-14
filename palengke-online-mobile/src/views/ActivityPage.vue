@@ -25,11 +25,11 @@
             <ion-icon :icon="chevronForwardOutline" class="active-arrow"></ion-icon>
           </div>
           <div class="active-progress">
-            <div class="progress-step" :class="{ done: true }">🏪</div>
+            <div class="progress-step" :class="{ done: true }"><ion-icon :icon="storefrontOutline"></ion-icon></div>
             <div class="progress-line done"></div>
-            <div class="progress-step" :class="{ active: true }">🏍️</div>
+            <div class="progress-step" :class="{ active: true }"><ion-icon :icon="bicycleOutline"></ion-icon></div>
             <div class="progress-line"></div>
-            <div class="progress-step">🏠</div>
+            <div class="progress-step"><ion-icon :icon="homeOutline"></ion-icon></div>
           </div>
         </div>
       </div>
@@ -39,7 +39,7 @@
         <h2 class="section-title">Recent</h2>
 
         <div v-if="recentOrders.length === 0" class="empty-state">
-          <div class="empty-icon">📋</div>
+          <div class="empty-icon"><ion-icon :icon="documentTextOutline"></ion-icon></div>
           <h3>No orders yet</h3>
           <p>Your recent orders will appear here</p>
           <ion-button color="success" @click="goToHome" class="shop-btn">
@@ -162,7 +162,8 @@ import {
 import {
   timeOutline, chevronForwardOutline,
   homeOutline, searchOutline, cartOutline,
-  receiptOutline, personOutline
+  receiptOutline, personOutline,
+  storefrontOutline, bicycleOutline, documentTextOutline
 } from 'ionicons/icons';
 
 const router = useRouter();

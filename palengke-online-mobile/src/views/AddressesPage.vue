@@ -14,7 +14,7 @@
       <div class="addr-list">
         <div v-for="addr in addresses" :key="addr.id" class="addr-card" @click="selectAddress(addr)">
           <div class="addr-icon" :class="addr.type">
-            <span>{{ addr.type === 'home' ? '🏠' : addr.type === 'work' ? '🏢' : '📍' }}</span>
+            <ion-icon :icon="addr.type === 'home' ? homeOutline : addr.type === 'work' ? businessOutline : locationOutline"></ion-icon>
           </div>
           <div class="addr-info">
             <div class="addr-title-row">
@@ -45,7 +45,8 @@ import {
   IonPage, IonContent, IonIcon, IonButton, alertController
 } from '@ionic/vue';
 import {
-  arrowBackOutline, chevronForwardOutline, addOutline, locationOutline
+  arrowBackOutline, chevronForwardOutline, addOutline, locationOutline,
+  homeOutline, businessOutline
 } from 'ionicons/icons';
 
 const router = useRouter();

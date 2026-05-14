@@ -108,7 +108,7 @@
               </div>
 
               <div class="seller-meta">
-                <span class="rating">⭐ {{ seller.rating }}</span>
+                <span class="rating"><ion-icon :icon="starOutline"></ion-icon> {{ seller.rating }}</span>
                 <span class="rating-count">({{ seller.reviewCount }})</span>
                 <span class="dot">•</span>
                 <span class="category">{{ seller.category }}</span>
@@ -185,7 +185,8 @@ import {
   swapVerticalOutline, chevronDownOutline, gridOutline,
   locationOutline, timeOutline, bicycleOutline, pricetagOutline,
   ellipsisVerticalOutline, homeOutline, cartOutline,
-  receiptOutline, personOutline
+  receiptOutline, personOutline,
+  starOutline
 } from 'ionicons/icons';
 
 const router = useRouter();

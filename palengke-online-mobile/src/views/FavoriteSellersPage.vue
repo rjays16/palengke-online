@@ -13,7 +13,7 @@
 
       <!-- Empty State -->
       <div v-if="favoriteSellers.length === 0" class="empty-state">
-        <div class="empty-icon">❤️</div>
+        <div class="empty-icon"><ion-icon :icon="heartOutline"></ion-icon></div>
         <h3>No favorites yet</h3>
         <p>Save your favorite sellers to order quickly</p>
         <ion-button color="success" @click="goToBrowse" class="browse-btn">
@@ -32,13 +32,13 @@
           <div class="seller-banner">
             <img :src="seller.image" class="seller-img" :alt="seller.name">
             <button class="favorite-btn active" @click.stop="toggleFavorite(seller)">
-              ❤️
+              <ion-icon :icon="heart"></ion-icon>
             </button>
           </div>
           <div class="seller-info">
             <h3>{{ seller.name }}</h3>
             <div class="seller-meta">
-              <span class="rating">⭐ {{ seller.rating }}</span>
+              <span class="rating"><ion-icon :icon="starOutline"></ion-icon> {{ seller.rating }}</span>
               <span class="dot">•</span>
               <span class="time">{{ seller.deliveryTime }}</span>
               <span class="dot">•</span>
@@ -58,7 +58,8 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton, IonButton, toastController } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton, IonButton, IonIcon, toastController } from '@ionic/vue';
+import { starOutline, heartOutline, heart } from 'ionicons/icons';
 
 const router = useRouter();
 
@@ -94,7 +95,7 @@ const openSeller = (seller) => {
 const toggleFavorite = async (seller) => {
   seller.isFavorite = !seller.isFavorite;
   const toast = await toastController.create({
-    message: seller.isFavorite ? '❤️ Added to favorites!' : 'Removed from favorites',
+    message: seller.isFavorite ? 'Added to favorites!' : 'Removed from favorites',
     duration: 1500,
     color: 'success',
     position: 'top'

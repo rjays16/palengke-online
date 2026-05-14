@@ -175,13 +175,13 @@ const onPhotoSelected = (e) => {
 const showReportForm = async (type, subject) => {
   const alert = await alertController.create({
     header: subject,
-    message: reportPhoto.value ? '📷 Photo attached' : '',
+    message: reportPhoto.value ? 'Photo attached' : '',
     inputs: [
       { name: 'subject', type: 'text', placeholder: 'Short summary (e.g. Rude driver)' },
       { name: 'description', type: 'textarea', placeholder: 'Describe what happened in detail...' }
     ],
     buttons: [
-      { text: reportPhoto.value ? '📷 Change Photo' : '📷 Add Photo', handler: () => { triggerPhotoPicker(); return false } },
+      { text: reportPhoto.value ? 'Change Photo' : 'Add Photo', handler: () => { triggerPhotoPicker(); return false } },
       { text: 'Cancel', role: 'cancel' },
       {
         text: 'Submit',

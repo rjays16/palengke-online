@@ -23,7 +23,7 @@
               :class="{ filled: star <= selectedRating }"
               @click="selectRating(star)"
             >
-              ⭐
+              <ion-icon :icon="starOutline"></ion-icon>
             </div>
           </div>
         </div>
@@ -113,7 +113,7 @@ import {
   IonPage, IonContent, IonButton, IonIcon, IonSpinner,
   alertController, toastController
 } from '@ionic/vue';
-import { closeOutline } from 'ionicons/icons';
+import { closeOutline, starOutline } from 'ionicons/icons';
 
 const router = useRouter();
 

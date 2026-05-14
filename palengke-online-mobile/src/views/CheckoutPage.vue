@@ -77,7 +77,7 @@
         <!-- Delivery Address -->
         <div v-if="deliveryMode === 'delivery'" class="address-section">
           <div class="address-row" @click="changeAddress">
-            <div class="address-dot">📍</div>
+            <div class="address-dot"><ion-icon :icon="locationOutline"></ion-icon></div>
             <div class="address-info">
               <p class="address-main">{{ deliveryAddress.main }}</p>
               <p class="address-sub">{{ deliveryAddress.sub }}</p>
@@ -94,7 +94,7 @@
         <!-- Pickup Info -->
         <div v-if="deliveryMode === 'pickup'" class="pickup-section">
           <div class="pickup-row">
-            <div class="address-dot">📍</div>
+            <div class="address-dot"><ion-icon :icon="locationOutline"></ion-icon></div>
             <div class="address-info">
               <p class="address-main">{{ storeData.address }}</p>
               <p class="address-sub">{{ storeData.distance }} away</p>
@@ -106,7 +106,7 @@
             <strong>Pick up in {{ storeData.pickupTime }} mins</strong>
           </div>
           <div class="pickup-reminder">
-            <div class="pickup-reminder-icon">📦</div>
+            <div class="pickup-reminder-icon"><ion-icon :icon="cubeOutline"></ion-icon></div>
             <div>
               <p><strong>This is a pickup</strong></p>
               <p>Remember to collect your food at the store when it's ready!</p>
@@ -235,7 +235,8 @@ import {
   alertController, toastController
 } from '@ionic/vue';
 import {
-  closeOutline, addOutline, chevronForwardOutline, timeOutline, bicycleOutline, flagOutline
+  closeOutline, addOutline, chevronForwardOutline, timeOutline, bicycleOutline, flagOutline,
+  locationOutline, cubeOutline
 } from 'ionicons/icons';
 
 const router = useRouter();

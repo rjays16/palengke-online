@@ -13,7 +13,7 @@
 
       <!-- Cashless Banner -->
       <div class="cashless-banner">
-        <p>💳 Enjoy easier, cashless payments</p>
+        <p><ion-icon :icon="cardOutline"></ion-icon> Enjoy easier, cashless payments</p>
       </div>
 
       <!-- QR Payment -->
@@ -41,7 +41,7 @@
         >
           <img v-if="method.image" :src="method.image" class="payment-img" :alt="method.name">
           <div v-else class="payment-logo" :class="method.type">
-            <span>{{ method.icon }}</span>
+            <ion-icon :icon="paymentTypeIcon(method.type)"></ion-icon>
           </div>
           <div class="payment-info">
             <h4>{{ method.name }}</h4>
@@ -64,7 +64,7 @@
         >
           <img v-if="method.image" :src="method.image" class="payment-img" :alt="method.name">
           <div v-else class="payment-logo" :class="method.type">
-            <span>{{ method.icon }}</span>
+            <ion-icon :icon="paymentTypeIcon(method.type)"></ion-icon>
           </div>
           <div class="payment-info">
             <h4>{{ method.name }}</h4>
@@ -108,23 +108,33 @@ import {
   IonButtons, IonBackButton, IonButton, IonIcon,
   toastController
 } from '@ionic/vue';
-import { chevronForwardOutline } from 'ionicons/icons';
+import { chevronForwardOutline, cardOutline, walletOutline, cashOutline } from 'ionicons/icons';
 
 const router = useRouter();
 const selectedMethod = ref('gcash');
 const showInsufficientModal = ref(false);
 
+const paymentTypeIcon = (type) => {
+  const map = {
+    wallet: walletOutline,
+    cash: cashOutline,
+    card: cardOutline,
+    maya: walletOutline,
+  }
+  return map[type] || walletOutline
+}
+
 const linkedMethods = ref([
-  { id: 'wallet', name: 'Palengke Wallet', icon: '💚', type: 'wallet', balance: '152.00', isDefault: true, image: '/assets/images/payment-methods-logo/palengke-wallet.png' },
-  { id: 'gcash', name: 'GCash', icon: '', type: 'gcash', balance: null, isDefault: false, image: '/assets/images/payment-methods-logo/gcash.png' },
-  { id: 'cash', name: 'Cash On Delivery', icon: '💵', type: 'cash', balance: null, isDefault: false, image: null },
+  { id: 'wallet', name: 'Palengke Wallet', type: 'wallet', balance: '152.00', isDefault: true, image: '/assets/images/payment-methods-logo/palengke-wallet.png' },
+  { id: 'gcash', name: 'GCash', type: 'gcash', balance: null, isDefault: false, image: '/assets/images/payment-methods-logo/gcash.png' },
+  { id: 'cash', name: 'Cash On Delivery', type: 'cash', balance: null, isDefault: false, image: null },
 ]);
 
 const addMethods = ref([
-  { id: 'add-wallet', name: 'Cash in Balance', icon: '💚', type: 'wallet', description: 'Earn up to 0.8% back in PalengkePoints', image: '/assets/images/payment-methods-logo/palengke-wallet.png' },
-  { id: 'add-card', name: 'Cards', icon: '💳', type: 'card', description: null, image: '/assets/images/payment-methods-logo/cards.png' },
-  { id: 'add-maya', name: 'Maya', icon: '🟣', type: 'maya', description: null, image: '/assets/images/payment-methods-logo/maya.png' },
-  { id: 'add-paypal', name: 'PayPal', icon: '🔵', type: 'paypal', description: null, image: '/assets/images/payment-methods-logo/paypal.png' },
+  { id: 'add-wallet', name: 'Cash in Balance', type: 'wallet', description: 'Earn up to 0.8% back in PalengkePoints', image: '/assets/images/payment-methods-logo/palengke-wallet.png' },
+  { id: 'add-card', name: 'Cards', type: 'card', description: null, image: '/assets/images/payment-methods-logo/cards.png' },
+  { id: 'add-maya', name: 'Maya', type: 'maya', description: null, image: '/assets/images/payment-methods-logo/maya.png' },
+  { id: 'add-paypal', name: 'PayPal', type: 'paypal', description: null, image: '/assets/images/payment-methods-logo/paypal.png' },
 ]);
 
 const selectMethod = (methodId) => { selectedMethod.value = methodId; };

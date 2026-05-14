@@ -41,7 +41,7 @@
           </div>
           <div class="seller-info">
             <p class="seller-name">{{ product.sellerName }}</p>
-            <p class="seller-meta">⭐ {{ product.sellerRating }} • {{ product.sellerDistance }}</p>
+            <p class="seller-meta"><ion-icon :icon="starOutline"></ion-icon> {{ product.sellerRating }} • {{ product.sellerDistance }}</p>
           </div>
           <ion-icon :icon="chevronForwardOutline" class="seller-arrow"></ion-icon>
         </div>
@@ -138,7 +138,8 @@ import {
 } from '@ionic/vue';
 import {
   arrowBackOutline, shareOutline, chevronForwardOutline,
-  addOutline, removeOutline, cartOutline
+  addOutline, removeOutline, cartOutline,
+  starOutline
 } from 'ionicons/icons';
 
 const router = useRouter();

@@ -40,7 +40,7 @@
           </div>
 
           <div class="store-rating-row" @click.stop="showReviews">
-            <span class="store-rating">⭐ {{ storeData.rating }}</span>
+            <span class="store-rating"><ion-icon :icon="starOutline"></ion-icon> {{ storeData.rating }}</span>
             <span class="store-reviews">({{ storeData.reviewCount }})</span>
             <span class="dot">•</span>
             <span class="ratings-link">Ratings and reviews</span>
@@ -214,7 +214,8 @@ import {
 import {
   arrowBackOutline, searchOutline, heartOutline, heart,
   chevronForwardOutline, timeOutline, addOutline,
-  closeCircleOutline, arrowForwardOutline, flagOutline
+  closeCircleOutline, arrowForwardOutline, flagOutline,
+  starOutline
 } from 'ionicons/icons';
 import { submitReport, readFileAsDataURL } from '../services/reportService';
 
@@ -402,7 +403,7 @@ const viewAllCategory = (cat) => {
 const toggleFavorite = async () => {
   isFavorite.value = !isFavorite.value;
   const toast = await toastController.create({
-    message: isFavorite.value ? '❤️ Added to favorites!' : 'Removed from favorites',
+    message: isFavorite.value ? 'Added to favorites!' : 'Removed from favorites',
     duration: 1500, color: isFavorite.value ? 'success' : 'dark', position: 'top'
   });
   await toast.present();
@@ -411,7 +412,7 @@ const toggleFavorite = async () => {
 const showStoreInfo = async () => {
   const alert = await alertController.create({
     header: storeData.value.name,
-    message: `⭐ Rating: ${storeData.value.rating}\n📍 Distance: ${storeData.value.distance}\n🛵 Delivery Fee: ₱${storeData.value.deliveryFee}\n⏱️ Delivery Time: ${storeData.value.deliveryTime}`,
+    message: `Rating: ${storeData.value.rating}\nDistance: ${storeData.value.distance}\nDelivery Fee: ₱${storeData.value.deliveryFee}\nDelivery Time: ${storeData.value.deliveryTime}`,
     buttons: ['Close']
   });
   await alert.present();
@@ -444,13 +445,13 @@ const reportVendor = async () => {
   const alert = await alertController.create({
     header: 'Report this Store',
     subHeader: storeData.value.name,
-    message: vendorPhoto.value ? '📷 Photo attached' : '',
+    message: vendorPhoto.value ? 'Photo attached' : '',
     inputs: [
       { name: 'subject', type: 'text', placeholder: 'Short summary' },
       { name: 'description', type: 'textarea', placeholder: 'Describe the issue...' }
     ],
     buttons: [
-      { text: vendorPhoto.value ? '📷 Change Photo' : '📷 Add Photo', handler: () => { vendorPhotoInput.value?.click(); return false } },
+      { text: vendorPhoto.value ? 'Change Photo' : 'Add Photo', handler: () => { vendorPhotoInput.value?.click(); return false } },
       { text: 'Cancel', role: 'cancel' },
       {
         text: 'Submit Report',

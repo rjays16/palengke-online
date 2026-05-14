@@ -28,7 +28,7 @@
           <div class="delivery-type-badge">{{ orderStatus.deliveryType }}</div>
           <div class="payment-badge" :class="paymentMethod">
             <span v-if="paymentMethod === 'gcash'">GCash</span>
-            <span v-else>💵 Cash On Delivery</span>
+            <span v-else><ion-icon :icon="cashOutline"></ion-icon> Cash On Delivery</span>
           </div>
         </div>
 
@@ -51,29 +51,29 @@
           <div class="progress-bar-section">
             <div class="progress-track">
               <div class="progress-step done">
-                <div class="step-icon store"><span>🏪</span></div>
+                <div class="step-icon store"><ion-icon :icon="storefrontOutline"></ion-icon></div>
                 <span class="step-label">Store</span>
               </div>
               <div class="progress-line" :class="{ done: currentStep >= 2 }"></div>
               <div class="progress-step" :class="{ done: currentStep >= 2, active: currentStep === 2 }">
-                <div class="step-icon prep"><span>🧺</span></div>
+                <div class="step-icon prep"><ion-icon :icon="basketOutline"></ion-icon></div>
                 <span class="step-label">Prep</span>
               </div>
               <div class="progress-line" :class="{ done: currentStep >= 3 }"></div>
               <div class="progress-step" :class="{ done: currentStep >= 3, active: currentStep === 3 }">
-                <div class="step-icon rider"><span>🏍️</span></div>
+                <div class="step-icon rider"><ion-icon :icon="bicycleOutline"></ion-icon></div>
                 <span class="step-label">Rider</span>
               </div>
               <div class="progress-line" :class="{ done: currentStep >= 4 }"></div>
               <div class="progress-step" :class="{ active: currentStep === 4 }">
-                <div class="step-icon home"><span>🏠</span></div>
+                <div class="step-icon home"><ion-icon :icon="homeOutline"></ion-icon></div>
                 <span class="step-label">Arrived</span>
               </div>
             </div>
           </div>
 
           <div class="promo-banner" v-if="showPromo">
-            <div class="promo-icon-wrap">🎁</div>
+            <div class="promo-icon-wrap"><ion-icon :icon="giftOutline"></ion-icon></div>
             <div class="promo-text">
               <p>{{ promoBanner.title }}</p>
               <span>{{ promoBanner.subtitle }}</span>
@@ -86,7 +86,7 @@
             <div class="driver-info">
               <p class="driver-name">{{ driverInfo.name }}</p>
               <p class="driver-meta">
-                <span class="driver-rating">⭐ {{ driverInfo.rating }}</span>
+                <span class="driver-rating"><ion-icon :icon="starOutline"></ion-icon> {{ driverInfo.rating }}</span>
                 <span class="driver-vehicle">{{ driverInfo.vehicleId }}</span>
               </p>
             </div>
@@ -138,7 +138,9 @@ import {
 import {
   arrowBackOutline, shareOutline, chevronForwardOutline,
   chatbubbleOutline, callOutline, closeOutline, flagOutline,
-  chevronUpOutline, chevronDownOutline
+  chevronUpOutline, chevronDownOutline,
+  starOutline, storefrontOutline, basketOutline, bicycleOutline,
+  homeOutline, giftOutline, cashOutline
 } from 'ionicons/icons';
 import { submitReport, readFileAsDataURL } from '../services/reportService';
 import L from 'leaflet';
@@ -221,17 +223,17 @@ const initMap = () => {
 
   const storeIcon = L.divIcon({
     className: '',
-    html: `<div style="background:#059669;color:white;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;border:3px solid white;box-shadow:0 4px 14px rgba(5,150,105,0.4)">🏪</div>`,
+    html: `<div style="background:#059669;color:white;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;border:3px solid white;box-shadow:0 4px 14px rgba(5,150,105,0.4)">S</div>`,
     iconSize: [44, 44], iconAnchor: [22, 22]
   });
   const customerIcon = L.divIcon({
     className: '',
-    html: `<div style="background:#dc2626;color:white;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;border:3px solid white;box-shadow:0 4px 14px rgba(220,38,38,0.4)">🏠</div>`,
+    html: `<div style="background:#dc2626;color:white;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;border:3px solid white;box-shadow:0 4px 14px rgba(220,38,38,0.4)">H</div>`,
     iconSize: [44, 44], iconAnchor: [22, 22]
   });
   const driverIcon = L.divIcon({
     className: '',
-    html: `<div style="background:#3b82f6;color:white;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;border:3px solid white;box-shadow:0 4px 14px rgba(59,130,246,0.5)">🏍️</div>`,
+    html: `<div style="background:#3b82f6;color:white;width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;border:3px solid white;box-shadow:0 4px 14px rgba(59,130,246,0.5)">R</div>`,
     iconSize: [48, 48], iconAnchor: [24, 24]
   });
 
@@ -257,7 +259,7 @@ const simulateDriverMovement = () => {
   simulationInterval = setInterval(() => {
     if (step >= steps) {
       clearInterval(simulationInterval);
-      orderStatus.value.statusText = '📍 Driver has arrived!';
+      orderStatus.value.statusText = 'Driver has arrived!';
       currentStep.value = 4;
       return;
     }
@@ -287,13 +289,13 @@ const reportDriver = async () => {
   const alert = await alertController.create({
     header: 'Report this Driver',
     subHeader: driverInfo.value.name,
-    message: driverPhoto.value ? '📷 Photo attached' : '',
+    message: driverPhoto.value ? 'Photo attached' : '',
     inputs: [
       { name: 'subject', type: 'text', placeholder: 'Short summary' },
       { name: 'description', type: 'textarea', placeholder: 'Describe the issue...' }
     ],
     buttons: [
-      { text: driverPhoto.value ? '📷 Change Photo' : '📷 Add Photo', handler: () => { driverPhotoInput.value?.click(); return false } },
+      { text: driverPhoto.value ? 'Change Photo' : 'Add Photo', handler: () => { driverPhotoInput.value?.click(); return false } },
       { text: 'Cancel', role: 'cancel' },
       {
         text: 'Submit Report',
@@ -326,7 +328,7 @@ const shareOrder = () => {};
 const showDriverInfo = async () => {
   const alert = await alertController.create({
     header: driverInfo.value.name,
-    message: `⭐ Rating: ${driverInfo.value.rating}\n🏍️ ${driverInfo.value.vehicleId}`,
+    message: `Rating: ${driverInfo.value.rating}\nVehicle: ${driverInfo.value.vehicleId}`,
     buttons: ['Close']
   });
   await alert.present();
@@ -481,8 +483,10 @@ onUnmounted(() => {
   position: relative; overflow: hidden;
 }
 .promo-banner::after {
-  content: '🎉'; position: absolute; right: -10px; bottom: -10px;
-  font-size: 60px; opacity: 0.12;
+  content: ''; position: absolute; right: -10px; bottom: -10px;
+  width: 60px; height: 60px;
+  background: linear-gradient(135deg, rgba(251,191,36,0.1), rgba(251,191,36,0.05));
+  border-radius: 50%;
 }
 .promo-icon-wrap { font-size: 28px; flex-shrink: 0; }
 .promo-text { flex: 1; z-index: 1; }

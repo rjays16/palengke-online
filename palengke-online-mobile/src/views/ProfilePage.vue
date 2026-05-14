@@ -215,9 +215,9 @@ const handleLogout = async () => {
 
 const rateApp = async () => {
   const alert = await alertController.create({
-    header: 'Rate Our App ⭐',
+    header: 'Rate Our App',
     message: 'Thank you for using Palengke Online!',
-    buttons: [{ text: 'Maybe Later', role: 'cancel' }, { text: 'Rate Now ⭐', handler: () => {} }]
+    buttons: [{ text: 'Maybe Later', role: 'cancel' }, { text: 'Rate Now', handler: () => {} }]
   });
   await alert.present();
 };

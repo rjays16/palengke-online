@@ -155,7 +155,7 @@
               <div class="seller-info-left">
                 <h3 class="seller-name">{{ seller.name }}</h3>
                 <div class="seller-meta">
-                  <span class="seller-rating">⭐ {{ seller.rating }}</span>
+                  <span class="seller-rating"><ion-icon :icon="starOutline"></ion-icon> {{ seller.rating }}</span>
                   <span class="meta-dot">•</span>
                   <span class="seller-time">{{ seller.deliveryTime }}</span>
                   <span class="meta-dot">•</span>
@@ -219,7 +219,8 @@ import {
 import {
   chevronDown, notifications, wallet,
   home, cart, receipt, person, search,
-  location, star, cube
+  location, star, cube,
+  starOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -345,9 +346,9 @@ const openAddressPicker = async () => {
   const actionSheet = await actionSheetController.create({
     header: 'Delivery Address',
     buttons: [
-      { text: '📍 Brgy. Carmen, CDO City', handler: () => { currentAddress.value = 'Brgy. Carmen, CDO City'; } },
-      { text: '📍 Brgy. Lapasan, CDO City', handler: () => { currentAddress.value = 'Brgy. Lapasan, CDO City'; } },
-      { text: '📍 Brgy. Macasandig, CDO City', handler: () => { currentAddress.value = 'Brgy. Macasandig, CDO City'; } },
+      { text: 'Brgy. Carmen, CDO City', handler: () => { currentAddress.value = 'Brgy. Carmen, CDO City'; } },
+      { text: 'Brgy. Lapasan, CDO City', handler: () => { currentAddress.value = 'Brgy. Lapasan, CDO City'; } },
+      { text: 'Brgy. Macasandig, CDO City', handler: () => { currentAddress.value = 'Brgy. Macasandig, CDO City'; } },
       { text: '+ Add New Address', handler: () => router.push('/addresses') },
       { text: 'Cancel', role: 'cancel' }
     ]
