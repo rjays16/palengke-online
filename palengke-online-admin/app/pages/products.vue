@@ -37,10 +37,41 @@
             <td>{{ p.unit }}</td>
             <td>{{ p.stock }}</td>
             <td><span class="status-badge" :class="p.status">{{ p.status === 'in_stock' ? 'In Stock' : 'Out of Stock' }}</span></td>
-            <td><button class="action-btn">...</button></td>
+            <td><button class="action-btn" @click="openDetail(p)">...</button></td>
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div class="modal-overlay" v-if="selected" @click="selected = null">
+      <div class="modal-card" @click.stop>
+        <div class="modal-top">
+          <span class="modal-title">{{ selected.name }}</span>
+          <span class="status-badge" :class="selected.status">{{ selected.status === 'in_stock' ? 'In Stock' : 'Out of Stock' }}</span>
+          <button class="modal-close" @click="selected = null">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="detail-grid">
+            <div class="detail-item"><span class="dl">Category</span><span class="dv">{{ selected.category }}</span></div>
+            <div class="detail-item"><span class="dl">Seller</span><span class="dv">{{ selected.seller }}</span></div>
+            <div class="detail-item"><span class="dl">Price</span><span class="dv">₱{{ selected.price }} / {{ selected.unit }}</span></div>
+            <div class="detail-item"><span class="dl">Stock</span><span class="dv" :class="{ low: selected.stock < 30 }">{{ selected.stock }} {{ selected.unit }}</span></div>
+          </div>
+          <div class="stock-bar">
+            <div class="stock-bar-track">
+              <div class="stock-bar-fill" :style="{ width: Math.min(100, (selected.stock / 200) * 100) + '%' }" :class="{ low: selected.stock < 30, empty: selected.stock === 0 }"></div>
+            </div>
+            <span class="stock-status" v-if="selected.stock === 0">Out of Stock</span>
+            <span class="stock-status" v-else-if="selected.stock < 30">Low Stock</span>
+            <span class="stock-status good" v-else>In Stock</span>
+          </div>
+          <div class="modal-actions-single">
+            <button class="modal-btn close" @click="selected = null">Close</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -65,6 +96,10 @@ const products = ref([
   { id: 11, name: 'Vegetable Bundle', category: 'Bundles', seller: 'FreshMart', price: 350, unit: 'set', stock: 25, status: 'in_stock' },
   { id: 12, name: 'Beef Lean Meat', category: 'Meat & Poultry', seller: "Ben's Butchery", price: 380, unit: 'kg', stock: 0, status: 'out_of_stock' },
 ])
+
+const selected = ref(null)
+
+function openDetail(p) { selected.value = p }
 
 const filteredProducts = computed(() => {
   return products.value.filter(p => {
@@ -98,4 +133,28 @@ const filteredProducts = computed(() => {
 .status-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; }
 .status-badge.in_stock { background: #f0fdf4; color: #059669; }
 .status-badge.out_of_stock { background: #fef2f2; color: #dc2626; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 32px; backdrop-filter: blur(2px); }
+.modal-card { background: #fff; border-radius: 16px; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.modal-top { display: flex; align-items: center; gap: 10px; padding: 20px 24px; border-bottom: 1px solid #f3f4f6; }
+.modal-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 700; color: #111827; flex: 1; }
+.modal-close { width: 32px; height: 32px; border: none; background: none; cursor: pointer; color: #9ca3af; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.modal-close:hover { background: #f3f4f6; color: #374151; }
+.modal-close svg { width: 18px; height: 18px; }
+.modal-body { padding: 20px 24px; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+.detail-item { display: flex; flex-direction: column; gap: 2px; }
+.dl { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.3px; }
+.dv { font-size: 14px; font-weight: 600; color: #111827; }
+.dv.low { color: #dc2626; }
+.stock-bar { margin-bottom: 20px; }
+.stock-bar-track { height: 8px; background: #f3f4f6; border-radius: 4px; overflow: hidden; margin-bottom: 6px; }
+.stock-bar-fill { height: 100%; border-radius: 4px; background: #059669; transition: width 0.3s; }
+.stock-bar-fill.low { background: #d97706; }
+.stock-bar-fill.empty { background: #dc2626; }
+.stock-status { font-size: 12px; font-weight: 600; color: #dc2626; }
+.stock-status.good { color: #059669; }
+.modal-actions-single { display: flex; }
+.modal-btn.close { width: 100%; padding: 11px; border-radius: 8px; font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; border: none; background: #f3f4f6; color: #6b7280; transition: all 0.15s; }
+.modal-btn.close:hover { background: #e5e7eb; }
 </style>
