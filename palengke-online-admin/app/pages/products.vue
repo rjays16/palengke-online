@@ -1,61 +1,129 @@
 <template>
   <div class="page-shell">
-    <div class="page-toolbar">
-      <div class="toolbar-left">
-        <div class="search-box">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input v-model="search" placeholder="Search products..." />
+    <div class="tabs-nav">
+      <button class="tab-btn" :class="{ active: tab === 'all' }" @click="tab = 'all'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        All Products
+        <span class="tab-badge">{{ store.products.length }}</span>
+      </button>
+      <button class="tab-btn" :class="{ active: tab === 'pending' }" @click="tab = 'pending'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Pending Reviews
+        <span class="tab-badge warn" v-if="store.pendingReviews.length > 0">{{ store.pendingReviews.length }}</span>
+      </button>
+    </div>
+
+    <div v-if="tab === 'all'">
+      <div class="page-toolbar">
+        <div class="toolbar-left">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input v-model="search" placeholder="Search products..." />
+          </div>
+          <select v-model="categoryFilter" class="filter-select">
+            <option value="">All Categories</option>
+            <option value="vegetables">Vegetables</option>
+            <option value="fruits">Fruits</option>
+            <option value="seafood">Seafood</option>
+            <option value="meat">Meat & Poultry</option>
+            <option value="bundles">Bundles</option>
+          </select>
+          <select v-model="stockFilter" class="filter-select">
+            <option value="">All Stock</option>
+            <option value="in_stock">In Stock</option>
+            <option value="out_of_stock">Out of Stock</option>
+          </select>
         </div>
-        <select v-model="categoryFilter" class="filter-select">
-          <option value="">All Categories</option>
-          <option value="vegetables">Vegetables</option>
-          <option value="fruits">Fruits</option>
-          <option value="seafood">Seafood</option>
-          <option value="meat">Meat & Poultry</option>
-          <option value="bundles">Bundles</option>
-        </select>
-        <select v-model="stockFilter" class="filter-select">
-          <option value="">All Stock</option>
-          <option value="in_stock">In Stock</option>
-          <option value="out_of_stock">Out of Stock</option>
-        </select>
+        <div class="toolbar-right">
+          <span class="result-count">{{ filtered.length }} products</span>
+          <button class="add-btn" @click="openAdd">+ Add Product</button>
+        </div>
       </div>
-      <div class="toolbar-right">
-        <span class="result-count">{{ filtered.length }} products</span>
-        <button class="add-btn" @click="openAdd">+ Add Product</button>
+
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr><th>Product</th><th>Category</th><th>Seller</th><th>Price</th><th>Unit</th><th>Stock</th><th>Status</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr v-for="p in filtered" :key="p.id">
+              <td>
+                <div class="cell-product" @click="openDetail(p)" style="cursor:pointer">
+                  <div class="product-thumb">{{ p.name.charAt(0) }}</div>
+                  <div class="name-cell">{{ p.name }}</div>
+                </div>
+              </td>
+              <td>{{ categoryLabel(p.category) }}</td>
+              <td>{{ p.seller }}</td>
+              <td>₱{{ p.price }}</td>
+              <td>{{ p.unit }}</td>
+              <td>
+                <span :class="{ 'stock-low': p.stock > 0 && p.stock < 30, 'stock-out': p.stock === 0 }">{{ p.stock }}</span>
+              </td>
+              <td><span class="status-badge" :class="p.status">{{ p.status === 'in_stock' ? 'In Stock' : 'Out of Stock' }}</span></td>
+              <td>
+                <div class="row-actions">
+                  <button class="row-btn edit" @click="openEdit(p)" title="Edit">✎</button>
+                  <button class="row-btn delete" @click="confirmDelete(p)" title="Delete">✕</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
-    <div class="table-card">
-      <table class="data-table">
-        <thead>
-          <tr><th>Product</th><th>Category</th><th>Seller</th><th>Price</th><th>Unit</th><th>Stock</th><th>Status</th><th></th></tr>
-        </thead>
-        <tbody>
-          <tr v-for="p in filtered" :key="p.id">
-            <td>
-              <div class="cell-product" @click="openDetail(p)" style="cursor:pointer">
-                <div class="product-thumb">{{ p.name.charAt(0) }}</div>
-                <div class="name-cell">{{ p.name }}</div>
-              </div>
-            </td>
-            <td>{{ categoryLabel(p.category) }}</td>
-            <td>{{ p.seller }}</td>
-            <td>₱{{ p.price }}</td>
-            <td>{{ p.unit }}</td>
-            <td>
-              <span :class="{ 'stock-low': p.stock > 0 && p.stock < 30, 'stock-out': p.stock === 0 }">{{ p.stock }}</span>
-            </td>
-            <td><span class="status-badge" :class="p.status">{{ p.status === 'in_stock' ? 'In Stock' : 'Out of Stock' }}</span></td>
-            <td>
-              <div class="row-actions">
-                <button class="row-btn edit" @click="openEdit(p)" title="Edit">✎</button>
-                <button class="row-btn delete" @click="confirmDelete(p)" title="Delete">✕</button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div v-if="tab === 'pending'">
+      <div class="page-toolbar">
+        <div class="toolbar-left">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input v-model="pendingSearch" placeholder="Search pending products..." />
+          </div>
+          <select v-model="pendingCategory" class="filter-select">
+            <option value="">All Categories</option>
+            <option value="vegetables">Vegetables</option>
+            <option value="fruits">Fruits</option>
+            <option value="seafood">Seafood</option>
+            <option value="meat">Meat & Poultry</option>
+            <option value="bundles">Bundles</option>
+          </select>
+        </div>
+        <span class="result-count">{{ filteredPending.length }} pending</span>
+      </div>
+
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr><th>Product</th><th>Category</th><th>Seller</th><th>Price</th><th>Unit</th><th>Stock</th><th>Submitted</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr v-for="r in filteredPending" :key="r.id">
+              <td>
+                <div class="cell-product">
+                  <div class="product-thumb pending">{{ r.name.charAt(0) }}</div>
+                  <div><div class="name-cell">{{ r.name }}</div><div class="sub-cell">{{ r.description }}</div></div>
+                </div>
+              </td>
+              <td>{{ categoryLabel(r.category) }}</td>
+              <td>{{ r.seller }}</td>
+              <td>₱{{ r.price }}</td>
+              <td>{{ r.unit }}</td>
+              <td>{{ r.stock }}</td>
+              <td class="date-cell">{{ r.submittedAt }}</td>
+              <td>
+                <div class="review-actions">
+                  <button class="review-btn approve" @click="store.approveReview(r.id)" title="Approve">✓</button>
+                  <button class="review-btn reject" @click="openReject(r)" title="Reject">✕</button>
+                </div>
+              </td>
+            </tr>
+            <tr v-if="filteredPending.length === 0">
+              <td colspan="8" class="empty-cell">No pending product reviews</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <div class="modal-overlay" v-if="showDetail" @click="showDetail = false">
@@ -155,6 +223,25 @@
       </div>
     </div>
 
+    <div class="modal-overlay" v-if="showRejectModal" @click="closeReject">
+      <div class="modal-card modal-sm" @click.stop>
+        <div class="modal-top">
+          <span class="modal-title">Reject Product</span>
+          <button class="modal-close" @click="closeReject">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="confirm-text">Reject <strong>{{ rejectTarget?.name }}</strong> from <strong>{{ rejectTarget?.seller }}</strong>?</p>
+          <textarea v-model="rejectReason" class="reject-input" placeholder="Reason for rejection (optional)..." rows="3"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn secondary" @click="closeReject">Cancel</button>
+          <button class="modal-btn danger" @click="handleReject">Reject Product</button>
+        </div>
+      </div>
+    </div>
+
     <div class="modal-overlay" v-if="showDelete" @click="showDelete = false">
       <div class="modal-card modal-sm" @click.stop>
         <div class="modal-top">
@@ -183,9 +270,21 @@ const store = useProductsStore()
 const sellersStore = useSellersStore()
 const sellers = computed(() => sellersStore.sellers)
 
+const tab = ref('all')
 const search = ref('')
 const categoryFilter = ref('')
 const stockFilter = ref('')
+const pendingSearch = ref('')
+const pendingCategory = ref('')
+
+const filteredPending = computed(() => {
+  return store.pendingReviews.filter(r => {
+    const q = pendingSearch.value.toLowerCase()
+    const matchSearch = !q || r.name.toLowerCase().includes(q) || r.seller.toLowerCase().includes(q)
+    const matchCat = !pendingCategory.value || r.category === pendingCategory.value
+    return matchSearch && matchCat
+  })
+})
 
 const filtered = computed(() => {
   return store.products.filter(p => {
@@ -278,6 +377,24 @@ function handleDelete() {
   showDelete.value = false
   deleteTarget.value = null
 }
+
+const showRejectModal = ref(false)
+const rejectTarget = ref(null)
+const rejectReason = ref('')
+function openReject(r) {
+  rejectTarget.value = r
+  rejectReason.value = ''
+  showRejectModal.value = true
+}
+function closeReject() {
+  showRejectModal.value = false
+  rejectTarget.value = null
+  rejectReason.value = ''
+}
+function handleReject() {
+  if (rejectTarget.value) store.rejectReview(rejectTarget.value.id)
+  closeReject()
+}
 </script>
 
 <style scoped>
@@ -311,6 +428,29 @@ function handleDelete() {
 .row-btn.edit:hover { border-color: #059669; background: #f0fdf4; }
 .row-btn.delete { color: #dc2626; }
 .row-btn.delete:hover { border-color: #dc2626; background: #fef2f2; }
+.sub-cell { font-size: 11px; color: #9ca3af; margin-top: 2px; line-height: 1.3; max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.empty-cell { text-align: center; color: #9ca3af; padding: 40px 16px !important; font-style: italic; }
+.product-thumb.pending { background: #fef3c7; color: #d97706; }
+
+.review-actions { display: flex; gap: 4px; }
+.review-btn { width: 32px; height: 32px; border-radius: 6px; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; transition: all 0.15s; }
+.review-btn.approve { color: #059669; }
+.review-btn.approve:hover { border-color: #059669; background: #f0fdf4; }
+.review-btn.reject { color: #dc2626; }
+.review-btn.reject:hover { border-color: #dc2626; background: #fef2f2; }
+
+.reject-input { width: 100%; padding: 12px 14px; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 13px; font-family: 'Inter', sans-serif; color: #374151; outline: none; resize: vertical; margin-top: 12px; }
+.reject-input:focus { border-color: #dc2626; }
+
+.tabs-nav { display: flex; gap: 4px; background: #fff; border-radius: 12px; padding: 4px; border: 1px solid #e5e7eb; width: fit-content; }
+.tab-btn { display: flex; align-items: center; gap: 6px; padding: 10px 18px; border: none; background: transparent; border-radius: 8px; font-size: 13px; font-weight: 500; font-family: 'Inter', sans-serif; color: #6b7280; cursor: pointer; transition: all 0.15s; }
+.tab-btn:hover { color: #374151; }
+.tab-btn.active { background: #059669; color: #fff; }
+.tab-btn svg { width: 16px; height: 16px; }
+.tab-badge { background: #fff; color: #059669; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; min-width: 18px; text-align: center; }
+.tab-badge.warn { background: #fef3c7; color: #d97706; }
+.tab-btn.active .tab-badge { background: rgba(255,255,255,0.25); color: #fff; }
+.tab-btn.active .tab-badge.warn { background: rgba(255,255,255,0.25); color: #fff; }
 
 .status-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; }
 .status-badge.in_stock { background: #f0fdf4; color: #059669; }

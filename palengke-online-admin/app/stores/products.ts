@@ -51,5 +51,35 @@ export const useProductsStore = defineStore('products', () => {
     products.value = products.value.filter(p => p.id !== id)
   }
 
-  return { products, addProduct, updateProduct, deleteProduct }
+  const pendingReviews = ref([
+    { id: 'PR-001', name: 'Fresh Ampalaya', category: 'vegetables', seller: "Juan's Farm", sellerId: 1, price: 50, unit: 'kg', stock: 80, description: 'Freshly harvested bitter gourd from our organic farm.', submittedAt: '2026-05-15' },
+    { id: 'PR-002', name: 'Dried Fish (Daing)', category: 'seafood', seller: 'Fresh Fish Co.', sellerId: 3, price: 200, unit: 'pack', stock: 40, description: 'Sun-dried bangus, ready to fry. 500g per pack.', submittedAt: '2026-05-14' },
+    { id: 'PR-003', name: 'Sweet Corn (Native)', category: 'vegetables', seller: "Maria's Produce", sellerId: 2, price: 35, unit: 'pc', stock: 150, description: 'Native sweet corn from Bukidnon. Sweet and juicy.', submittedAt: '2026-05-14' },
+    { id: 'PR-004', name: 'Frozen Liempo', category: 'meat', seller: 'Meat Shop Inc.', sellerId: 4, price: 250, unit: 'kg', stock: 60, description: 'Premium pork belly, vacuum-sealed and frozen.', submittedAt: '2026-05-13' },
+    { id: 'PR-005', name: 'Banana (Saba)', category: 'fruits', seller: 'Sweet Harvest', sellerId: 6, price: 15, unit: 'pc', stock: 300, description: 'Fresh saba bananas, perfect for turon or boiling.', submittedAt: '2026-05-12' },
+  ])
+
+  function approveReview(id) {
+    const r = pendingReviews.value.find(p => p.id === id)
+    if (r) {
+      products.value.unshift({
+        id: nextId++,
+        name: r.name,
+        category: r.category,
+        seller: r.seller,
+        sellerId: r.sellerId,
+        price: r.price,
+        unit: r.unit,
+        stock: r.stock,
+        status: r.stock > 0 ? 'in_stock' : 'out_of_stock',
+      })
+      pendingReviews.value = pendingReviews.value.filter(p => p.id !== id)
+    }
+  }
+
+  function rejectReview(id) {
+    pendingReviews.value = pendingReviews.value.filter(p => p.id !== id)
+  }
+
+  return { products, addProduct, updateProduct, deleteProduct, pendingReviews, approveReview, rejectReview }
 })
