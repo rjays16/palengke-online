@@ -195,7 +195,7 @@
             <span>Cart</span>
           </div>
           <div class="nav-item" @click="goToActivity">
-            <ion-icon :icon="receipts"></ion-icon>
+            <ion-icon :icon="receipt"></ion-icon>
             <span>Activity</span>
           </div>
           <div class="nav-item" @click="goToProfile">
@@ -218,7 +218,7 @@ import {
 } from '@ionic/vue';
 import {
   chevronDown, notifications, wallet,
-  home, cart, receipts, person, search,
+  home, cart, receipt, person, search,
   location, star, cube
 } from 'ionicons/icons';
 

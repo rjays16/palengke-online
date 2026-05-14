@@ -54,6 +54,10 @@
               <div class="delivery-label">Delivery</div>
             </div>
           </div>
+          <div class="report-link" @click.stop="reportVendor">
+            <ion-icon :icon="flagOutline"></ion-icon>
+            <span>Report this store</span>
+          </div>
 
           <!-- Closed Notice -->
           <div class="closed-notice" v-if="!storeData.isOpen">
@@ -194,13 +198,14 @@ import { ref, computed, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import {
   IonPage, IonContent, IonIcon,
-  alertController, toastController
+  alertController, toastController, actionSheetController
 } from '@ionic/vue';
 import {
   arrowBackOutline, searchOutline, heartOutline, heart,
   chevronForwardOutline, timeOutline, addOutline,
-  closeCircleOutline, arrowForwardOutline
+  closeCircleOutline, arrowForwardOutline, flagOutline
 } from 'ionicons/icons';
+import { submitReport } from '../services/reportService';
 
 const router = useRouter();
 const route = useRoute();
@@ -414,6 +419,44 @@ const showPromoDetails = async () => {
 const onScroll = () => {};
 const goBack = () => router.back();
 const goToCart = () => router.push('/cart');
+
+const reportVendor = async () => {
+  const alert = await alertController.create({
+    header: 'Report this Store',
+    subHeader: storeData.value.name,
+    inputs: [
+      { name: 'subject', type: 'text', placeholder: 'Short summary' },
+      { name: 'description', type: 'textarea', placeholder: 'Describe the issue...' }
+    ],
+    buttons: [
+      { text: 'Cancel', role: 'cancel' },
+      {
+        text: 'Submit Report',
+        handler: async (data) => {
+          if (!data.description) {
+            const toast = await toastController.create({
+              message: 'Please describe the issue', duration: 2000, color: 'warning', position: 'top'
+            });
+            await toast.present();
+            return false
+          }
+          submitReport({
+            type: 'seller',
+            submittedBy: storeData.value.name,
+            subject: data.subject || 'Report: ' + storeData.value.name,
+            description: data.description,
+            priority: 'medium'
+          })
+          const toast = await toastController.create({
+            message: 'Report submitted! We will review it shortly.', duration: 2500, color: 'success', position: 'top'
+          });
+          await toast.present();
+        }
+      }
+    ]
+  });
+  await alert.present();
+};
 </script>
 
 <style scoped>
@@ -523,12 +566,15 @@ const goToCart = () => router.push('/cart');
 .closed-notice span { font-size: 13px; color: #E65100; font-weight: 500; }
 
 /* Promo Banner */
+.report-link { display: flex; align-items: center; gap: 6px; padding: 8px 0 12px; cursor: pointer; color: #999; font-size: 13px; border-bottom: 1px solid #f0f0f0; margin-bottom: 4px; }
+.report-link:hover { color: #f44336; }
+.report-link ion-icon { font-size: 16px; }
+
 .promo-banner {
-  display: flex; align-items: center; gap: 12px;
-  margin: 12px 20px;
-  background: #E8F5E9; border-radius: 14px;
-  padding: 12px 16px; cursor: pointer;
-  border: 1px solid #C8E6C9;
+  margin: 0 0 8px; background: #FFF8E1;
+  border-radius: 12px; padding: 12px 14px;
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer;
 }
 .promo-icon { font-size: 28px; }
 .promo-text { flex: 1; }

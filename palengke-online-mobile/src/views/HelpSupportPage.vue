@@ -68,9 +68,10 @@ import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonButtons, IonBackButton, IonIcon,
-  alertController, toastController
+  alertController, toastController, actionSheetController
 } from '@ionic/vue';
-import { searchOutline, chevronUpOutline, chevronDownOutline, alertCircleOutline, chatbubblesOutline, callOutline, mailOutline } from 'ionicons/icons';
+import { searchOutline, chevronUpOutline, chevronDownOutline, alertCircleOutline, chatbubblesOutline, callOutline, mailOutline, storefrontOutline, bicycleOutline, documentTextOutline } from 'ionicons/icons';
+import { submitReport } from '../services/reportService';
 
 const router = useRouter();
 const searchQuery = ref('');
@@ -125,15 +126,62 @@ const emailSupport = async () => {
 };
 
 const reportIssue = async () => {
+  const actionSheet = await actionSheetController.create({
+    header: 'What do you want to report?',
+    buttons: [
+      {
+        text: 'Report a Vendor',
+        icon: storefrontOutline,
+        handler: () => showReportForm('seller', 'Report vendor')
+      },
+      {
+        text: 'Report a Driver',
+        icon: bicycleOutline,
+        handler: () => showReportForm('driver', 'Report driver')
+      },
+      {
+        text: 'Other Issue',
+        icon: documentTextOutline,
+        handler: () => showReportForm('other', 'Report issue')
+      },
+      { text: 'Cancel', role: 'cancel' }
+    ]
+  });
+  await actionSheet.present();
+};
+
+const showReportForm = async (type, subject) => {
   const alert = await alertController.create({
-    header: 'Report an Issue',
-    inputs: [{ name: 'issue', type: 'textarea', placeholder: 'Describe your issue...' }],
+    header: subject,
+    inputs: [
+      { name: 'subject', type: 'text', placeholder: 'Short summary (e.g. Rude driver)' },
+      { name: 'description', type: 'textarea', placeholder: 'Describe what happened in detail...' }
+    ],
     buttons: [
       { text: 'Cancel', role: 'cancel' },
-      { text: 'Submit', handler: async () => {
-        const toast = await toastController.create({ message: 'Report submitted!', duration: 2000, color: 'success', position: 'top' });
-        await toast.present();
-      }}
+      {
+        text: 'Submit',
+        handler: async (data) => {
+          if (!data.description) {
+            const toast = await toastController.create({
+              message: 'Please describe the issue', duration: 2000, color: 'warning', position: 'top'
+            });
+            await toast.present();
+            return false
+          }
+          submitReport({
+            type,
+            submittedBy: 'Customer',
+            subject: data.subject || subject,
+            description: data.description,
+            priority: 'medium'
+          })
+          const toast = await toastController.create({
+            message: 'Report submitted! We will review it shortly.', duration: 2500, color: 'success', position: 'top'
+          });
+          await toast.present();
+        }
+      }
     ]
   });
   await alert.present();
