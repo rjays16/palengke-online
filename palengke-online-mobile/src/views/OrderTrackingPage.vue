@@ -113,6 +113,17 @@
 
       </div>
 
+      <input type="file" ref="driverPhotoInput" accept="image/*" @change="onDriverPhotoSelected" hidden>
+
+      <div class="custom-modal-overlay" v-if="showReportSuccess" @click="showReportSuccess = false">
+        <div class="custom-modal" @click.stop>
+          <img src="/assets/images/checkmark_success.png" alt="Success" class="success-img">
+          <h3>Report submitted!</h3>
+          <p>We will review it shortly.</p>
+          <ion-button expand="block" class="modal-btn" @click="showReportSuccess = false">OK</ion-button>
+        </div>
+      </div>
+
     </ion-content>
   </ion-page>
 </template>
@@ -129,7 +140,7 @@ import {
   chatbubbleOutline, callOutline, closeOutline, flagOutline,
   chevronUpOutline, chevronDownOutline
 } from 'ionicons/icons';
-import { submitReport } from '../services/reportService';
+import { submitReport, readFileAsDataURL } from '../services/reportService';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -263,15 +274,26 @@ const toggleSheet = () => { sheetExpanded.value = !sheetExpanded.value; };
 const openPromo = () => {};
 const chatDriver = () => router.push('/messages');
 const callDriver = () => { window.location.href = 'tel:+639123456789'; };
+const showReportSuccess = ref(false)
+const driverPhoto = ref('')
+const driverPhotoInput = ref(null)
+
+const onDriverPhotoSelected = (e) => {
+  const file = e.target.files?.[0]
+  if (file) readFileAsDataURL(file).then(url => { driverPhoto.value = url })
+}
+
 const reportDriver = async () => {
   const alert = await alertController.create({
     header: 'Report this Driver',
     subHeader: driverInfo.value.name,
+    message: driverPhoto.value ? '📷 Photo attached' : '',
     inputs: [
       { name: 'subject', type: 'text', placeholder: 'Short summary' },
       { name: 'description', type: 'textarea', placeholder: 'Describe the issue...' }
     ],
     buttons: [
+      { text: driverPhoto.value ? '📷 Change Photo' : '📷 Add Photo', handler: () => { driverPhotoInput.value?.click(); return false } },
       { text: 'Cancel', role: 'cancel' },
       {
         text: 'Submit Report',
@@ -288,12 +310,11 @@ const reportDriver = async () => {
             submittedBy: driverInfo.value.name,
             subject: data.subject || 'Report: ' + driverInfo.value.name,
             description: data.description,
+            image: driverPhoto.value || undefined,
             priority: 'medium'
           })
-          const toast = await toastController.create({
-            message: 'Report submitted! We will review it shortly.', duration: 2500, color: 'success', position: 'top'
-          });
-          await toast.present();
+          driverPhoto.value = ''
+          showReportSuccess.value = true
         }
       }
     ]
@@ -504,6 +525,23 @@ onUnmounted(() => {
 .driver-action-btn ion-icon { font-size: 20px; color: #475569; }
 .driver-action-btn.report-btn ion-icon { color: #94a3b8; }
 .driver-action-btn.report-btn:active ion-icon { color: #dc2626; }
+
+.custom-modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); display: flex;
+  align-items: center; justify-content: center;
+  z-index: 99999; padding: 32px;
+}
+.custom-modal {
+  background: white; border-radius: 24px;
+  padding: 40px 32px 24px; text-align: center;
+  width: 100%; max-width: 320px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.success-img { width: 80px; height: 80px; margin: 0 auto 16px; display: block; }
+.custom-modal h3 { font-size: 20px; font-weight: 700; color: #1a1a1a; margin: 0 0 8px; }
+.custom-modal p { font-size: 14px; color: #666; margin: 0 0 24px; }
+.modal-btn { --background: #059669; --border-radius: 12px; height: 48px; font-weight: 600; text-transform: none; font-family: inherit; }
 
 /* ── Cancel Order ────────────────────── */
 .cancel-order-section { margin: 16px 20px 0; padding-top: 16px; border-top: 1px solid #f1f5f9; }

@@ -190,6 +190,17 @@
       <span class="basket-amount">₱{{ totalCartAmount.toFixed(2) }}</span>
     </div>
 
+    <input type="file" ref="vendorPhotoInput" accept="image/*" @change="onVendorPhotoSelected" hidden>
+
+    <div class="custom-modal-overlay" v-if="showReportSuccess" @click="showReportSuccess = false">
+      <div class="custom-modal" @click.stop>
+        <img src="/assets/images/checkmark_success.png" alt="Success" class="success-img">
+        <h3>Report submitted!</h3>
+        <p>We will review it shortly.</p>
+        <ion-button expand="block" class="modal-btn" @click="showReportSuccess = false">OK</ion-button>
+      </div>
+    </div>
+
   </ion-page>
 </template>
 
@@ -205,7 +216,7 @@ import {
   chevronForwardOutline, timeOutline, addOutline,
   closeCircleOutline, arrowForwardOutline, flagOutline
 } from 'ionicons/icons';
-import { submitReport } from '../services/reportService';
+import { submitReport, readFileAsDataURL } from '../services/reportService';
 
 const router = useRouter();
 const route = useRoute();
@@ -420,15 +431,26 @@ const onScroll = () => {};
 const goBack = () => router.back();
 const goToCart = () => router.push('/cart');
 
+const showReportSuccess = ref(false)
+const vendorPhoto = ref('')
+const vendorPhotoInput = ref(null)
+
+const onVendorPhotoSelected = (e) => {
+  const file = e.target.files?.[0]
+  if (file) readFileAsDataURL(file).then(url => { vendorPhoto.value = url })
+}
+
 const reportVendor = async () => {
   const alert = await alertController.create({
     header: 'Report this Store',
     subHeader: storeData.value.name,
+    message: vendorPhoto.value ? '📷 Photo attached' : '',
     inputs: [
       { name: 'subject', type: 'text', placeholder: 'Short summary' },
       { name: 'description', type: 'textarea', placeholder: 'Describe the issue...' }
     ],
     buttons: [
+      { text: vendorPhoto.value ? '📷 Change Photo' : '📷 Add Photo', handler: () => { vendorPhotoInput.value?.click(); return false } },
       { text: 'Cancel', role: 'cancel' },
       {
         text: 'Submit Report',
@@ -445,12 +467,11 @@ const reportVendor = async () => {
             submittedBy: storeData.value.name,
             subject: data.subject || 'Report: ' + storeData.value.name,
             description: data.description,
+            image: vendorPhoto.value || undefined,
             priority: 'medium'
           })
-          const toast = await toastController.create({
-            message: 'Report submitted! We will review it shortly.', duration: 2500, color: 'success', position: 'top'
-          });
-          await toast.present();
+          vendorPhoto.value = ''
+          showReportSuccess.value = true
         }
       }
     ]
@@ -710,6 +731,23 @@ const reportVendor = async () => {
 
 .basket-float:active { transform: scale(0.98); }
 .basket-left { display: flex; align-items: center; gap: 12px; }
+
+.custom-modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); display: flex;
+  align-items: center; justify-content: center;
+  z-index: 99999; padding: 32px;
+}
+.custom-modal {
+  background: white; border-radius: 24px;
+  padding: 40px 32px 24px; text-align: center;
+  width: 100%; max-width: 320px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.success-img { width: 80px; height: 80px; margin: 0 auto 16px; display: block; }
+.custom-modal h3 { font-size: 20px; font-weight: 700; color: #1a1a1a; margin: 0 0 8px; }
+.custom-modal p { font-size: 14px; color: #666; margin: 0 0 24px; }
+.modal-btn { --background: #4CAF50; --border-radius: 12px; height: 48px; font-weight: 600; text-transform: none; font-family: inherit; }
 .basket-count {
   background: rgba(255,255,255,0.25);
   width: 28px; height: 28px; border-radius: 8px;

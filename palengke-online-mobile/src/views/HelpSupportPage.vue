@@ -58,7 +58,18 @@
         </div>
       </div>
 
+      <input type="file" ref="photoInputRef" accept="image/*" @change="onPhotoSelected" hidden>
     </ion-content>
+
+    <div class="custom-modal-overlay" v-if="showReportSuccess" @click="showReportSuccess = false">
+      <div class="custom-modal" @click.stop>
+        <img src="/assets/images/checkmark_success.png" alt="Success" class="success-img">
+        <h3>Report submitted!</h3>
+        <p>We will review it shortly.</p>
+        <ion-button expand="block" class="modal-btn" @click="showReportSuccess = false">OK</ion-button>
+      </div>
+    </div>
+
   </ion-page>
 </template>
 
@@ -150,14 +161,27 @@ const reportIssue = async () => {
   await actionSheet.present();
 };
 
+const showReportSuccess = ref(false)
+const reportPhoto = ref('')
+const photoInputRef = ref(null)
+
+const triggerPhotoPicker = () => { photoInputRef.value?.click() }
+
+const onPhotoSelected = (e) => {
+  const file = e.target.files?.[0]
+  if (file) readFileAsDataURL(file).then(url => { reportPhoto.value = url })
+}
+
 const showReportForm = async (type, subject) => {
   const alert = await alertController.create({
     header: subject,
+    message: reportPhoto.value ? '📷 Photo attached' : '',
     inputs: [
       { name: 'subject', type: 'text', placeholder: 'Short summary (e.g. Rude driver)' },
       { name: 'description', type: 'textarea', placeholder: 'Describe what happened in detail...' }
     ],
     buttons: [
+      { text: reportPhoto.value ? '📷 Change Photo' : '📷 Add Photo', handler: () => { triggerPhotoPicker(); return false } },
       { text: 'Cancel', role: 'cancel' },
       {
         text: 'Submit',
@@ -174,12 +198,11 @@ const showReportForm = async (type, subject) => {
             submittedBy: 'Customer',
             subject: data.subject || subject,
             description: data.description,
+            image: reportPhoto.value || undefined,
             priority: 'medium'
           })
-          const toast = await toastController.create({
-            message: 'Report submitted! We will review it shortly.', duration: 2500, color: 'success', position: 'top'
-          });
-          await toast.present();
+          reportPhoto.value = ''
+          showReportSuccess.value = true
         }
       }
     ]

@@ -6,6 +6,7 @@ export interface Report {
   submittedBy: string
   subject: string
   description: string
+  image?: string
   status: 'pending' | 'in_progress' | 'resolved' | 'dismissed'
   priority: 'high' | 'medium' | 'low'
   date: string
@@ -30,4 +31,13 @@ export function getReports(): Report[] {
   } catch {
     return []
   }
+}
+
+export function readFileAsDataURL(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
 }
