@@ -220,13 +220,22 @@
           </div>
           <div class="form-row">
             <div class="form-group flex-1">
-              <label>Image URL</label>
-              <input v-model="form.image" type="url" placeholder="https://images.unsplash.com/photo-..." class="form-input" />
+              <label>Product Image</label>
+              <div class="image-upload-row">
+                <input type="file" accept="image/*" ref="fileInput" @change="onFileSelect" class="hidden-input" />
+                <button type="button" class="upload-btn" @click="$refs.fileInput.click()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Upload Photo
+                </button>
+                <span class="upload-or">or</span>
+                <input v-model="form.image" type="url" placeholder="Paste image URL..." class="form-input" />
+              </div>
             </div>
           </div>
           <div class="image-preview" v-if="form.image">
             <img :src="form.image" class="preview-img" />
             <span class="preview-label">Preview</span>
+            <button type="button" class="remove-img-btn" @click="form.image = ''">✕</button>
           </div>
         </div>
         <div class="modal-actions">
@@ -323,6 +332,7 @@ function openDetail(p) {
 
 const showForm = ref(false)
 const editing = ref(false)
+const fileInput = ref(null)
 const form = ref({ name: '', category: '', sellerId: '', price: '', unit: '', stock: '', image: '' })
 
 function resetForm() {
@@ -356,6 +366,16 @@ function closeForm() {
 
 function onSellerChange() {
   const s = sellers.value.find(s => s.id === Number(form.value.sellerId))
+}
+
+function onFileSelect(e) {
+  const file = e.target.files?.[0]
+  if (!file) return
+  const reader = new FileReader()
+  reader.onload = (ev) => {
+    form.value.image = ev.target?.result || ''
+  }
+  reader.readAsDataURL(file)
 }
 
 const formValid = computed(() => {
@@ -482,7 +502,18 @@ function handleReject() {
 .modal-close svg { width: 18px; height: 18px; }
 .modal-body { padding: 20px 24px; }
 .detail-img { width: 100%; max-height: 180px; object-fit: cover; border-radius: 10px; margin-bottom: 16px; }
+.image-upload-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.image-upload-row .form-input { width: 0; flex: 1; min-width: 160px; }
+.upload-btn { display: flex; align-items: center; gap: 6px; padding: 9px 16px; background: #fff; border: 1.5px dashed #d1d5db; border-radius: 8px; font-size: 13px; font-family: 'Inter', sans-serif; color: #374151; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+.upload-btn:hover { border-color: #059669; color: #059669; background: #f0fdf4; }
+.upload-btn svg { width: 16px; height: 16px; }
+.upload-or { font-size: 12px; color: #9ca3af; white-space: nowrap; }
+.hidden-input { display: none; }
 .image-preview { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; }
+.preview-img { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; }
+.preview-label { font-size: 12px; color: #9ca3af; }
+.remove-img-btn { margin-left: auto; width: 24px; height: 24px; border-radius: 4px; border: none; background: #fef2f2; color: #dc2626; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+.remove-img-btn:hover { background: #dc2626; color: #fff; }
 .preview-img { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; }
 .preview-label { font-size: 12px; color: #9ca3af; }
 .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
