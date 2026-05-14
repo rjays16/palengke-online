@@ -16,7 +16,7 @@
         </div>
         <div class="detail-actions">
           <span class="status-badge-lg verified">Verified</span>
-          <button class="action-btn danger" @click="alert('Customer suspended')">Suspend</button>
+          <button class="action-btn danger" @click="showSuspendConfirm = true">Suspend</button>
         </div>
       </div>
 
@@ -90,6 +90,25 @@
       <h2>Customer not found</h2>
       <p>The customer you're looking for doesn't exist.</p>
     </div>
+
+    <div class="modal-overlay" v-if="showSuspendConfirm" @click="showSuspendConfirm = false">
+      <div class="modal-card" @click.stop>
+        <div class="modal-top">
+          <span class="modal-title">Suspend Customer</span>
+          <button class="modal-close" @click="showSuspendConfirm = false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="confirm-text">Are you sure you want to suspend <strong>{{ customer?.name }}</strong>?</p>
+          <p class="confirm-hint">They will not be able to place orders while suspended.</p>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn cancel" @click="showSuspendConfirm = false">Cancel</button>
+          <button class="modal-btn danger" @click="suspendCustomer">Suspend</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -107,6 +126,12 @@ const orderHistory = computed(() => {
 })
 
 const activities = computed(() => customersStore.getActivities())
+
+const showSuspendConfirm = ref(false)
+
+function suspendCustomer() {
+  showSuspendConfirm.value = false
+}
 
 const goBack = () => navigateTo('/customers')
 </script>
@@ -171,6 +196,23 @@ const goBack = () => navigateTo('/customers')
 .not-found { text-align: center; padding: 60px 20px; background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; }
 .not-found h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; color: #111827; margin-bottom: 8px; }
 .not-found p { color: #9ca3af; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 32px; backdrop-filter: blur(2px); }
+.modal-card { background: #fff; border-radius: 16px; width: 100%; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.modal-top { display: flex; align-items: center; gap: 10px; padding: 20px 24px; border-bottom: 1px solid #f3f4f6; }
+.modal-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 700; color: #111827; flex: 1; }
+.modal-close { width: 32px; height: 32px; border: none; background: none; cursor: pointer; color: #9ca3af; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.modal-close:hover { background: #f3f4f6; color: #374151; }
+.modal-close svg { width: 18px; height: 18px; }
+.modal-body { padding: 20px 24px; }
+.confirm-text { font-size: 14px; color: #374151; margin: 0 0 8px; line-height: 1.5; }
+.confirm-hint { font-size: 12px; color: #9ca3af; margin: 0; }
+.modal-actions { display: flex; gap: 10px; padding: 16px 24px 20px; border-top: 1px solid #f3f4f6; }
+.modal-btn { flex: 1; padding: 11px; border-radius: 8px; font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s; border: none; }
+.modal-btn.cancel { background: #f3f4f6; color: #6b7280; }
+.modal-btn.cancel:hover { background: #e5e7eb; }
+.modal-btn.danger { background: #dc2626; color: #fff; }
+.modal-btn.danger:hover { background: #b91c1c; }
 
 @media (max-width: 768px) {
   .detail-grid { grid-template-columns: 1fr; }
