@@ -18,9 +18,10 @@
         </div>
       </div>
 
-      <div class="bottom-sheet">
+      <div class="bottom-sheet" :class="{ collapsed: !sheetExpanded }">
         <div class="sheet-handle" @click="toggleSheet">
           <div class="handle-bar"></div>
+          <ion-icon :icon="sheetExpanded ? chevronDownOutline : chevronUpOutline" class="chevron-icon"></ion-icon>
         </div>
 
         <div class="delivery-badge-row">
@@ -46,66 +47,68 @@
           </div>
         </div>
 
-        <div class="progress-bar-section">
-          <div class="progress-track">
-            <div class="progress-step done">
-              <div class="step-icon store"><span>🏪</span></div>
-              <span class="step-label">Store</span>
-            </div>
-            <div class="progress-line" :class="{ done: currentStep >= 2 }"></div>
-            <div class="progress-step" :class="{ done: currentStep >= 2, active: currentStep === 2 }">
-              <div class="step-icon prep"><span>🧺</span></div>
-              <span class="step-label">Prep</span>
-            </div>
-            <div class="progress-line" :class="{ done: currentStep >= 3 }"></div>
-            <div class="progress-step" :class="{ done: currentStep >= 3, active: currentStep === 3 }">
-              <div class="step-icon rider"><span>🏍️</span></div>
-              <span class="step-label">Rider</span>
-            </div>
-            <div class="progress-line" :class="{ done: currentStep >= 4 }"></div>
-            <div class="progress-step" :class="{ active: currentStep === 4 }">
-              <div class="step-icon home"><span>🏠</span></div>
-              <span class="step-label">Arrived</span>
+        <div class="sheet-body" v-show="sheetExpanded">
+          <div class="progress-bar-section">
+            <div class="progress-track">
+              <div class="progress-step done">
+                <div class="step-icon store"><span>🏪</span></div>
+                <span class="step-label">Store</span>
+              </div>
+              <div class="progress-line" :class="{ done: currentStep >= 2 }"></div>
+              <div class="progress-step" :class="{ done: currentStep >= 2, active: currentStep === 2 }">
+                <div class="step-icon prep"><span>🧺</span></div>
+                <span class="step-label">Prep</span>
+              </div>
+              <div class="progress-line" :class="{ done: currentStep >= 3 }"></div>
+              <div class="progress-step" :class="{ done: currentStep >= 3, active: currentStep === 3 }">
+                <div class="step-icon rider"><span>🏍️</span></div>
+                <span class="step-label">Rider</span>
+              </div>
+              <div class="progress-line" :class="{ done: currentStep >= 4 }"></div>
+              <div class="progress-step" :class="{ active: currentStep === 4 }">
+                <div class="step-icon home"><span>🏠</span></div>
+                <span class="step-label">Arrived</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="promo-banner" v-if="showPromo">
-          <div class="promo-icon-wrap">🎁</div>
-          <div class="promo-text">
-            <p>{{ promoBanner.title }}</p>
-            <span>{{ promoBanner.subtitle }}</span>
+          <div class="promo-banner" v-if="showPromo">
+            <div class="promo-icon-wrap">🎁</div>
+            <div class="promo-text">
+              <p>{{ promoBanner.title }}</p>
+              <span>{{ promoBanner.subtitle }}</span>
+            </div>
+            <div class="promo-close" @click="showPromo = false">✕</div>
           </div>
-          <div class="promo-close" @click="showPromo = false">✕</div>
-        </div>
 
-        <div class="driver-card">
-          <img :src="driverInfo.image" class="driver-photo-img">
-          <div class="driver-info">
-            <p class="driver-name">{{ driverInfo.name }}</p>
-            <p class="driver-meta">
-              <span class="driver-rating">⭐ {{ driverInfo.rating }}</span>
-              <span class="driver-vehicle">{{ driverInfo.vehicleId }}</span>
-            </p>
+          <div class="driver-card">
+            <img :src="driverInfo.image" class="driver-photo-img">
+            <div class="driver-info">
+              <p class="driver-name">{{ driverInfo.name }}</p>
+              <p class="driver-meta">
+                <span class="driver-rating">⭐ {{ driverInfo.rating }}</span>
+                <span class="driver-vehicle">{{ driverInfo.vehicleId }}</span>
+              </p>
+            </div>
+            <div class="driver-actions">
+              <div class="driver-action-btn" @click="chatDriver">
+                <ion-icon :icon="chatbubbleOutline"></ion-icon>
+              </div>
+              <div class="driver-action-btn" @click="callDriver">
+                <ion-icon :icon="callOutline"></ion-icon>
+              </div>
+              <div class="driver-action-btn report-btn" @click="reportDriver">
+                <ion-icon :icon="flagOutline"></ion-icon>
+              </div>
+            </div>
           </div>
-          <div class="driver-actions">
-            <div class="driver-action-btn" @click="chatDriver">
-              <ion-icon :icon="chatbubbleOutline"></ion-icon>
-            </div>
-            <div class="driver-action-btn" @click="callDriver">
-              <ion-icon :icon="callOutline"></ion-icon>
-            </div>
-            <div class="driver-action-btn report-btn" @click="reportDriver">
-              <ion-icon :icon="flagOutline"></ion-icon>
-            </div>
-          </div>
-        </div>
 
-        <div class="cancel-order-section" v-if="canCancelOrder">
-          <ion-button expand="block" fill="outline" color="danger" class="cancel-order-btn" @click="cancelOrder">
-            <ion-icon slot="start" :icon="closeOutline"></ion-icon>
-            Cancel Order
-          </ion-button>
+          <div class="cancel-order-section" v-if="canCancelOrder">
+            <ion-button expand="block" fill="outline" color="danger" class="cancel-order-btn" @click="cancelOrder">
+              <ion-icon slot="start" :icon="closeOutline"></ion-icon>
+              Cancel Order
+            </ion-button>
+          </div>
         </div>
 
       </div>
@@ -123,7 +126,8 @@ import {
 } from '@ionic/vue';
 import {
   arrowBackOutline, shareOutline, chevronForwardOutline,
-  chatbubbleOutline, callOutline, closeOutline, flagOutline
+  chatbubbleOutline, callOutline, closeOutline, flagOutline,
+  chevronUpOutline, chevronDownOutline
 } from 'ionicons/icons';
 import { submitReport } from '../services/reportService';
 import L from 'leaflet';
@@ -254,7 +258,8 @@ const simulateDriverMovement = () => {
   }, 3000);
 };
 
-const toggleSheet = () => {};
+const sheetExpanded = ref(true);
+const toggleSheet = () => { sheetExpanded.value = !sheetExpanded.value; };
 const openPromo = () => {};
 const chatDriver = () => router.push('/messages');
 const callDriver = () => { window.location.href = 'tel:+639123456789'; };
@@ -350,15 +355,22 @@ onUnmounted(() => {
   box-shadow: 0 -6px 30px rgba(0,0,0,0.12);
   z-index: 1000; padding-bottom: 24px;
   max-height: 70vh; overflow-y: auto;
+  transition: border-radius 0.3s;
 }
+.bottom-sheet.collapsed {
+  max-height: none; border-radius: 28px 28px 0 0;
+}
+.sheet-body { transition: opacity 0.25s; }
+.bottom-sheet.collapsed .sheet-body { display: none; }
 .bottom-sheet::before {
   content: ''; position: absolute; top: 0; left: 0; right: 0;
   height: 1px; background: linear-gradient(90deg, transparent, rgba(5,150,105,0.15), transparent);
 }
 
-.sheet-handle { padding: 14px 0 10px; display: flex; justify-content: center; cursor: pointer; }
+.sheet-handle { padding: 14px 0 6px; display: flex; flex-direction: column; align-items: center; cursor: pointer; gap: 4px; }
 .handle-bar { width: 44px; height: 5px; background: #e0e0e0; border-radius: 3px; transition: background 0.2s; }
 .sheet-handle:hover .handle-bar { background: #ccc; }
+.chevron-icon { font-size: 18px; color: #94a3b8; transition: transform 0.3s; }
 
 /* ── Delivery Badge ───────────────────── */
 .delivery-badge-row { padding: 0 20px 14px; display: flex; gap: 8px; }
