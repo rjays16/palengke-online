@@ -110,7 +110,13 @@
 </template>
 
 <script setup>
-definePageMeta({ layout: 'default' })
+definePageMeta({
+  layout: 'default',
+  middleware: [(to, from) => {
+    const auth = useAuthStore()
+    if (!auth.canAccessSettings) return navigateTo('/dashboard')
+  }]
+})
 
 const profile = ref({ name: 'Super Admin', email: 'admin@palengke.com', phone: '+63 912 345 6789', role: 'Administrator' })
 const prefs = ref({ emailNotifs: true, smsAlerts: false, autoApprove: true, darkMode: false })

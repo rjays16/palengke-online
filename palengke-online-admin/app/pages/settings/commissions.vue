@@ -96,7 +96,13 @@
 </template>
 
 <script setup>
-definePageMeta({ layout: 'default' })
+definePageMeta({
+  layout: 'default',
+  middleware: [(to, from) => {
+    const auth = useAuthStore()
+    if (!auth.canAccessSettings) return navigateTo('/dashboard')
+  }]
+})
 
 const comm = ref({ platform: 10, driverPerDelivery: 25, driverPerKm: 5, minPayout: 500, schedule: 'weekly', processingFee: 15, referralBonus: 100 })
 const original = JSON.stringify(comm.value)

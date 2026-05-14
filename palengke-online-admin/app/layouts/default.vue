@@ -41,7 +41,7 @@
 
         <div class="nav-section-label">Management</div>
 
-        <NuxtLink to="/approvals" class="nav-item" active-class="active">
+        <NuxtLink to="/approvals" class="nav-item" active-class="active" v-if="auth.canApprove">
           <span class="nav-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 12l2 2 4-4"/>
@@ -193,34 +193,36 @@
           <span class="nav-label">Notifications</span>
         </NuxtLink>
 
-        <NuxtLink to="/settings" class="nav-item" active-class="active">
-          <span class="nav-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-            </svg>
-          </span>
-          <span class="nav-label">Settings</span>
-        </NuxtLink>
-        <NuxtLink to="/settings/fees" class="nav-item sub" active-class="active">
-          <span class="nav-label" style="padding-left:30px;font-size:12px">Delivery Fees</span>
-        </NuxtLink>
-        <NuxtLink to="/settings/commissions" class="nav-item sub" active-class="active">
-          <span class="nav-label" style="padding-left:30px;font-size:12px">Commissions</span>
-        </NuxtLink>
+        <template v-if="auth.canAccessSettings">
+          <NuxtLink to="/settings" class="nav-item" active-class="active">
+            <span class="nav-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+            </span>
+            <span class="nav-label">Settings</span>
+          </NuxtLink>
+          <NuxtLink to="/settings/fees" class="nav-item sub" active-class="active">
+            <span class="nav-label" style="padding-left:30px;font-size:12px">Delivery Fees</span>
+          </NuxtLink>
+          <NuxtLink to="/settings/commissions" class="nav-item sub" active-class="active">
+            <span class="nav-label" style="padding-left:30px;font-size:12px">Commissions</span>
+          </NuxtLink>
+        </template>
 
       </nav>
 
       <!-- Sidebar Footer: Admin Profile -->
-      <div class="sidebar-user">
-        <div class="user-avatar">
-          <span>A</span>
-        </div>
-        <div class="user-info">
-          <span class="user-name">Super Admin</span>
-          <span class="user-role">admin@palengke.com</span>
-        </div>
-        <button class="user-logout" @click="handleLogout" title="Logout">
+        <div class="sidebar-user">
+          <div class="user-avatar">
+            <span>{{ auth.user?.name?.charAt(0) || 'A' }}</span>
+          </div>
+          <div class="user-info">
+            <span class="user-name">{{ auth.user?.name || 'Admin' }}</span>
+            <span class="user-role">{{ auth.user?.email || 'admin@palengke.com' }}</span>
+          </div>
+          <button class="user-logout" @click="handleLogout" title="Logout">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
             <polyline points="16 17 21 12 16 7"/>
@@ -267,14 +269,14 @@
 
           <!-- Admin Avatar -->
           <button class="topbar-avatar" @click="toggleUserMenu">
-            <span>A</span>
+            <span>{{ auth.user?.name?.charAt(0) || 'A' }}</span>
           </button>
 
           <!-- User dropdown -->
           <div class="user-dropdown" v-if="showUserMenu" v-click-outside="() => showUserMenu = false">
             <div class="dropdown-header">
-              <strong>Super Admin</strong>
-              <span>admin@palengke.com</span>
+              <strong>{{ auth.user?.name || 'Admin' }}</strong>
+              <span>{{ auth.user?.email || 'admin@palengke.com' }}</span>
             </div>
             <div class="dropdown-divider"></div>
             <NuxtLink to="/settings" class="dropdown-item" @click="showUserMenu = false">
@@ -324,6 +326,7 @@
 <script setup>
 const route = useRoute()
 const router = useRouter()
+const auth = useAuthStore()
 
 const showUserMenu = ref(false)
 const showNotifPanel = ref(false)

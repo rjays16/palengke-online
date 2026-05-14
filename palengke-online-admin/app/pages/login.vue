@@ -24,7 +24,7 @@
               <input
                 v-model="form.email"
                 type="email"
-                placeholder="admin@palengke.com"
+                placeholder="superadmin@palengke.com"
                 class="field-input"
                 autocomplete="email"
                 @focus="emailFocused = true"
@@ -104,7 +104,9 @@
         </div>
 
         <div class="form-footer">
-          <p>Having trouble? <a href="mailto:support@palengke-online.com">Contact support</a></p>
+          <p>Super Admin: superadmin@palengke.com / superadmin123</p>
+          <p>Admin: admin@palengke.com / admin123</p>
+          <p style="margin-top:8px">Having trouble? <a href="mailto:support@palengke-online.com">Contact support</a></p>
         </div>
       </div>
     </div>

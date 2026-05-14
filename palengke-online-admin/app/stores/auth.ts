@@ -8,10 +8,20 @@ export const useAuthStore = defineStore('auth', () => {
   const isLoading = ref(false)
   const loginError = ref('')
 
+  const isSuperAdmin = computed(() => user.value?.role === 'superadmin')
+  const isAdmin = computed(() => user.value?.role === 'admin')
+
+  const canApprove = computed(() => isSuperAdmin.value)
+  const canAccessSettings = computed(() => isSuperAdmin.value)
+
   async function login(email: string, password: string) {
     isLoading.value = true
     loginError.value = ''
     await new Promise(resolve => setTimeout(resolve, 1000))
+    if (email === 'superadmin@palengke.com' && password === 'superadmin123') {
+      user.value = { email, name: 'Super Admin', role: 'superadmin' }
+      return true
+    }
     if (email === 'admin@palengke.com' && password === 'admin123') {
       user.value = { email, name: 'Admin', role: 'admin' }
       return true
@@ -25,5 +35,5 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
   }
 
-  return { user, isAuthenticated, isLoading, loginError, login, logout }
+  return { user, isAuthenticated, isLoading, loginError, isSuperAdmin, isAdmin, canApprove, login, logout }
 })

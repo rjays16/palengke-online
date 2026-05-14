@@ -85,7 +85,13 @@
 </template>
 
 <script setup>
-definePageMeta({ layout: 'default' })
+definePageMeta({
+  layout: 'default',
+  middleware: [(to, from) => {
+    const auth = useAuthStore()
+    if (!auth.canAccessSettings) return navigateTo('/dashboard')
+  }]
+})
 
 const fees = ref({ base: 45, perKm: 10, expressMultiplier: 1.8, freeThreshold: 500, maxRadius: 15, nightSurcharge: 25 })
 const original = JSON.stringify(fees.value)

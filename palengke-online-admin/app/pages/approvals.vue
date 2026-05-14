@@ -184,7 +184,13 @@
 </template>
 
 <script setup>
-definePageMeta({ layout: 'default' })
+definePageMeta({
+  layout: 'default',
+  middleware: [(to, from) => {
+    const auth = useAuthStore()
+    if (!auth.canApprove) return navigateTo('/dashboard')
+  }]
+})
 const store = useRegistrationsStore()
 
 const tab = ref('pending')
