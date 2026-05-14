@@ -24,7 +24,7 @@
           <tr><th>Order ID</th><th>Customer</th><th>Seller</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th><th>Date</th><th></th></tr>
         </thead>
         <tbody>
-          <tr v-for="o in filteredOrders" :key="o.id">
+          <tr v-for="o in paginatedOrders" :key="o.id">
             <td class="id-cell">#{{ o.id }}</td>
             <td><span class="name-cell">{{ o.customer }}</span></td>
             <td>{{ o.seller }}</td>
@@ -37,6 +37,7 @@
           </tr>
         </tbody>
       </table>
+      <PaginationBar v-model="orderPage" :total="filteredOrders.length" :perPage="orderPerPage" />
     </div>
   </div>
 </template>
@@ -55,6 +56,14 @@ const filteredOrders = computed(() => {
     return matchSearch && matchStatus
   })
 })
+
+const orderPage = ref(1)
+const orderPerPage = ref(10)
+const paginatedOrders = computed(() => {
+  const start = (orderPage.value - 1) * orderPerPage.value
+  return filteredOrders.value.slice(start, start + orderPerPage.value)
+})
+watch([search, statusFilter], () => { orderPage.value = 1 })
 
 const goToOrder = (id) => navigateTo('/orders/' + id)
 </script>

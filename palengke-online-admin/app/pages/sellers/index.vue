@@ -16,7 +16,7 @@
           <tr><th>Store</th><th>Owner</th><th>Category</th><th>Products</th><th>Revenue</th><th>Rating</th><th>Status</th><th>Joined</th><th></th></tr>
         </thead>
         <tbody>
-          <tr v-for="s in filteredSellers" :key="s.id">
+          <tr v-for="s in paginatedSellers" :key="s.id">
             <td>
               <div class="cell-store">
                 <div class="store-avatar">{{ s.name.charAt(0) }}</div>
@@ -34,6 +34,7 @@
           </tr>
         </tbody>
       </table>
+      <PaginationBar v-model="sellerPage" :total="filteredSellers.length" :perPage="sellerPerPage" />
     </div>
   </div>
 </template>
@@ -49,6 +50,14 @@ const filteredSellers = computed(() => {
   const q = search.value.toLowerCase()
   return sellersStore.sellers.filter(s => s.name.toLowerCase().includes(q) || s.owner.toLowerCase().includes(q) || s.category.toLowerCase().includes(q))
 })
+
+const sellerPage = ref(1)
+const sellerPerPage = ref(10)
+const paginatedSellers = computed(() => {
+  const start = (sellerPage.value - 1) * sellerPerPage.value
+  return filteredSellers.value.slice(start, start + sellerPerPage.value)
+})
+watch(search, () => { sellerPage.value = 1 })
 
 const goToSeller = (id) => navigateTo('/sellers/' + id)
 </script>

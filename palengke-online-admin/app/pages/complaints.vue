@@ -51,7 +51,7 @@
             <tr><th>ID</th><th>Complainant</th><th>Respondent</th><th>Subject</th><th>Category</th><th>Priority</th><th>Status</th><th>Date</th><th></th></tr>
           </thead>
           <tbody>
-            <tr v-for="c in filtered" :key="c.id" class="clickable-row" @click="openDetail(c)">
+            <tr v-for="c in paginatedComplaints" :key="c.id" class="clickable-row" @click="openDetail(c)">
               <td class="id-cell">{{ c.id }}</td>
               <td>
                 <span class="name-cell">{{ c.complainant }}</span>
@@ -77,6 +77,7 @@
             </tr>
           </tbody>
         </table>
+        <PaginationBar v-model="complaintPage" :total="filtered.length" :perPage="complaintPerPage" />
       </div>
     </div>
 
@@ -217,6 +218,14 @@ const filtered = computed(() => {
     return matchSearch && matchStatus && matchCategory && matchPriority
   })
 })
+
+const complaintPage = ref(1)
+const complaintPerPage = ref(10)
+const paginatedComplaints = computed(() => {
+  const start = (complaintPage.value - 1) * complaintPerPage.value
+  return filtered.value.slice(start, start + complaintPerPage.value)
+})
+watch([search, statusFilter, categoryFilter, priorityFilter], () => { complaintPage.value = 1 })
 
 const circumference = 2 * Math.PI * 40
 

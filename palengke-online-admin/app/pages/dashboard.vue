@@ -60,7 +60,7 @@
           <tr><th>Order ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr>
         </thead>
         <tbody>
-          <tr v-for="o in recentOrders" :key="o.id">
+          <tr v-for="o in paginatedRecent" :key="o.id">
             <td class="order-id">#{{ o.id }}</td>
             <td>{{ o.customer }}</td>
             <td>{{ o.items }}</td>
@@ -70,6 +70,7 @@
           </tr>
         </tbody>
       </table>
+      <PaginationBar v-model="dashPage" :total="recentOrders.length" :perPage="dashPerPage" />
     </div>
   </div>
 </template>
@@ -77,6 +78,13 @@
 <script setup>
 definePageMeta({ layout: 'default' })
 const { stats, barData, orderStatusData, recentOrders } = storeToRefs(useDashboardStore())
+
+const dashPage = ref(1)
+const dashPerPage = ref(5)
+const paginatedRecent = computed(() => {
+  const start = (dashPage.value - 1) * dashPerPage.value
+  return recentOrders.value.slice(start, start + dashPerPage.value)
+})
 </script>
 
 <style scoped>

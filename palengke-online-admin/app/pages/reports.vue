@@ -42,7 +42,7 @@
             <tr><th>ID</th><th>Type</th><th>Submitted By</th><th>Subject</th><th>Priority</th><th>Status</th><th>Date</th><th></th></tr>
           </thead>
           <tbody>
-            <tr v-for="r in filtered" :key="r.id">
+            <tr v-for="r in paginatedReports" :key="r.id">
               <td class="id-cell">{{ r.id }}</td>
               <td><span class="type-badge" :class="r.type">{{ r.type === 'seller' ? 'Seller' : r.type === 'driver' ? 'Driver' : 'Customer' }}</span></td>
               <td><span class="name-cell">{{ r.submittedBy }}</span></td>
@@ -64,6 +64,7 @@
             </tr>
           </tbody>
         </table>
+        <PaginationBar v-model="reportPage" :total="filtered.length" :perPage="reportPerPage" />
       </div>
     </div>
 
@@ -125,6 +126,14 @@ const filtered = computed(() => {
     return matchSearch && matchType && matchStatus
   })
 })
+
+const reportPage = ref(1)
+const reportPerPage = ref(10)
+const paginatedReports = computed(() => {
+  const start = (reportPage.value - 1) * reportPerPage.value
+  return filtered.value.slice(start, start + reportPerPage.value)
+})
+watch([search, typeFilter, statusFilter], () => { reportPage.value = 1 })
 
 function statusLabel(s) {
   return s === 'in_progress' ? 'In Progress' : s.charAt(0).toUpperCase() + s.slice(1)

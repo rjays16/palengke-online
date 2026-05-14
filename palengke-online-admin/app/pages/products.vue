@@ -46,7 +46,7 @@
             <tr><th>Product</th><th>Category</th><th>Seller</th><th>Price</th><th>Unit</th><th>Stock</th><th>Status</th><th></th></tr>
           </thead>
           <tbody>
-            <tr v-for="p in filtered" :key="p.id">
+            <tr v-for="p in paginatedProducts" :key="p.id">
               <td>
                   <div class="cell-product" @click="openDetail(p)" style="cursor:pointer">
                     <img v-if="p.image" :src="p.image" class="product-thumb-img" />
@@ -71,6 +71,7 @@
             </tr>
           </tbody>
         </table>
+        <PaginationBar v-model="productPage" :total="filtered.length" :perPage="productPerPage" />
       </div>
     </div>
 
@@ -99,7 +100,7 @@
             <tr><th>Product</th><th>Category</th><th>Seller</th><th>Price</th><th>Unit</th><th>Stock</th><th>Submitted</th><th></th></tr>
           </thead>
           <tbody>
-            <tr v-for="r in filteredPending" :key="r.id">
+            <tr v-for="r in paginatedPending" :key="r.id">
               <td>
                 <div class="cell-product">
                     <img v-if="r.image" :src="r.image" class="product-thumb-img" />
@@ -125,6 +126,7 @@
             </tr>
           </tbody>
         </table>
+        <PaginationBar v-model="pendingPage" :total="filteredPending.length" :perPage="pendingPerPage" />
       </div>
     </div>
 
@@ -317,6 +319,22 @@ const filtered = computed(() => {
     return matchSearch && matchCat && matchStock
   })
 })
+
+const productPage = ref(1)
+const productPerPage = ref(10)
+const paginatedProducts = computed(() => {
+  const start = (productPage.value - 1) * productPerPage.value
+  return filtered.value.slice(start, start + productPerPage.value)
+})
+watch([search, categoryFilter, stockFilter], () => { productPage.value = 1 })
+
+const pendingPage = ref(1)
+const pendingPerPage = ref(10)
+const paginatedPending = computed(() => {
+  const start = (pendingPage.value - 1) * pendingPerPage.value
+  return filteredPending.value.slice(start, start + pendingPerPage.value)
+})
+watch([pendingSearch, pendingCategory], () => { pendingPage.value = 1 })
 
 function categoryLabel(cat) {
   const map = { vegetables: 'Vegetables', fruits: 'Fruits', seafood: 'Seafood', meat: 'Meat & Poultry', bundles: 'Bundles' }

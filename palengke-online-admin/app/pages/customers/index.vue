@@ -16,7 +16,7 @@
           <tr><th>Customer</th><th>Email</th><th>Phone</th><th>Orders</th><th>Spent</th><th>Joined</th><th></th></tr>
         </thead>
         <tbody>
-          <tr v-for="c in filteredCustomers" :key="c.id">
+          <tr v-for="c in paginatedCustomers" :key="c.id">
             <td>
               <div class="cell-customer">
                 <div class="customer-avatar">{{ c.name.charAt(0) }}{{ c.name.split(' ')[1]?.charAt(0) }}</div>
@@ -32,6 +32,7 @@
           </tr>
         </tbody>
       </table>
+      <PaginationBar v-model="customerPage" :total="filteredCustomers.length" :perPage="customerPerPage" />
     </div>
   </div>
 </template>
@@ -47,6 +48,14 @@ const filteredCustomers = computed(() => {
   const q = search.value.toLowerCase()
   return customersStore.customers.filter(c => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q))
 })
+
+const customerPage = ref(1)
+const customerPerPage = ref(10)
+const paginatedCustomers = computed(() => {
+  const start = (customerPage.value - 1) * customerPerPage.value
+  return filteredCustomers.value.slice(start, start + customerPerPage.value)
+})
+watch(search, () => { customerPage.value = 1 })
 
 const goToCustomer = (id) => navigateTo('/customers/' + id)
 </script>

@@ -18,7 +18,7 @@
           <tr><th>Payout ID</th><th>Recipient</th><th>Type</th><th>Amount</th><th>Account</th><th>Status</th><th>Date</th><th></th></tr>
         </thead>
         <tbody>
-          <tr v-for="p in filteredPayouts" :key="p.id">
+          <tr v-for="p in paginatedPayouts" :key="p.id">
             <td class="id-cell">#{{ p.id }}</td>
             <td><span class="name-cell">{{ p.recipient }}</span></td>
             <td>{{ p.type }}</td>
@@ -30,6 +30,7 @@
           </tr>
         </tbody>
       </table>
+      <PaginationBar v-model="payoutPage" :total="filteredPayouts.length" :perPage="payoutPerPage" />
     </div>
   </div>
 </template>
@@ -54,6 +55,14 @@ const filteredPayouts = computed(() => {
   if (!statusFilter.value) return payouts.value
   return payouts.value.filter(p => p.status === statusFilter.value)
 })
+
+const payoutPage = ref(1)
+const payoutPerPage = ref(10)
+const paginatedPayouts = computed(() => {
+  const start = (payoutPage.value - 1) * payoutPerPage.value
+  return filteredPayouts.value.slice(start, start + payoutPerPage.value)
+})
+watch(statusFilter, () => { payoutPage.value = 1 })
 </script>
 
 <style scoped>

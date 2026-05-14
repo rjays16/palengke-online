@@ -16,7 +16,7 @@
           <tr><th>Driver</th><th>Vehicle</th><th>Plate #</th><th>Deliveries</th><th>Rating</th><th>Earnings</th><th>Status</th><th>Joined</th><th></th></tr>
         </thead>
         <tbody>
-          <tr v-for="d in filteredDrivers" :key="d.id">
+          <tr v-for="d in paginatedDrivers" :key="d.id">
             <td>
               <div class="cell-driver">
                 <div class="driver-avatar">{{ d.name.charAt(0) }}</div>
@@ -34,6 +34,7 @@
           </tr>
         </tbody>
       </table>
+      <PaginationBar v-model="driverPage" :total="filteredDrivers.length" :perPage="driverPerPage" />
     </div>
   </div>
 </template>
@@ -49,6 +50,14 @@ const filteredDrivers = computed(() => {
   const q = search.value.toLowerCase()
   return driversStore.drivers.filter(d => d.name.toLowerCase().includes(q) || d.plate.toLowerCase().includes(q))
 })
+
+const driverPage = ref(1)
+const driverPerPage = ref(10)
+const paginatedDrivers = computed(() => {
+  const start = (driverPage.value - 1) * driverPerPage.value
+  return filteredDrivers.value.slice(start, start + driverPerPage.value)
+})
+watch(search, () => { driverPage.value = 1 })
 
 const goToDriver = (id) => navigateTo('/drivers/' + id)
 </script>

@@ -18,7 +18,7 @@
           <tr><th>ID</th><th>Order</th><th>Reported By</th><th>Against</th><th>Reason</th><th>Priority</th><th>Status</th><th>Date</th><th></th></tr>
         </thead>
         <tbody>
-          <tr v-for="d in filteredDisputes" :key="d.id">
+          <tr v-for="d in paginatedDisputes" :key="d.id">
             <td class="id-cell">#{{ d.id }}</td>
             <td class="id-cell">#{{ d.orderId }}</td>
             <td><span class="name-cell">{{ d.reportedBy }}</span></td>
@@ -31,6 +31,7 @@
           </tr>
         </tbody>
       </table>
+      <PaginationBar v-model="disputePage" :total="filteredDisputes.length" :perPage="disputePerPage" />
     </div>
   </div>
 </template>
@@ -53,6 +54,14 @@ const filteredDisputes = computed(() => {
   if (!statusFilter.value) return disputes.value
   return disputes.value.filter(d => d.status === statusFilter.value)
 })
+
+const disputePage = ref(1)
+const disputePerPage = ref(10)
+const paginatedDisputes = computed(() => {
+  const start = (disputePage.value - 1) * disputePerPage.value
+  return filteredDisputes.value.slice(start, start + disputePerPage.value)
+})
+watch(statusFilter, () => { disputePage.value = 1 })
 </script>
 
 <style scoped>

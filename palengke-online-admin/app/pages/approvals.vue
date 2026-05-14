@@ -34,7 +34,7 @@
             <tr><th>ID</th><th>Type</th><th>Applicant</th><th>Store / Vehicle</th><th>Submitted</th><th></th></tr>
           </thead>
           <tbody>
-            <tr v-for="r in filtered" :key="r.id" class="clickable-row" @click="openDetail(r)">
+            <tr v-for="r in paginatedPending" :key="r.id" class="clickable-row" @click="openDetail(r)">
               <td class="id-cell">{{ r.id }}</td>
               <td><span class="role-badge" :class="r.role">{{ r.role === 'seller' ? 'Seller' : 'Driver' }}</span></td>
               <td>
@@ -61,6 +61,7 @@
             </tr>
           </tbody>
         </table>
+        <PaginationBar v-model="pendingPage" :total="filtered.length" :perPage="pendingPerPage" />
       </div>
     </div>
 
@@ -71,7 +72,7 @@
             <tr><th>ID</th><th>Type</th><th>Applicant</th><th>Decision</th><th>Reviewed By</th><th>Date</th><th>Reason</th></tr>
           </thead>
           <tbody>
-            <tr v-for="r in store.history" :key="r.id">
+            <tr v-for="r in paginatedHistory" :key="r.id">
               <td class="id-cell">{{ r.id }}</td>
               <td><span class="role-badge" :class="r.role">{{ r.role === 'seller' ? 'Seller' : 'Driver' }}</span></td>
               <td class="name-cell">{{ r.firstName }} {{ r.lastName }}</td>
@@ -85,6 +86,7 @@
             </tr>
           </tbody>
         </table>
+        <PaginationBar v-model="historyPage" :total="store.history.length" :perPage="historyPerPage" />
       </div>
     </div>
 
@@ -207,6 +209,21 @@ const filtered = computed(() => {
     const matchRole = !roleFilter.value || r.role === roleFilter.value
     return matchSearch && matchRole
   })
+})
+
+const pendingPage = ref(1)
+const pendingPerPage = ref(10)
+const paginatedPending = computed(() => {
+  const start = (pendingPage.value - 1) * pendingPerPage.value
+  return filtered.value.slice(start, start + pendingPerPage.value)
+})
+watch([search, roleFilter], () => { pendingPage.value = 1 })
+
+const historyPage = ref(1)
+const historyPerPage = ref(10)
+const paginatedHistory = computed(() => {
+  const start = (historyPage.value - 1) * historyPerPage.value
+  return store.history.slice(start, start + historyPerPage.value)
 })
 
 function areaLabel(area) {
