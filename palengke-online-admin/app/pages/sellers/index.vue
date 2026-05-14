@@ -40,24 +40,14 @@
 
 <script setup>
 definePageMeta({ layout: 'default' })
+const sellersStore = useSellersStore()
 
 const search = ref('')
 
-const sellers = ref([
-  { id: 1, name: "Juan's Farm", owner: 'Juan dela Cruz', category: 'Vegetables', location: 'Brgy. San Isidro', products: 48, revenue: 45200, rating: 4.8, status: 'active', joined: '2025-11-03' },
-  { id: 2, name: "Ana's Store", owner: 'Ana Gonzales', category: 'Fruits', location: 'Brgy. Maligaya', products: 36, revenue: 38400, rating: 4.6, status: 'active', joined: '2025-12-15' },
-  { id: 3, name: 'Pedro Merchants', owner: 'Pedro Reyes', category: 'Seafood', location: 'Brgy. Baybay', products: 52, revenue: 62100, rating: 4.9, status: 'active', joined: '2025-10-20' },
-  { id: 4, name: "Liza's Shop", owner: 'Liza Morales', category: 'Meat & Poultry', location: 'Brgy. Central', products: 28, revenue: 29500, rating: 4.4, status: 'active', joined: '2026-01-08' },
-  { id: 5, name: 'FreshMart', owner: 'Carlo Bautista', category: 'Bundles', location: 'Brgy. New Town', products: 44, revenue: 51200, rating: 4.7, status: 'active', joined: '2025-09-12' },
-  { id: 6, name: 'Rosa\'s Produce', owner: 'Rosa Villanueva', category: 'Vegetables', location: 'Brgy. Silangan', products: 31, revenue: 21800, rating: 4.3, status: 'inactive', joined: '2026-02-20' },
-  { id: 7, name: 'Ben\'s Butchery', owner: 'Ben Torres', category: 'Meat & Poultry', location: 'Brgy. Kanluran', products: 24, revenue: 35600, rating: 4.5, status: 'active', joined: '2025-12-01' },
-  { id: 8, name: 'Diana\'s Delights', owner: 'Diana Rivera', category: 'Fruits', location: 'Brgy. Poblacion', products: 19, revenue: 15200, rating: 4.2, status: 'inactive', joined: '2026-03-14' },
-])
-
 const filteredSellers = computed(() => {
-  if (!search.value) return sellers.value
+  if (!search.value) return sellersStore.sellers
   const q = search.value.toLowerCase()
-  return sellers.value.filter(s => s.name.toLowerCase().includes(q) || s.owner.toLowerCase().includes(q) || s.category.toLowerCase().includes(q))
+  return sellersStore.sellers.filter(s => s.name.toLowerCase().includes(q) || s.owner.toLowerCase().includes(q) || s.category.toLowerCase().includes(q))
 })
 
 const goToSeller = (id) => navigateTo('/sellers/' + id)

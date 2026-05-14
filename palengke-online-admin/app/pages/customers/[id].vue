@@ -96,38 +96,17 @@
 <script setup>
 definePageMeta({ layout: 'default' })
 const route = useRoute()
+const customersStore = useCustomersStore()
 
-const customers = [
-  { id: 1, name: 'Maria Santos', email: 'maria.santos@email.com', phone: '0912-345-6789', orders: 28, spent: 18400, joined: '2025-11-20' },
-  { id: 2, name: 'Juan dela Cruz', email: 'juan.dc@email.com', phone: '0923-456-7890', orders: 15, spent: 9200, joined: '2025-12-05' },
-  { id: 3, name: 'Ana Gonzales', email: 'ana.g@email.com', phone: '0934-567-8901', orders: 42, spent: 32100, joined: '2025-10-15' },
-  { id: 4, name: 'Pedro Reyes', email: 'pedro.r@email.com', phone: '0945-678-9012', orders: 8, spent: 4600, joined: '2026-01-22' },
-  { id: 5, name: 'Liza Morales', email: 'liza.m@email.com', phone: '0956-789-0123', orders: 19, spent: 12100, joined: '2025-11-08' },
-  { id: 6, name: 'Carlo Bautista', email: 'carlo.b@email.com', phone: '0967-890-1234', orders: 33, spent: 25400, joined: '2025-09-30' },
-  { id: 7, name: 'Rosa Villanueva', email: 'rosa.v@email.com', phone: '0978-901-2345', orders: 11, spent: 6800, joined: '2026-02-14' },
-  { id: 8, name: 'Ben Torres', email: 'ben.t@email.com', phone: '0989-012-3456', orders: 24, spent: 17500, joined: '2025-12-28' },
-  { id: 9, name: 'Diana Rivera', email: 'diana.r@email.com', phone: '0990-123-4567', orders: 6, spent: 3200, joined: '2026-03-10' },
-  { id: 10, name: 'Mark Lim', email: 'mark.lim@email.com', phone: '0901-234-5678', orders: 37, spent: 28900, joined: '2025-10-05' },
-]
-
-const customer = computed(() => customers.find(c => c.id === Number(route.params.id)))
+const customer = computed(() => customersStore.getCustomerById(Number(route.params.id)))
 const activeTab = ref('orders')
 
-const orderHistory = ref([
-  { id: 'ORD-1042', seller: "Juan's Farm", items: 4, total: 1280, status: 'delivered', date: '2026-05-14' },
-  { id: 'ORD-1038', seller: "Juan's Farm", items: 3, total: 960, status: 'cancelled', date: '2026-05-13' },
-  { id: 'ORD-1034', seller: "Juan's Farm", items: 3, total: 750, status: 'delivered', date: '2026-05-12' },
-  { id: 'ORD-1029', seller: 'FreshMart', items: 5, total: 1640, status: 'delivered', date: '2026-05-10' },
-  { id: 'ORD-1023', seller: "Ana's Store", items: 2, total: 380, status: 'delivered', date: '2026-05-08' },
-])
+const orderHistory = computed(() => {
+  if (!customer.value) return []
+  return customersStore.getOrderHistory(customer.value.id)
+})
 
-const activities = ref([
-  { id: 1, type: 'order', text: 'Placed order #ORD-1042', time: '2 hours ago' },
-  { id: 2, type: 'payment', text: 'Payment confirmed for #ORD-1042 via GCash', time: '2 hours ago' },
-  { id: 3, type: 'review', text: 'Left a 5-star review for Juan\'s Farm', time: '1 day ago' },
-  { id: 4, type: 'account', text: 'Updated delivery address', time: '3 days ago' },
-  { id: 5, type: 'order', text: 'Placed order #ORD-1034', time: '5 days ago' },
-])
+const activities = computed(() => customersStore.getActivities())
 
 const goBack = () => navigateTo('/customers')
 </script>

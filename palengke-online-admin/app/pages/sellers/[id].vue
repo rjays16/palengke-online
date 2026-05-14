@@ -127,46 +127,23 @@
 <script setup>
 definePageMeta({ layout: 'default' })
 const route = useRoute()
+const sellersStore = useSellersStore()
 
-const sellers = [
-  { id: 1, name: "Juan's Farm", owner: 'Juan dela Cruz', category: 'Vegetables', location: 'Brgy. San Isidro', products: 48, revenue: 45200, rating: 4.8, status: 'active', joined: '2025-11-03', contact: { phone: '0917-111-2233', email: 'juan.farm@email.com' } },
-  { id: 2, name: "Ana's Store", owner: 'Ana Gonzales', category: 'Fruits', location: 'Brgy. Maligaya', products: 36, revenue: 38400, rating: 4.6, status: 'active', joined: '2025-12-15', contact: { phone: '0917-222-3344', email: 'ana.store@email.com' } },
-  { id: 3, name: 'Pedro Merchants', owner: 'Pedro Reyes', category: 'Seafood', location: 'Brgy. Baybay', products: 52, revenue: 62100, rating: 4.9, status: 'active', joined: '2025-10-20', contact: { phone: '0917-333-4455', email: 'pedro.merchant@email.com' } },
-  { id: 4, name: "Liza's Shop", owner: 'Liza Morales', category: 'Meat & Poultry', location: 'Brgy. Central', products: 28, revenue: 29500, rating: 4.4, status: 'active', joined: '2026-01-08', contact: { phone: '0917-444-5566', email: 'liza.shop@email.com' } },
-  { id: 5, name: 'FreshMart', owner: 'Carlo Bautista', category: 'Bundles', location: 'Brgy. New Town', products: 44, revenue: 51200, rating: 4.7, status: 'active', joined: '2025-09-12', contact: { phone: '0917-555-6677', email: 'freshmart@email.com' } },
-  { id: 6, name: "Rosa's Produce", owner: 'Rosa Villanueva', category: 'Vegetables', location: 'Brgy. Silangan', products: 31, revenue: 21800, rating: 4.3, status: 'inactive', joined: '2026-02-20', contact: { phone: '0917-666-7788', email: 'rosa.produce@email.com' } },
-  { id: 7, name: "Ben's Butchery", owner: 'Ben Torres', category: 'Meat & Poultry', location: 'Brgy. Kanluran', products: 24, revenue: 35600, rating: 4.5, status: 'active', joined: '2025-12-01', contact: { phone: '0917-777-8899', email: 'ben.butchery@email.com' } },
-  { id: 8, name: "Diana's Delights", owner: 'Diana Rivera', category: 'Fruits', location: 'Brgy. Poblacion', products: 19, revenue: 15200, rating: 4.2, status: 'inactive', joined: '2026-03-14', contact: { phone: '0917-888-9900', email: 'diana.delights@email.com' } },
-]
-
-const seller = computed(() => sellers.find(s => s.id === Number(route.params.id)))
-
+const seller = computed(() => sellersStore.getSellerById(Number(route.params.id)))
 const activeTab = ref('products')
 
 const mockProducts = computed(() => {
-  const all = [
-    { id: 1, name: 'Fresh Tomatoes', price: 60, unit: 'kg', stock: 120 },
-    { id: 2, name: 'Organic Eggplant', price: 45, unit: 'kg', stock: 85 },
-    { id: 3, name: 'Ripe Mangoes', price: 120, unit: 'kg', stock: 50 },
-    { id: 4, name: 'Fresh Bangus', price: 180, unit: 'kg', stock: 30 },
-    { id: 5, name: 'Pork Belly', price: 280, unit: 'kg', stock: 0 },
-    { id: 6, name: 'Pechay Baguio', price: 35, unit: 'bundle', stock: 200 },
-    { id: 7, name: 'Green Papaya', price: 40, unit: 'pc', stock: 65 },
-    { id: 8, name: 'Chicken Leg Quarters', price: 190, unit: 'kg', stock: 45 },
-  ]
-  return all.slice(0, seller.value?.products || 5)
+  if (!seller.value) return []
+  return sellersStore.getSellerProducts(seller.value.id)
 })
 
-const mockOrders = ref([
-  { id: 'ORD-1042', customer: 'Maria Santos', items: 4, total: 1280, status: 'delivered', date: '2026-05-14' },
-  { id: 'ORD-1039', customer: 'Pedro Reyes', items: 1, total: 180, status: 'delivered', date: '2026-05-13' },
-  { id: 'ORD-1035', customer: 'Ben Torres', items: 8, total: 2890, status: 'transit', date: '2026-05-12' },
-  { id: 'ORD-1031', customer: 'Diana Rivera', items: 3, total: 750, status: 'delivered', date: '2026-05-10' },
-  { id: 'ORD-1028', customer: 'Mark Lim', items: 2, total: 420, status: 'cancelled', date: '2026-05-08' },
-])
+const mockOrders = computed(() => {
+  if (!seller.value) return []
+  return sellersStore.getSellerOrders(seller.value.id)
+})
 
 const toggleStatus = () => {
-  seller.value.status = seller.value.status === 'active' ? 'inactive' : 'active'
+  if (seller.value) sellersStore.toggleStatus(seller.value.id)
 }
 
 const goBack = () => navigateTo('/sellers')

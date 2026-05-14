@@ -103,37 +103,20 @@
 <script setup>
 definePageMeta({ layout: 'default' })
 const route = useRoute()
+const driversStore = useDriversStore()
 
-const drivers = [
-  { id: 1, name: 'Mark Reyes', phone: '0917-123-4567', vehicle: 'Honda Click 125', plate: 'ABC-1234', deliveries: 342, rating: 4.9, earnings: 45800, status: 'active', joined: '2025-10-01' },
-  { id: 2, name: 'Nina Salvador', phone: '0928-234-5678', vehicle: 'Yamaha Mio i125', plate: 'DEF-5678', deliveries: 287, rating: 4.7, earnings: 38200, status: 'active', joined: '2025-11-15' },
-  { id: 3, name: 'Rico Dimagiba', phone: '0939-345-6789', vehicle: 'Suzuki Skydrive', plate: 'GHI-9012', deliveries: 198, rating: 4.5, earnings: 26400, status: 'idle', joined: '2026-01-08' },
-  { id: 4, name: 'Tina Fernandez', phone: '0940-456-7890', vehicle: 'Honda Beat', plate: 'JKL-3456', deliveries: 415, rating: 4.8, earnings: 52100, status: 'active', joined: '2025-09-20' },
-  { id: 5, name: 'Gary Alcantara', phone: '0951-567-8901', vehicle: 'Yamaha Nmax', plate: 'MNO-7890', deliveries: 156, rating: 4.3, earnings: 21200, status: 'offline', joined: '2026-02-14' },
-  { id: 6, name: 'Wendy Pascual', phone: '0962-678-9012', vehicle: 'Honda PCX 160', plate: 'PQR-1234', deliveries: 273, rating: 4.6, earnings: 36500, status: 'active', joined: '2025-12-05' },
-  { id: 7, name: 'Leo Magno', phone: '0973-789-0123', vehicle: 'Suzuki Burgman', plate: 'STU-5678', deliveries: 89, rating: 4.1, earnings: 12800, status: 'idle', joined: '2026-03-22' },
-]
-
-const driver = computed(() => drivers.find(d => d.id === Number(route.params.id)))
+const driver = computed(() => driversStore.getDriverById(Number(route.params.id)))
 const activeTab = ref('earnings')
 
-const weeklyEarnings = computed(() => Math.round(driver.value?.earnings * 0.12) || 0)
-const monthlyEarnings = computed(() => Math.round(driver.value?.earnings * 0.45) || 0)
+const weeklyEarnings = computed(() => Math.round((driver.value?.earnings || 0) * 0.12))
+const monthlyEarnings = computed(() => Math.round((driver.value?.earnings || 0) * 0.45))
 
-const documents = ref([
-  { name: 'Driver\'s License', status: 'verified' },
-  { name: 'OR/CR', status: 'verified' },
-  { name: 'NBI Clearance', status: 'pending' },
-  { name: 'Birth Certificate', status: 'verified' },
-])
+const documents = computed(() => driversStore.getDocuments())
 
-const deliveryHistory = ref([
-  { id: 'ORD-1042', customer: 'Maria Santos', pickup: "Juan's Farm", delivery: 'Brgy. San Isidro', status: 'delivered', date: '2026-05-14' },
-  { id: 'ORD-1041', customer: 'Juan dela Cruz', pickup: "Ana's Store", delivery: 'Brgy. Maligaya', status: 'delivered', date: '2026-05-14' },
-  { id: 'ORD-1038', customer: 'Liza Morales', pickup: "Ana's Store", delivery: 'Brgy. Central', status: 'cancelled', date: '2026-05-13' },
-  { id: 'ORD-1035', customer: 'Ben Torres', pickup: 'Pedro Merchants', delivery: 'Brgy. Kanluran', status: 'delivered', date: '2026-05-12' },
-  { id: 'ORD-1032', customer: 'Rosa Villanueva', pickup: "Liza's Shop", delivery: 'Brgy. Silangan', status: 'delivered', date: '2026-05-11' },
-])
+const deliveryHistory = computed(() => {
+  if (!driver.value) return []
+  return driversStore.getDeliveryHistory(driver.value.id)
+})
 
 const goBack = () => navigateTo('/drivers')
 </script>

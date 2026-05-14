@@ -43,25 +43,13 @@
 
 <script setup>
 definePageMeta({ layout: 'default' })
+const ordersStore = useOrdersStore()
 
 const search = ref('')
 const statusFilter = ref('')
 
-const orders = ref([
-  { id: 'ORD-1042', customer: 'Maria Santos', seller: "Juan's Farm", items: 4, total: 1280, payment: 'gcash', status: 'delivered', date: '2026-05-14' },
-  { id: 'ORD-1041', customer: 'Juan dela Cruz', seller: "Ana's Store", items: 2, total: 540, payment: 'cod', status: 'transit', date: '2026-05-14' },
-  { id: 'ORD-1040', customer: 'Ana Gonzales', seller: 'Pedro Merchants', items: 6, total: 2150, payment: 'gcash', status: 'preparing', date: '2026-05-14' },
-  { id: 'ORD-1039', customer: 'Pedro Reyes', seller: "Liza's Shop", items: 1, total: 180, payment: 'cod', status: 'delivered', date: '2026-05-13' },
-  { id: 'ORD-1038', customer: 'Liza Morales', seller: "Juan's Farm", items: 3, total: 960, payment: 'gcash', status: 'cancelled', date: '2026-05-13' },
-  { id: 'ORD-1037', customer: 'Carlo Bautista', seller: 'FreshMart', items: 5, total: 1640, payment: 'cod', status: 'pending', date: '2026-05-13' },
-  { id: 'ORD-1036', customer: 'Rosa Villanueva', seller: "Ana's Store", items: 2, total: 320, payment: 'gcash', status: 'delivered', date: '2026-05-12' },
-  { id: 'ORD-1035', customer: 'Ben Torres', seller: 'Pedro Merchants', items: 8, total: 2890, payment: 'cod', status: 'transit', date: '2026-05-12' },
-  { id: 'ORD-1034', customer: 'Diana Rivera', seller: "Juan's Farm", items: 3, total: 750, payment: 'gcash', status: 'delivered', date: '2026-05-12' },
-  { id: 'ORD-1033', customer: 'Mark Lim', seller: 'FreshMart', items: 4, total: 1120, payment: 'cod', status: 'preparing', date: '2026-05-11' },
-])
-
 const filteredOrders = computed(() => {
-  return orders.value.filter(o => {
+  return ordersStore.orders.filter(o => {
     const matchSearch = !search.value || o.id.toLowerCase().includes(search.value.toLowerCase()) || o.customer.toLowerCase().includes(search.value.toLowerCase())
     const matchStatus = !statusFilter.value || o.status === statusFilter.value
     return matchSearch && matchStatus

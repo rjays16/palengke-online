@@ -76,10 +76,10 @@
           <button
             type="submit"
             class="submit-btn"
-            :class="{ loading: isLoading }"
-            :disabled="isLoading"
+            :class="{ loading: auth.isLoading }"
+            :disabled="auth.isLoading"
           >
-            <span class="btn-text" v-if="!isLoading">
+            <span class="btn-text" v-if="!auth.isLoading">
               Sign In
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <line x1="5" y1="12" x2="19" y2="12"/>
@@ -94,13 +94,13 @@
           </button>
         </form>
 
-        <div class="alert-error" v-if="loginError">
+        <div class="alert-error" v-if="auth.loginError">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/>
             <line x1="12" y1="8" x2="12" y2="12"/>
             <line x1="12" y1="16" x2="12.01" y2="16"/>
           </svg>
-          {{ loginError }}
+          {{ auth.loginError }}
         </div>
 
         <div class="form-footer">
@@ -145,12 +145,11 @@
 
 <script setup>
 definePageMeta({ layout: 'auth' })
+const auth = useAuthStore()
 const form = ref({ email: '', password: '' })
 const errors = ref({ email: '', password: '' })
 const showPassword = ref(false)
 const rememberMe = ref(false)
-const isLoading = ref(false)
-const loginError = ref('')
 const emailFocused = ref(false)
 const passFocused = ref(false)
 
@@ -181,24 +180,12 @@ const validatePassword = () => {
 }
 
 const handleLogin = async () => {
-  loginError.value = ''
+  auth.loginError = ''
   const emailOk = validateEmail()
   const passOk = validatePassword()
   if (!emailOk || !passOk) return
-
-  isLoading.value = true
-  try {
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    if (form.value.email === 'admin@palengke.com' && form.value.password === 'admin123') {
-      navigateTo('/dashboard')
-    } else {
-      loginError.value = 'Invalid email or password. Please try again.'
-    }
-  } catch (e) {
-    loginError.value = 'Something went wrong. Please try again.'
-  } finally {
-    isLoading.value = false
-  }
+  const success = await auth.login(form.value.email, form.value.password)
+  if (success) navigateTo('/dashboard')
 }
 
 const handleForgot = () => {

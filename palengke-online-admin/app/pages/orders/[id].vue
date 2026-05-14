@@ -116,43 +116,19 @@
 <script setup>
 definePageMeta({ layout: 'default' })
 const route = useRoute()
+const ordersStore = useOrdersStore()
 
-const orders = [
-  { id: 'ORD-1042', customer: 'Maria Santos', seller: "Juan's Farm", items: 4, total: 1280, payment: 'gcash', status: 'delivered', date: '2026-05-14' },
-  { id: 'ORD-1041', customer: 'Juan dela Cruz', seller: "Ana's Store", items: 2, total: 540, payment: 'cod', status: 'transit', date: '2026-05-14' },
-  { id: 'ORD-1040', customer: 'Ana Gonzales', seller: 'Pedro Merchants', items: 6, total: 2150, payment: 'gcash', status: 'preparing', date: '2026-05-14' },
-  { id: 'ORD-1039', customer: 'Pedro Reyes', seller: "Liza's Shop", items: 1, total: 180, payment: 'cod', status: 'delivered', date: '2026-05-13' },
-  { id: 'ORD-1038', customer: 'Liza Morales', seller: "Juan's Farm", items: 3, total: 960, payment: 'gcash', status: 'cancelled', date: '2026-05-13' },
-  { id: 'ORD-1037', customer: 'Carlo Bautista', seller: 'FreshMart', items: 5, total: 1640, payment: 'cod', status: 'pending', date: '2026-05-13' },
-  { id: 'ORD-1036', customer: 'Rosa Villanueva', seller: "Ana's Store", items: 2, total: 320, payment: 'gcash', status: 'delivered', date: '2026-05-12' },
-  { id: 'ORD-1035', customer: 'Ben Torres', seller: 'Pedro Merchants', items: 8, total: 2890, payment: 'cod', status: 'transit', date: '2026-05-12' },
-  { id: 'ORD-1034', customer: 'Diana Rivera', seller: "Juan's Farm", items: 3, total: 750, payment: 'gcash', status: 'delivered', date: '2026-05-12' },
-  { id: 'ORD-1033', customer: 'Mark Lim', seller: 'FreshMart', items: 4, total: 1120, payment: 'cod', status: 'preparing', date: '2026-05-11' },
-]
-
-const order = computed(() => orders.find(o => o.id === route.params.id))
+const order = computed(() => ordersStore.getOrderById(String(route.params.id)))
 const activeTab = ref('timeline')
 
 const orderItems = computed(() => {
   if (!order.value) return []
-  const items = {
-    'ORD-1042': [{ name: 'Fresh Tomatoes', qty: 2, price: 60 }, { name: 'Organic Eggplant', qty: 1, price: 45 }, { name: 'Pechay Baguio', qty: 1, price: 35 }],
-    'ORD-1041': [{ name: 'Ripe Mangoes', qty: 1, price: 120 }, { name: 'Green Papaya', qty: 1, price: 40 }],
-    'ORD-1040': [{ name: 'Fresh Bangus', qty: 2, price: 180 }, { name: 'Chicken Leg Quarters', qty: 1, price: 190 }],
-  }
-  return items[order.value.id] || [{ name: 'Item', qty: order.value.items, price: Math.round(order.value.total / order.value.items) }]
+  return ordersStore.getOrderItems(order.value.id)
 })
 
 const timeline = computed(() => {
-  const status = order.value?.status || 'pending'
-  const steps = [
-    { title: 'Order Placed', time: order.value?.date + ' 09:30 AM', done: true, current: false },
-    { title: 'Order Confirmed', time: order.value?.date + ' 09:35 AM', done: status !== 'pending', current: status === 'pending' },
-    { title: 'Preparing', time: order.value?.date + ' 09:50 AM', done: ['delivered', 'transit', 'cancelled'].includes(status), current: status === 'preparing' },
-    { title: 'Picked Up', time: order.value?.date + ' 10:15 AM', done: ['delivered', 'transit'].includes(status), current: status === 'transit' },
-    { title: 'Delivered', time: order.value?.date + ' 10:45 AM', done: status === 'delivered', current: status === 'delivered' },
-  ]
-  return steps
+  if (!order.value) return []
+  return ordersStore.getTimeline(order.value.status, order.value.date)
 })
 
 const driverInfo = computed(() => {

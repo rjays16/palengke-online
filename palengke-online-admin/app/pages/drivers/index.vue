@@ -40,23 +40,14 @@
 
 <script setup>
 definePageMeta({ layout: 'default' })
+const driversStore = useDriversStore()
 
 const search = ref('')
 
-const drivers = ref([
-  { id: 1, name: 'Mark Reyes', phone: '0917-123-4567', vehicle: 'Honda Click 125', plate: 'ABC-1234', deliveries: 342, rating: 4.9, earnings: 45800, status: 'active', joined: '2025-10-01' },
-  { id: 2, name: 'Nina Salvador', phone: '0928-234-5678', vehicle: 'Yamaha Mio i125', plate: 'DEF-5678', deliveries: 287, rating: 4.7, earnings: 38200, status: 'active', joined: '2025-11-15' },
-  { id: 3, name: 'Rico Dimagiba', phone: '0939-345-6789', vehicle: 'Suzuki Skydrive', plate: 'GHI-9012', deliveries: 198, rating: 4.5, earnings: 26400, status: 'idle', joined: '2026-01-08' },
-  { id: 4, name: 'Tina Fernandez', phone: '0940-456-7890', vehicle: 'Honda Beat', plate: 'JKL-3456', deliveries: 415, rating: 4.8, earnings: 52100, status: 'active', joined: '2025-09-20' },
-  { id: 5, name: 'Gary Alcantara', phone: '0951-567-8901', vehicle: 'Yamaha Nmax', plate: 'MNO-7890', deliveries: 156, rating: 4.3, earnings: 21200, status: 'offline', joined: '2026-02-14' },
-  { id: 6, name: 'Wendy Pascual', phone: '0962-678-9012', vehicle: 'Honda PCX 160', plate: 'PQR-1234', deliveries: 273, rating: 4.6, earnings: 36500, status: 'active', joined: '2025-12-05' },
-  { id: 7, name: 'Leo Magno', phone: '0973-789-0123', vehicle: 'Suzuki Burgman', plate: 'STU-5678', deliveries: 89, rating: 4.1, earnings: 12800, status: 'idle', joined: '2026-03-22' },
-])
-
 const filteredDrivers = computed(() => {
-  if (!search.value) return drivers.value
+  if (!search.value) return driversStore.drivers
   const q = search.value.toLowerCase()
-  return drivers.value.filter(d => d.name.toLowerCase().includes(q) || d.plate.toLowerCase().includes(q))
+  return driversStore.drivers.filter(d => d.name.toLowerCase().includes(q) || d.plate.toLowerCase().includes(q))
 })
 
 const goToDriver = (id) => navigateTo('/drivers/' + id)

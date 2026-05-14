@@ -76,38 +76,7 @@
 
 <script setup>
 definePageMeta({ layout: 'default' })
-
-const stats = ref([
-  { label: 'Total Revenue', value: '₱284,500', change: '+12.5%', up: true, period: 'vs last month' },
-  { label: 'Active Orders', value: '156', change: '+8.2%', up: true, period: 'vs yesterday' },
-  { label: 'Total Users', value: '2,847', change: '+3.1%', up: true, period: 'vs last week' },
-  { label: 'Growth Rate', value: '24.8%', change: '-2.4%', up: false, period: 'vs last quarter' },
-])
-
-const barData = ref([
-  { label: 'Mon', pct: 45, highlight: false },
-  { label: 'Tue', pct: 65, highlight: false },
-  { label: 'Wed', pct: 55, highlight: false },
-  { label: 'Thu', pct: 80, highlight: true },
-  { label: 'Fri', pct: 70, highlight: false },
-  { label: 'Sat', pct: 90, highlight: false },
-  { label: 'Sun', pct: 50, highlight: false },
-])
-
-const orderStatusData = ref([
-  { label: 'Delivered', count: 145, color: '#059669' },
-  { label: 'In Transit', count: 68, color: '#3b82f6' },
-  { label: 'Preparing', count: 32, color: '#f59e0b' },
-  { label: 'Cancelled', count: 12, color: '#dc2626' },
-])
-
-const recentOrders = ref([
-  { id: 'ORD-1042', customer: 'Maria Santos', items: 4, total: 1280, status: 'delivered', date: '2026-05-14' },
-  { id: 'ORD-1041', customer: 'Juan dela Cruz', items: 2, total: 540, status: 'transit', date: '2026-05-14' },
-  { id: 'ORD-1040', customer: 'Ana Gonzales', items: 6, total: 2150, status: 'preparing', date: '2026-05-14' },
-  { id: 'ORD-1039', customer: 'Pedro Reyes', items: 1, total: 180, status: 'delivered', date: '2026-05-13' },
-  { id: 'ORD-1038', customer: 'Liza Morales', items: 3, total: 960, status: 'cancelled', date: '2026-05-13' },
-])
+const { stats, barData, orderStatusData, recentOrders } = storeToRefs(useDashboardStore())
 </script>
 
 <style scoped>
