@@ -144,6 +144,18 @@
           <span class="nav-badge warn" v-if="openDisputes > 0">{{ openDisputes }}</span>
         </NuxtLink>
 
+        <NuxtLink to="/complaints" class="nav-item" active-class="active">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </span>
+          <span class="nav-label">Complaints</span>
+          <span class="nav-badge warn" v-if="pendingComplaints > 0">{{ pendingComplaints }}</span>
+        </NuxtLink>
+
         <NuxtLink to="/reports" class="nav-item" active-class="active">
           <span class="nav-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -307,8 +319,10 @@ const showNotifPanel = ref(false)
 
 // Mock counts — replace with real API data
 const pendingOrders = ref(12)
+const complaintsStore = useComplaintsStore()
 const openDisputes = ref(3)
 const openReports = ref(4)
+const pendingComplaints = computed(() => complaintsStore.pendingHighPriority.length)
 const unreadNotifs = ref(5)
 
 // Mock notifications
@@ -333,6 +347,7 @@ const pageTitle = computed(() => {
     '/analytics': 'Analytics',
     '/payouts': 'Payouts',
     '/disputes': 'Disputes',
+    '/complaints': 'Complaints',
     '/reports': 'Reports',
     '/notifications': 'Notifications',
     '/settings': 'Settings',
