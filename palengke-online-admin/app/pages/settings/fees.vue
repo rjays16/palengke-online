@@ -11,38 +11,44 @@
         <h3>Delivery Fee Configuration</h3>
         <div class="settings-form">
           <div class="form-row">
-            <div class="form-group">
-              <label>Base Delivery Fee (₱)</label>
-              <input v-model="fees.base" type="number" class="form-input" />
+            <div class="form-group" :class="{ hasError: errors.base }">
+              <label>Base Delivery Fee (₱) <span class="req">*</span></label>
+              <input v-model="fees.base" type="number" min="0" class="form-input" required />
               <span class="form-hint">Standard fee for orders within 3km</span>
+              <span class="form-error" v-if="errors.base">{{ errors.base }}</span>
             </div>
-            <div class="form-group">
-              <label>Per Kilometer Rate (₱)</label>
-              <input v-model="fees.perKm" type="number" step="0.5" class="form-input" />
+            <div class="form-group" :class="{ hasError: errors.perKm }">
+              <label>Per Kilometer Rate (₱) <span class="req">*</span></label>
+              <input v-model="fees.perKm" type="number" step="0.5" min="0" class="form-input" required />
               <span class="form-hint">Additional charge per km beyond base</span>
+              <span class="form-error" v-if="errors.perKm">{{ errors.perKm }}</span>
             </div>
           </div>
           <div class="form-row">
-            <div class="form-group">
-              <label>Express Multiplier (×)</label>
-              <input v-model="fees.expressMultiplier" type="number" step="0.1" class="form-input" />
+            <div class="form-group" :class="{ hasError: errors.expressMultiplier }">
+              <label>Express Multiplier (×) <span class="req">*</span></label>
+              <input v-model="fees.expressMultiplier" type="number" step="0.1" min="1" class="form-input" required />
               <span class="form-hint">Express delivery = base × multiplier</span>
+              <span class="form-error" v-if="errors.expressMultiplier">{{ errors.expressMultiplier }}</span>
             </div>
-            <div class="form-group">
-              <label>Free Delivery Threshold (₱)</label>
-              <input v-model="fees.freeThreshold" type="number" class="form-input" />
+            <div class="form-group" :class="{ hasError: errors.freeThreshold }">
+              <label>Free Delivery Threshold (₱) <span class="req">*</span></label>
+              <input v-model="fees.freeThreshold" type="number" min="0" class="form-input" required />
               <span class="form-hint">Orders above this amount get free delivery</span>
+              <span class="form-error" v-if="errors.freeThreshold">{{ errors.freeThreshold }}</span>
             </div>
           </div>
           <div class="form-row">
-            <div class="form-group">
-              <label>Max Delivery Radius (km)</label>
-              <input v-model="fees.maxRadius" type="number" class="form-input" />
+            <div class="form-group" :class="{ hasError: errors.maxRadius }">
+              <label>Max Delivery Radius (km) <span class="req">*</span></label>
+              <input v-model="fees.maxRadius" type="number" min="0" class="form-input" required />
+              <span class="form-error" v-if="errors.maxRadius">{{ errors.maxRadius }}</span>
             </div>
-            <div class="form-group">
-              <label>Night Surcharge (₱)</label>
-              <input v-model="fees.nightSurcharge" type="number" class="form-input" />
+            <div class="form-group" :class="{ hasError: errors.nightSurcharge }">
+              <label>Night Surcharge (₱) <span class="req">*</span></label>
+              <input v-model="fees.nightSurcharge" type="number" min="0" class="form-input" required />
               <span class="form-hint">Additional fee for 10PM — 6AM deliveries</span>
+              <span class="form-error" v-if="errors.nightSurcharge">{{ errors.nightSurcharge }}</span>
             </div>
           </div>
         </div>
@@ -84,8 +90,58 @@ definePageMeta({ layout: 'default' })
 const fees = ref({ base: 45, perKm: 10, expressMultiplier: 1.8, freeThreshold: 500, maxRadius: 15, nightSurcharge: 25 })
 const original = JSON.stringify(fees.value)
 
-const saveFees = () => { alert('Delivery fees saved successfully!') }
-const resetFees = () => { fees.value = JSON.parse(original) }
+const errors = reactive({
+  base: '', perKm: '', expressMultiplier: '', freeThreshold: '', maxRadius: '', nightSurcharge: ''
+})
+
+function validate() {
+  let valid = true
+  Object.keys(errors).forEach(k => errors[k] = '')
+
+  if (fees.value.base === '' || fees.value.base == null) {
+    errors.base = 'Base delivery fee is required'; valid = false
+  } else if (fees.value.base < 0) {
+    errors.base = 'Cannot be negative'; valid = false
+  }
+
+  if (fees.value.perKm === '' || fees.value.perKm == null) {
+    errors.perKm = 'Per km rate is required'; valid = false
+  } else if (fees.value.perKm < 0) {
+    errors.perKm = 'Cannot be negative'; valid = false
+  }
+
+  if (fees.value.expressMultiplier === '' || fees.value.expressMultiplier == null) {
+    errors.expressMultiplier = 'Express multiplier is required'; valid = false
+  } else if (fees.value.expressMultiplier < 1) {
+    errors.expressMultiplier = 'Must be at least 1'; valid = false
+  }
+
+  if (fees.value.freeThreshold === '' || fees.value.freeThreshold == null) {
+    errors.freeThreshold = 'Free delivery threshold is required'; valid = false
+  } else if (fees.value.freeThreshold < 0) {
+    errors.freeThreshold = 'Cannot be negative'; valid = false
+  }
+
+  if (fees.value.maxRadius === '' || fees.value.maxRadius == null) {
+    errors.maxRadius = 'Max delivery radius is required'; valid = false
+  } else if (fees.value.maxRadius < 0) {
+    errors.maxRadius = 'Cannot be negative'; valid = false
+  }
+
+  if (fees.value.nightSurcharge === '' || fees.value.nightSurcharge == null) {
+    errors.nightSurcharge = 'Night surcharge is required'; valid = false
+  } else if (fees.value.nightSurcharge < 0) {
+    errors.nightSurcharge = 'Cannot be negative'; valid = false
+  }
+
+  return valid
+}
+
+const saveFees = () => {
+  if (!validate()) return
+  alert('Delivery fees saved successfully!')
+}
+const resetFees = () => { fees.value = JSON.parse(original); Object.keys(errors).forEach(k => errors[k] = '') }
 </script>
 
 <style scoped>
@@ -104,6 +160,9 @@ const resetFees = () => { fees.value = JSON.parse(original) }
 .form-input { padding: 10px 12px; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 13px; font-family: 'Inter', sans-serif; color: #111827; background: #fff; outline: none; transition: border-color 0.2s; }
 .form-input:focus { border-color: #059669; }
 .form-hint { font-size: 11px; color: #9ca3af; }
+.req { color: #dc2626; }
+.form-group.hasError .form-input { border-color: #dc2626; background: #fef2f2; }
+.form-error { font-size: 11px; color: #dc2626; font-weight: 500; }
 .preview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .preview-card { padding: 16px; background: #f9fafb; border-radius: 10px; text-align: center; }
 .preview-label { display: block; font-size: 12px; color: #9ca3af; margin-bottom: 6px; }
