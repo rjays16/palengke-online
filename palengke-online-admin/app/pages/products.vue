@@ -48,10 +48,11 @@
           <tbody>
             <tr v-for="p in filtered" :key="p.id">
               <td>
-                <div class="cell-product" @click="openDetail(p)" style="cursor:pointer">
-                  <div class="product-thumb">{{ p.name.charAt(0) }}</div>
-                  <div class="name-cell">{{ p.name }}</div>
-                </div>
+                  <div class="cell-product" @click="openDetail(p)" style="cursor:pointer">
+                    <img v-if="p.image" :src="p.image" class="product-thumb-img" />
+                    <div v-else class="product-thumb">{{ p.name.charAt(0) }}</div>
+                    <div class="name-cell">{{ p.name }}</div>
+                  </div>
               </td>
               <td>{{ categoryLabel(p.category) }}</td>
               <td>{{ p.seller }}</td>
@@ -101,9 +102,10 @@
             <tr v-for="r in filteredPending" :key="r.id">
               <td>
                 <div class="cell-product">
-                  <div class="product-thumb pending">{{ r.name.charAt(0) }}</div>
-                  <div><div class="name-cell">{{ r.name }}</div><div class="sub-cell">{{ r.description }}</div></div>
-                </div>
+                    <img v-if="r.image" :src="r.image" class="product-thumb-img" />
+                    <div v-else class="product-thumb pending">{{ r.name.charAt(0) }}</div>
+                    <div><div class="name-cell">{{ r.name }}</div><div class="sub-cell">{{ r.description }}</div></div>
+                  </div>
               </td>
               <td>{{ categoryLabel(r.category) }}</td>
               <td>{{ r.seller }}</td>
@@ -136,6 +138,7 @@
           </button>
         </div>
         <div class="modal-body">
+          <img v-if="detailProduct.image" :src="detailProduct.image" class="detail-img" />
           <div class="detail-grid">
             <div class="detail-item"><span class="dl">Category</span><span class="dv">{{ categoryLabel(detailProduct.category) }}</span></div>
             <div class="detail-item"><span class="dl">Seller</span><span class="dv">{{ detailProduct.seller }}</span></div>
@@ -214,6 +217,16 @@
               <label>Stock <span class="req">*</span></label>
               <input v-model="form.stock" type="number" min="0" placeholder="0" class="form-input" />
             </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>Image URL</label>
+              <input v-model="form.image" type="url" placeholder="https://images.unsplash.com/photo-..." class="form-input" />
+            </div>
+          </div>
+          <div class="image-preview" v-if="form.image">
+            <img :src="form.image" class="preview-img" />
+            <span class="preview-label">Preview</span>
           </div>
         </div>
         <div class="modal-actions">
@@ -310,10 +323,10 @@ function openDetail(p) {
 
 const showForm = ref(false)
 const editing = ref(false)
-const form = ref({ name: '', category: '', sellerId: '', price: '', unit: '', stock: '' })
+const form = ref({ name: '', category: '', sellerId: '', price: '', unit: '', stock: '', image: '' })
 
 function resetForm() {
-  form.value = { name: '', category: '', sellerId: '', price: '', unit: '', stock: '' }
+  form.value = { name: '', category: '', sellerId: '', price: '', unit: '', stock: '', image: '' }
 }
 
 function openAdd() {
@@ -331,6 +344,7 @@ function openEdit(p) {
     price: p.price,
     unit: p.unit,
     stock: p.stock,
+    image: p.image || '',
   }
   showForm.value = true
 }
@@ -357,6 +371,7 @@ function saveProduct() {
     sellerId: Number(form.value.sellerId),
     price: Number(form.value.price),
     stock: Number(form.value.stock),
+    image: form.value.image,
   }
   if (editing.value) {
     store.updateProduct(editing.value.id, data)
@@ -418,6 +433,7 @@ function handleReject() {
 .data-table td { padding: 14px 16px; font-size: 13px; color: #374151; border-bottom: 1px solid #f9fafb; }
 .cell-product { display: flex; align-items: center; gap: 10px; }
 .product-thumb { width: 34px; height: 34px; border-radius: 8px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #6b7280; flex-shrink: 0; }
+.product-thumb-img { width: 34px; height: 34px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
 .name-cell { font-weight: 600; color: #111827; }
 .stock-low { color: #d97706; font-weight: 600; }
 .stock-out { color: #dc2626; font-weight: 600; }
@@ -465,6 +481,10 @@ function handleReject() {
 .modal-close:hover { background: #f3f4f6; color: #374151; }
 .modal-close svg { width: 18px; height: 18px; }
 .modal-body { padding: 20px 24px; }
+.detail-img { width: 100%; max-height: 180px; object-fit: cover; border-radius: 10px; margin-bottom: 16px; }
+.image-preview { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; }
+.preview-img { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; }
+.preview-label { font-size: 12px; color: #9ca3af; }
 .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
 .detail-item { display: flex; flex-direction: column; gap: 2px; }
 .dl { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.3px; }
@@ -487,7 +507,7 @@ function handleReject() {
 .form-group.flex-1 { flex: 1; }
 .form-group label { font-size: 12px; font-weight: 600; color: #374151; }
 .req { color: #dc2626; }
-.form-input { padding: 10px 12px; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 13px; font-family: 'Inter', sans-serif; color: #111827; background: #fff; outline: none; transition: border-color 0.2s; }
+.form-input { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 13px; font-family: 'Inter', sans-serif; color: #111827; background: #fff; outline: none; transition: border-color 0.2s; }
 .form-input:focus { border-color: #059669; }
 .form-input::placeholder { color: #9ca3af; }
 select.form-input { cursor: pointer; }
