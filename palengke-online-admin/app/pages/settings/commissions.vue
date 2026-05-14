@@ -11,10 +11,11 @@
         <h3>Commission Rates</h3>
         <div class="settings-form">
           <div class="form-row">
-            <div class="form-group">
-              <label>Platform Commission (%)</label>
-              <input v-model="comm.platform" type="number" step="0.5" class="form-input" />
+            <div class="form-group" :class="{ hasError: errors.platform }">
+              <label>Platform Commission (%) <span class="req">*</span></label>
+              <input v-model="comm.platform" type="number" step="0.5" min="0" max="100" class="form-input" required />
               <span class="form-hint">Percentage deducted from each order total</span>
+              <span class="form-error" v-if="errors.platform">{{ errors.platform }}</span>
             </div>
             <div class="form-group">
               <label>Seller Payout Rate (%)</label>
@@ -23,14 +24,15 @@
             </div>
           </div>
           <div class="form-row">
-            <div class="form-group">
-              <label>Driver Commission per Delivery (₱)</label>
-              <input v-model="comm.driverPerDelivery" type="number" class="form-input" />
+            <div class="form-group" :class="{ hasError: errors.driverPerDelivery }">
+              <label>Driver Commission per Delivery (₱) <span class="req">*</span></label>
+              <input v-model="comm.driverPerDelivery" type="number" min="0" class="form-input" required />
               <span class="form-hint">Fixed amount paid to driver per completed delivery</span>
+              <span class="form-error" v-if="errors.driverPerDelivery">{{ errors.driverPerDelivery }}</span>
             </div>
             <div class="form-group">
               <label>Driver Commission per km (₱)</label>
-              <input v-model="comm.driverPerKm" type="number" step="0.5" class="form-input" />
+              <input v-model="comm.driverPerKm" type="number" step="0.5" min="0" class="form-input" />
               <span class="form-hint">Additional amount per km traveled</span>
             </div>
           </div>
@@ -41,30 +43,34 @@
         <h3>Payout Settings</h3>
         <div class="settings-form">
           <div class="form-row">
-            <div class="form-group">
-              <label>Minimum Payout Amount (₱)</label>
-              <input v-model="comm.minPayout" type="number" class="form-input" />
+            <div class="form-group" :class="{ hasError: errors.minPayout }">
+              <label>Minimum Payout Amount (₱) <span class="req">*</span></label>
+              <input v-model="comm.minPayout" type="number" min="0" class="form-input" required />
               <span class="form-hint">Minimum balance before seller can request payout</span>
+              <span class="form-error" v-if="errors.minPayout">{{ errors.minPayout }}</span>
             </div>
-            <div class="form-group">
-              <label>Payout Schedule</label>
-              <select v-model="comm.schedule" class="form-input">
+            <div class="form-group" :class="{ hasError: errors.schedule }">
+              <label>Payout Schedule <span class="req">*</span></label>
+              <select v-model="comm.schedule" class="form-input" required>
+                <option value="">Select schedule...</option>
                 <option value="daily">Daily</option>
                 <option value="weekly">Weekly</option>
                 <option value="biweekly">Bi-Weekly</option>
                 <option value="monthly">Monthly</option>
               </select>
+              <span class="form-error" v-if="errors.schedule">{{ errors.schedule }}</span>
             </div>
           </div>
           <div class="form-row">
-            <div class="form-group">
-              <label>Payout Processing Fee (₱)</label>
-              <input v-model="comm.processingFee" type="number" class="form-input" />
+            <div class="form-group" :class="{ hasError: errors.processingFee }">
+              <label>Payout Processing Fee (₱) <span class="req">*</span></label>
+              <input v-model="comm.processingFee" type="number" min="0" class="form-input" required />
               <span class="form-hint">Fee charged per payout transaction</span>
+              <span class="form-error" v-if="errors.processingFee">{{ errors.processingFee }}</span>
             </div>
             <div class="form-group">
               <label>Referral Bonus (₱)</label>
-              <input v-model="comm.referralBonus" type="number" class="form-input" />
+              <input v-model="comm.referralBonus" type="number" min="0" class="form-input" />
               <span class="form-hint">Bonus for referring new sellers</span>
             </div>
           </div>
@@ -95,8 +101,63 @@ definePageMeta({ layout: 'default' })
 const comm = ref({ platform: 10, driverPerDelivery: 25, driverPerKm: 5, minPayout: 500, schedule: 'weekly', processingFee: 15, referralBonus: 100 })
 const original = JSON.stringify(comm.value)
 
-const saveComm = () => { alert('Commission settings saved successfully!') }
-const resetComm = () => { comm.value = JSON.parse(original) }
+const errors = reactive({
+  platform: '', driverPerDelivery: '', minPayout: '', schedule: '', processingFee: ''
+})
+
+function validate() {
+  let valid = true
+  errors.platform = ''
+  errors.driverPerDelivery = ''
+  errors.minPayout = ''
+  errors.schedule = ''
+  errors.processingFee = ''
+
+  if (comm.value.platform === '' || comm.value.platform == null) {
+    errors.platform = 'Platform commission is required'
+    valid = false
+  } else if (comm.value.platform < 0 || comm.value.platform > 100) {
+    errors.platform = 'Must be between 0 and 100'
+    valid = false
+  }
+
+  if (comm.value.driverPerDelivery === '' || comm.value.driverPerDelivery == null) {
+    errors.driverPerDelivery = 'Driver commission is required'
+    valid = false
+  } else if (comm.value.driverPerDelivery < 0) {
+    errors.driverPerDelivery = 'Cannot be negative'
+    valid = false
+  }
+
+  if (comm.value.minPayout === '' || comm.value.minPayout == null) {
+    errors.minPayout = 'Minimum payout is required'
+    valid = false
+  } else if (comm.value.minPayout < 0) {
+    errors.minPayout = 'Cannot be negative'
+    valid = false
+  }
+
+  if (!comm.value.schedule) {
+    errors.schedule = 'Please select a payout schedule'
+    valid = false
+  }
+
+  if (comm.value.processingFee === '' || comm.value.processingFee == null) {
+    errors.processingFee = 'Processing fee is required'
+    valid = false
+  } else if (comm.value.processingFee < 0) {
+    errors.processingFee = 'Cannot be negative'
+    valid = false
+  }
+
+  return valid
+}
+
+const saveComm = () => {
+  if (!validate()) return
+  alert('Commission settings saved successfully!')
+}
+const resetComm = () => { comm.value = JSON.parse(original); Object.keys(errors).forEach(k => errors[k] = '') }
 </script>
 
 <style scoped>
@@ -116,6 +177,9 @@ const resetComm = () => { comm.value = JSON.parse(original) }
 .form-input:focus { border-color: #059669; }
 .form-input:disabled { background: #f9fafb; color: #9ca3af; }
 .form-hint { font-size: 11px; color: #9ca3af; }
+.req { color: #dc2626; }
+.form-group.hasError .form-input { border-color: #dc2626; background: #fef2f2; }
+.form-error { font-size: 11px; color: #dc2626; font-weight: 500; }
 .example-box { background: #f9fafb; border-radius: 10px; padding: 16px; }
 .example-intro { font-size: 13px; color: #6b7280; margin-bottom: 12px; }
 .example-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 13px; color: #374151; border-bottom: 1px solid #e5e7eb; }
