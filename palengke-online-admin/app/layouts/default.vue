@@ -41,7 +41,7 @@
 
         <div class="nav-section-label">Management</div>
 
-        <NuxtLink to="/approvals" class="nav-item" active-class="active" v-if="auth.canApprove">
+        <NuxtLink to="/approvals" class="nav-item" active-class="active" v-if="auth.user?.role === 'superadmin'">
           <span class="nav-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 12l2 2 4-4"/>
@@ -193,7 +193,19 @@
           <span class="nav-label">Notifications</span>
         </NuxtLink>
 
-        <template v-if="auth.canAccessSettings">
+        <NuxtLink to="/admin-users" class="nav-item" active-class="active" v-if="auth.user?.role === 'superadmin'">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </span>
+          <span class="nav-label">Admin Users</span>
+        </NuxtLink>
+
+        <template v-if="auth.user?.role === 'superadmin'">
           <NuxtLink to="/settings" class="nav-item" active-class="active">
             <span class="nav-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -220,7 +232,7 @@
           </div>
           <div class="user-info">
             <span class="user-name">{{ auth.user?.name || 'Admin' }}</span>
-            <span class="user-role">{{ auth.user?.email || 'admin@palengke.com' }}</span>
+            <span class="user-role">{{ auth.user?.email || 'admin@palengke.com' }} · {{ auth.user?.role || 'none' }}</span>
           </div>
           <button class="user-logout" @click="handleLogout" title="Logout">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -368,6 +380,7 @@ const pageTitle = computed(() => {
     '/reports': 'Reports',
     '/notifications': 'Notifications',
     '/settings': 'Settings',
+    '/admin-users': 'Admin Users',
   }
   // Match dynamic routes like /sellers/123
   const base = '/' + route.path.split('/')[1]

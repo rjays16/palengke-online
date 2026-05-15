@@ -18,12 +18,11 @@ export const useAuthStore = defineStore('auth', () => {
     isLoading.value = true
     loginError.value = ''
     await new Promise(resolve => setTimeout(resolve, 1000))
-    if (email === 'superadmin@palengke.com' && password === 'superadmin123') {
-      user.value = { email, name: 'Super Admin', role: 'superadmin' }
-      return true
-    }
-    if (email === 'admin@palengke.com' && password === 'admin123') {
-      user.value = { email, name: 'Admin', role: 'admin' }
+    const adminUsersStore = useAdminUsersStore()
+    const found = adminUsersStore.findByEmail(email)
+    if (found && found.password === password && found.status === 'active') {
+      user.value = { email: found.email, name: found.name, role: found.role }
+      isLoading.value = false
       return true
     }
     loginError.value = 'Invalid email or password'
