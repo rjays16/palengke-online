@@ -173,7 +173,7 @@ const goBack = () => navigateTo('/customers')
 .tab:hover { color: #374151; }
 .tab.active { color: #059669; border-bottom-color: #059669; font-weight: 600; }
 .tab-content { padding: 16px; }
-.table-card { overflow: hidden; }
+.table-card { overflow: auto; }
 .data-table { width: 100%; border-collapse: collapse; }
 .data-table th { text-align: left; font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 12px; border-bottom: 1px solid #f3f4f6; }
 .data-table td { padding: 12px; font-size: 13px; color: #374151; border-bottom: 1px solid #f9fafb; }
@@ -217,5 +217,9 @@ const goBack = () => navigateTo('/customers')
 @media (max-width: 768px) {
   .detail-grid { grid-template-columns: 1fr; }
   .detail-header { flex-wrap: wrap; }
+  .data-table { min-width: 500px; }
+}
+@media (max-width: 480px) {
+  .detail-actions { flex-wrap: wrap; }
 }
 </style>
