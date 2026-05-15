@@ -111,10 +111,14 @@
 <script setup>
 definePageMeta({
   layout: 'default',
-  middleware: [(to, from) => {
-    const auth = useAuthStore()
-    if (!auth.isSuperAdmin) return navigateTo('/dashboard')
-  }]
+})
+
+const auth = useAuthStore()
+auth.restore()
+onMounted(() => {
+  if (auth.user?.role !== 'superadmin') {
+    navigateTo('/dashboard')
+  }
 })
 
 const store = useAdminUsersStore()

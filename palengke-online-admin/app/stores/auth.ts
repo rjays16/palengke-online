@@ -54,9 +54,5 @@ export const useAuthStore = defineStore('auth', () => {
     if (saved) user.value = saved
   }
 
-  if (typeof localStorage !== 'undefined') {
-    setTimeout(() => restore(), 0)
-  }
-
   return { user, isAuthenticated, isLoading, loginError, isSuperAdmin, isAdmin, canApprove, login, logout, restore }
 })

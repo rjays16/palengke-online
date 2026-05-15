@@ -112,10 +112,14 @@
 <script setup>
 definePageMeta({
   layout: 'default',
-  middleware: [(to, from) => {
-    const auth = useAuthStore()
-    if (!auth.canAccessSettings) return navigateTo('/dashboard')
-  }]
+})
+
+const auth = useAuthStore()
+auth.restore()
+onMounted(() => {
+  if (auth.user?.role !== 'superadmin') {
+    navigateTo('/dashboard')
+  }
 })
 
 const profile = ref({ name: 'Super Admin', email: 'admin@palengke.com', phone: '+63 912 345 6789', role: 'Administrator' })

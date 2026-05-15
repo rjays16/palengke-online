@@ -98,10 +98,14 @@
 <script setup>
 definePageMeta({
   layout: 'default',
-  middleware: [(to, from) => {
-    const auth = useAuthStore()
-    if (!auth.canAccessSettings) return navigateTo('/dashboard')
-  }]
+})
+
+const auth = useAuthStore()
+auth.restore()
+onMounted(() => {
+  if (auth.user?.role !== 'superadmin') {
+    navigateTo('/dashboard')
+  }
 })
 
 const comm = ref({ platform: 10, driverPerDelivery: 25, driverPerKm: 5, minPayout: 500, schedule: 'weekly', processingFee: 15, referralBonus: 100 })
