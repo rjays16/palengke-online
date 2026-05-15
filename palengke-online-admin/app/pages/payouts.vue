@@ -72,7 +72,7 @@ watch(statusFilter, () => { payoutPage.value = 1 })
 .filter-select { padding: 8px 12px; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 13px; font-family: 'Inter', sans-serif; color: #374151; background: #fff; cursor: pointer; outline: none; }
 .filter-select:focus { border-color: #059669; }
 .result-count { font-size: 13px; color: #9ca3af; }
-.table-card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
+.table-card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: auto; }
 .data-table { width: 100%; border-collapse: collapse; }
 .data-table th { text-align: left; font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 16px; border-bottom: 1px solid #f3f4f6; }
 .data-table td { padding: 14px 16px; font-size: 13px; color: #374151; border-bottom: 1px solid #f9fafb; }
@@ -86,4 +86,12 @@ watch(statusFilter, () => { payoutPage.value = 1 })
 .status-badge.completed { background: #f0fdf4; color: #059669; }
 .status-badge.pending { background: #fef3c7; color: #d97706; }
 .status-badge.failed { background: #fef2f2; color: #dc2626; }
+
+@media (max-width: 768px) {
+  .data-table { min-width: 700px; }
+}
+@media (max-width: 480px) {
+  .page-toolbar { flex-direction: column; align-items: stretch; }
+  .filter-select { width: 100%; }
+}
 </style>
