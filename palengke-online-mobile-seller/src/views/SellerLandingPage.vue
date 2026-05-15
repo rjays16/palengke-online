@@ -28,10 +28,12 @@
             <img src="/assets/images/palengke-seller-boy.png" alt="Seller" class="welcome-avatar">
           </div>
           
-          <!-- Trial Badge -->
-          <div class="trial-badge" v-if="isTrialActive">
-            <ion-icon :icon="timeOutline"></ion-icon>
-            <span>{{ trialDaysLeft }} days left in free trial</span>
+          <!-- Trial / Subscription Badge -->
+          <div class="trial-badge" :class="{ expired }" v-if="isTrialActive || expired" @click="goToPlans">
+            <ion-icon :icon="expired ? alertCircleOutline : timeOutline"></ion-icon>
+            <span v-if="expired">Trial expired — tap to subscribe</span>
+            <span v-else>{{ trialDaysLeft }} day{{ trialDaysLeft > 1 ? 's' : '' }} left in free trial</span>
+            <ion-icon :icon="chevronForwardOutline" class="badge-arrow"></ion-icon>
           </div>
         </div>
 
@@ -186,6 +188,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { getSubscription, daysLeft, isExpired } from '@/services/subscriptionService';
 import {
   IonPage,
   IonHeader,
@@ -220,7 +223,9 @@ import {
   informationCircleOutline,
   closeOutline,
   shareSocialOutline,
-  chatbubblesOutline
+  chatbubblesOutline,
+  alertCircleOutline,
+  chevronForwardOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -228,8 +233,13 @@ const router = useRouter();
 // Seller Data
 const sellerName = ref('Juan Dela Cruz');
 const notificationCount = ref(3);
-const isTrialActive = ref(true);
-const trialDaysLeft = ref(25);
+const sub = getSubscription()
+const remaining = daysLeft(sub)
+const expired = isExpired(sub)
+const isTrialActive = ref(sub.status === 'trial' && !expired)
+const trialDaysLeft = ref(remaining)
+
+const goToPlans = () => router.push('/plans')
 
 // Stats
 const todayOrders = ref(12);
@@ -689,10 +699,23 @@ ion-header ion-toolbar ion-buttons ion-button {
   border-radius: 12px;
   font-size: 14px;
   font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.trial-badge:active { opacity: 0.8; }
+
+.trial-badge.expired {
+  background: rgba(244, 67, 54, 0.2);
 }
 
 .trial-badge ion-icon {
   font-size: 20px;
+}
+
+.badge-arrow {
+  margin-left: auto;
+  font-size: 16px !important;
+  opacity: 0.7;
 }
 
 /* Stats Section */

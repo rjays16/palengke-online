@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import type { RouteRecordRaw } from 'vue-router';
+import { getSubscription, isExpired } from '@/services/subscriptionService';
 
 // ============================================
 // COMPONENT IMPORTS
@@ -19,6 +20,7 @@ import ProfilePage from '@/views/ProfilePage.vue';
 import NotificationPage from '@/views/NotificationsPage.vue';
 import HelpSupportPage from '@/views/HelpSupportPage.vue';
 import AboutPage from '@/views/AboutPage.vue';
+import PlansPage from '@/views/PlansPage.vue';
 
 // ============================================
 // REGISTRATION FLOW IMPORTS
@@ -201,9 +203,15 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAuth: true }
   },
   {
-  path: '/track-driver/:orderId',
-  name: 'TrackDriver',
-  component: () => import('@/views/DriverTrackingPage.vue')
+    path: '/track-driver/:orderId',
+    name: 'TrackDriver',
+    component: () => import('@/views/DriverTrackingPage.vue')
+  },
+  {
+    path: '/plans',
+    name: 'Plans',
+    component: PlansPage,
+    meta: { requiresAuth: true }
   },
 ];
 
@@ -220,16 +228,20 @@ const router = createRouter({
 // ============================================
 router.beforeEach((to, from, next) => {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-  
+
   if (to.meta.requiresAuth && !isAuthenticated) {
-    // Not logged in, redirect to login
     next('/login');
   } else if (to.path === '/login' && isAuthenticated) {
-    // Already logged in, redirect to home
     next('/home');
+  } else if (to.meta.requiresAuth && isAuthenticated && to.path !== '/plans') {
+    const sub = getSubscription()
+    if (isExpired(sub)) {
+      next('/plans')
+    } else {
+      next()
+    }
   } else {
-    // All good, proceed
-    next();
+    next()
   }
 });
 

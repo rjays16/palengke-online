@@ -22,6 +22,18 @@
           <p class="subtitle">Fresh market delivered to your door</p>
         </div>
 
+        <!-- Subscription Banner -->
+        <div class="sub-banner" :class="subStatus" @click="goToPlans">
+          <div class="sub-banner-left">
+            <ion-icon :icon="subIcon" class="sub-banner-icon"></ion-icon>
+            <div class="sub-banner-text">
+              <p class="sub-banner-title">{{ subTitle }}</p>
+              <p class="sub-banner-sub">{{ subDesc }}</p>
+            </div>
+          </div>
+          <ion-icon :icon="chevronForwardOutline" class="sub-banner-arrow"></ion-icon>
+        </div>
+
         <!-- Quick Stats -->
         <div class="stats-grid">
           <div class="stat-card">
@@ -83,16 +95,52 @@ import {
   IonIcon,
   alertController
 } from '@ionic/vue';
+import { computed } from 'vue';
 import { 
   logOutOutline,
   cartOutline,
   heartOutline,
   walletOutline,
   searchOutline,
-  personOutline
+  personOutline,
+  chevronForwardOutline,
+  timeOutline,
+  alertCircleOutline,
+  checkmarkCircleOutline
 } from 'ionicons/icons';
+import { getSubscription, daysLeft, isExpired } from '@/services/subscriptionService';
 
 const router = useRouter();
+
+const sub = getSubscription()
+const remaining = daysLeft(sub)
+const expired = isExpired(sub)
+
+const subStatus = computed(() => {
+  if (expired) return 'expired'
+  if (sub.status === 'active') return 'active'
+  return 'trial'
+})
+
+const subIcon = computed(() => {
+  if (expired) return alertCircleOutline
+  if (sub.status === 'active') return checkmarkCircleOutline
+  return timeOutline
+})
+
+const subTitle = computed(() => {
+  if (expired) return 'Trial Expired'
+  if (sub.status === 'active') return 'Plan Active'
+  return 'Free Trial'
+})
+
+const subDesc = computed(() => {
+  if (expired) return 'Choose a plan to continue selling'
+  if (remaining <= 3) return `${remaining} day${remaining > 1 ? 's' : ''} left — renew soon!`
+  return `${remaining} days remaining in your trial`
+})
+
+const goToPlans = () => router.push('/plans')
 
 const logout = async () => {
   const alert = await alertController.create({
@@ -218,6 +266,42 @@ h1 {
 .action-btn::part(native) {
   font-size: 16px;
 }
+
+/* Subscription Banner */
+.sub-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: 14px;
+  margin-bottom: 24px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.sub-banner:active { opacity: 0.8; }
+
+.sub-banner.trial { background: #E3F2FD; }
+.sub-banner.active { background: #E8F5E9; }
+.sub-banner.expired { background: #FFEBEE; }
+
+.sub-banner-left { display: flex; align-items: center; gap: 12px; flex: 1; }
+.sub-banner-icon { font-size: 24px; }
+.sub-banner.trial .sub-banner-icon { color: #1565C0; }
+.sub-banner.active .sub-banner-icon { color: #2E7D32; }
+.sub-banner.expired .sub-banner-icon { color: #c62828; }
+
+.sub-banner-text { flex: 1; }
+.sub-banner-title { font-size: 14px; font-weight: 700; margin: 0 0 2px; }
+.sub-banner.trial .sub-banner-title { color: #1565C0; }
+.sub-banner.active .sub-banner-title { color: #2E7D32; }
+.sub-banner.expired .sub-banner-title { color: #c62828; }
+
+.sub-banner-sub { font-size: 12px; margin: 0; }
+.sub-banner.trial .sub-banner-sub { color: #5a7fa0; }
+.sub-banner.active .sub-banner-sub { color: #558b5a; }
+.sub-banner.expired .sub-banner-sub { color: #9a5555; }
+
+.sub-banner-arrow { font-size: 18px; color: #999; }
 
 /* Info Text */
 .info-text {
