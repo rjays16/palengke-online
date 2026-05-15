@@ -2,7 +2,7 @@
   <div class="admin-shell">
 
     <!-- ── SIDEBAR ─────────────────────────── -->
-    <aside class="sidebar">
+    <aside class="sidebar" :class="{ collapsed: sidebarCollapsed }">
 
       <!-- Logo -->
       <div class="sidebar-logo">
@@ -245,6 +245,12 @@
 
     </aside>
 
+    <button class="sidebar-collapse-btn" @click="sidebarCollapsed = !sidebarCollapsed" :title="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{ flipped: sidebarCollapsed }">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </button>
+
     <!-- ── MAIN CONTENT AREA ───────────────── -->
     <div class="main-area">
 
@@ -340,6 +346,7 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 
+const sidebarCollapsed = ref(false)
 const showUserMenu = ref(false)
 const showNotifPanel = ref(false)
 
@@ -440,6 +447,7 @@ const vClickOutside = {
   height: 100vh;
   overflow: hidden;
   background: #f3f4f6;
+  position: relative;
 }
 
 /* ── SIDEBAR ───────────────────────────────── */
@@ -454,14 +462,15 @@ const vClickOutside = {
   overflow: hidden;
   z-index: 50;
   flex-shrink: 0;
+  position: relative;
 }
 
 /* Logo */
 .sidebar-logo {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 20px 20px 16px;
+  gap: 10px;
+  padding: 16px 14px;
   border-bottom: 1px solid #f3f4f6;
   flex-shrink: 0;
 }
@@ -699,6 +708,62 @@ const vClickOutside = {
 
 .user-logout:hover { background: #fef2f2; color: #dc2626; }
 .user-logout svg { width: 16px; height: 16px; }
+
+/* Sidebar Collapse Button */
+.sidebar-collapse-btn {
+  position: absolute;
+  top: 20px;
+  left: 242px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 2px solid #059669;
+  background: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #059669;
+  transition: all 0.2s;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(5,150,105,0.2);
+  padding: 0;
+}
+.sidebar-collapse-btn:hover { background: #059669; color: #fff; box-shadow: 0 3px 12px rgba(5,150,105,0.35); transform: scale(1.05); }
+.sidebar-collapse-btn svg {
+  width: 12px;
+  height: 12px;
+  transition: transform 0.25s ease;
+}
+.sidebar-collapse-btn svg.flipped {
+  transform: rotate(180deg);
+}
+.sidebar.collapsed ~ .sidebar-collapse-btn {
+  left: 50px;
+}
+
+/* ── SIDEBAR COLLAPSED ──────────────────────── */
+.sidebar.collapsed {
+  width: 64px;
+  min-width: 64px;
+}
+.sidebar.collapsed .sidebar-logo {
+  justify-content: center;
+  padding: 14px 12px;
+  gap: 0;
+}
+.sidebar.collapsed .sidebar-logo-text { display: none; }
+.sidebar.collapsed .sidebar-logo-img { width: 32px; height: 32px; }
+.sidebar.collapsed .sidebar-collapse-btn { right: -14px; }
+.sidebar.collapsed .nav-section-label { display: none; }
+.sidebar.collapsed .nav-item { justify-content: center; padding: 9px; }
+.sidebar.collapsed .nav-label { display: none; }
+.sidebar.collapsed .nav-badge { display: none; }
+.sidebar.collapsed .nav-item.sub { display: none; }
+.sidebar.collapsed .nav-item.active::before { left: -12px; }
+.sidebar.collapsed .sidebar-user { justify-content: center; padding: 14px 8px; }
+.sidebar.collapsed .user-info { display: none; }
+.sidebar.collapsed .user-logout { display: none; }
 
 /* ── MAIN AREA ─────────────────────────────── */
 .main-area {
