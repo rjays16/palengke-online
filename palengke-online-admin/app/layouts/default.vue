@@ -924,8 +924,8 @@ const vClickOutside = {
 
 .topbar-left {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: 10px;
   min-width: 0;
 }
 
@@ -1357,6 +1357,25 @@ const vClickOutside = {
   .topbar-btn { width: 32px; height: 32px; }
   .topbar-avatar { width: 32px; height: 32px; }
   .page-content { padding: 12px; }
+}
+
+@media (max-height: 620px) {
+  .sidebar-nav { overflow-y: auto; }
+  .sidebar-user { padding: 10px 14px; }
+  .sidebar-user .user-avatar { width: 32px; height: 32px; font-size: 13px; }
+  .sidebar-user .user-role { font-size: 10px; }
+  .topbar { padding: 0 16px; height: 48px; min-height: 48px; }
+  .topbar-title { font-size: 15px; }
+  .topbar-breadcrumb { display: none; }
+  .topbar-search { min-width: 0; flex: 1; max-width: 240px; }
+  .search-kbd { display: none; }
+  .topbar-btn { width: 32px; height: 32px; }
+  .topbar-avatar { width: 30px; height: 30px; }
+  .page-content { padding: 12px 16px; }
+  .page-shell { padding-top: 0; }
+  .page-toolbar { padding: 10px 16px; }
+  .table-card { padding: 12px; }
+  .data-table th, .data-table td { padding: 8px 10px; font-size: 12px; }
 }
 </style>
 
