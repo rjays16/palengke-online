@@ -27,11 +27,38 @@
             <td><span class="priority-badge" :class="d.priority">{{ d.priority }}</span></td>
             <td><span class="status-badge" :class="d.status">{{ d.status }}</span></td>
             <td class="date-cell">{{ d.date }}</td>
-            <td><button class="action-btn">...</button></td>
+            <td><button class="action-btn" @click="viewDispute(d)">...</button></td>
           </tr>
         </tbody>
       </table>
       <PaginationBar v-model="disputePage" :total="filteredDisputes.length" :perPage="disputePerPage" />
+    </div>
+
+    <div class="modal-overlay" v-if="selected" @click="selected = null">
+      <div class="modal-card modal-sm" @click.stop>
+        <div class="modal-top">
+          <span class="modal-title">#{{ selected.id }} · Order #{{ selected.orderId }}</span>
+          <span class="status-badge" :class="selected.status">{{ selected.status }}</span>
+          <button class="modal-close" @click="selected = null">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="detail-grid">
+            <div class="detail-item"><span class="dl">Reported By</span><span class="dv">{{ selected.reportedBy }}</span></div>
+            <div class="detail-item"><span class="dl">Against</span><span class="dv">{{ selected.against }}</span></div>
+            <div class="detail-item"><span class="dl">Reason</span><span class="dv">{{ selected.reason }}</span></div>
+            <div class="detail-item"><span class="dl">Priority</span><span class="dv" :style="{ color: selected.priority === 'high' ? '#dc2626' : selected.priority === 'medium' ? '#d97706' : '#6b7280' }">{{ selected.priority }}</span></div>
+            <div class="detail-item"><span class="dl">Date</span><span class="dv">{{ selected.date }}</span></div>
+            <div class="detail-item"><span class="dl">Status</span><span class="dv">{{ selected.status }}</span></div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn secondary" @click="selected = null">Close</button>
+          <button v-if="selected.status === 'open'" class="modal-btn primary" @click="updateStatus(selected.id, 'investigating')">Investigate</button>
+          <button v-if="selected.status !== 'resolved'" class="modal-btn success" @click="updateStatus(selected.id, 'resolved')">Resolve</button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -40,6 +67,17 @@
 definePageMeta({ layout: 'default' })
 
 const statusFilter = ref('')
+const selected = ref(null)
+
+function viewDispute(d) {
+  selected.value = d
+}
+
+function updateStatus(id, status) {
+  const d = disputes.value.find(d => d.id === id)
+  if (d) d.status = status
+  selected.value = null
+}
 
 const disputes = ref([
   { id: 1, orderId: 'ORD-1038', reportedBy: 'Liza Morales', against: "Juan's Farm", reason: 'Wrong items delivered', priority: 'high', status: 'open', date: '2026-05-14' },
@@ -88,6 +126,28 @@ watch(statusFilter, () => { disputePage.value = 1 })
 .status-badge.open { background: #fef2f2; color: #dc2626; }
 .status-badge.investigating { background: #fef3c7; color: #d97706; }
 .status-badge.resolved { background: #f0fdf4; color: #059669; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 32px; backdrop-filter: blur(2px); }
+.modal-card { background: #fff; border-radius: 16px; width: 100%; max-width: 420px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.modal-card.modal-sm { max-width: 420px; }
+.modal-top { display: flex; align-items: center; gap: 10px; padding: 20px 24px; border-bottom: 1px solid #f3f4f6; }
+.modal-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 700; color: #111827; flex: 1; }
+.modal-close { width: 32px; height: 32px; border: none; background: none; cursor: pointer; color: #9ca3af; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.modal-close:hover { background: #f3f4f6; color: #374151; }
+.modal-close svg { width: 18px; height: 18px; }
+.modal-body { padding: 20px 24px; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.detail-item { display: flex; flex-direction: column; gap: 2px; }
+.dl { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.3px; }
+.dv { font-size: 14px; font-weight: 600; color: #111827; }
+.modal-actions { display: flex; gap: 10px; padding: 16px 24px 20px; border-top: 1px solid #f3f4f6; }
+.modal-btn { flex: 1; padding: 11px; border-radius: 8px; font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s; border: none; }
+.modal-btn.secondary { background: #f3f4f6; color: #6b7280; }
+.modal-btn.secondary:hover { background: #e5e7eb; }
+.modal-btn.primary { background: #059669; color: #fff; }
+.modal-btn.primary:hover { background: #047857; }
+.modal-btn.success { background: #3b82f6; color: #fff; }
+.modal-btn.success:hover { background: #2563eb; }
 
 @media (max-width: 768px) {
   .data-table { min-width: 750px; }

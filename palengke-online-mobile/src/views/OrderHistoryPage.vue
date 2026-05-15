@@ -51,6 +51,12 @@
               @click="viewReceipt(order)">
               View Receipt
             </ion-button>
+            <ion-button v-if="order.status === 'completed'"
+              fill="clear" color="danger" size="small"
+              @click="fileDispute(order)">
+              <ion-icon :icon="warningOutline" slot="start"></ion-icon>
+              {{ getDisputeByOrderId(order.id) ? 'View Dispute' : 'Report Issue' }}
+            </ion-button>
           </div>
         </div>
       </div>
@@ -66,7 +72,8 @@ import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonButtons, IonButton, IonLabel, IonSegment, IonSegmentButton, IonIcon
 } from '@ionic/vue';
-import { arrowBackOutline } from 'ionicons/icons';
+import { arrowBackOutline, warningOutline } from 'ionicons/icons';
+import { getDisputeByOrderId } from '../services/disputeService';
 
 const router = useRouter();
 const selectedFilter = ref('all');
@@ -97,6 +104,11 @@ const reorder = (order) => {
 const viewReceipt = (order) => {
   router.push(`/order-receipt/${order.id}`);
 };
+
+const fileDispute = (order) => {
+  localStorage.setItem('lastOrder_' + order.id, JSON.stringify(order))
+  router.push(`/file-dispute/${order.id}`)
+}
 
 const goBack = () => router.back();
 </script>

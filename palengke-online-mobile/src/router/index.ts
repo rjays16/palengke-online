@@ -32,6 +32,7 @@ import FavoriteSellersPage from '@/views/FavoriteSellersPage.vue';
 import ProductDetailPage from '@/views/ProductDetailPage.vue';
 import CategoryProductsPage from '@/views/CategoryProductsPage.vue';
 import OrderReceiptPage from '@/views/OrderReceiptPage.vue';
+import FileDisputePage from '@/views/FileDisputePage.vue';
 
 const routes: Array<RouteRecordRaw> = [
   { path: '/', redirect: '/login' },
@@ -227,6 +228,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/order-receipt/:id',
     name: 'OrderReceipt',
     component: OrderReceiptPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/file-dispute/:orderId',
+    name: 'FileDispute',
+    component: FileDisputePage,
     meta: { requiresAuth: true }
   },
 ];

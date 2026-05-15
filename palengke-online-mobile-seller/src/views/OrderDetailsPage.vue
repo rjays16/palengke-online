@@ -131,6 +131,32 @@
           </div>
         </div>
 
+        <!-- Dispute Info -->
+        <div class="info-card dispute-card" v-if="dispute">
+          <div class="card-header">
+            <h3>⚠️ Customer Dispute</h3>
+            <ion-badge color="danger">OPEN</ion-badge>
+          </div>
+          <div class="dispute-details">
+            <div class="info-row">
+              <span class="label">Reason:</span>
+              <span class="value">{{ dispute.reasonLabel }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Description:</span>
+              <span class="value">{{ dispute.description }}</span>
+            </div>
+            <div class="info-row">
+              <span class="label">Filed on:</span>
+              <span class="value">{{ dispute.date }}</span>
+            </div>
+            <div class="info-row" v-if="dispute.image">
+              <span class="label">Photo:</span>
+              <img :src="dispute.image" class="dispute-photo" />
+            </div>
+          </div>
+        </div>
+
         <!-- Action Buttons -->
         <div class="action-buttons" v-if="order.status !== 'completed' && order.status !== 'cancelled'">
           <ion-button
@@ -205,8 +231,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { getDisputeByOrderId } from '../services/disputeService';
 import {
   IonPage,
   IonHeader,
@@ -242,6 +269,11 @@ const router = useRouter();
 const route = useRoute();
 
 const order = ref(null);
+
+const dispute = computed(() => {
+  if (!order.value) return null
+  return getDisputeByOrderId(order.value.id)
+})
 
 // Mock order data (TODO: Replace with API call)
 const mockOrders = {
@@ -858,6 +890,11 @@ const showToast = async (message, color = 'dark') => {
   font-weight: 600;
   text-transform: none;
 }
+
+/* Dispute Card */
+.dispute-card { border: 1.5px solid #fecaca; background: #fef2f2; }
+.dispute-details { margin-top: 8px; }
+.dispute-photo { width: 100%; max-height: 140px; object-fit: cover; border-radius: 8px; margin-top: 8px; }
 
 /* Completed Message */
 .completed-message {

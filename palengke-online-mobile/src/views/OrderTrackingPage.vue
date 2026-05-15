@@ -109,6 +109,12 @@
               Cancel Order
             </ion-button>
           </div>
+          <div class="cancel-order-section" v-if="currentStep === 4">
+            <ion-button expand="block" color="danger" class="cancel-order-btn" @click="fileDispute">
+              <ion-icon slot="start" :icon="warningOutline"></ion-icon>
+              Report Issue with Order
+            </ion-button>
+          </div>
         </div>
 
       </div>
@@ -140,7 +146,7 @@ import {
   chatbubbleOutline, callOutline, closeOutline, flagOutline,
   chevronUpOutline, chevronDownOutline,
   starOutline, storefrontOutline, basketOutline, bicycleOutline,
-  homeOutline, giftOutline, cashOutline
+  homeOutline, giftOutline, cashOutline, warningOutline
 } from 'ionicons/icons';
 import { submitReport, readFileAsDataURL } from '../services/reportService';
 import L from 'leaflet';
@@ -323,6 +329,15 @@ const reportDriver = async () => {
   });
   await alert.present();
 };
+const fileDispute = () => {
+  const orderId = route.params.id
+  localStorage.setItem('lastOrder_' + orderId, JSON.stringify({
+    id: orderId,
+    storeName: orderStatus.value.statusText.includes('Store') ? 'Store' : 'Unknown',
+    total: 0,
+  }))
+  router.push('/file-dispute/' + orderId)
+}
 const getHelp = () => router.push('/help');
 const shareOrder = () => {};
 const showDriverInfo = async () => {
