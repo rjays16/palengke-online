@@ -29,21 +29,23 @@ function show() {
   fading.value = false
 }
 
-function hide() {
-  fading.value = true
+function hide(delay = 400) {
   timeout = setTimeout(() => {
-    visible.value = false
-    fading.value = false
-  }, 400)
+    fading.value = true
+    setTimeout(() => {
+      visible.value = false
+      fading.value = false
+    }, 400)
+  }, delay)
 }
 
-// Initial load: show for 2.5s then fade
-timeout = setTimeout(hide, 2500)
+// Initial load: show for 2.5s
+hide(2500)
 
-// Page transitions: show briefly on route change
+// Every page navigation: show briefly
 watch(() => route.path, () => {
   show()
-  timeout = setTimeout(hide, 600)
+  hide(500)
 })
 </script>
 
@@ -126,6 +128,4 @@ watch(() => route.path, () => {
   0%, 100% { opacity: 0.3; }
   50% { opacity: 1; }
 }
-
-
 </style>
