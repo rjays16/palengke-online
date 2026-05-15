@@ -439,10 +439,19 @@ function exportCSV() {
 .dismiss-btn:hover { background: #fef2f2; color: #dc2626; }
 
 @media (max-width: 768px) {
+  .data-table { min-width: 700px; }
+  .search-box { min-width: 160px; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .analytics-grid-2 { grid-template-columns: 1fr; }
   .tabs-nav { width: 100%; }
   .tab-btn { flex: 1; justify-content: center; }
   .modal-meta-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .page-toolbar { flex-direction: column; align-items: stretch; }
+  .toolbar-left { flex-direction: column; }
+  .search-box { min-width: 0; width: 100%; }
+  .filter-select { width: 100%; }
+  .data-table { min-width: 640px; }
 }
 </style>

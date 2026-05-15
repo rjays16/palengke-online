@@ -229,9 +229,18 @@ function statusLabel(s) {
 .bar-count { font-size: 13px; font-weight: 600; color: #111827; min-width: 24px; text-align: right; }
 
 @media (max-width: 768px) {
+  .data-table { min-width: 700px; }
+  .search-box { min-width: 160px; }
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .analytics-grid-2 { grid-template-columns: 1fr; }
   .tabs-nav { width: 100%; }
   .tab-btn { flex: 1; justify-content: center; }
+}
+@media (max-width: 480px) {
+  .page-toolbar { flex-direction: column; align-items: stretch; }
+  .toolbar-left { flex-direction: column; }
+  .search-box { min-width: 0; width: 100%; }
+  .filter-select { width: 100%; }
+  .data-table { min-width: 640px; }
 }
 </style>

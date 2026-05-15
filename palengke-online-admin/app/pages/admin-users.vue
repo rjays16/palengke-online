@@ -262,5 +262,16 @@ select.form-input { cursor: pointer; }
 .modal-btn.danger:hover { background: #b91c1c; }
 .confirm-text { font-size: 14px; color: #374151; margin: 0 0 8px; line-height: 1.5; }
 .confirm-hint { font-size: 12px; color: #9ca3af; margin: 0; }
+@media (max-width: 768px) {
+  .data-table { min-width: 700px; }
+  .search-box { min-width: 160px; }
+}
 @media (max-width: 600px) { .form-row { flex-direction: column; } }
+@media (max-width: 480px) {
+  .page-toolbar { flex-direction: column; align-items: stretch; }
+  .toolbar-left { flex-direction: column; }
+  .search-box { min-width: 0; width: 100%; }
+  .add-btn { text-align: center; }
+  .data-table { min-width: 640px; }
+}
 </style>

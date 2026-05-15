@@ -275,12 +275,25 @@
         <div class="topbar-right">
 
           <!-- Search -->
-          <div class="topbar-search">
+          <div class="topbar-search" ref="searchRef">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
-            <input type="text" placeholder="Search orders, sellers…" class="search-input" />
+            <input v-model="searchQuery" type="text" placeholder="Search orders, sellers…" class="search-input" @input="onSearch" @keydown="onSearchKeydown" @focus="searchFocused = true" />
             <kbd class="search-kbd">⌘K</kbd>
+            <div class="search-dropdown" v-if="searchFocused && searchQuery">
+              <div v-if="searchResults.length === 0" class="search-empty">No results found</div>
+              <template v-for="(group, gi) in searchResults" :key="gi">
+                <div class="search-group-label">{{ group.label }}</div>
+                <div v-for="(item, ii) in group.items" :key="gi + '-' + ii" class="search-item" :class="{ highlighted: searchHighlight === gi + '-' + ii }" @mousedown.prevent="goToResult(item)" @mouseenter="searchHighlight = gi + '-' + ii">
+                  <span class="search-item-icon">{{ group.icon }}</span>
+                  <div class="search-item-body">
+                    <span class="search-item-title">{{ item.title }}</span>
+                    <span class="search-item-sub">{{ item.sub }}</span>
+                  </div>
+                </div>
+              </template>
+            </div>
           </div>
 
           <!-- Notifications Bell -->
@@ -357,6 +370,110 @@ const sidebarCollapsed = ref(false)
 const sidebarOpen = ref(false)
 const showUserMenu = ref(false)
 const showNotifPanel = ref(false)
+
+// Global search
+const searchQuery = ref('')
+const searchFocused = ref(false)
+const searchHighlight = ref('')
+const searchRef = ref(null)
+let searchTimer = null
+
+const searchResults = computed(() => {
+  const q = searchQuery.value.toLowerCase().trim()
+  if (!q) return []
+  const results = []
+
+  // Orders
+  const ordersStore = useOrdersStore()
+  const matchedOrders = ordersStore.orders.filter(o => o.id.toLowerCase().includes(q) || o.customer.toLowerCase().includes(q))
+  if (matchedOrders.length) {
+    results.push({ label: 'Orders', icon: '📦', items: matchedOrders.map(o => ({ title: '#' + o.id, sub: o.customer + ' — ₱' + o.total.toLocaleString(), to: '/orders/' + o.id })) })
+  }
+
+  // Sellers
+  const sellersStore = useSellersStore()
+  const matchedSellers = sellersStore.sellers.filter(s => s.name.toLowerCase().includes(q) || s.owner.toLowerCase().includes(q))
+  if (matchedSellers.length) {
+    results.push({ label: 'Sellers', icon: '🏪', items: matchedSellers.map(s => ({ title: s.name, sub: s.owner + ' · ' + s.category, to: '/sellers/' + s.id })) })
+  }
+
+  // Customers
+  const customersStore = useCustomersStore()
+  const matchedCustomers = customersStore.customers.filter(c => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q))
+  if (matchedCustomers.length) {
+    results.push({ label: 'Customers', icon: '👤', items: matchedCustomers.map(c => ({ title: c.name, sub: c.email, to: '/customers/' + c.id })) })
+  }
+
+  // Drivers
+  const driversStore = useDriversStore()
+  const matchedDrivers = driversStore.drivers.filter(d => d.name.toLowerCase().includes(q))
+  if (matchedDrivers.length) {
+    results.push({ label: 'Drivers', icon: '🏍️', items: matchedDrivers.map(d => ({ title: d.name, sub: d.vehicle + ' · ' + d.plate, to: '/drivers/' + d.id })) })
+  }
+
+  return results
+})
+
+function onSearch() {
+  searchHighlight.value = ''
+}
+
+function onSearchKeydown(e) {
+  const flat = []
+  searchResults.value.forEach(g => g.items.forEach((item, ii) => flat.push(g.label + '-' + ii)))
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault()
+    const idx = flat.indexOf(searchHighlight.value)
+    const next = idx < flat.length - 1 ? idx + 1 : 0
+    searchHighlight.value = flat[next]
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault()
+    const idx = flat.indexOf(searchHighlight.value)
+    const prev = idx > 0 ? idx - 1 : flat.length - 1
+    searchHighlight.value = flat[prev]
+  } else if (e.key === 'Enter') {
+    e.preventDefault()
+    const selected = flat.indexOf(searchHighlight.value)
+    if (selected >= 0) {
+      let count = 0
+      for (const g of searchResults.value) {
+        for (const item of g.items) {
+          if (count === selected) { goToResult(item); return }
+          count++
+        }
+      }
+    }
+    // No highlight, go to first result
+    if (searchResults.value.length && searchResults.value[0].items.length) {
+      goToResult(searchResults.value[0].items[0])
+    }
+  } else if (e.key === 'Escape') {
+    searchFocused.value = false
+    searchQuery.value = ''
+  }
+}
+
+function goToResult(item) {
+  searchFocused.value = false
+  searchQuery.value = ''
+  navigateTo(item.to)
+}
+
+// Close search on click outside
+watch(searchFocused, (val) => {
+  if (val) {
+    setTimeout(() => {
+      const handler = (e) => {
+        if (searchRef.value && !searchRef.value.contains(e.target)) {
+          searchFocused.value = false
+          document.removeEventListener('click', handler)
+        }
+      }
+      document.addEventListener('click', handler)
+    }, 0)
+  }
+})
 
 // Mock counts — replace with real API data
 const pendingOrders = ref(12)
@@ -852,6 +969,7 @@ const vClickOutside = {
   padding: 8px 12px;
   min-width: 240px;
   transition: border-color 0.2s;
+  position: relative;
 }
 
 .topbar-search:focus-within {
@@ -888,6 +1006,31 @@ const vClickOutside = {
   font-family: 'Inter', sans-serif;
   flex-shrink: 0;
 }
+
+/* Search dropdown */
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 6px;
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 200;
+  padding: 8px 0;
+}
+.search-empty { padding: 24px 16px; text-align: center; font-size: 13px; color: #9ca3af; }
+.search-group-label { padding: 6px 14px 4px; font-size: 10px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.8px; }
+.search-item { display: flex; align-items: center; gap: 10px; padding: 8px 14px; cursor: pointer; transition: background 0.1s; }
+.search-item:hover, .search-item.highlighted { background: #f0fdf4; }
+.search-item-icon { font-size: 16px; flex-shrink: 0; }
+.search-item-body { display: flex; flex-direction: column; min-width: 0; }
+.search-item-title { font-size: 13px; font-weight: 600; color: #111827; }
+.search-item-sub { font-size: 11px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Topbar buttons */
 .topbar-btn {

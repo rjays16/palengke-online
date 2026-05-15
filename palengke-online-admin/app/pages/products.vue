@@ -573,7 +573,16 @@ select.form-input { cursor: pointer; }
 .modal-btn.danger:hover { background: #b91c1c; }
 
 @media (max-width: 768px) {
+  .data-table { min-width: 700px; }
+  .search-box { min-width: 160px; }
   .form-row { flex-direction: column; }
   .form-row.three-col { flex-direction: column; }
+}
+@media (max-width: 480px) {
+  .page-toolbar { flex-direction: column; align-items: stretch; }
+  .toolbar-left { flex-direction: column; }
+  .search-box { min-width: 0; width: 100%; }
+  .filter-select { width: 100%; }
+  .data-table { min-width: 640px; }
 }
 </style>
