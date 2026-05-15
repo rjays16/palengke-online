@@ -8,7 +8,7 @@
       <div class="sidebar-logo">
         <img src="/assets/images/logo.png" alt="Palengke Online" class="sidebar-logo-img" />
         <div class="sidebar-logo-text">
-          <span class="sidebar-brand">Palengke</span>
+          <span class="sidebar-brand">Palengke Online</span>
           <span class="sidebar-brand-sub">Admin Portal</span>
         </div>
       </div>
@@ -608,8 +608,8 @@ const vClickOutside = {
 }
 
 .sidebar-logo-img {
-  width: 40px;
-  height: 40px;
+  width: 95px;
+  height: 95px;
   border-radius: 10px;
   object-fit: cover;
   flex-shrink: 0;
