@@ -2,7 +2,7 @@
   <div class="admin-shell">
 
     <!-- ── SIDEBAR ─────────────────────────── -->
-    <aside class="sidebar" :class="{ collapsed: sidebarCollapsed }">
+    <aside class="sidebar" :class="{ collapsed: sidebarCollapsed, open: sidebarOpen }">
 
       <!-- Logo -->
       <div class="sidebar-logo">
@@ -245,6 +245,8 @@
 
     </aside>
 
+    <div class="sidebar-overlay" :class="{ open: sidebarOpen }" @click="sidebarOpen = false"></div>
+
     <button class="sidebar-collapse-btn" @click="sidebarCollapsed = !sidebarCollapsed" :title="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="{ flipped: sidebarCollapsed }">
         <polyline points="15 18 9 12 15 6"/>
@@ -257,6 +259,11 @@
       <!-- Topbar -->
       <header class="topbar">
         <div class="topbar-left">
+          <button class="hamburger-btn" @click="sidebarOpen = !sidebarOpen" title="Toggle menu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
           <h1 class="topbar-title">{{ pageTitle }}</h1>
           <div class="topbar-breadcrumb">
             <span>Admin</span>
@@ -347,6 +354,7 @@ const router = useRouter()
 const auth = useAuthStore()
 
 const sidebarCollapsed = ref(false)
+const sidebarOpen = ref(false)
 const showUserMenu = ref(false)
 const showNotifPanel = ref(false)
 
@@ -413,6 +421,7 @@ const handleLogout = () => {
 watch(() => route.path, () => {
   showUserMenu.value = false
   showNotifPanel.value = false
+  sidebarOpen.value = false
 })
 
 // Click outside directive
@@ -1126,5 +1135,78 @@ const vClickOutside = {
 .notif-time {
   font-size: 11px;
   color: #9ca3af;
+}
+
+/* ── HAMBURGER ─────────────────────────────── */
+.hamburger-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid #e5e7eb;
+  background: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #6b7280;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.hamburger-btn:hover { border-color: #059669; color: #059669; }
+.hamburger-btn svg { width: 18px; height: 18px; }
+
+/* Sidebar overlay (mobile) */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 45;
+  opacity: 0;
+  transition: opacity 0.25s;
+  pointer-events: none;
+}
+.sidebar-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── RESPONSIVE ────────────────────────────── */
+@media (max-width: 1024px) {
+  .sidebar.collapsed { width: 256px; min-width: 256px; }
+  .sidebar.collapsed .sidebar-logo { justify-content: flex-start; padding: 16px 14px; gap: 10px; }
+  .sidebar.collapsed .sidebar-logo-text { display: flex; }
+  .sidebar.collapsed .sidebar-logo-img { width: 40px; height: 40px; }
+  .sidebar.collapsed .nav-section-label { display: block; }
+  .sidebar.collapsed .nav-item { justify-content: flex-start; padding: 9px 10px; }
+  .sidebar.collapsed .nav-label { display: block; }
+  .sidebar.collapsed .nav-badge { display: inline; }
+  .sidebar.collapsed .nav-item.sub { display: flex; }
+  .sidebar.collapsed .sidebar-user { justify-content: flex-start; padding: 14px 16px; }
+  .sidebar.collapsed .user-info { display: block; }
+  .sidebar.collapsed .user-logout { display: flex; }
+  .sidebar-collapse-btn { display: none; }
+  .hamburger-btn { display: flex; }
+  .sidebar { position: fixed; left: -256px; top: 0; bottom: 0; transition: left 0.3s ease; z-index: 50; }
+  .sidebar.open { left: 0; }
+  .sidebar-overlay { display: block; }
+  .main-area { margin-left: 0; width: 100%; }
+  .topbar { padding: 0 16px; }
+  .topbar-search { min-width: 0; }
+  .search-kbd { display: none; }
+}
+
+@media (max-width: 768px) {
+  .topbar-title { font-size: 15px; }
+  .topbar-breadcrumb { display: none; }
+  .topbar-search { display: none; }
+  .page-content { padding: 16px; }
+}
+
+@media (max-width: 480px) {
+  .topbar-right { gap: 4px; }
+  .topbar-btn { width: 32px; height: 32px; }
+  .topbar-avatar { width: 32px; height: 32px; }
+  .page-content { padding: 12px; }
 }
 </style>
