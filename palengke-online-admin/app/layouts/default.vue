@@ -320,6 +320,11 @@
               Settings
             </NuxtLink>
             <div class="dropdown-divider"></div>
+            <button class="dropdown-item" @click="theme.toggle(); showUserMenu = false">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              {{ theme.isDark ? 'Light Mode' : 'Dark Mode' }}
+            </button>
+            <div class="dropdown-divider"></div>
             <button class="dropdown-item danger" @click="handleLogout">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
               Logout
@@ -363,6 +368,9 @@
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
+
+const theme = useThemeStore()
+if (import.meta.client) theme.init()
 
 const sidebarCollapsed = ref(false)
 const sidebarOpen = ref(false)
@@ -1350,4 +1358,176 @@ const vClickOutside = {
   .topbar-avatar { width: 32px; height: 32px; }
   .page-content { padding: 12px; }
 }
+</style>
+
+<style>
+/* ── DARK MODE ──────────────────────────── */
+:root.dark-mode,
+html.dark-mode {
+  color-scheme: dark;
+}
+
+.dark-mode .admin-shell { background: #1a1a2e; }
+.dark-mode .sidebar { background: #16213e; border-right-color: #1e2a4a; }
+.dark-mode .sidebar-logo { border-bottom-color: #1e2a4a; }
+.dark-mode .sidebar-logo-img {
+  background: #f0fdf4;
+  border-radius: 10px;
+  padding: 4px;
+  filter: brightness(1.1);
+}
+.dark-mode .sidebar-brand { color: #e2e8f0; }
+.dark-mode .sidebar-brand-sub { color: #64748b; }
+.dark-mode .nav-section-label { color: #475569; }
+.dark-mode .nav-item { color: #94a3b8; }
+.dark-mode .nav-item:hover { background: #1e2a4a; color: #e2e8f0; }
+.dark-mode .nav-item.active { background: rgba(5,150,105,0.15); color: #34d399; }
+.dark-mode .nav-item.active .nav-icon { color: #34d399; }
+.dark-mode .nav-item.active::before { background: #34d399; }
+.dark-mode .nav-icon { color: #475569; }
+.dark-mode .nav-item:hover .nav-icon { color: #94a3b8; }
+.dark-mode .nav-badge.count { background: rgba(5,150,105,0.15); color: #34d399; border-color: rgba(5,150,105,0.3); }
+
+.dark-mode .main-area { background: #1a1a2e; }
+.dark-mode .topbar { background: #16213e; border-bottom-color: #1e2a4a; }
+.dark-mode .topbar-title { color: #e2e8f0; }
+.dark-mode .topbar-breadcrumb { color: #64748b; }
+.dark-mode .breadcrumb-current { color: #94a3b8; }
+.dark-mode .topbar-search { background: #1e2a4a; border-color: #2a3a5a; }
+.dark-mode .topbar-search:focus-within { border-color: #059669; }
+.dark-mode .topbar-search input { color: #e2e8f0; }
+.dark-mode .topbar-search svg { color: #475569; }
+.dark-mode .topbar-btn { color: #94a3b8; }
+.dark-mode .topbar-btn:hover { background: #1e2a4a; color: #e2e8f0; }
+.dark-mode .topbar-avatar { border-color: #2a3a5a; }
+.dark-mode .result-count { color: #64748b; }
+
+.dark-mode .user-dropdown { background: #16213e; border-color: #1e2a4a; }
+.dark-mode .dropdown-header strong { color: #e2e8f0; }
+.dark-mode .dropdown-header span { color: #64748b; }
+.dark-mode .dropdown-divider { border-color: #1e2a4a; }
+.dark-mode .dropdown-item { color: #94a3b8; }
+.dark-mode .dropdown-item:hover { background: #1e2a4a; color: #e2e8f0; }
+.dark-mode .dropdown-item.danger:hover { background: rgba(220,38,38,0.1); color: #f87171; }
+
+.dark-mode .page-content { background: #1a1a2e; }
+.dark-mode .page-content::-webkit-scrollbar-thumb { background: #2a3a5a; }
+.dark-mode .page-content::-webkit-scrollbar-track { background: transparent; }
+
+.dark-mode .search-dropdown { background: #16213e; border-color: #1e2a4a; }
+.dark-mode .search-group-label { color: #64748b; }
+.dark-mode .search-item { color: #94a3b8; }
+.dark-mode .search-item:hover { background: #1e2a4a; color: #e2e8f0; }
+.dark-mode .search-item-sub { color: #64748b; }
+
+.dark-mode .notif-panel { background: #16213e; border-left-color: #1e2a4a; }
+.dark-mode .notif-panel-header h3 { color: #e2e8f0; }
+.dark-mode .notif-panel-header button { color: #64748b; }
+.dark-mode .notif-panel-header button:hover { background: #1e2a4a; color: #e2e8f0; }
+.dark-mode .notif-item { border-bottom-color: #1e2a4a; }
+.dark-mode .notif-text { color: #cbd5e1; }
+.dark-mode .notif-time { color: #64748b; }
+
+/* Shared page component overrides */
+.dark-mode .page-shell { color: #e2e8f0; }
+.dark-mode .page-toolbar { color: #e2e8f0; }
+
+.dark-mode .table-card { background: #16213e; border-color: #1e2a4a; }
+.dark-mode .data-table th { color: #64748b; border-bottom-color: #1e2a4a; }
+.dark-mode .data-table td { color: #cbd5e1; border-bottom-color: #1a1a2e; }
+.dark-mode .id-cell { color: #34d399; }
+.dark-mode .name-cell { color: #e2e8f0; }
+.dark-mode .date-cell { color: #64748b; }
+.dark-mode .amount-cell { color: #e2e8f0; }
+.dark-mode .action-btn { border-color: #2a3a5a; color: #64748b; }
+.dark-mode .action-btn:hover { border-color: #059669; color: #34d399; }
+
+.dark-mode .search-box { background: #1e2a4a; border-color: #2a3a5a; }
+.dark-mode .search-box:focus-within { border-color: #059669; }
+.dark-mode .search-box input { color: #e2e8f0; }
+.dark-mode .search-box svg { color: #475569; }
+.dark-mode .filter-select { background: #1e2a4a; border-color: #2a3a5a; color: #cbd5e1; }
+.dark-mode .filter-select:focus { border-color: #059669; }
+
+.dark-mode .method-badge.cod { background: #1e2a4a; color: #94a3b8; }
+.dark-mode .method-badge.gcash { background: rgba(5,150,105,0.15); color: #34d399; }
+.dark-mode .status-badge.delivered { background: rgba(5,150,105,0.15); color: #34d399; }
+.dark-mode .status-badge.transit { background: rgba(59,130,246,0.15); color: #60a5fa; }
+.dark-mode .status-badge.preparing { background: rgba(217,119,6,0.15); color: #fbbf24; }
+.dark-mode .status-badge.pending { background: #1e2a4a; color: #94a3b8; }
+.dark-mode .status-badge.cancelled { background: rgba(220,38,38,0.15); color: #f87171; }
+.dark-mode .status-badge.completed { background: rgba(5,150,105,0.15); color: #34d399; }
+.dark-mode .status-badge.open { background: rgba(220,38,38,0.15); color: #f87171; }
+.dark-mode .status-badge.investigating { background: rgba(217,119,6,0.15); color: #fbbf24; }
+.dark-mode .status-badge.resolved { background: rgba(5,150,105,0.15); color: #34d399; }
+.dark-mode .status-badge.failed { background: rgba(220,38,38,0.15); color: #f87171; }
+
+.dark-mode .priority-badge.high { background: rgba(220,38,38,0.15); color: #f87171; }
+.dark-mode .priority-badge.medium { background: rgba(217,119,6,0.15); color: #fbbf24; }
+.dark-mode .priority-badge.low { background: #1e2a4a; color: #94a3b8; }
+
+.dark-mode .stats-grid .stat-card { background: #16213e; border-color: #1e2a4a; }
+.dark-mode .stat-label { color: #64748b; }
+.dark-mode .stat-value { color: #e2e8f0; }
+.dark-mode .stat-period { color: #475569; }
+.dark-mode .stat-change.up { color: #34d399; }
+.dark-mode .stat-change.down { color: #f87171; }
+
+.dark-mode .dash-card { background: #16213e; border-color: #1e2a4a; }
+.dark-mode .card-head h3 { color: #e2e8f0; }
+.dark-mode .card-badge { background: #1e2a4a; color: #64748b; }
+
+.dark-mode .modal-overlay { background: rgba(0,0,0,0.6); }
+.dark-mode .modal-card { background: #16213e; }
+.dark-mode .modal-top { border-bottom-color: #1e2a4a; }
+.dark-mode .modal-title { color: #e2e8f0; }
+.dark-mode .modal-close { color: #64748b; }
+.dark-mode .modal-close:hover { background: #1e2a4a; color: #e2e8f0; }
+.dark-mode .modal-body { color: #cbd5e1; }
+.dark-mode .dl { color: #64748b; }
+.dark-mode .dv { color: #e2e8f0; }
+.dark-mode .modal-actions-single,
+.dark-mode .modal-actions { border-top-color: #1e2a4a; }
+.dark-mode .modal-btn.secondary { background: #1e2a4a; color: #94a3b8; }
+.dark-mode .modal-btn.secondary:hover { background: #2a3a5a; }
+
+.dark-mode .settings-subnav { background: #16213e; border-color: #1e2a4a; }
+.dark-mode .subnav-item { color: #64748b; }
+.dark-mode .subnav-item:hover { color: #cbd5e1; background: #1e2a4a; }
+.dark-mode .subnav-item.active { background: rgba(5,150,105,0.15); color: #34d399; }
+.dark-mode .settings-section { background: #16213e; border-color: #1e2a4a; }
+.dark-mode .settings-section h3 { color: #e2e8f0; }
+.dark-mode .form-group label { color: #cbd5e1; }
+.dark-mode .form-input { background: #1e2a4a; border-color: #2a3a5a; color: #e2e8f0; }
+.dark-mode .form-input:focus { border-color: #059669; }
+.dark-mode .form-input:disabled { background: #1a1a2e; color: #64748b; }
+.dark-mode .form-hint { color: #475569; }
+.dark-mode .pref-row { border-bottom-color: #1a1a2e; }
+.dark-mode .pref-label { color: #e2e8f0; }
+.dark-mode .pref-desc { color: #64748b; }
+.dark-mode .toggle-slider { background: #2a3a5a; }
+.dark-mode .toggle input:checked + .toggle-slider { background: #059669; }
+.dark-mode .save-btn { background: #059669; }
+.dark-mode .save-btn:hover { background: #047857; }
+.dark-mode .reset-btn { background: #1e2a4a; color: #94a3b8; border-color: #2a3a5a; }
+.dark-mode .reset-btn:hover { border-color: #64748b; }
+
+.dark-mode .example-box { background: #1e2a4a; }
+.dark-mode .example-intro { color: #94a3b8; }
+.dark-mode .example-row { color: #cbd5e1; border-bottom-color: #1e2a4a; }
+.dark-mode .example-row.highlight { color: #34d399; }
+.dark-mode .preview-card { background: #1e2a4a; }
+.dark-mode .preview-label { color: #64748b; }
+.dark-mode .preview-value { color: #e2e8f0; }
+
+.dark-mode .detail-grid { background: #1e2a4a; border-color: #1e2a4a; }
+.dark-mode .detail-item .dl { color: #64748b; }
+.dark-mode .detail-item .dv { color: #e2e8f0; }
+
+.dark-mode .sidebar-user { border-top-color: #1e2a4a; }
+.dark-mode .user-name { color: #e2e8f0; }
+.dark-mode .user-role { color: #64748b; }
+.dark-mode .user-avatar { background: #1e2a4a; color: #34d399; }
+.dark-mode .user-logout { color: #64748b; }
+.dark-mode .user-logout:hover { background: rgba(220,38,38,0.1); color: #f87171; }
 </style>

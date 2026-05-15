@@ -69,11 +69,11 @@
           <div class="pref-row">
             <div class="pref-info">
               <span class="pref-label">Dark Mode</span>
-              <span class="pref-desc">Switch to dark theme (coming soon)</span>
+              <span class="pref-desc">Switch to dark theme</span>
             </div>
             <label class="toggle">
-              <input type="checkbox" v-model="prefs.darkMode" disabled />
-              <span class="toggle-slider disabled"></span>
+              <input type="checkbox" :checked="theme.isDark" @change="theme.toggle()" />
+              <span class="toggle-slider"></span>
             </label>
           </div>
         </div>
@@ -115,6 +115,7 @@ definePageMeta({
 })
 
 const auth = useAuthStore()
+const theme = useThemeStore()
 auth.restore()
 onMounted(() => {
   if (auth.user?.role !== 'superadmin') {
