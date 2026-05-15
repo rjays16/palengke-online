@@ -668,19 +668,32 @@ const handleForgot = () => {
 
 /* ── RESPONSIVE ──────────────────────────── */
 @media (max-width: 900px) {
-  .login-root { flex-direction: column-reverse; }
+  .login-root { flex-direction: column; }
   .hero-panel {
     width: 100%;
     min-height: 40vh;
   }
   .hero-content {
     min-height: 40vh;
-    padding: 40px 24px;
+    padding: 32px 24px;
   }
   .hero-title { font-size: 28px; }
   .form-panel {
     min-height: auto;
     padding: 40px 24px;
   }
+}
+@media (max-width: 480px) {
+  .hero-panel { display: none; }
+  .form-panel { padding: 32px 20px; align-items: flex-start; }
+  .form-inner { max-width: 100%; }
+  .logo-row { margin-bottom: 24px; }
+  .logo { width: 44px; height: 44px; }
+  .logo-text { font-size: 20px; }
+  .form-title { font-size: 26px; }
+  .form-subtitle { font-size: 14px; }
+  .form-options { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .form-footer { font-size: 11px; }
+  .field-input { font-size: 14px; padding: 13px 14px 13px 42px; }
 }
 </style>

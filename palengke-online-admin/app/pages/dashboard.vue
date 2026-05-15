@@ -139,5 +139,12 @@ const paginatedRecent = computed(() => {
 @media (max-width: 768px) {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .dash-grid-2 { grid-template-columns: 1fr; }
+  .dash-card { overflow-x: auto; }
+  .dash-table { min-width: 500px; }
+}
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .stat-value { font-size: 22px; }
+  .donut-placeholder { flex-direction: column; gap: 16px; }
 }
 </style>
