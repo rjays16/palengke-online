@@ -71,7 +71,7 @@ const goToSeller = (id) => navigateTo('/sellers/' + id)
 .search-box svg { width: 16px; height: 16px; color: #9ca3af; flex-shrink: 0; }
 .search-box input { border: none; background: transparent; font-size: 13px; font-family: 'Inter', sans-serif; color: #111827; outline: none; width: 100%; }
 .result-count { font-size: 13px; color: #9ca3af; }
-.table-card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
+.table-card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: auto; }
 .data-table { width: 100%; border-collapse: collapse; }
 .data-table th { text-align: left; font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 16px; border-bottom: 1px solid #f3f4f6; }
 .data-table td { padding: 14px 16px; font-size: 13px; color: #374151; border-bottom: 1px solid #f9fafb; }
@@ -86,4 +86,14 @@ const goToSeller = (id) => navigateTo('/sellers/' + id)
 .status-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; }
 .status-badge.active { background: #f0fdf4; color: #059669; }
 .status-badge.inactive { background: #f3f4f6; color: #6b7280; }
+
+@media (max-width: 768px) {
+  .data-table { min-width: 750px; }
+  .search-box { min-width: 160px; }
+}
+@media (max-width: 480px) {
+  .page-toolbar { flex-direction: column; align-items: stretch; }
+  .search-box { min-width: 0; width: 100%; }
+  .data-table { min-width: 680px; }
+}
 </style>
