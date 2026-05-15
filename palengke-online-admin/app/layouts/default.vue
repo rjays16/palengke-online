@@ -1,4 +1,5 @@
 <template>
+  <LoadingScreen />
   <div class="admin-shell">
 
     <!-- ── SIDEBAR ─────────────────────────── -->
