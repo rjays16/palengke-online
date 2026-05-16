@@ -7,7 +7,7 @@
           <input v-model="search" placeholder="Search categories..." />
         </div>
       </div>
-      <button class="add-btn" @click="showAddModal = true">
+      <button class="add-btn" @click="openAddModal">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add Category
       </button>
@@ -24,10 +24,10 @@
           <div class="cat-bar-bg"><div class="cat-bar-fill" :style="{ width: cat.pct + '%', background: cat.color }"></div></div>
         </div>
         <div class="cat-actions">
-          <button class="icon-btn" @click="editCategory(cat)" title="Edit">
+          <button class="icon-btn" @click="openEditModal(cat)" title="Edit">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           </button>
-          <button class="icon-btn danger" @click="deleteCategory(cat)" title="Delete">
+          <button class="icon-btn danger" @click="confirmDelete(cat)" title="Delete">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
           </button>
         </div>
@@ -67,29 +67,41 @@
         </div>
       </div>
     </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" v-if="showDeleteModal" @click.self="showDeleteModal = false">
+      <div class="modal-card modal-sm">
+        <div class="modal-top">
+          <span class="modal-title">Delete Category</span>
+          <button class="modal-close" @click="showDeleteModal = false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size:14px;color:#374151;line-height:1.5">Delete "{{ deletingCat?.name }}"? This will not delete the products inside.</p>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn secondary" @click="showDeleteModal = false">Cancel</button>
+          <button class="modal-btn danger" @click="doDelete">Delete</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 definePageMeta({ layout: 'default' })
 
+const store = useCategoriesStore()
+const { categories } = storeToRefs(store)
+
 const search = ref('')
 const showAddModal = ref(false)
 const editingCat = ref(null)
+const showDeleteModal = ref(false)
+const deletingCat = ref(null)
 
 const colors = ['#059669', '#3b82f6', '#f59e0b', '#dc2626', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316']
-
-const categories = ref([
-  { id: 1, name: 'Vegetables', icon: '🥬', color: '#059669', products: 48, pct: 100 },
-  { id: 2, name: 'Fruits', icon: '🍎', color: '#dc2626', products: 36, pct: 75 },
-  { id: 3, name: 'Seafood', icon: '🐟', color: '#3b82f6', products: 28, pct: 58 },
-  { id: 4, name: 'Meat & Poultry', icon: '🍗', color: '#f59e0b', products: 32, pct: 67 },
-  { id: 5, name: 'Pork', icon: '🥩', color: '#ec4899', products: 20, pct: 42 },
-  { id: 6, name: 'Chicken', icon: '🐔', color: '#f97316', products: 18, pct: 38 },
-  { id: 7, name: 'Bundles', icon: '📦', color: '#8b5cf6', products: 12, pct: 25 },
-  { id: 8, name: 'Rice & Grains', icon: '🌾', color: '#14b8a6', products: 15, pct: 31 },
-])
-
 const form = ref({ name: '', icon: '', color: '#059669' })
 
 const filteredCategories = computed(() => {
@@ -98,32 +110,35 @@ const filteredCategories = computed(() => {
   return categories.value.filter(c => c.name.toLowerCase().includes(q))
 })
 
-const editCategory = (cat) => {
+function openAddModal() {
+  editingCat.value = null
+  form.value = { name: '', icon: '', color: '#059669' }
+  showAddModal.value = true
+}
+
+function openEditModal(cat) {
   editingCat.value = cat
   form.value = { name: cat.name, icon: cat.icon, color: cat.color }
   showAddModal.value = true
 }
 
-const deleteCategory = (cat) => {
-  if (confirm(`Delete "${cat.name}"? This will not delete the products inside.`)) {
-    categories.value = categories.value.filter(c => c.id !== cat.id)
-  }
+function confirmDelete(cat) {
+  deletingCat.value = cat
+  showDeleteModal.value = true
 }
 
-const saveCategory = () => {
-  if (!form.value.name) return alert('Category name is required')
+function doDelete() {
+  if (deletingCat.value) store.deleteCategory(deletingCat.value.id)
+  showDeleteModal.value = false
+  deletingCat.value = null
+}
+
+function saveCategory() {
+  if (!form.value.name) return
   if (editingCat.value) {
-    const cat = categories.value.find(c => c.id === editingCat.value.id)
-    if (cat) Object.assign(cat, form.value)
+    store.updateCategory(editingCat.value.id, { name: form.value.name, icon: form.value.icon || '📁', color: form.value.color })
   } else {
-    categories.value.push({
-      id: Math.max(...categories.value.map(c => c.id)) + 1,
-      name: form.value.name,
-      icon: form.value.icon || '📁',
-      color: form.value.color,
-      products: 0,
-      pct: 0,
-    })
+    store.addCategory({ name: form.value.name, icon: form.value.icon || '📁', color: form.value.color })
   }
   showAddModal.value = false
   editingCat.value = null
@@ -158,12 +173,14 @@ const saveCategory = () => {
 .icon-btn.danger:hover { border-color: #dc2626; color: #dc2626; }
 .icon-btn svg { width: 14px; height: 14px; }
 
-/* Modal */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; z-index: 200; backdrop-filter: blur(2px); }
 .modal-card { background: #fff; border-radius: 16px; width: 100%; max-width: 440px; box-shadow: 0 16px 48px rgba(0,0,0,0.15); animation: modalIn 0.15s ease; }
+.modal-card.modal-sm { max-width: 420px; }
 @keyframes modalIn { from { opacity: 0; transform: scale(0.95) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 0; }
 .modal-header h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 700; color: #111827; }
+.modal-top { display: flex; align-items: center; gap: 10px; padding: 20px 24px; border-bottom: 1px solid #f3f4f6; }
+.modal-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 700; color: #111827; flex: 1; }
 .modal-close { width: 30px; height: 30px; border: none; background: none; cursor: pointer; color: #9ca3af; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
 .modal-close:hover { background: #f3f4f6; color: #374151; }
 .modal-close svg { width: 18px; height: 18px; }
@@ -178,6 +195,12 @@ const saveCategory = () => {
 .color-swatch:hover { transform: scale(1.15); }
 .color-swatch.active { border-color: #111827; transform: scale(1.15); }
 .modal-footer { display: flex; justify-content: flex-end; gap: 10px; padding: 0 24px 20px; }
+.modal-actions { display: flex; gap: 10px; padding: 16px 24px 20px; border-top: 1px solid #f3f4f6; }
+.modal-btn { flex: 1; padding: 11px; border-radius: 8px; font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s; border: none; }
+.modal-btn.secondary { background: #f3f4f6; color: #6b7280; }
+.modal-btn.secondary:hover { background: #e5e7eb; }
+.modal-btn.danger { background: #dc2626; color: #fff; }
+.modal-btn.danger:hover { background: #b91c1c; }
 .save-btn { padding: 10px 20px; background: #059669; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
 .save-btn:hover { background: #047857; }
 .reset-btn { padding: 10px 20px; background: #fff; color: #374151; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; }

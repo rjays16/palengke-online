@@ -1,12 +1,13 @@
 <template>
   <div class="page-shell">
     <div class="notif-controls">
-      <button class="mark-read-btn" @click="markAllRead">Mark All as Read</button>
+      <span class="result-count">{{ store.allNotifications.length }} total</span>
+      <button class="mark-read-btn" @click="store.markAllRead()">Mark All as Read</button>
     </div>
 
     <div class="table-card">
       <div class="notif-list">
-        <div v-for="n in notifications" :key="n.id" class="notif-item" :class="{ unread: !n.read }" @click="n.read = true">
+        <div v-for="n in paginatedNotifications" :key="n.id" class="notif-item" :class="{ unread: !n.read }" @click="store.markRead(n.id)">
           <div class="notif-icon" :class="n.type">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path v-if="n.type === 'order'" d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
@@ -21,7 +22,13 @@
             <span class="notif-time">{{ n.time }}</span>
           </div>
           <span class="notif-unread-dot" v-if="!n.read"></span>
+          <button class="notif-delete" @click.stop="store.deleteNotification(n.id)" title="Delete">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
         </div>
+      </div>
+      <div class="pagination-wrap">
+        <PaginationBar v-model="notifPage" :total="store.allNotifications.length" :perPage="notifPerPage" />
       </div>
     </div>
   </div>
@@ -30,27 +37,21 @@
 <script setup>
 definePageMeta({ layout: 'default' })
 
-const notifications = ref([
-  { id: 1, type: 'order', message: 'New order #ORD-1042 placed by Maria Santos', time: '2 mins ago', read: false },
-  { id: 2, type: 'order', message: 'Order #ORD-1041 marked as In Transit', time: '8 mins ago', read: false },
-  { id: 3, type: 'system', message: 'System backup completed successfully', time: '14 mins ago', read: false },
-  { id: 4, type: 'alert', message: 'Dispute opened on Order #ORD-1038 by Liza Morales', time: '22 mins ago', read: false },
-  { id: 5, type: 'order', message: 'New seller registration: Rosa\'s Produce', time: '1 hour ago', read: true },
-  { id: 6, type: 'system', message: 'New driver application: Leo Magno', time: '2 hours ago', read: true },
-  { id: 7, type: 'promo', message: 'Promo code PALENGKE20 used 45 times today', time: '3 hours ago', read: true },
-  { id: 8, type: 'warning', message: 'Payment payout for Pedro Merchants failed', time: '5 hours ago', read: true },
-  { id: 9, type: 'order', message: 'Order #ORD-1033 delivered successfully', time: '6 hours ago', read: true },
-  { id: 10, type: 'system', message: 'New app version 2.4.1 ready for deployment', time: '1 day ago', read: true },
-])
+const store = useNotificationsStore()
 
-const markAllRead = () => {
-  notifications.value.forEach(n => n.read = true)
-}
+const notifPage = ref(1)
+const notifPerPage = ref(5)
+
+const paginatedNotifications = computed(() => {
+  const start = (notifPage.value - 1) * notifPerPage.value
+  return store.allNotifications.slice(start, start + notifPerPage.value)
+})
 </script>
 
 <style scoped>
 .page-shell { display: flex; flex-direction: column; gap: 20px; }
-.notif-controls { display: flex; justify-content: flex-end; }
+.notif-controls { display: flex; justify-content: space-between; align-items: center; }
+.result-count { font-size: 13px; color: #9ca3af; }
 .mark-read-btn { padding: 8px 16px; border: 1.5px solid #e5e7eb; border-radius: 8px; background: #fff; font-size: 13px; font-weight: 500; color: #059669; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }
 .mark-read-btn:hover { background: #f0fdf4; border-color: #059669; }
 .table-card { background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
@@ -71,4 +72,9 @@ const markAllRead = () => {
 .notif-item.unread .notif-text { font-weight: 600; color: #111827; }
 .notif-time { font-size: 11px; color: #9ca3af; }
 .notif-unread-dot { width: 8px; height: 8px; border-radius: 50%; background: #059669; flex-shrink: 0; margin-top: 6px; }
+.notif-delete { width: 28px; height: 28px; border: none; background: none; cursor: pointer; color: #9ca3af; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; opacity: 0; transition: all 0.15s; }
+.notif-item:hover .notif-delete { opacity: 1; }
+.notif-delete:hover { background: #fef2f2; color: #dc2626; }
+.notif-delete svg { width: 14px; height: 14px; }
+.pagination-wrap { padding: 12px 20px; border-top: 1px solid #f3f4f6; }
 </style>

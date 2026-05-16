@@ -5,5 +5,6 @@ export default defineNuxtConfig({
   modules: ['@pinia/nuxt'],
   imports: {
     dirs: ['stores']
-  }
+  },
+  css: ['leaflet/dist/leaflet.css']
 })

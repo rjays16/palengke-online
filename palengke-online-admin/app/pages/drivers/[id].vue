@@ -34,14 +34,13 @@
         <div class="info-card">
           <h3>Documents</h3>
           <div class="doc-list">
-            <div v-for="doc in documents" :key="doc.name" class="doc-row">
+            <div v-for="doc in docs" :key="doc.name" class="doc-row">
               <div class="doc-info">
                 <span class="doc-name">{{ doc.name }}</span>
                 <span class="doc-status" :class="doc.status">{{ doc.status === 'verified' ? 'Verified' : doc.status === 'pending' ? 'Pending' : 'Rejected' }}</span>
               </div>
-              <button class="doc-btn" :class="doc.status === 'verified' ? 'verified' : ''">
-                {{ doc.status === 'verified' ? 'View' : 'Review' }}
-              </button>
+              <button v-if="doc.status === 'verified'" class="doc-btn verified" @click="viewDoc(doc)">View</button>
+              <button v-else class="doc-btn" @click="reviewDoc(doc)">Review</button>
             </div>
           </div>
         </div>
@@ -97,6 +96,60 @@
       <h2>Driver not found</h2>
       <p>The driver you're looking for doesn't exist.</p>
     </div>
+
+    <div class="modal-overlay bottom" v-if="viewingDoc" @click.self="viewingDoc = null">
+      <div class="modal-card modal-sm" @click.stop>
+        <div class="modal-top">
+          <span class="modal-title">{{ viewingDoc?.name }}</span>
+          <button class="modal-close" @click="viewingDoc = null">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="doc-preview">
+            <div class="doc-preview-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <span class="doc-preview-name">{{ viewingDoc?.name }}</span>
+            <span class="doc-preview-status" :class="viewingDoc?.status">
+              {{ viewingDoc?.status === 'verified' ? 'Verified' : viewingDoc?.status === 'pending' ? 'Pending' : 'Rejected' }}
+            </span>
+            <p class="doc-preview-note">This document has been verified and approved.</p>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn secondary" @click="viewingDoc = null">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay bottom" v-if="reviewingDoc" @click.self="reviewingDoc = null">
+      <div class="modal-card" @click.stop>
+        <div class="modal-top">
+          <span class="modal-title">Review: {{ reviewingDoc?.name }}</span>
+          <button class="modal-close" @click="reviewingDoc = null">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="review-status">
+            <span class="review-label">Current Status</span>
+            <span class="doc-preview-status" :class="reviewingDoc?.status">
+              {{ reviewingDoc?.status === 'verified' ? 'Verified' : reviewingDoc?.status === 'pending' ? 'Pending' : 'Rejected' }}
+            </span>
+          </div>
+          <div class="form-group" style="margin-top:16px">
+            <label>Review Notes</label>
+            <textarea v-model="reviewNotes" class="form-input" rows="3" placeholder="Add notes about this document..."></textarea>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn secondary" @click="reviewingDoc = null">Cancel</button>
+          <button class="modal-btn danger" @click="rejectDoc">Reject</button>
+          <button class="modal-btn primary" @click="approveDoc">Approve</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -111,7 +164,34 @@ const activeTab = ref('earnings')
 const weeklyEarnings = computed(() => Math.round((driver.value?.earnings || 0) * 0.12))
 const monthlyEarnings = computed(() => Math.round((driver.value?.earnings || 0) * 0.45))
 
-const documents = computed(() => driversStore.getDocuments())
+const docs = ref(driversStore.getDocuments())
+
+const viewingDoc = ref(null)
+const reviewingDoc = ref(null)
+const reviewNotes = ref('')
+
+function viewDoc(doc) {
+  viewingDoc.value = doc
+}
+
+function reviewDoc(doc) {
+  reviewingDoc.value = doc
+  reviewNotes.value = ''
+}
+
+function approveDoc() {
+  if (!reviewingDoc.value) return
+  const d = docs.value.find(d => d.name === reviewingDoc.value.name)
+  if (d) d.status = 'verified'
+  reviewingDoc.value = null
+}
+
+function rejectDoc() {
+  if (!reviewingDoc.value) return
+  const d = docs.value.find(d => d.name === reviewingDoc.value.name)
+  if (d) d.status = 'rejected'
+  reviewingDoc.value = null
+}
 
 const deliveryHistory = computed(() => {
   if (!driver.value) return []
@@ -181,6 +261,40 @@ const goBack = () => navigateTo('/drivers')
 .not-found { text-align: center; padding: 60px 20px; background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; }
 .not-found h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; color: #111827; margin-bottom: 8px; }
 .not-found p { color: #9ca3af; }
+.doc-preview { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 0; text-align: center; }
+.doc-preview-icon svg { width: 48px; height: 48px; color: #9ca3af; }
+.doc-preview-name { font-size: 15px; font-weight: 600; color: #111827; }
+.doc-preview-status { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 6px; }
+.doc-preview-status.verified { background: #f0fdf4; color: #059669; }
+.doc-preview-status.pending { background: #fef3c7; color: #d97706; }
+.doc-preview-status.rejected { background: #fef2f2; color: #dc2626; }
+.doc-preview-note { font-size: 13px; color: #9ca3af; margin-top: 4px; }
+.review-status { display: flex; align-items: center; gap: 10px; }
+.review-label { font-size: 13px; font-weight: 600; color: #374151; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label { font-size: 13px; font-weight: 600; color: #374151; }
+.form-input { width: 100%; box-sizing: border-box; padding: 10px 12px; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 13px; font-family: 'Inter', sans-serif; color: #111827; background: #fff; outline: none; }
+.form-input:focus { border-color: #059669; }
+textarea.form-input { resize: vertical; font-family: 'Inter', sans-serif; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 32px; backdrop-filter: blur(2px); }
+.modal-overlay.bottom { align-items: flex-end; padding: 0; }
+.modal-overlay.bottom .modal-card { border-radius: 16px 16px 0 0; max-width: 100%; max-height: 70vh; }
+.modal-card { background: #fff; border-radius: 16px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.modal-card.modal-sm { max-width: 400px; }
+.modal-top { display: flex; align-items: center; gap: 10px; padding: 20px 24px; border-bottom: 1px solid #f3f4f6; }
+.modal-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 700; color: #111827; flex: 1; }
+.modal-close { width: 32px; height: 32px; border: none; background: none; cursor: pointer; color: #9ca3af; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.modal-close:hover { background: #f3f4f6; color: #374151; }
+.modal-close svg { width: 18px; height: 18px; }
+.modal-body { padding: 20px 24px; }
+.modal-actions { display: flex; gap: 10px; padding: 16px 24px 20px; border-top: 1px solid #f3f4f6; }
+.modal-btn { flex: 1; padding: 11px; border-radius: 8px; font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s; border: none; }
+.modal-btn.primary { background: #059669; color: #fff; }
+.modal-btn.primary:hover { background: #047857; }
+.modal-btn.secondary { background: #f3f4f6; color: #6b7280; }
+.modal-btn.secondary:hover { background: #e5e7eb; }
+.modal-btn.danger { background: #dc2626; color: #fff; }
+.modal-btn.danger:hover { background: #b91c1c; }
 
 @media (max-width: 768px) {
   .detail-grid { grid-template-columns: 1fr; }

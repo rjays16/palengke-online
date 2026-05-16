@@ -52,8 +52,11 @@
             <div class="detail-item"><span class="dl">Status</span><span class="dv">{{ selected.status }}</span></div>
           </div>
         </div>
-        <div class="modal-actions-single">
+        <div class="modal-actions">
           <button class="modal-btn secondary" @click="selected = null">Close</button>
+          <button v-if="selected.status === 'pending'" class="modal-btn success" @click="store.processPayout(selected.id); selected = null">Process</button>
+          <button v-if="selected.status === 'failed'" class="modal-btn primary" @click="store.retryPayout(selected.id); selected = null">Retry</button>
+          <button v-if="selected.status === 'pending' || selected.status === 'failed'" class="modal-btn danger" @click="store.cancelPayout(selected.id); selected = null">Cancel</button>
         </div>
       </div>
     </div>
@@ -63,35 +66,26 @@
 <script setup>
 definePageMeta({ layout: 'default' })
 
+const store = usePayoutsStore()
+const { payouts } = storeToRefs(store)
+
 const statusFilter = ref('')
 const selected = ref(null)
+const payoutPage = ref(1)
+const payoutPerPage = ref(10)
 
-function viewPayout(p) {
-  selected.value = p
-}
-
-const payouts = ref([
-  { id: 'PO-001', recipient: "Juan's Farm", type: 'Seller', amount: 45200, account: 'GCash - ****1234', status: 'completed', date: '2026-05-14' },
-  { id: 'PO-002', recipient: 'Mark Reyes', type: 'Driver', amount: 12500, account: 'GCash - ****5678', status: 'completed', date: '2026-05-14' },
-  { id: 'PO-003', recipient: "Ana's Store", type: 'Seller', amount: 28400, account: 'Bank - ****9012', status: 'pending', date: '2026-05-13' },
-  { id: 'PO-004', recipient: 'Nina Salvador', type: 'Driver', amount: 9800, account: 'GCash - ****3456', status: 'completed', date: '2026-05-13' },
-  { id: 'PO-005', recipient: 'Pedro Merchants', type: 'Seller', amount: 52100, account: 'Bank - ****7890', status: 'failed', date: '2026-05-12' },
-  { id: 'PO-006', recipient: 'Tina Fernandez', type: 'Driver', amount: 15600, account: 'GCash - ****2345', status: 'completed', date: '2026-05-12' },
-  { id: 'PO-007', recipient: 'FreshMart', type: 'Seller', amount: 36200, account: 'GCash - ****6789', status: 'pending', date: '2026-05-11' },
-  { id: 'PO-008', recipient: "Liza's Shop", type: 'Seller', amount: 19500, account: 'Bank - ****0123', status: 'completed', date: '2026-05-10' },
-])
+function viewPayout(p) { selected.value = p }
 
 const filteredPayouts = computed(() => {
   if (!statusFilter.value) return payouts.value
   return payouts.value.filter(p => p.status === statusFilter.value)
 })
 
-const payoutPage = ref(1)
-const payoutPerPage = ref(10)
 const paginatedPayouts = computed(() => {
   const start = (payoutPage.value - 1) * payoutPerPage.value
   return filteredPayouts.value.slice(start, start + payoutPerPage.value)
 })
+
 watch(statusFilter, () => { payoutPage.value = 1 })
 </script>
 
@@ -129,16 +123,17 @@ watch(statusFilter, () => { payoutPage.value = 1 })
 .detail-item { display: flex; flex-direction: column; gap: 2px; }
 .dl { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.3px; }
 .dv { font-size: 14px; font-weight: 600; color: #111827; }
-.modal-actions-single { display: flex; gap: 10px; padding: 16px 24px 20px; border-top: 1px solid #f3f4f6; }
+.modal-actions { display: flex; gap: 10px; padding: 16px 24px 20px; border-top: 1px solid #f3f4f6; }
 .modal-btn { flex: 1; padding: 11px; border-radius: 8px; font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s; border: none; }
 .modal-btn.secondary { background: #f3f4f6; color: #6b7280; }
 .modal-btn.secondary:hover { background: #e5e7eb; }
+.modal-btn.success { background: #059669; color: #fff; }
+.modal-btn.success:hover { background: #047857; }
+.modal-btn.primary { background: #3b82f6; color: #fff; }
+.modal-btn.primary:hover { background: #2563eb; }
+.modal-btn.danger { background: #dc2626; color: #fff; }
+.modal-btn.danger:hover { background: #b91c1c; }
 
-@media (max-width: 768px) {
-  .data-table { min-width: 700px; }
-}
-@media (max-width: 480px) {
-  .page-toolbar { flex-direction: column; align-items: stretch; }
-  .filter-select { width: 100%; }
-}
+@media (max-width: 768px) { .data-table { min-width: 700px; } }
+@media (max-width: 480px) { .page-toolbar { flex-direction: column; align-items: stretch; } .filter-select { width: 100%; } }
 </style>

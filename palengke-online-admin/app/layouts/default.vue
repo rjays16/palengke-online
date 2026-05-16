@@ -121,6 +121,24 @@
           <span class="nav-label">Categories</span>
         </NuxtLink>
 
+        <NuxtLink to="/banners" class="nav-item" active-class="active">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
+            </svg>
+          </span>
+          <span class="nav-label">Banners</span>
+        </NuxtLink>
+
+        <NuxtLink to="/promos" class="nav-item" active-class="active">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>
+            </svg>
+          </span>
+          <span class="nav-label">Promos</span>
+        </NuxtLink>
+
         <div class="nav-section-label">Finance</div>
 
         <NuxtLink to="/analytics" class="nav-item" active-class="active">
@@ -520,6 +538,8 @@ const pageTitle = computed(() => {
     '/notifications': 'Notifications',
     '/settings': 'Settings',
     '/admin-users': 'Admin Users',
+    '/banners': 'Banners',
+    '/promos': 'Promos',
   }
   // Match dynamic routes like /sellers/123
   const base = '/' + route.path.split('/')[1]
@@ -1550,4 +1570,67 @@ html.dark-mode {
 .dark-mode .user-avatar { background: #1e2a4a; color: #34d399; }
 .dark-mode .user-logout { color: #64748b; }
 .dark-mode .user-logout:hover { background: rgba(220,38,38,0.1); color: #f87171; }
+
+/* Disputes analytics */
+.dark-mode .tab-switch { background: #1e2a4a; }
+.dark-mode .tab-btn { color: #64748b; }
+.dark-mode .tab-btn.active { background: #16213e; color: #34d399; }
+.dark-mode .stat-card { background: #16213e; border-color: #1e2a4a; }
+.dark-mode .stat-value { color: #e2e8f0; }
+.dark-mode .chart-card { background: #16213e; border-color: #1e2a4a; }
+.dark-mode .chart-card h4 { color: #e2e8f0; }
+.dark-mode .chart-bar-bg { background: #1e2a4a; }
+.dark-mode .chart-bar-val { color: #e2e8f0; }
+.dark-mode .reason-item { border-bottom-color: #1e2a4a; }
+.dark-mode .reason-name { color: #cbd5e1; }
+.dark-mode .reason-count { color: #34d399; }
+
+/* Categories */
+.dark-mode .categories-grid .category-card { background: #16213e; border-color: #1e2a4a; }
+.dark-mode .cat-name { color: #e2e8f0; }
+.dark-mode .cat-count { color: #64748b; }
+.dark-mode .cat-bar-bg { background: #1e2a4a; }
+.dark-mode .icon-btn { background: #1e2a4a; border-color: #2a3a5a; color: #64748b; }
+.dark-mode .icon-btn:hover { border-color: #059669; color: #34d399; }
+.dark-mode .icon-btn.danger:hover { border-color: #dc2626; color: #f87171; }
+.dark-mode .modal-header h3 { color: #e2e8f0; }
+.dark-mode .modal-form .form-group label { color: #cbd5e1; }
+.dark-mode .color-swatch { border-color: #2a3a5a; }
+.dark-mode .color-swatch.active { border-color: #34d399; }
+.dark-mode .modal-btn.danger { background: #dc2626; color: #fff; }
+.dark-mode .modal-btn.danger:hover { background: #b91c1c; }
+.dark-mode .modal-btn.success { background: #059669; color: #fff; }
+.dark-mode .modal-btn.success:hover { background: #047857; }
+.dark-mode .modal-btn.primary { background: #3b82f6; color: #fff; }
+.dark-mode .modal-btn.primary:hover { background: #2563eb; }
+
+/* Notifications */
+.dark-mode .notif-item { border-bottom-color: #1e2a4a; }
+.dark-mode .notif-item:hover { background: #1e2a4a; }
+.dark-mode .notif-item.unread { background: rgba(5,150,105,0.1); }
+.dark-mode .notif-text { color: #cbd5e1; }
+.dark-mode .notif-item.unread .notif-text { color: #e2e8f0; }
+.dark-mode .notif-time { color: #64748b; }
+.dark-mode .notif-delete { color: #475569; }
+.dark-mode .notif-delete:hover { background: rgba(220,38,38,0.1); color: #f87171; }
+.dark-mode .mark-read-btn { background: #1e2a4a; border-color: #2a3a5a; }
+.dark-mode .mark-read-btn:hover { background: rgba(5,150,105,0.15); border-color: #059669; }
+.dark-mode .pagination-wrap { border-top-color: #1e2a4a; }
+
+/* Banners */
+.dark-mode .banner-card { background: #16213e; border-color: #1e2a4a; }
+.dark-mode .banner-title { color: #e2e8f0; }
+.dark-mode .banner-subtitle { color: #94a3b8; }
+.dark-mode .banner-link { color: #34d399; }
+.dark-mode .status-badge.active { background: rgba(5,150,105,0.15); color: #34d399; }
+.dark-mode .status-badge.inactive { background: #1e2a4a; color: #64748b; }
+.dark-mode .promo-code { color: #34d399; }
+
+/* Modal danger/success/primary btn dark mode */
+.dark-mode .modal-btn.danger { background: #dc2626; color: #fff; }
+.dark-mode .modal-btn.danger:hover { background: #b91c1c; }
+.dark-mode .modal-btn.success { background: #059669; color: #fff; }
+.dark-mode .modal-btn.success:hover { background: #047857; }
+.dark-mode .modal-btn.primary { background: #3b82f6; color: #fff; }
+.dark-mode .modal-btn.primary:hover { background: #2563eb; }
 </style>
