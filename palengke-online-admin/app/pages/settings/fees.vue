@@ -4,6 +4,7 @@
       <NuxtLink to="/settings" class="subnav-item" active-class="active">General</NuxtLink>
       <NuxtLink to="/settings/fees" class="subnav-item" active-class="active" exact-active-class="active">Delivery Fees</NuxtLink>
       <NuxtLink to="/settings/commissions" class="subnav-item" active-class="active">Commissions</NuxtLink>
+      <NuxtLink to="/settings/payments" class="subnav-item" active-class="active">Payments</NuxtLink>
     </div>
 
     <div class="settings-grid">

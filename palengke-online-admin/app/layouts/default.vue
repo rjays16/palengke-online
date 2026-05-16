@@ -248,6 +248,9 @@
         <NuxtLink v-show="auth.user?.role === 'superadmin'" to="/settings/commissions" class="nav-item sub" active-class="active">
           <span class="nav-label" style="padding-left:30px;font-size:12px">Commissions</span>
         </NuxtLink>
+        <NuxtLink v-show="auth.user?.role === 'superadmin'" to="/settings/payments" class="nav-item sub" active-class="active">
+          <span class="nav-label" style="padding-left:30px;font-size:12px">Payments</span>
+        </NuxtLink>
 
       </nav>
 
@@ -547,13 +550,14 @@ const pageTitle = computed(() => {
     '/notifications': 'Notifications',
     '/settings': 'Settings',
     '/admin-users': 'Admin Users',
+    '/settings/payments': 'Payment Settings',
     '/banners': 'Banners',
     '/promos': 'Promos',
     '/banner-requests': 'Banner Requests',
   }
   // Match dynamic routes like /sellers/123
   const base = '/' + route.path.split('/')[1]
-  return map[base] || 'Admin'
+  return map[route.path] || map[base] || 'Admin'
 })
 
 const toggleNotifPanel = () => {
@@ -1648,4 +1652,13 @@ html.dark-mode {
 .dark-mode .modal-btn.success:hover { background: #047857; }
 .dark-mode .modal-btn.primary { background: #3b82f6; color: #fff; }
 .dark-mode .modal-btn.primary:hover { background: #2563eb; }
+
+/* Payment Settings */
+.dark-mode .pm-name { color: #e2e8f0; }
+.dark-mode .payment-method-card { background: #16213e; border-color: #1e2a4a; }
+.dark-mode .payment-method-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.dark-mode .toggle-text { color: #94a3b8; }
+.dark-mode .toggle-slider { background: #2a3a5a; }
+.dark-mode .toggle-label input:checked + .toggle-slider { background: #059669; }
+.dark-mode .preview-chip { background: rgba(5,150,105,0.15) !important; border-color: rgba(5,150,105,0.3) !important; color: #34d399 !important; }
 </style>
