@@ -22,6 +22,37 @@ export const useDriversStore = defineStore('drivers', () => {
     ]
   }
 
+  let nextId = 8
+
+  function addDriver(data: { name: string; phone: string; vehicle: string; plate: string }) {
+    drivers.value.push({
+      id: nextId++,
+      name: data.name,
+      phone: data.phone,
+      vehicle: data.vehicle,
+      plate: data.plate,
+      deliveries: 0,
+      rating: 0,
+      earnings: 0,
+      status: 'active',
+      joined: new Date().toISOString().slice(0, 10),
+    })
+  }
+
+  function updateDriver(id: number, data: { name: string; phone: string; vehicle: string; plate: string; status: string }) {
+    const d = drivers.value.find(d => d.id === id)
+    if (!d) return
+    d.name = data.name
+    d.phone = data.phone
+    d.vehicle = data.vehicle
+    d.plate = data.plate
+    d.status = data.status
+  }
+
+  function deleteDriver(id: number) {
+    drivers.value = drivers.value.filter(d => d.id !== id)
+  }
+
   function getDeliveryHistory(id: number) {
     const allHistory = [
       { id: 'ORD-1042', customer: 'Maria Santos', pickup: "Juan's Farm", delivery: 'Brgy. San Isidro', status: 'delivered', date: '2026-05-14' },
@@ -33,5 +64,5 @@ export const useDriversStore = defineStore('drivers', () => {
     return allHistory
   }
 
-  return { drivers, getDriverById, getDocuments, getDeliveryHistory }
+  return { drivers, getDriverById, getDocuments, getDeliveryHistory, addDriver, updateDriver, deleteDriver }
 })

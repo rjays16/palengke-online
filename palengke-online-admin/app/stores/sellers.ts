@@ -74,6 +74,40 @@ export const useSellersStore = defineStore('sellers', () => {
     seller.subscription.status = 'cancelled'
   }
 
+  let nextId = 9
+
+  function addSeller(data: { name: string; owner: string; category: string; location: string; phone: string; email: string }) {
+    sellers.value.push({
+      id: nextId++,
+      name: data.name,
+      owner: data.owner,
+      category: data.category,
+      location: data.location,
+      products: 0,
+      revenue: 0,
+      rating: 0,
+      status: 'active',
+      joined: new Date().toISOString().slice(0, 10),
+      contact: { phone: data.phone, email: data.email },
+      subscription: { plan: 'Trial', amount: 0, start: new Date().toISOString().slice(0, 10), end: '', status: 'trial' },
+    })
+  }
+
+  function updateSeller(id: number, data: { name: string; owner: string; category: string; location: string; phone: string; email: string }) {
+    const s = sellers.value.find(s => s.id === id)
+    if (!s) return
+    s.name = data.name
+    s.owner = data.owner
+    s.category = data.category
+    s.location = data.location
+    s.contact.phone = data.phone
+    s.contact.email = data.email
+  }
+
+  function deleteSeller(id: number) {
+    sellers.value = sellers.value.filter(s => s.id !== id)
+  }
+
   function toggleStatus(id: number) {
     const seller = sellers.value.find(s => s.id === id)
     if (seller) {
@@ -81,5 +115,5 @@ export const useSellersStore = defineStore('sellers', () => {
     }
   }
 
-  return { sellers, getSellerById, getSellerProducts, getSellerOrders, toggleStatus, changeSubscriptionPlan, extendSubscriptionDays, cancelSubscription, AVAILABLE_PLANS }
+  return { sellers, getSellerById, getSellerProducts, getSellerOrders, toggleStatus, changeSubscriptionPlan, extendSubscriptionDays, cancelSubscription, AVAILABLE_PLANS, addSeller, updateSeller, deleteSeller }
 })
