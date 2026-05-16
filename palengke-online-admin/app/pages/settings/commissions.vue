@@ -88,6 +88,8 @@
       </div>
     </div>
 
+    <div class="save-toast" v-if="success">✓ Commission settings saved successfully</div>
+
     <div class="settings-actions">
       <button class="save-btn" @click="saveComm">Save Changes</button>
       <button class="reset-btn" @click="resetComm">Reset to Default</button>
@@ -108,8 +110,20 @@ onMounted(() => {
   }
 })
 
-const comm = ref({ platform: 10, driverPerDelivery: 25, driverPerKm: 5, minPayout: 500, schedule: 'weekly', processingFee: 15, referralBonus: 100 })
-const original = JSON.stringify(comm.value)
+const STORAGE_KEY = 'palengke_settings_commissions'
+
+const defaults = { platform: 10, driverPerDelivery: 25, driverPerKm: 5, minPayout: 500, schedule: 'weekly', processingFee: 15, referralBonus: 100 }
+
+function loadComm() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) return JSON.parse(saved)
+  } catch {}
+  return { ...defaults }
+}
+
+const comm = ref(loadComm())
+const success = ref(false)
 
 const errors = reactive({
   platform: '', driverPerDelivery: '', minPayout: '', schedule: '', processingFee: ''
@@ -165,9 +179,16 @@ function validate() {
 
 const saveComm = () => {
   if (!validate()) return
-  alert('Commission settings saved successfully!')
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(comm.value))
+  success.value = true
+  setTimeout(() => { success.value = false }, 2500)
 }
-const resetComm = () => { comm.value = JSON.parse(original); Object.keys(errors).forEach(k => errors[k] = '') }
+
+const resetComm = () => {
+  comm.value = { ...defaults }
+  Object.keys(errors).forEach(k => errors[k] = '')
+  saveComm()
+}
 </script>
 
 <style scoped>
@@ -196,6 +217,7 @@ const resetComm = () => { comm.value = JSON.parse(original); Object.keys(errors)
 .example-row:last-child { border-bottom: none; }
 .example-row.highlight { font-weight: 700; color: #059669; font-size: 15px; }
 .settings-actions { display: flex; gap: 12px; }
+.save-toast { padding: 10px 16px; background: #f0fdf4; color: #059669; border: 1px solid #bbf7d0; border-radius: 8px; font-size: 13px; font-weight: 600; }
 .save-btn { padding: 12px 24px; background: #059669; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }
 .save-btn:hover { background: #047857; }
 .reset-btn { padding: 12px 24px; background: #fff; color: #374151; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }

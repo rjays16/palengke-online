@@ -102,6 +102,8 @@
       </div>
     </div>
 
+    <div class="save-toast" v-if="success">✓ Settings saved successfully</div>
+
     <div class="settings-actions">
       <button class="save-btn" @click="saveSettings">Save Changes</button>
       <button class="reset-btn" @click="resetSettings">Reset to Default</button>
@@ -123,15 +125,34 @@ onMounted(() => {
   }
 })
 
-const profile = ref({ name: 'Super Admin', email: 'admin@palengke.com', phone: '+63 912 345 6789', role: 'Administrator' })
-const prefs = ref({ emailNotifs: true, smsAlerts: false, autoApprove: true, darkMode: false })
-const original = JSON.stringify({ profile, prefs })
+const STORAGE_KEY = 'palengke_settings_general'
 
-const saveSettings = () => { alert('Settings saved successfully!') }
-const resetSettings = () => {
-  const o = JSON.parse(original)
-  profile.value = o.profile
-  prefs.value = o.prefs
+const defaults = { profile: { name: 'Super Admin', email: 'admin@palengke.com', phone: '+63 912 345 6789', role: 'Administrator' }, prefs: { emailNotifs: true, smsAlerts: false, autoApprove: true, darkMode: false } }
+
+function loadSettings() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    if (saved) return JSON.parse(saved)
+  } catch {}
+  return defaults
+}
+
+const saved = loadSettings()
+const profile = ref(saved.profile)
+const prefs = ref(saved.prefs)
+const success = ref(false)
+
+function saveSettings() {
+  const data = { profile: profile.value, prefs: prefs.value }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+  success.value = true
+  setTimeout(() => { success.value = false }, 2500)
+}
+
+function resetSettings() {
+  profile.value = { ...defaults.profile }
+  prefs.value = { ...defaults.prefs }
+  saveSettings()
 }
 </script>
 
@@ -169,5 +190,6 @@ const resetSettings = () => {
 .save-btn:hover { background: #047857; }
 .reset-btn { padding: 12px 24px; background: #fff; color: #374151; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }
 .reset-btn:hover { border-color: #9ca3af; }
+.save-toast { padding: 10px 16px; background: #f0fdf4; color: #059669; border: 1px solid #bbf7d0; border-radius: 8px; font-size: 13px; font-weight: 600; }
 @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
 </style>
