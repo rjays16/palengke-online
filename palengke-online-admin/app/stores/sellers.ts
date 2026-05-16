@@ -1,13 +1,13 @@
 export const useSellersStore = defineStore('sellers', () => {
   const sellers = ref([
-    { id: 1, name: "Juan's Farm", owner: 'Juan dela Cruz', category: 'Vegetables', location: 'Brgy. San Isidro', products: 48, revenue: 45200, rating: 4.8, status: 'active', joined: '2024-01-15', contact: { phone: '0917-111-2233', email: 'juan.farm@email.com' } },
-    { id: 2, name: "Maria's Produce", owner: 'Maria Santos', category: 'Fruits', location: 'Brgy. Maligaya', products: 35, revenue: 38400, rating: 4.6, status: 'active', joined: '2024-03-20', contact: { phone: '0917-222-3344', email: 'maria.produce@email.com' } },
-    { id: 3, name: 'Fresh Fish Co.', owner: 'Pedro Reyes', category: 'Seafood', location: 'Brgy. Poblacion', products: 52, revenue: 62100, rating: 4.9, status: 'active', joined: '2024-02-01', contact: { phone: '0917-333-4455', email: 'freshfish@email.com' } },
-    { id: 4, name: 'Meat Shop Inc.', owner: 'Ana Cruz', category: 'Meat & Poultry', location: 'Brgy. Bagong Silang', products: 28, revenue: 52300, rating: 4.7, status: 'active', joined: '2024-04-10', contact: { phone: '0917-444-5566', email: 'meatshop@email.com' } },
-    { id: 5, name: 'Green Valley Farm', owner: 'Ben Torres', category: 'Vegetables', location: 'Brgy. Kasiglahan', products: 41, revenue: 29800, rating: 4.5, status: 'inactive', joined: '2024-05-05', contact: { phone: '0917-555-6677', email: 'greenvalley@email.com' } },
-    { id: 6, name: 'Sweet Harvest', owner: 'Luisa Tan', category: 'Fruits', location: 'Brgy. Mabuhay', products: 25, revenue: 21500, rating: 4.3, status: 'active', joined: '2024-06-18', contact: { phone: '0917-666-7788', email: 'sweetharvest@email.com' } },
-    { id: 7, name: 'Coastal Catch', owner: 'Rosa Mendiola', category: 'Seafood', location: 'Brgy. Baybay', products: 38, revenue: 45900, rating: 4.8, status: 'active', joined: '2024-03-12', contact: { phone: '0917-777-8899', email: 'coastalcatch@email.com' } },
-    { id: 8, name: 'Organic Choice', owner: 'Carlos Gomez', category: 'Bundles', location: 'Brgy. Sampa', products: 20, revenue: 18200, rating: 4.2, status: 'inactive', joined: '2024-08-01', contact: { phone: '0917-888-9900', email: 'organicchoice@email.com' } }
+    { id: 1, name: "Juan's Farm", owner: 'Juan dela Cruz', category: 'Vegetables', location: 'Brgy. San Isidro', products: 48, revenue: 45200, rating: 4.8, status: 'active', joined: '2024-01-15', contact: { phone: '0917-111-2233', email: 'juan.farm@email.com' }, subscription: { plan: '4 Months', amount: 2100, start: '2026-04-15', end: '2026-08-15', status: 'active' } },
+    { id: 2, name: "Maria's Produce", owner: 'Maria Santos', category: 'Fruits', location: 'Brgy. Maligaya', products: 35, revenue: 38400, rating: 4.6, status: 'active', joined: '2024-03-20', contact: { phone: '0917-222-3344', email: 'maria.produce@email.com' }, subscription: { plan: '1 Month', amount: 600, start: '2026-05-01', end: '2026-06-01', status: 'active' } },
+    { id: 3, name: 'Fresh Fish Co.', owner: 'Pedro Reyes', category: 'Seafood', location: 'Brgy. Poblacion', products: 52, revenue: 62100, rating: 4.9, status: 'active', joined: '2024-02-01', contact: { phone: '0917-333-4455', email: 'freshfish@email.com' }, subscription: { plan: '8 Months', amount: 4000, start: '2026-01-01', end: '2026-09-01', status: 'active' } },
+    { id: 4, name: 'Meat Shop Inc.', owner: 'Ana Cruz', category: 'Meat & Poultry', location: 'Brgy. Bagong Silang', products: 28, revenue: 52300, rating: 4.7, status: 'active', joined: '2024-04-10', contact: { phone: '0917-444-5566', email: 'meatshop@email.com' }, subscription: { plan: '2 Months', amount: 1200, start: '2026-04-10', end: '2026-06-10', status: 'active' } },
+    { id: 5, name: 'Green Valley Farm', owner: 'Ben Torres', category: 'Vegetables', location: 'Brgy. Kasiglahan', products: 41, revenue: 29800, rating: 4.5, status: 'inactive', joined: '2024-05-05', contact: { phone: '0917-555-6677', email: 'greenvalley@email.com' }, subscription: { plan: 'Trial', amount: 0, start: '2026-05-05', end: '2026-05-30', status: 'trial' } },
+    { id: 6, name: 'Sweet Harvest', owner: 'Luisa Tan', category: 'Fruits', location: 'Brgy. Mabuhay', products: 25, revenue: 21500, rating: 4.3, status: 'active', joined: '2024-06-18', contact: { phone: '0917-666-7788', email: 'sweetharvest@email.com' }, subscription: { plan: '1 Month', amount: 600, start: '2026-05-10', end: '2026-06-10', status: 'active' } },
+    { id: 7, name: 'Coastal Catch', owner: 'Rosa Mendiola', category: 'Seafood', location: 'Brgy. Baybay', products: 38, revenue: 45900, rating: 4.8, status: 'active', joined: '2024-03-12', contact: { phone: '0917-777-8899', email: 'coastalcatch@email.com' }, subscription: { plan: '4 Months', amount: 2100, start: '2026-03-12', end: '2026-07-12', status: 'active' } },
+    { id: 8, name: 'Organic Choice', owner: 'Carlos Gomez', category: 'Bundles', location: 'Brgy. Sampa', products: 20, revenue: 18200, rating: 4.2, status: 'inactive', joined: '2024-08-01', contact: { phone: '0917-888-9900', email: 'organicchoice@email.com' }, subscription: { plan: 'Trial', amount: 0, start: '2024-08-01', end: '2024-08-26', status: 'expired' } }
   ])
 
   function getSellerById(id: number) {
@@ -38,6 +38,42 @@ export const useSellersStore = defineStore('sellers', () => {
     return allOrders.slice(0, 5)
   }
 
+  const AVAILABLE_PLANS = [
+    { name: '1 Month', months: 1, amount: 600 },
+    { name: '2 Months', months: 2, amount: 1200 },
+    { name: '4 Months', months: 4, amount: 2100 },
+    { name: '8 Months', months: 8, amount: 4000 },
+  ]
+
+  function changeSubscriptionPlan(id: number, planName: string, amount: number, months: number) {
+    const seller = sellers.value.find(s => s.id === id)
+    if (!seller) return
+    const now = new Date()
+    const end = new Date(now)
+    end.setMonth(end.getMonth() + months)
+    seller.subscription = {
+      plan: planName,
+      amount,
+      start: now.toISOString().slice(0, 10),
+      end: end.toISOString().slice(0, 10),
+      status: 'active',
+    }
+  }
+
+  function extendSubscriptionDays(id: number, extraDays: number) {
+    const seller = sellers.value.find(s => s.id === id)
+    if (!seller) return
+    const end = new Date(seller.subscription.end)
+    end.setDate(end.getDate() + extraDays)
+    seller.subscription.end = end.toISOString().slice(0, 10)
+  }
+
+  function cancelSubscription(id: number) {
+    const seller = sellers.value.find(s => s.id === id)
+    if (!seller) return
+    seller.subscription.status = 'cancelled'
+  }
+
   function toggleStatus(id: number) {
     const seller = sellers.value.find(s => s.id === id)
     if (seller) {
@@ -45,5 +81,5 @@ export const useSellersStore = defineStore('sellers', () => {
     }
   }
 
-  return { sellers, getSellerById, getSellerProducts, getSellerOrders, toggleStatus }
+  return { sellers, getSellerById, getSellerProducts, getSellerOrders, toggleStatus, changeSubscriptionPlan, extendSubscriptionDays, cancelSubscription, AVAILABLE_PLANS }
 })

@@ -51,6 +51,73 @@
             </button>
           </div>
         </div>
+
+        <div class="info-card sub-card">
+          <h3>Subscription</h3>
+          <div class="info-rows">
+            <div class="info-row"><span class="info-label">Plan</span><span class="info-value">{{ seller.subscription.plan }}</span></div>
+            <div class="info-row"><span class="info-label">Amount</span><span class="info-value">₱{{ seller.subscription.amount.toLocaleString() }}</span></div>
+            <div class="info-row"><span class="info-label">Start</span><span class="info-value">{{ seller.subscription.start }}</span></div>
+            <div class="info-row"><span class="info-label">End</span><span class="info-value">{{ seller.subscription.end }}</span></div>
+            <div class="info-row"><span class="info-label">Status</span><span class="info-value"><span class="status-badge" :class="seller.subscription.status">{{ seller.subscription.status }}</span></span></div>
+          </div>
+
+          <div v-if="subAction === null" class="info-card-actions">
+            <button class="ghost-btn" @click="subAction = 'change'">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              Change Plan
+            </button>
+            <button class="ghost-btn" @click="subAction = 'extend'">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Extend
+            </button>
+            <button v-if="seller.subscription.status !== 'cancelled'" class="ghost-btn danger" @click="subAction = 'cancel'">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Cancel
+            </button>
+          </div>
+
+          <div v-if="subAction === 'change'" class="sub-action-area">
+            <p class="sub-action-title">Change Subscription Plan</p>
+            <div class="plan-options">
+              <label v-for="plan in sellersStore.AVAILABLE_PLANS" :key="plan.name" class="plan-option" :class="{ selected: selectedPlan === plan.name }">
+                <input type="radio" :value="plan.name" v-model="selectedPlan" />
+                <div class="plan-option-content">
+                  <span class="plan-option-name">{{ plan.name }}</span>
+                  <span class="plan-option-price">₱{{ plan.amount.toLocaleString() }}</span>
+                </div>
+              </label>
+            </div>
+            <div class="sub-action-btns">
+              <button class="ghost-btn" @click="cancelSubAction">Cancel</button>
+              <button class="primary-btn" @click="confirmChangePlan">Confirm Change</button>
+            </div>
+          </div>
+
+          <div v-if="subAction === 'extend'" class="sub-action-area">
+            <p class="sub-action-title">Extend Subscription</p>
+            <p class="sub-action-desc">Add extra days to the current subscription period.</p>
+            <div class="extend-input-group">
+              <button class="extend-btn" @click="extendDays = Math.max(1, extendDays - 7)">-7</button>
+              <input type="number" v-model.number="extendDays" min="1" class="extend-input" />
+              <button class="extend-btn" @click="extendDays += 7">+7</button>
+            </div>
+            <span class="extend-label">days</span>
+            <div class="sub-action-btns">
+              <button class="ghost-btn" @click="cancelSubAction">Cancel</button>
+              <button class="primary-btn" @click="confirmExtend">Extend</button>
+            </div>
+          </div>
+
+          <div v-if="subAction === 'cancel'" class="sub-action-area">
+            <p class="sub-action-title">Cancel Subscription</p>
+            <p class="sub-action-desc warning">This will mark the subscription as cancelled. The seller will lose access to premium features.</p>
+            <div class="sub-action-btns">
+              <button class="ghost-btn" @click="cancelSubAction">Keep Active</button>
+              <button class="danger-btn" @click="confirmCancel">Yes, Cancel</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="tabs-card">
@@ -132,6 +199,10 @@ const sellersStore = useSellersStore()
 const seller = computed(() => sellersStore.getSellerById(Number(route.params.id)))
 const activeTab = ref('products')
 
+const subAction = ref(null)
+const selectedPlan = ref('')
+const extendDays = ref(30)
+
 const mockProducts = computed(() => {
   if (!seller.value) return []
   return sellersStore.getSellerProducts(seller.value.id)
@@ -147,6 +218,32 @@ const toggleStatus = () => {
 }
 
 const goBack = () => navigateTo('/sellers')
+
+function cancelSubAction() {
+  subAction.value = null
+  selectedPlan.value = ''
+  extendDays.value = 30
+}
+
+function confirmChangePlan() {
+  if (!seller.value || !selectedPlan.value) return
+  const plan = sellersStore.AVAILABLE_PLANS.find(p => p.name === selectedPlan.value)
+  if (!plan) return
+  sellersStore.changeSubscriptionPlan(seller.value.id, plan.name, plan.amount, plan.months)
+  cancelSubAction()
+}
+
+function confirmExtend() {
+  if (!seller.value || !extendDays.value || extendDays.value < 1) return
+  sellersStore.extendSubscriptionDays(seller.value.id, extendDays.value)
+  cancelSubAction()
+}
+
+function confirmCancel() {
+  if (!seller.value) return
+  sellersStore.cancelSubscription(seller.value.id)
+  cancelSubAction()
+}
 </script>
 
 <style scoped>
@@ -211,6 +308,38 @@ const goBack = () => navigateTo('/sellers')
 .not-found { text-align: center; padding: 60px 20px; background: #fff; border-radius: 12px; border: 1px solid #e5e7eb; }
 .not-found h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; color: #111827; margin-bottom: 8px; }
 .not-found p { color: #9ca3af; }
+
+.sub-card { grid-column: 1 / -1; }
+.sub-card .status-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+.sub-card .status-badge.active { background: #f0fdf4; color: #059669; }
+.sub-card .status-badge.trial { background: #eff6ff; color: #3b82f6; }
+.sub-card .status-badge.expired { background: #fef2f2; color: #dc2626; }
+.sub-card .status-badge.cancelled { background: #f3f4f6; color: #6b7280; }
+.sub-action-area { margin-top: 16px; padding-top: 16px; border-top: 1px solid #f3f4f6; }
+.sub-action-title { font-size: 13px; font-weight: 600; color: #111827; margin: 0 0 4px; }
+.sub-action-desc { font-size: 12px; color: #9ca3af; margin: 0 0 12px; }
+.sub-action-desc.warning { color: #dc2626; }
+.plan-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.plan-option { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1.5px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.15s; font-size: 13px; }
+.plan-option:hover { border-color: #059669; }
+.plan-option.selected { border-color: #059669; background: #f0fdf4; }
+.plan-option input { accent-color: #059669; }
+.plan-option-content { display: flex; justify-content: space-between; flex: 1; }
+.plan-option-name { font-weight: 600; color: #111827; }
+.plan-option-price { color: #059669; font-weight: 700; }
+.sub-action-btns { display: flex; gap: 8px; margin-top: 8px; }
+.primary-btn { padding: 8px 16px; border-radius: 8px; border: none; background: #059669; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+.primary-btn:hover { background: #047857; }
+.danger-btn { padding: 8px 16px; border-radius: 8px; border: none; background: #dc2626; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; }
+.danger-btn:hover { background: #b91c1c; }
+.ghost-btn.danger { border-color: #fecaca; color: #dc2626; }
+.ghost-btn.danger:hover { background: #fef2f2; }
+.extend-input-group { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.extend-btn { width: 36px; height: 36px; border-radius: 8px; border: 1.5px solid #e5e7eb; background: #fff; font-size: 13px; font-weight: 600; color: #374151; cursor: pointer; font-family: 'Inter', sans-serif; }
+.extend-btn:hover { border-color: #059669; color: #059669; }
+.extend-input { width: 80px; height: 36px; border: 1.5px solid #e5e7eb; border-radius: 8px; text-align: center; font-size: 16px; font-weight: 700; color: #111827; font-family: 'Inter', sans-serif; outline: none; }
+.extend-input:focus { border-color: #059669; }
+.extend-label { display: block; font-size: 12px; color: #9ca3af; margin-bottom: 8px; }
 
 @media (max-width: 768px) {
   .detail-grid { grid-template-columns: 1fr; }

@@ -13,7 +13,7 @@
     <div class="table-card">
       <table class="data-table">
         <thead>
-          <tr><th>Store</th><th>Owner</th><th>Category</th><th>Products</th><th>Revenue</th><th>Rating</th><th>Status</th><th>Joined</th><th></th></tr>
+          <tr><th>Store</th><th>Owner</th><th>Category</th><th>Products</th><th>Revenue</th><th>Rating</th><th>Subscription</th><th>Status</th><th>Joined</th><th></th></tr>
         </thead>
         <tbody>
           <tr v-for="s in paginatedSellers" :key="s.id">
@@ -28,6 +28,12 @@
             <td>{{ s.products }}</td>
             <td>₱{{ s.revenue.toLocaleString() }}</td>
             <td><span class="stars">★</span> {{ s.rating }}</td>
+            <td>
+              <div class="sub-col">
+                <span class="sub-plan">{{ s.subscription.plan }}</span>
+                <span class="status-badge sub-badge" :class="s.subscription.status">{{ s.subscription.status }}</span>
+              </div>
+            </td>
             <td><span class="status-badge" :class="s.status">{{ s.status === 'active' ? 'Active' : 'Inactive' }}</span></td>
             <td class="date-cell">{{ s.joined }}</td>
             <td><button class="action-btn" @click="goToSeller(s.id)">...</button></td>
@@ -86,6 +92,12 @@ const goToSeller = (id) => navigateTo('/sellers/' + id)
 .status-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; }
 .status-badge.active { background: #f0fdf4; color: #059669; }
 .status-badge.inactive { background: #f3f4f6; color: #6b7280; }
+.sub-col { display: flex; flex-direction: column; gap: 4px; }
+.sub-plan { font-weight: 600; font-size: 12px; color: #111827; }
+.sub-badge { width: fit-content; }
+.status-badge.trial { background: #eff6ff; color: #3b82f6; }
+.status-badge.expired { background: #fef2f2; color: #dc2626; }
+.status-badge.cancelled { background: #f3f4f6; color: #6b7280; }
 
 @media (max-width: 768px) {
   .data-table { min-width: 750px; }
