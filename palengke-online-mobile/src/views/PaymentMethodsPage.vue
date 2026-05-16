@@ -60,7 +60,8 @@
           v-for="method in addMethods"
           :key="method.id"
           class="payment-item"
-          @click="addPaymentMethod(method)"
+          :class="{ disabled: method.comingSoon }"
+          @click="method.comingSoon ? showComingSoon() : addPaymentMethod(method)"
         >
           <img v-if="method.image" :src="method.image" class="payment-img" :alt="method.name">
           <div v-else class="payment-logo" :class="method.type">
@@ -70,7 +71,8 @@
             <h4>{{ method.name }}</h4>
             <p v-if="method.description">{{ method.description }}</p>
           </div>
-          <ion-icon :icon="chevronForwardOutline" class="arrow-icon"></ion-icon>
+          <span class="coming-soon-tag" v-if="method.comingSoon">Coming Soon</span>
+          <ion-icon :icon="chevronForwardOutline" class="arrow-icon" v-else></ion-icon>
         </div>
       </div>
 
@@ -130,14 +132,38 @@ const linkedMethods = ref([
   { id: 'cash', name: 'Cash On Delivery', type: 'cash', balance: null, isDefault: false, image: null },
 ]);
 
+function getAdminPaymentConfig() {
+  const raw = localStorage.getItem('palengke_payment_methods')
+  if (raw) return JSON.parse(raw)
+  return [
+    { id: 'gcash', name: 'GCash', visible: true, comingSoon: false },
+    { id: 'paypal', name: 'PayPal', visible: true, comingSoon: true },
+    { id: 'stripe', name: 'Stripe', visible: true, comingSoon: true },
+    { id: 'cod', name: 'Cash on Delivery', visible: true, comingSoon: false },
+  ]
+}
+const adminMethods = getAdminPaymentConfig()
+const isComingSoon = (id) => {
+  const m = adminMethods.find(m => m.id === id)
+  return m ? m.comingSoon : false
+}
+
 const addMethods = ref([
   { id: 'add-wallet', name: 'Cash in Balance', type: 'wallet', description: 'Earn up to 0.8% back in PalengkePoints', image: '/assets/images/payment-methods-logo/palengke-wallet.png' },
-  { id: 'add-card', name: 'Cards', type: 'card', description: null, image: '/assets/images/payment-methods-logo/cards.png' },
+  { id: 'add-card', name: 'Cards', type: 'card', description: null, image: '/assets/images/payment-methods-logo/cards.png', comingSoon: isComingSoon('stripe') },
   { id: 'add-maya', name: 'Maya', type: 'maya', description: null, image: '/assets/images/payment-methods-logo/maya.png' },
-  { id: 'add-paypal', name: 'PayPal', type: 'paypal', description: null, image: '/assets/images/payment-methods-logo/paypal.png' },
+  { id: 'add-paypal', name: 'PayPal', type: 'paypal', description: null, image: '/assets/images/payment-methods-logo/paypal.png', comingSoon: isComingSoon('paypal') },
 ]);
 
 const selectMethod = (methodId) => { selectedMethod.value = methodId; };
+
+const showComingSoon = async () => {
+  const toast = await toastController.create({
+    message: 'This payment method is coming soon!',
+    duration: 2000, color: 'warning', position: 'top'
+  });
+  await toast.present();
+};
 
 const addPaymentMethod = async (method) => {
   const toast = await toastController.create({
@@ -229,6 +255,9 @@ const topUpNow = () => {
 }
 
 .arrow-icon { font-size: 20px; color: #ccc; }
+.payment-item.disabled { opacity: 0.5; cursor: default; }
+.payment-item.disabled:active { background: transparent; }
+.coming-soon-tag { font-size: 10px; font-weight: 700; color: #f59e0b; background: #fef3c7; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
 
 /* Insufficient Modal */
 .insufficient-overlay {
