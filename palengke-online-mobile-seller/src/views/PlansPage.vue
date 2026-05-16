@@ -46,21 +46,9 @@
               <p class="plan-per" v-if="plan.savings">{{ plan.savings }}</p>
             </div>
             <div class="plan-features">
-              <div class="feature">
+              <div class="feature" v-for="feature in plan.features" :key="feature">
                 <ion-icon :icon="checkmarkOutline"></ion-icon>
-                <span>Full product listing</span>
-              </div>
-              <div class="feature">
-                <ion-icon :icon="checkmarkOutline"></ion-icon>
-                <span>Order management</span>
-              </div>
-              <div class="feature">
-                <ion-icon :icon="checkmarkOutline"></ion-icon>
-                <span>Real-time analytics</span>
-              </div>
-              <div class="feature">
-                <ion-icon :icon="checkmarkOutline"></ion-icon>
-                <span>Priority support</span>
+                <span>{{ feature }}</span>
               </div>
             </div>
             <ion-button expand="block" class="select-btn" :fill="plan.popular ? 'solid' : 'outline'" @click.stop="selected = plan.id">

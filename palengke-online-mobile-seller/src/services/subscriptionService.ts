@@ -7,13 +7,14 @@ export interface Plan {
   price: number
   popular?: boolean
   savings?: string
+  features: string[]
 }
 
 export const PLANS: Plan[] = [
-  { id: '1m', name: '1 Month', months: 1, price: 600 },
-  { id: '2m', name: '2 Months', months: 2, price: 1200, savings: 'Save ₱0' },
-  { id: '4m', name: '4 Months', months: 4, price: 2100, popular: true, savings: 'Save ₱300' },
-  { id: '8m', name: '8 Months', months: 8, price: 4000, savings: 'Save ₱800' },
+  { id: '1m', name: '1 Month', months: 1, price: 600, features: ['Full product listing', 'Order management', 'Real-time analytics'] },
+  { id: '2m', name: '2 Months', months: 2, price: 1200, savings: 'Save ₱0', features: ['Full product listing', 'Order management', 'Real-time analytics'] },
+  { id: '4m', name: '4 Months', months: 4, price: 2100, popular: true, savings: 'Save ₱300', features: ['Full product listing', 'Order management', 'Real-time analytics', 'Priority support'] },
+  { id: '8m', name: '8 Months', months: 8, price: 4000, savings: 'Save ₱800', features: ['Full product listing', 'Order management', 'Real-time analytics', 'Priority support', 'Request promo banner'] },
 ]
 
 export interface Subscription {
