@@ -122,22 +122,11 @@ const selectedTags = ref([]);
 const feedback = ref('');
 const isSubmitting = ref(false);
 
-const orderData = ref({
-  storeName: "Juan's Fresh Market",
-  storeImage: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=100&h=100&fit=crop',
-  items: 'Bawang/Garlic, Kamatis/Tomato',
-  total: 207.00
-});
+import { orderData as mockOrderData, positiveTags as mockPositiveTags, negativeTags as mockNegativeTags } from '@/mock/orderRating';
 
-const positiveTags = [
-  'Professional', 'Punctuality', 'Friendly',
-  'Contactless Delivery', 'Followed Instructions', 'Hygienic'
-];
-
-const negativeTags = [
-  'Late Delivery', 'Wrong Items', 'Poor Packaging',
-  'Unprofessional', 'Missing Items', 'Cold Food'
-];
+const orderData = ref({ ...mockOrderData });
+const positiveTags = mockPositiveTags;
+const negativeTags = mockNegativeTags;
 
 const ratingLabel = computed(() => {
   const labels = ['', 'Poor 😞', 'Fair 😐', 'Good 😊', 'Great 😄', 'Perfect 🤩'];

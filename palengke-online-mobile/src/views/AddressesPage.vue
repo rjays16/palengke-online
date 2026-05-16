@@ -51,10 +51,9 @@ import {
 
 const router = useRouter();
 
-const addresses = ref([
-  { id: 1, type: 'home', name: 'Home', address: '123 Main Street, Brgy. Carmen, CDO City', isDefault: true },
-  { id: 2, type: 'work', name: 'Work', address: '456 Office Building, Brgy. Cogon, CDO City', isDefault: false },
-]);
+import { addresses as mockAddresses } from '@/mock/addresses';
+
+const addresses = ref(mockAddresses);
 
 const addNewAddress = async () => {
   const alert = await alertController.create({
