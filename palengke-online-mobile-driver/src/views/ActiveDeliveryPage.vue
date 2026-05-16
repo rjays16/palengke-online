@@ -159,6 +159,7 @@ import {
 } from 'ionicons/icons';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { mockOrderData, driverStartLocation, vendorLocation, customerLocation } from '@/mock/activeDelivery';
 
 const router = useRouter();
 
@@ -176,27 +177,10 @@ const etaTime = ref('12 min');
 const etaDistance = ref('2.3 km');
 
 // Order Data
-const orderData = ref({
-  id: '1234',
-  sellerName: "Juan's Fresh Market",
-  pickupAddress: 'Stall #15, CDO City Palengke, Cagayan de Oro',
-  pickupPhone: '0912 345 6789',
-  customerName: 'Maria Santos',
-  deliveryAddress: 'Brgy. Carmen, Cagayan de Oro City',
-  customerPhone: '0918 765 4321',
-  itemCount: 5,
-  totalAmount: 850,
-  paymentMethod: 'cash',
-  driverEarnings: 85,
-  pickupInstructions: 'Ask for Juan at Stall #15',
-  items: ['2kg Pork', '1kg Tomatoes', '3pcs Cabbage']
-});
+const orderData = ref(mockOrderData);
 
 // Vendor/Driver/Customer Locations (mock coordinates - CDO area)
-const driverStartLocation = [8.4850, 124.6510];
-const vendorLocation = [8.4820, 124.6472];
-const customerLocation = [8.4920, 124.6600];
-const driverLocation = ref([8.4850, 124.6510]);
+const driverLocation = ref(driverStartLocation);
 
 // Init Map with both pickup and delivery locations
 const initMap = () => {

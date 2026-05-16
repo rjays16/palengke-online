@@ -294,55 +294,28 @@ import {
   starOutline, flashOutline, thumbsUpOutline, heartOutline,
   timeOutline, closeCircleOutline, warningOutline
 } from 'ionicons/icons';
+import {
+  mockProfileData, mockRatingCounts, mockBadges,
+  mockImprovements, mockDocumentsPreview
+} from '@/mock/profile';
 
 const router = useRouter();
 const activeTab = ref('achievements');
 const cityAvgRating = ref(4.70);
 
-const profileData = ref({
-  name: 'Juan Dela Cruz',
-  phone: '+63 912 345 6789',
-  email: 'juan.delacruz@email.com',
-  vehicleType: 'Motorcycle',
-  plateNumber: 'ABC 1234',
-  vehicleModel: 'Honda Click 125i',
-  vehicleColor: 'Black',
-  avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-  totalTrips: 142,
-  rating: 5.00,
-  joinedDays: 45
-});
+const profileData = ref(mockProfileData);
 
 // Rating distribution
-const ratingCounts = { 5: 100, 4: 0, 3: 0, 2: 0, 1: 0 };
+const ratingCounts = mockRatingCounts;
 const getRatingCount = (star) => ratingCounts[star] || 0;
 const getRatingWidth = (star) => {
   const total = Object.values(ratingCounts).reduce((a, b) => a + b, 0);
   return total > 0 ? (ratingCounts[star] / total) * 100 : 0;
 };
 
-// Badges
-const badges = ref([
-  { id: 1, name: 'Top Rated', icon: trophyOutline, color: '#FFD700', isNew: true, count: 1 },
-  { id: 2, name: 'Fast Delivery', icon: flashOutline, color: '#2196F3', isNew: true, count: 1 },
-  { id: 3, name: 'Friendly', icon: thumbsUpOutline, color: '#4CAF50', isNew: true, count: 1 },
-  { id: 4, name: 'Helpful', icon: heartOutline, color: '#E91E63', count: 73, isNew: false },
-]);
-
-// Improvements
-const improvements = ref([
-  { id: 1, title: 'Acceptance Rate', description: 'Accept more orders to improve', icon: checkmarkCircleOutline, score: '80%', type: 'good' },
-  { id: 2, title: 'On-Time Delivery', description: 'Great job delivering on time!', icon: timeOutline, score: '95%', type: 'great' },
-  { id: 3, title: 'Cancellation Rate', description: 'Keep cancellations low', icon: closeCircleOutline, score: '2%', type: 'good' },
-]);
-
-// Documents preview
-const documentsPreview = ref([
-  { id: 1, name: "Driver's License", status: 'verified' },
-  { id: 2, name: 'NBI Clearance', status: 'verified' },
-  { id: 3, name: 'ORCR', status: 'verified' },
-  { id: 4, name: 'Drug Test', status: 'verified' },
-]);
+const badges = ref(mockBadges);
+const improvements = ref(mockImprovements);
+const documentsPreview = ref(mockDocumentsPreview);
 
 // Methods
 const editProfile = async () => {

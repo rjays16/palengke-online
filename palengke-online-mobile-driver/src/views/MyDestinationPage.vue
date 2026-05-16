@@ -96,21 +96,13 @@ import {
   timeOutline, locationOutline, ellipsisHorizontalOutline,
   addCircleOutline
 } from 'ionicons/icons';
+import { mockSavedDestinations, mockRecentDestinations } from '@/mock/destinations';
 
 const router = useRouter();
 const searchQuery = ref('');
 
-const savedDestinations = ref([
-  { id: 1, name: 'Home', address: 'Brgy. San Isidro, CDO City', type: 'home' },
-  { id: 2, name: 'CDO City Palengke', address: 'Cogon Market, CDO City', type: 'work' },
-]);
-
-const recentDestinations = ref([
-  { id: 1, name: 'SM City CDO', address: 'Mastersons Ave, CDO City' },
-  { id: 2, name: 'Brgy. Carmen', address: 'Carmen, Cagayan de Oro City' },
-  { id: 3, name: 'Robinsons CDO', address: 'Capitol, CDO City' },
-  { id: 4, name: 'Brgy. Lapasan', address: 'Lapasan, CDO City' },
-]);
+const savedDestinations = ref(mockSavedDestinations);
+const recentDestinations = ref(mockRecentDestinations);
 
 const filteredRecent = computed(() => {
   if (!searchQuery.value) return recentDestinations.value;

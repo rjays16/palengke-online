@@ -259,6 +259,7 @@ import {
   navigateOutline, storefrontOutline, logOutOutline,
   helpCircleOutline, informationCircleOutline
 } from 'ionicons/icons';
+import { mockActiveDelivery, mockRecentDeliveries } from '@/mock/home';
 
 const router = useRouter();
 
@@ -280,44 +281,10 @@ const activeHours = ref(3.5);
 const weekEarnings = ref(4250);
 
 // Active Delivery (null if no active delivery)
-const activeDelivery = ref({
-  id: '1234',
-  customerName: 'Maria Santos',
-  address: 'Brgy. Carmen, CDO City',
-  amount: 250,
-  status: 'delivering' // pickup | delivering | delivered
-});
+const activeDelivery = ref(mockActiveDelivery);
 
 // Recent Deliveries
-const recentDeliveries = ref([
-  {
-    id: '1233',
-    customerName: 'Pedro Cruz',
-    address: 'Brgy. Lapasan, CDO City',
-    amount: 180,
-    time: '30 mins ago',
-    status: 'completed',
-    tipped: true
-  },
-  {
-    id: '1232',
-    customerName: 'Ana Lopez',
-    address: 'Brgy. Macasandig, CDO City',
-    amount: 320,
-    time: '1 hour ago',
-    status: 'completed',
-    tipped: false
-  },
-  {
-    id: '1231',
-    customerName: 'Jose Reyes',
-    address: 'Brgy. Bulua, CDO City',
-    amount: 150,
-    time: '2 hours ago',
-    status: 'completed',
-    tipped: true
-  }
-]);
+const recentDeliveries = ref(mockRecentDeliveries);
 
 // Toggle Active/Inactive
 const toggleActiveStatus = async () => {

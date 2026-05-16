@@ -126,23 +126,15 @@ import {
   personOutline, chatbubbleOutline, trophyOutline,
   bicycleOutline, cashOutline
 } from 'ionicons/icons';
+import { mockTipData, mockTotalTipsToday, mockConfettiColors } from '@/mock/tips';
 
 const router = useRouter();
 const route = useRoute();
 
-// Tip data (in real app, get from route params or store)
-const tipData = ref({
-  amount: 50.00,
-  customerName: 'Maria Santos',
-  message: 'Thank you kuya! Very fast delivery!',
-  orderId: '1234',
-  deliveryFee: 85.00
-});
+const tipData = ref(mockTipData);
+const totalTipsToday = ref(mockTotalTipsToday);
 
-const totalTipsToday = ref(170.00); // total tips today including this one
-
-// Confetti styles
-const confettiColors = ['#4CAF50', '#FFD700', '#FF9800', '#2196F3', '#E91E63', '#9C27B0'];
+const confettiColors = mockConfettiColors;
 
 const getConfettiStyle = (i) => {
   const color = confettiColors[i % confettiColors.length];
