@@ -12,6 +12,32 @@ export const useCustomersStore = defineStore('customers', () => {
     { id: 10, name: 'Tina Rivera', email: 'tina.rivera@email.com', phone: '0921-234-5678', orders: 31, spent: 24500, joined: '2023-10-10' }
   ])
 
+  let nextId = 11
+
+  function addCustomer(data: { name: string; email: string; phone: string }) {
+    customers.value.push({
+      id: nextId++,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      orders: 0,
+      spent: 0,
+      joined: new Date().toISOString().slice(0, 10),
+    })
+  }
+
+  function updateCustomer(id: number, data: { name: string; email: string; phone: string }) {
+    const c = customers.value.find(c => c.id === id)
+    if (!c) return
+    c.name = data.name
+    c.email = data.email
+    c.phone = data.phone
+  }
+
+  function deleteCustomer(id: number) {
+    customers.value = customers.value.filter(c => c.id !== id)
+  }
+
   function getCustomerById(id: number) {
     return customers.value.find(c => c.id === id)
   }
@@ -37,5 +63,5 @@ export const useCustomersStore = defineStore('customers', () => {
     ]
   }
 
-  return { customers, getCustomerById, getOrderHistory, getActivities }
+  return { customers, getCustomerById, getOrderHistory, getActivities, addCustomer, updateCustomer, deleteCustomer }
 })
