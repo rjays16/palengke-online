@@ -41,13 +41,9 @@
             <div class="info-row"><span class="info-label">Email</span><span class="info-value">{{ seller.contact?.email || 'N/A' }}</span></div>
           </div>
           <div class="info-card-actions">
-            <button class="ghost-btn" @click="alert('Calling ' + seller.owner)">
+            <button class="ghost-btn" @click="openContactModal">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-              Call
-            </button>
-            <button class="ghost-btn" @click="alert('Emailing ' + seller.owner)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-              Email
+              Contact
             </button>
           </div>
         </div>
@@ -188,6 +184,32 @@
       <h2>Seller not found</h2>
       <p>The seller you're looking for doesn't exist.</p>
     </div>
+
+    <div class="modal-overlay" v-if="showContact" @click.self="showContact = false">
+      <div class="modal-card modal-sm" @click.stop>
+        <div class="modal-top">
+          <span class="modal-title">Contact {{ seller?.owner }}</span>
+          <button class="modal-close" @click="showContact = false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="contact-row">
+            <span class="contact-label">Phone</span>
+            <span class="contact-value">{{ seller?.contact?.phone || 'N/A' }}</span>
+            <a :href="'tel:' + seller?.contact?.phone" class="contact-action">Call</a>
+          </div>
+          <div class="contact-row">
+            <span class="contact-label">Email</span>
+            <span class="contact-value">{{ seller?.contact?.email || 'N/A' }}</span>
+            <a :href="'mailto:' + seller?.contact?.email" class="contact-action">Email</a>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn secondary" @click="showContact = false">Close</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -218,6 +240,11 @@ const toggleStatus = () => {
 }
 
 const goBack = () => navigateTo('/sellers')
+
+const showContact = ref(false)
+function openContactModal() {
+  showContact.value = true
+}
 
 function cancelSubAction() {
   subAction.value = null
@@ -340,6 +367,27 @@ function confirmCancel() {
 .extend-input { width: 80px; height: 36px; border: 1.5px solid #e5e7eb; border-radius: 8px; text-align: center; font-size: 16px; font-weight: 700; color: #111827; font-family: 'Inter', sans-serif; outline: none; }
 .extend-input:focus { border-color: #059669; }
 .extend-label { display: block; font-size: 12px; color: #9ca3af; margin-bottom: 8px; }
+.contact-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f9fafb; }
+.contact-row:last-child { border-bottom: none; }
+.contact-label { font-size: 12px; font-weight: 600; color: #9ca3af; min-width: 60px; }
+.contact-value { flex: 1; font-size: 13px; color: #111827; font-weight: 600; }
+.contact-action { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; background: #f0fdf4; color: #059669; cursor: pointer; }
+.contact-action:hover { background: #059669; color: #fff; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 32px; backdrop-filter: blur(2px); }
+.modal-card { background: #fff; border-radius: 16px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.modal-card.modal-sm { max-width: 400px; }
+.modal-top { display: flex; align-items: center; gap: 10px; padding: 20px 24px; border-bottom: 1px solid #f3f4f6; }
+.modal-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 700; color: #111827; flex: 1; }
+.modal-close { width: 32px; height: 32px; border: none; background: none; cursor: pointer; color: #9ca3af; border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.modal-close:hover { background: #f3f4f6; color: #374151; }
+.modal-close svg { width: 18px; height: 18px; }
+.modal-body { padding: 20px 24px; }
+.modal-actions { display: flex; gap: 10px; padding: 16px 24px 20px; border-top: 1px solid #f3f4f6; }
+.modal-btn { flex: 1; padding: 11px; border-radius: 8px; font-size: 13px; font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; transition: all 0.15s; border: none; }
+.modal-btn.primary { background: #059669; color: #fff; }
+.modal-btn.primary:hover { background: #047857; }
+.modal-btn.secondary { background: #f3f4f6; color: #6b7280; }
+.modal-btn.secondary:hover { background: #e5e7eb; }
 
 @media (max-width: 768px) {
   .detail-grid { grid-template-columns: 1fr; }

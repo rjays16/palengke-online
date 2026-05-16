@@ -15,8 +15,9 @@
           <span class="detail-subtitle">{{ customer.email }} · {{ customer.phone }}</span>
         </div>
         <div class="detail-actions">
-          <span class="status-badge-lg verified">Verified</span>
-          <button class="action-btn danger" @click="showSuspendConfirm = true">Suspend</button>
+          <span class="status-badge-lg" :class="customer.status">{{ customer.status === 'active' ? 'Active' : 'Suspended' }}</span>
+          <button v-if="customer.status === 'active'" class="action-btn danger" @click="showSuspendConfirm = true">Suspend</button>
+          <button v-else class="action-btn" @click="reactivateCustomer">Reactivate</button>
         </div>
       </div>
 
@@ -91,6 +92,8 @@
       <p>The customer you're looking for doesn't exist.</p>
     </div>
 
+    <div class="save-toast" v-if="suspendSuccess">{{ customer?.status === 'suspended' ? '✓ Customer suspended' : '✓ Customer reactivated' }}</div>
+
     <div class="modal-overlay" v-if="showSuspendConfirm" @click="showSuspendConfirm = false">
       <div class="modal-card" @click.stop>
         <div class="modal-top">
@@ -128,9 +131,21 @@ const orderHistory = computed(() => {
 const activities = computed(() => customersStore.getActivities())
 
 const showSuspendConfirm = ref(false)
+const suspendSuccess = ref(false)
 
 function suspendCustomer() {
+  if (!customer.value) return
+  customersStore.toggleSuspendCustomer(customer.value.id)
   showSuspendConfirm.value = false
+  suspendSuccess.value = true
+  setTimeout(() => { suspendSuccess.value = false }, 2500)
+}
+
+function reactivateCustomer() {
+  if (!customer.value) return
+  customersStore.toggleSuspendCustomer(customer.value.id)
+  suspendSuccess.value = true
+  setTimeout(() => { suspendSuccess.value = false }, 2500)
 }
 
 const goBack = () => navigateTo('/customers')
@@ -149,7 +164,8 @@ const goBack = () => navigateTo('/customers')
 .detail-subtitle { font-size: 13px; color: #9ca3af; }
 .detail-actions { display: flex; align-items: center; gap: 10px; }
 .status-badge-lg { padding: 5px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; }
-.status-badge-lg.verified { background: #f0fdf4; color: #059669; }
+.status-badge-lg.active { background: #f0fdf4; color: #059669; }
+.status-badge-lg.suspended { background: #fef2f2; color: #dc2626; }
 .action-btn { padding: 8px 16px; border-radius: 8px; border: 1.5px solid #e5e7eb; background: #fff; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; color: #374151; }
 .action-btn.danger { border-color: #fecaca; color: #dc2626; }
 .action-btn.danger:hover { background: #fef2f2; }
@@ -213,6 +229,7 @@ const goBack = () => navigateTo('/customers')
 .modal-btn.cancel:hover { background: #e5e7eb; }
 .modal-btn.danger { background: #dc2626; color: #fff; }
 .modal-btn.danger:hover { background: #b91c1c; }
+.save-toast { padding: 10px 16px; background: #f0fdf4; color: #059669; border: 1px solid #bbf7d0; border-radius: 8px; font-size: 13px; font-weight: 600; }
 
 @media (max-width: 768px) {
   .detail-grid { grid-template-columns: 1fr; }

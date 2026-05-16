@@ -44,6 +44,11 @@ export const useOrdersStore = defineStore('orders', () => {
     return orderItems[id] || []
   }
 
+  function cancelOrder(id: string) {
+    const o = orders.value.find(o => o.id === id)
+    if (o) o.status = 'cancelled'
+  }
+
   function getTimeline(status: string, date: string): Array<{ title: string; time: string; done: boolean; current: boolean }> {
     const steps = [
       { title: 'Order Placed', time: `${date} 09:30 AM`, done: true, current: false },
@@ -59,5 +64,5 @@ export const useOrdersStore = defineStore('orders', () => {
     return steps
   }
 
-  return { orders, orderItems, getOrderById, getOrderItems, getTimeline }
+  return { orders, orderItems, getOrderById, getOrderItems, getTimeline, cancelOrder }
 })
