@@ -29,12 +29,12 @@
           </div>
           
           <!-- Trial / Subscription Badge -->
-          <div class="trial-badge" :class="{ expired, active: subActive }" v-if="isTrialActive || subActive || expired" @click="goToPlans">
+          <div class="trial-badge" :class="{ expired, active: subActive && !subLow }" v-if="isTrialActive || subActive || expired" :style="{ cursor: (isTrialActive || expired || subLow) ? 'pointer' : 'default' }" @click="(isTrialActive || expired || subLow) ? goToPlans() : null">
             <ion-icon :icon="expired ? alertCircleOutline : subActive ? checkmarkCircleOutline : timeOutline"></ion-icon>
             <span v-if="expired">Trial expired — tap to subscribe</span>
-            <span v-else-if="subActive">Plan Active — tap to manage</span>
-            <span v-else>{{ trialDaysLeft }} day{{ trialDaysLeft > 1 ? 's' : '' }} left in free trial</span>
-            <ion-icon :icon="chevronForwardOutline" class="badge-arrow"></ion-icon>
+            <span v-else-if="subActive">Plan Active: {{ remainingText }}</span>
+            <span v-else>{{ remainingText }} in free trial</span>
+            <ion-icon :icon="chevronForwardOutline" class="badge-arrow" v-if="isTrialActive || expired || subLow"></ion-icon>
           </div>
         </div>
 
@@ -106,12 +106,18 @@
               </div>
               <div class="action-text">Share Shop</div>
             </div>
+          </div>
 
-            <div class="action-card" v-if="canRequestBanner" @click="openBannerRequest">
+          <div class="banner-request-row" v-if="canRequestBanner" @click="openBannerRequest">
+            <div class="banner-request-card">
               <div class="action-icon banner">
                 <ion-icon :icon="megaphoneOutline"></ion-icon>
               </div>
-              <div class="action-text">Request Banner</div>
+              <div class="banner-request-text">
+                <span class="banner-request-title">Request Promo Banner</span>
+                <span class="banner-request-sub">Get featured on the buyer app</span>
+              </div>
+              <ion-icon :icon="chevronForwardOutline" class="badge-arrow"></ion-icon>
             </div>
           </div>
         </div>
@@ -304,8 +310,20 @@ onIonViewWillEnter(refreshSub)
 const remaining = computed(() => daysLeft(sub.value))
 const expired = computed(() => isExpired(sub.value))
 const subActive = computed(() => sub.value.status === 'active' && !expired.value)
+const subLow = computed(() => subActive.value && remaining.value <= 15)
 const isTrialActive = computed(() => sub.value.status === 'trial' && !expired.value)
 const trialDaysLeft = computed(() => remaining.value)
+
+const remainingText = computed(() => {
+  const days = remaining.value
+  const months = Math.floor(days / 30)
+  const d = days % 30
+  let text = ''
+  if (months > 0) text += `${months} month${months > 1 ? 's' : ''}`
+  if (months > 0 && d > 0) text += ' and '
+  if (d > 0 || months === 0) text += `${d} day${d !== 1 ? 's' : ''}`
+  return text + ' left'
+})
 
 const goToPlans = () => router.push('/plans')
 const canRequestBanner = computed(() => subActive.value && sub.value.planId === '8m')
@@ -817,10 +835,6 @@ ion-header ion-toolbar ion-buttons ion-button {
   background: rgba(244, 67, 54, 0.2);
 }
 
-.trial-badge.active {
-  background: rgba(76, 175, 80, 0.2);
-}
-
 .trial-badge ion-icon {
   font-size: 20px;
 }
@@ -909,9 +923,27 @@ ion-header ion-toolbar ion-buttons ion-button {
 
 .actions-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
+
+.banner-request-row { margin-top: 12px; }
+.banner-request-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #F3E5F5;
+  border: 2px dashed #CE93D8;
+  border-radius: 14px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.banner-request-card:active { opacity: 0.8; }
+.banner-request-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.banner-request-title { font-size: 14px; font-weight: 700; color: #7B1FA2; }
+.banner-request-sub { font-size: 12px; color: #9C27B0; opacity: 0.8; }
+.banner-request-row .badge-arrow { color: #7B1FA2; }
 
 .action-card {
   text-align: center;
