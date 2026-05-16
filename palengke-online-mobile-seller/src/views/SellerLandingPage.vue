@@ -81,6 +81,22 @@
           </div>
         </div>
 
+        <!-- Notice Banner -->
+        <div class="notice-banner" v-if="activeNotice && !dismissedNotices.includes(activeNotice.id)">
+          <div class="notice-banner-inner">
+            <div class="notice-banner-icon">
+              <ion-icon :icon="megaphoneOutline"></ion-icon>
+            </div>
+            <div class="notice-banner-text">
+              <span class="notice-banner-title">{{ activeNotice.title }}</span>
+              <span class="notice-banner-msg">{{ activeNotice.message }}</span>
+            </div>
+            <button class="notice-banner-close" @click.stop="dismissNotice(activeNotice.id)">
+              <ion-icon :icon="closeOutline"></ion-icon>
+            </button>
+          </div>
+        </div>
+
         <!-- Quick Actions -->
         <div class="actions-section">
           <h2 class="section-title">Quick Actions</h2>
@@ -306,6 +322,23 @@ function refreshSub() {
 }
 
 onIonViewWillEnter(refreshSub)
+
+// Notice banner
+const NOTICE_KEY = 'palengke_notices'
+const DISMISS_KEY = 'palengke_seller_dismissed_notices'
+const dismissedNotices = ref(JSON.parse(localStorage.getItem(DISMISS_KEY) || '[]'))
+
+const activeNotice = computed(() => {
+  const all = JSON.parse(localStorage.getItem(NOTICE_KEY) || '[]')
+  return all.find(n => n.active && (n.target === 'all' || n.target === 'seller')) || null
+})
+
+function dismissNotice(id) {
+  if (!dismissedNotices.value.includes(id)) {
+    dismissedNotices.value.push(id)
+    localStorage.setItem(DISMISS_KEY, JSON.stringify(dismissedNotices.value))
+  }
+}
 
 const remaining = computed(() => daysLeft(sub.value))
 const expired = computed(() => isExpired(sub.value))
@@ -907,6 +940,62 @@ ion-header ion-toolbar ion-buttons ion-button {
 .stat-label {
   font-size: 12px;
   color: #666;
+}
+
+/* Notice Banner */
+.notice-banner {
+  padding: 0 20px 8px;
+}
+.notice-banner-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #FFF8E1;
+  border: 1px solid #FFE082;
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.notice-banner-icon {
+  flex-shrink: 0;
+  color: #F57F17;
+  font-size: 20px;
+  display: flex;
+}
+.notice-banner-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.notice-banner-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #E65100;
+  line-height: 1.3;
+}
+.notice-banner-msg {
+  font-size: 12px;
+  color: #795548;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.notice-banner-close {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border: none;
+  background: rgba(0,0,0,0.05);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #795548;
+  padding: 0;
+  font-size: 16px;
 }
 
 /* Actions Section */

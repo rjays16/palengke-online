@@ -31,6 +31,29 @@
         </div>
       </div>
 
+      <!-- ─── Notice Banner ─────────────────────── -->
+      <div class="notice-banner" v-if="activeNotice && !dismissedNotices.includes(activeNotice.id)" @click="activeNotice.link && router.push(activeNotice.link)">
+        <div class="notice-banner-inner">
+          <div class="notice-banner-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+              <path d="M11 22q-4 0-7-3t-3-7q0-1 .3-2.2Q2 8.2 3 7l9-5 9 5q1 .9 1.7 2.8.3 1.2.3 2.2 0 4-3 7t-7 3"/>
+              <line x1="12" y1="11" x2="12" y2="17"/>
+              <line x1="9" y1="14" x2="15" y2="14"/>
+            </svg>
+          </div>
+          <div class="notice-banner-text">
+            <span class="notice-banner-title">{{ activeNotice.title }}</span>
+            <span class="notice-banner-msg">{{ activeNotice.message }}</span>
+          </div>
+          <button class="notice-banner-close" @click.stop="dismissNotice(activeNotice.id)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
       <!-- ─── Promo Banner ──────────────────────── -->
       <div class="banner-section">
         <div class="banner-scroll">
@@ -341,6 +364,23 @@ const nearbySellers = ref([
   },
 ]);
 
+// Notice banner
+const NOTICE_KEY = 'palengke_notices'
+const DISMISS_KEY = 'palengke_dismissed_notices'
+const dismissedNotices = ref(JSON.parse(localStorage.getItem(DISMISS_KEY) || '[]'))
+
+const activeNotice = computed(() => {
+  const all = JSON.parse(localStorage.getItem(NOTICE_KEY) || '[]')
+  return all.find(n => n.active && (n.target === 'all' || n.target === 'customer')) || null
+})
+
+function dismissNotice(id) {
+  if (!dismissedNotices.value.includes(id)) {
+    dismissedNotices.value.push(id)
+    localStorage.setItem(DISMISS_KEY, JSON.stringify(dismissedNotices.value))
+  }
+}
+
 // Methods
 const openAddressPicker = async () => {
   const actionSheet = await actionSheetController.create({
@@ -442,6 +482,62 @@ const goToNotifications = () => router.push('/notifications');
 }
 .search-bar ion-icon { font-size: 20px; color: #999; flex-shrink: 0; }
 .search-placeholder { font-size: 15px; color: #999; }
+
+/* ─── Notice Banner ──────────────────────────── */
+.notice-banner {
+  padding: 0 16px;
+  margin-top: 12px;
+}
+.notice-banner-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #FFF8E1;
+  border: 1px solid #FFE082;
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+.notice-banner-icon {
+  flex-shrink: 0;
+  color: #F57F17;
+  display: flex;
+}
+.notice-banner-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.notice-banner-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #E65100;
+  line-height: 1.3;
+}
+.notice-banner-msg {
+  font-size: 11px;
+  color: #795548;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.notice-banner-close {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: rgba(0,0,0,0.05);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #795548;
+  padding: 0;
+}
 
 /* ─── Banner ─────────────────────────────────── */
 .banner-section { padding: 16px 0 8px; }

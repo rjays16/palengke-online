@@ -221,6 +221,17 @@
           <span class="nav-label">Notifications</span>
         </NuxtLink>
 
+        <NuxtLink to="/notices" class="nav-item" active-class="active">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M11 22q-4 0-7-3t-3-7q0-1 .3-2.2Q2 8.2 3 7l9-5 9 5q1 .9 1.7 2.8.3 1.2.3 2.2 0 4-3 7t-7 3"/>
+              <line x1="12" y1="11" x2="12" y2="17"/>
+              <line x1="9" y1="14" x2="15" y2="14"/>
+            </svg>
+          </span>
+          <span class="nav-label">Notices</span>
+        </NuxtLink>
+
         <NuxtLink to="/admin-users" class="nav-item" active-class="active" v-if="auth.user?.role === 'superadmin'">
           <span class="nav-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -548,6 +559,7 @@ const pageTitle = computed(() => {
     '/complaints': 'Complaints',
     '/reports': 'Reports',
     '/notifications': 'Notifications',
+    '/notices': 'Notices',
     '/settings': 'Settings',
     '/admin-users': 'Admin Users',
     '/settings/payments': 'Payment Settings',
