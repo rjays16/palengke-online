@@ -81,22 +81,6 @@
           </div>
         </div>
 
-        <!-- Notice Banner -->
-        <div class="notice-banner" v-if="activeNotice && !dismissedNotices.includes(activeNotice.id)">
-          <div class="notice-banner-inner">
-            <div class="notice-banner-icon">
-              <ion-icon :icon="megaphoneOutline"></ion-icon>
-            </div>
-            <div class="notice-banner-text">
-              <span class="notice-banner-title">{{ activeNotice.title }}</span>
-              <span class="notice-banner-msg">{{ activeNotice.message }}</span>
-            </div>
-            <button class="notice-banner-close" @click.stop="dismissNotice(activeNotice.id)">
-              <ion-icon :icon="closeOutline"></ion-icon>
-            </button>
-          </div>
-        </div>
-
         <!-- Quick Actions -->
         <div class="actions-section">
           <h2 class="section-title">Quick Actions</h2>
@@ -188,6 +172,30 @@
 
       </div>
     </ion-content>
+
+    <!-- Notice Modal -->
+    <ion-modal :is-open="showNoticeModal" @did-dismiss="closeNoticeModal" css-class="notice-modal">
+      <ion-header>
+        <ion-toolbar color="warning">
+          <ion-title>Notice</ion-title>
+          <ion-buttons slot="end">
+            <ion-button @click="closeNoticeModal">
+              <ion-icon :icon="closeOutline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <div class="notice-modal-body" v-if="activeNotice">
+          <div class="notice-modal-icon">
+            <ion-icon :icon="megaphoneOutline"></ion-icon>
+          </div>
+          <h2 class="notice-modal-title">{{ activeNotice.title }}</h2>
+          <p class="notice-modal-msg">{{ activeNotice.message }}</p>
+          <ion-button expand="block" class="notice-modal-btn" @click="closeNoticeModal">Got it</ion-button>
+        </div>
+      </ion-content>
+    </ion-modal>
 
     <!-- Banner Request Modal -->
     <ion-modal :is-open="showBannerModal" @did-dismiss="showBannerModal = false" css-class="banner-modal">
@@ -328,6 +336,19 @@ const NOTICE_KEY = 'palengke_notices'
 const DISMISS_KEY = 'palengke_seller_dismissed_notices'
 const dismissedNotices = ref(JSON.parse(localStorage.getItem(DISMISS_KEY) || '[]'))
 
+function seedNotices() {
+  const existing = JSON.parse(localStorage.getItem(NOTICE_KEY) || '[]')
+  if (existing.length) return
+  const mock = [
+    { id: 1, title: 'System Maintenance Tonight', message: 'The app will be down from 2AM to 4AM for scheduled maintenance. Please plan your orders accordingly.', target: 'all', active: true, createdAt: '2026-05-17' },
+    { id: 2, title: 'Seller Portal Updates', message: 'New product analytics and bulk edit features are now available on your seller dashboard.', target: 'seller', active: true, createdAt: '2026-05-16' },
+    { id: 3, title: 'Delivery Schedule Change', message: 'Due to the holiday, deliveries will run until 5PM only on May 20.', target: 'customer', active: true, createdAt: '2026-05-15' },
+  ]
+  localStorage.setItem(NOTICE_KEY, JSON.stringify(mock))
+}
+
+seedNotices()
+
 const activeNotice = computed(() => {
   const all = JSON.parse(localStorage.getItem(NOTICE_KEY) || '[]')
   return all.find(n => n.active && (n.target === 'all' || n.target === 'seller')) || null
@@ -338,6 +359,23 @@ function dismissNotice(id) {
     dismissedNotices.value.push(id)
     localStorage.setItem(DISMISS_KEY, JSON.stringify(dismissedNotices.value))
   }
+}
+
+const showNoticeModal = ref(false)
+
+function checkNotice() {
+  const all = JSON.parse(localStorage.getItem(NOTICE_KEY) || '[]')
+  const val = all.find(n => n.active && (n.target === 'all' || n.target === 'seller')) || null
+  if (val && !dismissedNotices.value.includes(val.id)) {
+    showNoticeModal.value = true
+  }
+}
+
+onIonViewWillEnter(checkNotice)
+
+function closeNoticeModal() {
+  if (activeNotice.value) dismissNotice(activeNotice.value.id)
+  showNoticeModal.value = false
 }
 
 const remaining = computed(() => daysLeft(sub.value))
@@ -942,60 +980,37 @@ ion-header ion-toolbar ion-buttons ion-button {
   color: #666;
 }
 
-/* Notice Banner */
-.notice-banner {
-  padding: 0 20px 8px;
-}
-.notice-banner-inner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #FFF8E1;
-  border: 1px solid #FFE082;
-  border-radius: 12px;
-  padding: 10px 12px;
-}
-.notice-banner-icon {
-  flex-shrink: 0;
-  color: #F57F17;
-  font-size: 20px;
-  display: flex;
-}
-.notice-banner-text {
-  flex: 1;
+/* Notice Modal */
+.notice-modal-body {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-.notice-banner-title {
-  font-size: 13px;
-  font-weight: 700;
-  color: #E65100;
-  line-height: 1.3;
-}
-.notice-banner-msg {
-  font-size: 12px;
-  color: #795548;
-  line-height: 1.3;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.notice-banner-close {
-  flex-shrink: 0;
-  width: 26px;
-  height: 26px;
-  border: none;
-  background: rgba(0,0,0,0.05);
-  border-radius: 50%;
-  display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #795548;
-  padding: 0;
-  font-size: 16px;
+  text-align: center;
+  padding: 32px 16px 16px;
+  gap: 12px;
+}
+.notice-modal-icon {
+  font-size: 48px;
+  color: #F57F17;
+  margin-bottom: 8px;
+}
+.notice-modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+.notice-modal-msg {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+  margin: 0 0 8px;
+}
+.notice-modal-btn {
+  --border-radius: 12px;
+  height: 48px;
+  font-weight: 600;
+  --background: #F57F17;
 }
 
 /* Actions Section */

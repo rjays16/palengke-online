@@ -31,29 +31,6 @@
         </div>
       </div>
 
-      <!-- ─── Notice Banner ─────────────────────── -->
-      <div class="notice-banner" v-if="activeNotice && !dismissedNotices.includes(activeNotice.id)" @click="activeNotice.link && router.push(activeNotice.link)">
-        <div class="notice-banner-inner">
-          <div class="notice-banner-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
-              <path d="M11 22q-4 0-7-3t-3-7q0-1 .3-2.2Q2 8.2 3 7l9-5 9 5q1 .9 1.7 2.8.3 1.2.3 2.2 0 4-3 7t-7 3"/>
-              <line x1="12" y1="11" x2="12" y2="17"/>
-              <line x1="9" y1="14" x2="15" y2="14"/>
-            </svg>
-          </div>
-          <div class="notice-banner-text">
-            <span class="notice-banner-title">{{ activeNotice.title }}</span>
-            <span class="notice-banner-msg">{{ activeNotice.message }}</span>
-          </div>
-          <button class="notice-banner-close" @click.stop="dismissNotice(activeNotice.id)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-
       <!-- ─── Promo Banner ──────────────────────── -->
       <div class="banner-section">
         <div class="banner-scroll">
@@ -198,6 +175,30 @@
 
     </ion-content>
 
+    <!-- ─── Notice Modal ───────────────────────── -->
+    <ion-modal :is-open="showNoticeModal" @did-dismiss="closeNoticeModal">
+      <ion-header>
+        <ion-toolbar color="warning">
+          <ion-title>Notice</ion-title>
+          <ion-buttons slot="end">
+            <ion-button @click="closeNoticeModal">
+              <ion-icon :icon="close"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <div class="notice-modal-body" v-if="activeNotice">
+          <div class="notice-modal-icon">
+            <ion-icon :icon="megaphone"></ion-icon>
+          </div>
+          <h2 class="notice-modal-title">{{ activeNotice.title }}</h2>
+          <p class="notice-modal-msg">{{ activeNotice.message }}</p>
+          <ion-button expand="block" class="notice-modal-btn" @click="closeNoticeModal">Got it</ion-button>
+        </div>
+      </ion-content>
+    </ion-modal>
+
     <!-- ─── Bottom Navigation ──────────────────── -->
     <ion-footer>
       <ion-toolbar class="bottom-nav-toolbar">
@@ -233,17 +234,19 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage, IonContent, IonFooter, IonToolbar, IonIcon,
+  IonModal, IonHeader, IonButtons, IonTitle,
+  onIonViewWillEnter,
   actionSheetController, toastController
 } from '@ionic/vue';
 import {
   chevronDown, notifications, wallet,
   home, cart, receipt, person, search,
   location, star, cube,
-  starOutline
+  starOutline, megaphone, close
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -369,6 +372,19 @@ const NOTICE_KEY = 'palengke_notices'
 const DISMISS_KEY = 'palengke_dismissed_notices'
 const dismissedNotices = ref(JSON.parse(localStorage.getItem(DISMISS_KEY) || '[]'))
 
+function seedNotices() {
+  const existing = JSON.parse(localStorage.getItem(NOTICE_KEY) || '[]')
+  if (existing.length) return
+  const mock = [
+    { id: 1, title: 'System Maintenance Tonight', message: 'The app will be down from 2AM to 4AM for scheduled maintenance. Please plan your orders accordingly.', target: 'all', active: true, createdAt: '2026-05-17' },
+    { id: 2, title: 'Seller Portal Updates', message: 'New product analytics and bulk edit features are now available on your seller dashboard.', target: 'seller', active: true, createdAt: '2026-05-16' },
+    { id: 3, title: 'Delivery Schedule Change', message: 'Due to the holiday, deliveries will run until 5PM only on May 20.', target: 'customer', active: true, createdAt: '2026-05-15' },
+  ]
+  localStorage.setItem(NOTICE_KEY, JSON.stringify(mock))
+}
+
+seedNotices()
+
 const activeNotice = computed(() => {
   const all = JSON.parse(localStorage.getItem(NOTICE_KEY) || '[]')
   return all.find(n => n.active && (n.target === 'all' || n.target === 'customer')) || null
@@ -379,6 +395,23 @@ function dismissNotice(id) {
     dismissedNotices.value.push(id)
     localStorage.setItem(DISMISS_KEY, JSON.stringify(dismissedNotices.value))
   }
+}
+
+const showNoticeModal = ref(false)
+
+function checkNotice() {
+  const all = JSON.parse(localStorage.getItem(NOTICE_KEY) || '[]')
+  const val = all.find(n => n.active && (n.target === 'all' || n.target === 'customer')) || null
+  if (val && !dismissedNotices.value.includes(val.id)) {
+    showNoticeModal.value = true
+  }
+}
+
+onIonViewWillEnter(checkNotice)
+
+function closeNoticeModal() {
+  if (activeNotice.value) dismissNotice(activeNotice.value.id)
+  showNoticeModal.value = false
 }
 
 // Methods
@@ -483,60 +516,37 @@ const goToNotifications = () => router.push('/notifications');
 .search-bar ion-icon { font-size: 20px; color: #999; flex-shrink: 0; }
 .search-placeholder { font-size: 15px; color: #999; }
 
-/* ─── Notice Banner ──────────────────────────── */
-.notice-banner {
-  padding: 0 16px;
-  margin-top: 12px;
-}
-.notice-banner-inner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #FFF8E1;
-  border: 1px solid #FFE082;
-  border-radius: 12px;
-  padding: 10px 12px;
-  cursor: pointer;
-}
-.notice-banner-icon {
-  flex-shrink: 0;
-  color: #F57F17;
-  display: flex;
-}
-.notice-banner-text {
-  flex: 1;
+/* ─── Notice Modal ──────────────────────────── */
+.notice-modal-body {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-.notice-banner-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: #E65100;
-  line-height: 1.3;
-}
-.notice-banner-msg {
-  font-size: 11px;
-  color: #795548;
-  line-height: 1.3;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.notice-banner-close {
-  flex-shrink: 0;
-  width: 24px;
-  height: 24px;
-  border: none;
-  background: rgba(0,0,0,0.05);
-  border-radius: 50%;
-  display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #795548;
-  padding: 0;
+  text-align: center;
+  padding: 32px 16px 16px;
+  gap: 12px;
+}
+.notice-modal-icon {
+  font-size: 48px;
+  color: #F57F17;
+  margin-bottom: 8px;
+}
+.notice-modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+.notice-modal-msg {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+  margin: 0 0 8px;
+}
+.notice-modal-btn {
+  --border-radius: 12px;
+  height: 48px;
+  font-weight: 600;
+  --background: #F57F17;
 }
 
 /* ─── Banner ─────────────────────────────────── */

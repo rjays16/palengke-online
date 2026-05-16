@@ -114,8 +114,24 @@ definePageMeta({ layout: 'default' })
 
 const KEY = 'palengke_notices'
 
-const notices = ref(JSON.parse(localStorage.getItem(KEY) || '[]'))
-let nextId = notices.value.length ? Math.max(...notices.value.map(n => n.id)) + 1 : 1
+const notices = ref([])
+let nextId = 1
+
+if (import.meta.client) {
+  const raw = localStorage.getItem(KEY)
+  if (raw) {
+    notices.value = JSON.parse(raw)
+  } else {
+    const mock = [
+      { id: 1, title: 'System Maintenance Tonight', message: 'The app will be down from 2AM to 4AM for scheduled maintenance. Please plan your orders accordingly.', target: 'all', active: true, createdAt: '2026-05-17' },
+      { id: 2, title: 'Seller Portal Updates', message: 'New product analytics and bulk edit features are now available on your seller dashboard.', target: 'seller', active: true, createdAt: '2026-05-16' },
+      { id: 3, title: 'Delivery Schedule Change', message: 'Due to the holiday, deliveries will run until 5PM only on May 20.', target: 'customer', active: true, createdAt: '2026-05-15' },
+    ]
+    localStorage.setItem(KEY, JSON.stringify(mock))
+    notices.value = mock
+  }
+  nextId = notices.value.length ? Math.max(...notices.value.map(n => n.id)) + 1 : 1
+}
 
 const showModal = ref(false)
 const editing = ref(null)
