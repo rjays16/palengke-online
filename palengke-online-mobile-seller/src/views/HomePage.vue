@@ -95,7 +95,8 @@ import {
   IonIcon,
   alertController
 } from '@ionic/vue';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+import { onIonViewWillEnter } from '@ionic/vue';
 import { 
   logOutOutline,
   cartOutline,
@@ -112,32 +113,39 @@ import { getSubscription, daysLeft, isExpired } from '@/services/subscriptionSer
 
 const router = useRouter();
 
-const sub = getSubscription()
-const remaining = daysLeft(sub)
-const expired = isExpired(sub)
+const sub = ref(getSubscription())
+
+function refreshSub() {
+  sub.value = getSubscription()
+}
+
+onIonViewWillEnter(refreshSub)
+
+const remaining = computed(() => daysLeft(sub.value))
+const expired = computed(() => isExpired(sub.value))
 
 const subStatus = computed(() => {
-  if (expired) return 'expired'
-  if (sub.status === 'active') return 'active'
+  if (expired.value) return 'expired'
+  if (sub.value.status === 'active') return 'active'
   return 'trial'
 })
 
 const subIcon = computed(() => {
-  if (expired) return alertCircleOutline
-  if (sub.status === 'active') return checkmarkCircleOutline
+  if (expired.value) return alertCircleOutline
+  if (sub.value.status === 'active') return checkmarkCircleOutline
   return timeOutline
 })
 
 const subTitle = computed(() => {
-  if (expired) return 'Trial Expired'
-  if (sub.status === 'active') return 'Plan Active'
+  if (expired.value) return 'Trial Expired'
+  if (sub.value.status === 'active') return 'Plan Active'
   return 'Free Trial'
 })
 
 const subDesc = computed(() => {
-  if (expired) return 'Choose a plan to continue selling'
-  if (remaining <= 3) return `${remaining} day${remaining > 1 ? 's' : ''} left — renew soon!`
-  return `${remaining} days remaining in your trial`
+  if (expired.value) return 'Choose a plan to continue selling'
+  if (remaining.value <= 3) return `${remaining.value} day${remaining.value > 1 ? 's' : ''} left — renew soon!`
+  return `${remaining.value} days remaining in your trial`
 })
 
 const goToPlans = () => router.push('/plans')

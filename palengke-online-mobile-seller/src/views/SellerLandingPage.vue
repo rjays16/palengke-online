@@ -29,9 +29,10 @@
           </div>
           
           <!-- Trial / Subscription Badge -->
-          <div class="trial-badge" :class="{ expired }" v-if="isTrialActive || expired" @click="goToPlans">
-            <ion-icon :icon="expired ? alertCircleOutline : timeOutline"></ion-icon>
+          <div class="trial-badge" :class="{ expired, active: subActive }" v-if="isTrialActive || subActive || expired" @click="goToPlans">
+            <ion-icon :icon="expired ? alertCircleOutline : subActive ? checkmarkCircleOutline : timeOutline"></ion-icon>
             <span v-if="expired">Trial expired — tap to subscribe</span>
+            <span v-else-if="subActive">Plan Active — tap to manage</span>
             <span v-else>{{ trialDaysLeft }} day{{ trialDaysLeft > 1 ? 's' : '' }} left in free trial</span>
             <ion-icon :icon="chevronForwardOutline" class="badge-arrow"></ion-icon>
           </div>
@@ -105,6 +106,13 @@
               </div>
               <div class="action-text">Share Shop</div>
             </div>
+
+            <div class="action-card" v-if="canRequestBanner" @click="openBannerRequest">
+              <div class="action-icon banner">
+                <ion-icon :icon="megaphoneOutline"></ion-icon>
+              </div>
+              <div class="action-text">Request Banner</div>
+            </div>
           </div>
         </div>
 
@@ -159,6 +167,52 @@
       </div>
     </ion-content>
 
+    <!-- Banner Request Modal -->
+    <ion-modal :is-open="showBannerModal" @did-dismiss="showBannerModal = false" css-class="banner-modal">
+      <ion-header>
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-button @click="showBannerModal = false">
+              <ion-icon :icon="closeOutline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+          <ion-title>Request Promo Banner</ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <div class="banner-form">
+          <ion-item>
+            <ion-label position="stacked">Banner Title</ion-label>
+            <ion-input v-model="bannerForm.title" placeholder="e.g. Fresh Seafood Sale"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Subtitle</ion-label>
+            <ion-input v-model="bannerForm.subtitle" placeholder="e.g. Up to 30% off all seafood"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Link</ion-label>
+            <ion-input v-model="bannerForm.link" placeholder="e.g. /category/seafood"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Image URL (optional)</ion-label>
+            <ion-input v-model="bannerForm.image" placeholder="/images/banner.jpg"></ion-input>
+          </ion-item>
+
+          <div class="banner-preview-box" v-if="bannerForm.title || bannerForm.subtitle">
+            <p class="preview-label">Preview</p>
+            <div class="preview-banner">
+              <span class="preview-title">{{ bannerForm.title || 'Banner Title' }}</span>
+              <span class="preview-sub">{{ bannerForm.subtitle || 'Banner subtitle' }}</span>
+            </div>
+          </div>
+
+          <ion-button expand="block" class="submit-banner-btn" @click="submitBannerRequest">
+            Submit Request
+          </ion-button>
+        </div>
+      </ion-content>
+    </ion-modal>
+
     <!-- Bottom Navigation -->
     <ion-footer>
       <ion-toolbar>
@@ -186,8 +240,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { onIonViewWillEnter } from '@ionic/vue';
 import { getSubscription, daysLeft, isExpired } from '@/services/subscriptionService';
 import {
   IonPage,
@@ -199,7 +254,10 @@ import {
   IonButton,
   IonButtons,
   IonIcon,
-  IonBadge,
+  IonModal,
+  IonInput,
+  IonLabel,
+  IonItem,
   alertController,
   actionSheetController,
   toastController
@@ -225,7 +283,9 @@ import {
   shareSocialOutline,
   chatbubblesOutline,
   alertCircleOutline,
-  chevronForwardOutline
+  checkmarkCircleOutline,
+  chevronForwardOutline,
+  megaphoneOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -233,13 +293,62 @@ const router = useRouter();
 // Seller Data
 const sellerName = ref('Juan Dela Cruz');
 const notificationCount = ref(3);
-const sub = getSubscription()
-const remaining = daysLeft(sub)
-const expired = isExpired(sub)
-const isTrialActive = ref(sub.status === 'trial' && !expired)
-const trialDaysLeft = ref(remaining)
+const sub = ref(getSubscription())
+
+function refreshSub() {
+  sub.value = getSubscription()
+}
+
+onIonViewWillEnter(refreshSub)
+
+const remaining = computed(() => daysLeft(sub.value))
+const expired = computed(() => isExpired(sub.value))
+const subActive = computed(() => sub.value.status === 'active' && !expired.value)
+const isTrialActive = computed(() => sub.value.status === 'trial' && !expired.value)
+const trialDaysLeft = computed(() => remaining.value)
 
 const goToPlans = () => router.push('/plans')
+const canRequestBanner = computed(() => subActive.value && sub.value.planId === '8m')
+
+const showBannerModal = ref(false)
+const bannerForm = ref({ title: '', subtitle: '', link: '', image: '' })
+
+function openBannerRequest() {
+  bannerForm.value = { title: '', subtitle: '', link: '', image: '' }
+  showBannerModal.value = true
+}
+
+async function submitBannerRequest() {
+  if (!bannerForm.value.title) {
+    const toast = await toastController.create({
+      message: 'Please enter a banner title',
+      duration: 2000,
+      color: 'warning',
+      position: 'top',
+    })
+    return toast.present()
+  }
+
+  const requests = JSON.parse(localStorage.getItem('palengke_banner_requests') || '[]')
+  requests.push({
+    id: Date.now(),
+    seller: sellerName.value,
+    ...bannerForm.value,
+    status: 'pending',
+    submittedAt: new Date().toISOString().slice(0, 10),
+  })
+  localStorage.setItem('palengke_banner_requests', JSON.stringify(requests))
+
+  showBannerModal.value = false
+
+  const toast = await toastController.create({
+    message: 'Banner request submitted! An admin will review it.',
+    duration: 3000,
+    color: 'success',
+    position: 'top',
+  })
+  toast.present()
+}
 
 // Stats
 const todayOrders = ref(12);
@@ -708,6 +817,10 @@ ion-header ion-toolbar ion-buttons ion-button {
   background: rgba(244, 67, 54, 0.2);
 }
 
+.trial-badge.active {
+  background: rgba(76, 175, 80, 0.2);
+}
+
 .trial-badge ion-icon {
   font-size: 20px;
 }
@@ -796,7 +909,7 @@ ion-header ion-toolbar ion-buttons ion-button {
 
 .actions-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
 }
 
@@ -834,6 +947,11 @@ ion-header ion-toolbar ion-buttons ion-button {
 .action-icon.share {
   background: #E3F2FD;
   color: #2196F3;
+}
+
+.action-icon.banner {
+  background: #F3E5F5;
+  color: #9C27B0;
 }
 
 .action-text {
@@ -983,6 +1101,17 @@ ion-header ion-toolbar ion-buttons ion-button {
   align-items: center;
   gap: 4px;
 }
+
+/* Banner Request Modal */
+.banner-form { padding-top: 8px; }
+.banner-form ion-item { --padding-start: 0; margin-bottom: 8px; }
+.banner-form ion-label { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.banner-preview-box { margin: 20px 0; }
+.preview-label { font-size: 12px; color: #999; margin-bottom: 8px; }
+.preview-banner { background: linear-gradient(135deg, #4CAF50, #2E7D32); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 4px; }
+.preview-title { font-size: 16px; font-weight: 700; color: #fff; }
+.preview-sub { font-size: 12px; color: rgba(255,255,255,0.8); }
+.submit-banner-btn { --border-radius: 12px; height: 48px; font-weight: 600; margin-top: 12px; --background: #9C27B0; }
 
 /* Bottom Navigation */
 .bottom-nav {

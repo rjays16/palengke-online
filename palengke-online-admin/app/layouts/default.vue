@@ -139,6 +139,15 @@
           <span class="nav-label">Promos</span>
         </NuxtLink>
 
+        <NuxtLink to="/banner-requests" class="nav-item" active-class="active">
+          <span class="nav-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="12" y1="7" x2="12" y2="13"/>
+            </svg>
+          </span>
+          <span class="nav-label">Banner Requests</span>
+        </NuxtLink>
+
         <div class="nav-section-label">Finance</div>
 
         <NuxtLink to="/analytics" class="nav-item" active-class="active">
@@ -540,6 +549,7 @@ const pageTitle = computed(() => {
     '/admin-users': 'Admin Users',
     '/banners': 'Banners',
     '/promos': 'Promos',
+    '/banner-requests': 'Banner Requests',
   }
   // Match dynamic routes like /sellers/123
   const base = '/' + route.path.split('/')[1]
@@ -1625,6 +1635,11 @@ html.dark-mode {
 .dark-mode .status-badge.active { background: rgba(5,150,105,0.15); color: #34d399; }
 .dark-mode .status-badge.inactive { background: #1e2a4a; color: #64748b; }
 .dark-mode .promo-code { color: #34d399; }
+
+/* Banner Requests */
+.dark-mode .status-badge.pending { background: rgba(217,119,6,0.15); color: #fbbf24; }
+.dark-mode .status-badge.approved { background: rgba(5,150,105,0.15); color: #34d399; }
+.dark-mode .status-badge.rejected { background: rgba(220,38,38,0.15); color: #f87171; }
 
 /* Modal danger/success/primary btn dark mode */
 .dark-mode .modal-btn.danger { background: #dc2626; color: #fff; }
