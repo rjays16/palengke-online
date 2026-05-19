@@ -3,10 +3,10 @@
 </template>
 
 <script setup>
-const auth = useAuthStore()
+const auth = useAuthStore();
 if (auth.isAuthenticated) {
-  await navigateTo('/dashboard')
+  await navigateTo("/dashboard");
 } else {
-  await navigateTo('/login')
+  await navigateTo("/login");
 }
 </script>

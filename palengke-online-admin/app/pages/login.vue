@@ -4,7 +4,11 @@
     <div class="form-panel">
       <div class="form-inner">
         <div class="logo-row">
-          <img src="/assets/images/logo.png" alt="Palengke Online" class="logo" />
+          <img
+            src="/assets/images/logo.png"
+            alt="Palengke Online"
+            class="logo"
+          />
           <span class="logo-text">Palengke Online</span>
         </div>
 
@@ -14,12 +18,27 @@
         </div>
 
         <form class="login-form" @submit.prevent="handleLogin">
-          <div class="field-group" :class="{ focused: emailFocused, error: errors.email, filled: form.email }">
+          <div
+            class="field-group"
+            :class="{
+              focused: emailFocused,
+              error: errors.email,
+              filled: form.email,
+            }"
+          >
             <label class="field-label">Email Address</label>
             <div class="field-wrap">
-              <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                <polyline points="22,6 12,13 2,6"/>
+              <svg
+                class="field-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+                />
+                <polyline points="22,6 12,13 2,6" />
               </svg>
               <input
                 v-model="form.email"
@@ -28,18 +47,36 @@
                 class="field-input"
                 autocomplete="email"
                 @focus="emailFocused = true"
-                @blur="emailFocused = false; validateEmail()"
+                @blur="
+                  emailFocused = false;
+                  validateEmail();
+                "
               />
             </div>
-            <span class="field-error" v-if="errors.email">{{ errors.email }}</span>
+            <span class="field-error" v-if="errors.email">{{
+              errors.email
+            }}</span>
           </div>
 
-          <div class="field-group" :class="{ focused: passFocused, error: errors.password, filled: form.password }">
+          <div
+            class="field-group"
+            :class="{
+              focused: passFocused,
+              error: errors.password,
+              filled: form.password,
+            }"
+          >
             <label class="field-label">Password</label>
             <div class="field-wrap">
-              <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              <svg
+                class="field-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
               <input
                 v-model="form.password"
@@ -48,29 +85,58 @@
                 class="field-input"
                 autocomplete="current-password"
                 @focus="passFocused = true"
-                @blur="passFocused = false; validatePassword()"
+                @blur="
+                  passFocused = false;
+                  validatePassword();
+                "
               />
-              <button type="button" class="eye-btn" @click="showPassword = !showPassword">
-                <svg v-if="!showPassword" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                  <circle cx="12" cy="12" r="3"/>
+              <button
+                type="button"
+                class="eye-btn"
+                @click="showPassword = !showPassword"
+              >
+                <svg
+                  v-if="!showPassword"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
                 </svg>
-                <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-                  <line x1="1" y1="1" x2="23" y2="23"/>
+                <svg
+                  v-else
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                  />
+                  <line x1="1" y1="1" x2="23" y2="23" />
                 </svg>
               </button>
             </div>
-            <span class="field-error" v-if="errors.password">{{ errors.password }}</span>
+            <span class="field-error" v-if="errors.password">{{
+              errors.password
+            }}</span>
           </div>
 
           <div class="form-options">
             <label class="remember-label">
-              <input type="checkbox" v-model="rememberMe" class="remember-check" />
+              <input
+                type="checkbox"
+                v-model="rememberMe"
+                class="remember-check"
+              />
               <span class="remember-custom"></span>
               <span>Remember me</span>
             </label>
-            <a href="#" class="forgot-link" @click.prevent="handleForgot">Forgot password?</a>
+            <a href="#" class="forgot-link" @click.prevent="handleForgot"
+              >Forgot password?</a
+            >
           </div>
 
           <button
@@ -81,9 +147,14 @@
           >
             <span class="btn-text" v-if="!auth.isLoading">
               Sign In
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <line x1="5" y1="12" x2="19" y2="12"/>
-                <polyline points="12 5 19 12 12 19"/>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
               </svg>
             </span>
             <span class="btn-loader" v-else>
@@ -95,10 +166,15 @@
         </form>
 
         <div class="alert-error" v-if="auth.loginError">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="12"/>
-            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
           </svg>
           {{ auth.loginError }}
         </div>
@@ -106,7 +182,10 @@
         <div class="form-footer">
           <p>Super Admin: superadmin@palengke.com / superadmin123</p>
           <p>Admin: admin@palengke.com / admin123</p>
-          <p style="margin-top:8px">Having trouble? <a href="mailto:support@palengke-online.com">Contact support</a></p>
+          <p style="margin-top: 8px">
+            Having trouble?
+            <a href="mailto:support@palengke-online.com">Contact support</a>
+          </p>
         </div>
       </div>
     </div>
@@ -122,7 +201,9 @@
       <div class="hero-content">
         <div class="hero-badge">Admin Portal</div>
         <h2 class="hero-title">Manage your marketplace</h2>
-        <p class="hero-desc">Oversee sellers, drivers, customers, and analytics — all in one place.</p>
+        <p class="hero-desc">
+          Oversee sellers, drivers, customers, and analytics — all in one place.
+        </p>
         <div class="hero-stats">
           <div class="hero-stat">
             <span class="hero-stat-num">3</span>
@@ -146,59 +227,60 @@
 </template>
 
 <script setup>
-definePageMeta({ layout: 'auth' })
-const auth = useAuthStore()
-const form = ref({ email: '', password: '' })
-const errors = ref({ email: '', password: '' })
-const showPassword = ref(false)
-const rememberMe = ref(false)
-const emailFocused = ref(false)
-const passFocused = ref(false)
+definePageMeta({ layout: "auth" });
+const auth = useAuthStore();
+const form = ref({ email: "", password: "" });
+const errors = ref({ email: "", password: "" });
+const showPassword = ref(false);
+const rememberMe = ref(false);
+const emailFocused = ref(false);
+const passFocused = ref(false);
 
 const validateEmail = () => {
   if (!form.value.email) {
-    errors.value.email = 'Email is required'
-    return false
+    errors.value.email = "Email is required";
+    return false;
   }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.value.email)) {
-    errors.value.email = 'Enter a valid email address'
-    return false
+    errors.value.email = "Enter a valid email address";
+    return false;
   }
-  errors.value.email = ''
-  return true
-}
+  errors.value.email = "";
+  return true;
+};
 
 const validatePassword = () => {
   if (!form.value.password) {
-    errors.value.password = 'Password is required'
-    return false
+    errors.value.password = "Password is required";
+    return false;
   }
   if (form.value.password.length < 6) {
-    errors.value.password = 'Password must be at least 6 characters'
-    return false
+    errors.value.password = "Password must be at least 6 characters";
+    return false;
   }
-  errors.value.password = ''
-  return true
-}
+  errors.value.password = "";
+  return true;
+};
 
 const handleLogin = async () => {
-  auth.loginError = ''
-  const emailOk = validateEmail()
-  const passOk = validatePassword()
-  if (!emailOk || !passOk) return
-  const success = await auth.login(form.value.email, form.value.password)
-  if (success) navigateTo('/dashboard')
-}
+  auth.loginError = "";
+  const emailOk = validateEmail();
+  const passOk = validatePassword();
+  if (!emailOk || !passOk) return;
+  const success = await auth.login(form.value.email, form.value.password);
+  if (success) navigateTo("/dashboard");
+};
 
 const handleForgot = () => {
-  alert('Password reset link will be sent to your email.')
-}
+  alert("Password reset link will be sent to your email.");
+};
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap");
 
-:global(html), :global(body) {
+:global(html),
+:global(body) {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -209,13 +291,19 @@ const handleForgot = () => {
   height: 100%;
 }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 .login-root {
   display: flex;
   min-height: 100vh;
   height: 100vh;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   background: #fff;
   overflow: hidden;
 }
@@ -238,8 +326,14 @@ const handleForgot = () => {
 }
 
 @keyframes formIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .logo-row {
@@ -257,7 +351,7 @@ const handleForgot = () => {
 }
 
 .logo-text {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 26px;
   font-weight: 700;
   color: #111827;
@@ -268,7 +362,7 @@ const handleForgot = () => {
 }
 
 .form-title {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 34px;
   font-weight: 700;
   color: #111827;
@@ -304,8 +398,12 @@ const handleForgot = () => {
   transition: color 0.2s;
 }
 
-.field-group.focused .field-label { color: #059669; }
-.field-group.error .field-label { color: #dc2626; }
+.field-group.focused .field-label {
+  color: #059669;
+}
+.field-group.error .field-label {
+  color: #dc2626;
+}
 
 .field-wrap {
   position: relative;
@@ -324,8 +422,12 @@ const handleForgot = () => {
   flex-shrink: 0;
 }
 
-.field-group.focused .field-icon { color: #059669; }
-.field-group.error .field-icon { color: #dc2626; }
+.field-group.focused .field-icon {
+  color: #059669;
+}
+.field-group.error .field-icon {
+  color: #dc2626;
+}
 
 .field-input {
   width: 100%;
@@ -333,14 +435,19 @@ const handleForgot = () => {
   border: 1.5px solid #e5e7eb;
   border-radius: 10px;
   font-size: 15px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   color: #111827;
   background: #f9fafb;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
 }
 
-.field-input::placeholder { color: #9ca3af; }
+.field-input::placeholder {
+  color: #9ca3af;
+}
 
 .field-group.focused .field-input {
   border-color: #059669;
@@ -366,8 +473,13 @@ const handleForgot = () => {
   align-items: center;
   transition: color 0.2s;
 }
-.eye-btn:hover { color: #059669; }
-.eye-btn svg { width: 18px; height: 18px; }
+.eye-btn:hover {
+  color: #059669;
+}
+.eye-btn svg {
+  width: 18px;
+  height: 18px;
+}
 
 .field-error {
   font-size: 12px;
@@ -378,9 +490,16 @@ const handleForgot = () => {
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
 }
 
 /* ── OPTIONS ROW ─────────────────────────── */
@@ -401,7 +520,9 @@ const handleForgot = () => {
   user-select: none;
 }
 
-.remember-check { display: none; }
+.remember-check {
+  display: none;
+}
 
 .remember-custom {
   width: 18px;
@@ -420,7 +541,7 @@ const handleForgot = () => {
 }
 
 .remember-check:checked + .remember-custom::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 2px;
   left: 5px;
@@ -439,7 +560,9 @@ const handleForgot = () => {
   font-weight: 600;
   transition: color 0.2s;
 }
-.forgot-link:hover { color: #047857; }
+.forgot-link:hover {
+  color: #047857;
+}
 
 /* ── SUBMIT BUTTON ───────────────────────── */
 .submit-btn {
@@ -450,7 +573,7 @@ const handleForgot = () => {
   border: none;
   border-radius: 10px;
   font-size: 16px;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
@@ -465,7 +588,9 @@ const handleForgot = () => {
   box-shadow: 0 4px 16px rgba(5, 150, 105, 0.35);
 }
 
-.submit-btn:active { transform: translateY(0); }
+.submit-btn:active {
+  transform: translateY(0);
+}
 
 .submit-btn:disabled {
   cursor: not-allowed;
@@ -487,7 +612,9 @@ const handleForgot = () => {
   transition: transform 0.2s;
 }
 
-.submit-btn:hover .btn-text svg { transform: translateX(4px); }
+.submit-btn:hover .btn-text svg {
+  transform: translateX(4px);
+}
 
 .btn-loader {
   display: flex;
@@ -503,12 +630,24 @@ const handleForgot = () => {
   border-radius: 50%;
   animation: bounce 1.2s ease-in-out infinite;
 }
-.loader-dot:nth-child(2) { animation-delay: 0.2s; }
-.loader-dot:nth-child(3) { animation-delay: 0.4s; }
+.loader-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.loader-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
 
 @keyframes bounce {
-  0%, 80%, 100% { transform: scale(0.7); opacity: 0.5; }
-  40% { transform: scale(1); opacity: 1; }
+  0%,
+  80%,
+  100% {
+    transform: scale(0.7);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* ── ERROR ALERT ─────────────────────────── */
@@ -543,7 +682,9 @@ const handleForgot = () => {
   text-decoration: none;
   font-weight: 600;
 }
-.form-footer a:hover { color: #047857; }
+.form-footer a:hover {
+  color: #047857;
+}
 
 /* ── RIGHT HERO PANEL ────────────────────── */
 .hero-panel {
@@ -603,7 +744,7 @@ const handleForgot = () => {
 }
 
 .hero-title {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 40px;
   font-weight: 800;
   color: #fff;
@@ -637,7 +778,7 @@ const handleForgot = () => {
 
 .hero-stat-num {
   display: block;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 24px;
   font-weight: 700;
   color: #fff;
@@ -668,7 +809,9 @@ const handleForgot = () => {
 
 /* ── RESPONSIVE ──────────────────────────── */
 @media (max-width: 900px) {
-  .login-root { flex-direction: column; }
+  .login-root {
+    flex-direction: column;
+  }
   .hero-panel {
     width: 100%;
     min-height: 40vh;
@@ -677,23 +820,52 @@ const handleForgot = () => {
     min-height: 40vh;
     padding: 32px 24px;
   }
-  .hero-title { font-size: 28px; }
+  .hero-title {
+    font-size: 28px;
+  }
   .form-panel {
     min-height: auto;
     padding: 40px 24px;
   }
 }
 @media (max-width: 480px) {
-  .hero-panel { display: none; }
-  .form-panel { padding: 32px 20px; align-items: flex-start; }
-  .form-inner { max-width: 100%; }
-  .logo-row { margin-bottom: 24px; }
-  .logo { width: 44px; height: 44px; }
-  .logo-text { font-size: 20px; }
-  .form-title { font-size: 26px; }
-  .form-subtitle { font-size: 14px; }
-  .form-options { flex-direction: column; align-items: flex-start; gap: 8px; }
-  .form-footer { font-size: 11px; }
-  .field-input { font-size: 14px; padding: 13px 14px 13px 42px; }
+  .hero-panel {
+    display: none;
+  }
+  .form-panel {
+    padding: 32px 20px;
+    align-items: flex-start;
+  }
+  .form-inner {
+    max-width: 100%;
+  }
+  .logo-row {
+    margin-bottom: 24px;
+  }
+  .logo {
+    width: 44px;
+    height: 44px;
+  }
+  .logo-text {
+    font-size: 20px;
+  }
+  .form-title {
+    font-size: 26px;
+  }
+  .form-subtitle {
+    font-size: 14px;
+  }
+  .form-options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .form-footer {
+    font-size: 11px;
+  }
+  .field-input {
+    font-size: 14px;
+    padding: 13px 14px 13px 42px;
+  }
 }
 </style>

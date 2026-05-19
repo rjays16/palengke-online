@@ -2,10 +2,30 @@
   <div v-if="visible" class="loading-overlay" :class="{ 'fade-out': fading }">
     <div class="loader-content">
       <div class="logo-wrapper">
-        <img src="/assets/images/logo-without-circle.png" alt="Palengke Online" class="logo-img">
+        <img
+          src="/assets/images/logo-without-circle.png"
+          alt="Palengke Online"
+          class="logo-img"
+        />
         <svg class="loading-ring" viewBox="0 0 200 200">
-          <circle cx="100" cy="100" r="85" fill="none" stroke="#e5e7eb" stroke-width="6" />
-          <circle class="ring-spin" cx="100" cy="100" r="85" fill="none" stroke="#1a1a1a" stroke-width="6" stroke-linecap="round" />
+          <circle
+            cx="100"
+            cy="100"
+            r="85"
+            fill="none"
+            stroke="#e5e7eb"
+            stroke-width="6"
+          />
+          <circle
+            class="ring-spin"
+            cx="100"
+            cy="100"
+            r="85"
+            fill="none"
+            stroke="#1a1a1a"
+            stroke-width="6"
+            stroke-linecap="round"
+          />
         </svg>
       </div>
       <div class="loading-text">Loading</div>
@@ -14,39 +34,42 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, watch } from "vue";
+import { useRoute } from "vue-router";
 
-const route = useRoute()
-const visible = ref(true)
-const fading = ref(false)
+const route = useRoute();
+const visible = ref(true);
+const fading = ref(false);
 
-let timeout
+let timeout;
 
 function show() {
-  clearTimeout(timeout)
-  visible.value = true
-  fading.value = false
+  clearTimeout(timeout);
+  visible.value = true;
+  fading.value = false;
 }
 
 function hide(delay = 400) {
   timeout = setTimeout(() => {
-    fading.value = true
+    fading.value = true;
     setTimeout(() => {
-      visible.value = false
-      fading.value = false
-    }, 400)
-  }, delay)
+      visible.value = false;
+      fading.value = false;
+    }, 400);
+  }, delay);
 }
 
 // Initial load: show for 2.5s
-hide(2500)
+hide(2500);
 
 // Every page navigation: show briefly
-watch(() => route.path, () => {
-  show()
-  hide(500)
-})
+watch(
+  () => route.path,
+  () => {
+    show();
+    hide(500);
+  },
+);
 </script>
 
 <style scoped>
@@ -115,17 +138,32 @@ watch(() => route.path, () => {
 }
 
 @keyframes logoIn {
-  0% { transform: scale(0.7); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes ringSpin {
-  0% { transform: rotate(-90deg); }
-  100% { transform: rotate(270deg); }
+  0% {
+    transform: rotate(-90deg);
+  }
+  100% {
+    transform: rotate(270deg);
+  }
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 </style>

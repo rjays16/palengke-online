@@ -1,10 +1,10 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2025-07-15',
+  compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
-  modules: ['@pinia/nuxt'],
+  modules: ["@pinia/nuxt"],
   imports: {
-    dirs: ['stores']
+    dirs: ["stores"],
   },
-  css: ['leaflet/dist/leaflet.css']
-})
+  css: ["leaflet/dist/leaflet.css"],
+});
