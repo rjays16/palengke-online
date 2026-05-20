@@ -478,6 +478,16 @@
             >Payments</span
           >
         </NuxtLink>
+        <NuxtLink
+          v-show="auth.user?.role === 'superadmin'"
+          to="/settings/locations"
+          class="nav-item sub"
+          active-class="active"
+        >
+          <span class="nav-label" style="padding-left: 30px; font-size: 12px"
+            >Locations</span
+          >
+        </NuxtLink>
       </nav>
 
       <!-- Sidebar Footer: Admin Profile -->
@@ -977,6 +987,7 @@ const pageTitle = computed(() => {
     "/settings": "Settings",
     "/admin-users": "Admin Users",
     "/settings/payments": "Payment Settings",
+    "/settings/locations": "Location Settings",
     "/banners": "Banners",
     "/promos": "Promos",
     "/banner-requests": "Banner Requests",

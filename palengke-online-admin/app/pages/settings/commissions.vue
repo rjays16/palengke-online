@@ -20,6 +20,12 @@
         active-class="active"
         >Payments</NuxtLink
       >
+      <NuxtLink
+        to="/settings/locations"
+        class="subnav-item"
+        active-class="active"
+        >Locations</NuxtLink
+      >
     </div>
 
     <div class="settings-grid">

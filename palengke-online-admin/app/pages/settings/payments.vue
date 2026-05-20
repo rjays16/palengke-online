@@ -21,7 +21,14 @@
         to="/settings/payments"
         class="subnav-item"
         active-class="active"
+        exact-active-class="active"
         >Payments</NuxtLink
+      >
+      <NuxtLink
+        to="/settings/locations"
+        class="subnav-item"
+        active-class="active"
+        >Locations</NuxtLink
       >
     </div>
 
