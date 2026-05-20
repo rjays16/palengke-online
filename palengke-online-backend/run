@@ -3,13 +3,21 @@
 # Palengke Online Backend - Run Script
 # Usage: ./run [command]
 # Examples:
-#   ./run php artisan migrate
-#   ./run composer install
-#   ./run bash
+#   ./run docker compose up -d       # Start containers
+#   ./run docker compose down        # Stop containers
+#   ./run docker compose ps          # Check container status
+#   ./run php artisan migrate        # Run migrations
+#   ./run composer install           # Install dependencies
+#   ./run bash                       # Open bash shell in container
 
-# Check if docker-compose is running
-if ! docker-compose ps | grep -q "palengke-app"; then
-    echo "Error: Containers are not running. Start them with: docker-compose up -d"
+# Detect docker compose command (old vs new syntax)
+if command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE="docker-compose"
+elif docker compose version &> /dev/null; then
+    DOCKER_COMPOSE="docker compose"
+else
+    echo "Error: docker-compose or docker compose not found. Please install Docker."
+    echo "Download: https://www.docker.com/products/docker-desktop"
     exit 1
 fi
 
@@ -17,7 +25,13 @@ fi
 if [ $# -eq 0 ]; then
     echo "Usage: ./run [command]"
     echo ""
-    echo "Examples:"
+    echo "Docker Commands:"
+    echo "  ./run docker compose up -d       # Start all containers"
+    echo "  ./run docker compose down        # Stop and remove containers"
+    echo "  ./run docker compose ps            # List running containers"
+    echo "  ./run docker compose logs          # View container logs"
+    echo ""
+    echo "Laravel/PHP Commands (requires running containers):"
     echo "  ./run php artisan migrate"
     echo "  ./run php artisan make:model Product"
     echo "  ./run composer install"
@@ -26,5 +40,30 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-# Execute the command in the container
-docker-compose exec app "$@"
+# Check if this is a docker compose command
+if [ "$1" == "docker" ] && [ "$2" == "compose" ]; then
+    # Execute docker compose commands directly
+    shift 2  # Remove 'docker compose' from args
+    $DOCKER_COMPOSE "$@"
+    exit $?
+fi
+
+# For all other commands, check if containers are running first
+if ! $DOCKER_COMPOSE ps | grep -q "palengke-app"; then
+    echo "Containers are not running. Starting them now..."
+    $DOCKER_COMPOSE up -d
+    
+    # Wait for containers to be ready
+    echo "Waiting for containers to start..."
+    sleep 3
+    
+    # Check again
+    if ! $DOCKER_COMPOSE ps | grep -q "palengke-app"; then
+        echo "Error: Failed to start containers. Check logs with: ./run docker compose logs"
+        exit 1
+    fi
+    echo "Containers started successfully!"
+fi
+
+# Execute the command inside the app container
+$DOCKER_COMPOSE exec app "$@"
