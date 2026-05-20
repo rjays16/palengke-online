@@ -1,35 +1,6 @@
 <template>
   <div class="page-shell">
-    <div class="settings-subnav">
-      <NuxtLink to="/settings" class="subnav-item" active-class="active"
-        >General</NuxtLink
-      >
-      <NuxtLink
-        to="/settings/fees"
-        class="subnav-item"
-        active-class="active"
-        exact-active-class="active"
-        >Delivery Fees</NuxtLink
-      >
-      <NuxtLink
-        to="/settings/commissions"
-        class="subnav-item"
-        active-class="active"
-        >Commissions</NuxtLink
-      >
-      <NuxtLink
-        to="/settings/payments"
-        class="subnav-item"
-        active-class="active"
-        >Payments</NuxtLink
-      >
-      <NuxtLink
-        to="/settings/locations"
-        class="subnav-item"
-        active-class="active"
-        >Locations</NuxtLink
-      >
-    </div>
+    <SettingsSubnav />
 
     <div class="settings-grid">
       <div class="settings-section">

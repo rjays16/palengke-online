@@ -1,18 +1,45 @@
-function b(name: string, id: string) {
-  return { id, name, checked: false };
+export interface Barangay {
+  id: string;
+  name: string;
+  checked: boolean;
 }
 
-function city(id: string, name: string, barangayNames: string[]) {
+export interface City {
+  id: string;
+  name: string;
+  checked: boolean;
+  indeterminate: boolean;
+  barangays: Barangay[];
+}
+
+export interface Region {
+  id: string;
+  name: string;
+  checked: boolean;
+  indeterminate: boolean;
+  cities: City[];
+}
+
+function createBarangay(name: string, cityId: string, index: number): Barangay {
+  const barangayNumber = String(index + 1).padStart(3, "0");
+  return {
+    id: `${cityId}b${barangayNumber}`,
+    name,
+    checked: false,
+  };
+}
+
+function createCity(id: string, name: string, barangayNames: string[]): City {
   return {
     id,
     name,
     checked: false,
     indeterminate: false,
-    barangays: barangayNames.map((bn, i) => b(bn, `${id}b${String(i + 1).padStart(3, "0")}`)),
+    barangays: barangayNames.map((name, i) => createBarangay(name, id, i)),
   };
 }
 
-function defaultBarangays(prefix: string) {
+function getDefaultBarangays(): string[] {
   return [
     "Poblacion",
     "Barangay 1",
@@ -23,8 +50,9 @@ function defaultBarangays(prefix: string) {
   ];
 }
 
-const luzonCities = [
-  city("c101", "Manila", [
+// ===== LUZON CITIES =====
+const luzonCities: City[] = [
+  createCity("c101", "Manila", [
     "Barangay 1 - Intramuros",
     "Barangay 2 - Intramuros",
     "Barangay 3 - Intramuros",
@@ -49,7 +77,7 @@ const luzonCities = [
     "Santa Mesa",
     "Tondo",
   ]),
-  city("c102", "Quezon City", [
+  createCity("c102", "Quezon City", [
     "Alicia",
     "Amihan",
     "Apolonio Samson",
@@ -195,39 +223,40 @@ const luzonCities = [
     "West Triangle",
     "White Plains",
   ]),
-  city("c103", "Caloocan", defaultBarangays("c103")),
-  city("c104", "Las Piñas", defaultBarangays("c104")),
-  city("c105", "Makati", defaultBarangays("c105")),
-  city("c106", "Malabon", defaultBarangays("c106")),
-  city("c107", "Mandaluyong", defaultBarangays("c107")),
-  city("c108", "Marikina", defaultBarangays("c108")),
-  city("c109", "Muntinlupa", defaultBarangays("c109")),
-  city("c110", "Navotas", defaultBarangays("c110")),
-  city("c111", "Parañaque", defaultBarangays("c111")),
-  city("c112", "Pasay", defaultBarangays("c112")),
-  city("c113", "Pasig", defaultBarangays("c113")),
-  city("c114", "Pateros", defaultBarangays("c114")),
-  city("c115", "San Juan", defaultBarangays("c115")),
-  city("c116", "Taguig", defaultBarangays("c116")),
-  city("c117", "Valenzuela", defaultBarangays("c117")),
-  city("c118", "Antipolo", defaultBarangays("c118")),
-  city("c119", "Cavite City", defaultBarangays("c119")),
-  city("c120", "Bacoor", defaultBarangays("c120")),
-  city("c121", "Dasmariñas", defaultBarangays("c121")),
-  city("c122", "Imus", defaultBarangays("c122")),
-  city("c123", "Tagaytay", defaultBarangays("c123")),
-  city("c124", "Baguio", defaultBarangays("c124")),
-  city("c125", "Cabanatuan", defaultBarangays("c125")),
-  city("c126", "Lipa", defaultBarangays("c126")),
-  city("c127", "Lucena", defaultBarangays("c127")),
-  city("c128", "Olongapo", defaultBarangays("c128")),
-  city("c129", "San Fernando (Pampanga)", defaultBarangays("c129")),
-  city("c130", "San Fernando (La Union)", defaultBarangays("c130")),
-  city("c131", "Tarlac City", defaultBarangays("c131")),
+  createCity("c103", "Caloocan", getDefaultBarangays()),
+  createCity("c104", "Las Piñas", getDefaultBarangays()),
+  createCity("c105", "Makati", getDefaultBarangays()),
+  createCity("c106", "Malabon", getDefaultBarangays()),
+  createCity("c107", "Mandaluyong", getDefaultBarangays()),
+  createCity("c108", "Marikina", getDefaultBarangays()),
+  createCity("c109", "Muntinlupa", getDefaultBarangays()),
+  createCity("c110", "Navotas", getDefaultBarangays()),
+  createCity("c111", "Parañaque", getDefaultBarangays()),
+  createCity("c112", "Pasay", getDefaultBarangays()),
+  createCity("c113", "Pasig", getDefaultBarangays()),
+  createCity("c114", "Pateros", getDefaultBarangays()),
+  createCity("c115", "San Juan", getDefaultBarangays()),
+  createCity("c116", "Taguig", getDefaultBarangays()),
+  createCity("c117", "Valenzuela", getDefaultBarangays()),
+  createCity("c118", "Antipolo", getDefaultBarangays()),
+  createCity("c119", "Cavite City", getDefaultBarangays()),
+  createCity("c120", "Bacoor", getDefaultBarangays()),
+  createCity("c121", "Dasmariñas", getDefaultBarangays()),
+  createCity("c122", "Imus", getDefaultBarangays()),
+  createCity("c123", "Tagaytay", getDefaultBarangays()),
+  createCity("c124", "Baguio", getDefaultBarangays()),
+  createCity("c125", "Cabanatuan", getDefaultBarangays()),
+  createCity("c126", "Lipa", getDefaultBarangays()),
+  createCity("c127", "Lucena", getDefaultBarangays()),
+  createCity("c128", "Olongapo", getDefaultBarangays()),
+  createCity("c129", "San Fernando (Pampanga)", getDefaultBarangays()),
+  createCity("c130", "San Fernando (La Union)", getDefaultBarangays()),
+  createCity("c131", "Tarlac City", getDefaultBarangays()),
 ];
 
-const visayasCities = [
-  city("c201", "Cebu City", [
+// ===== VISAYAS CITIES =====
+const visayasCities: City[] = [
+  createCity("c201", "Cebu City", [
     "Adlaon",
     "Agsungot",
     "Apas",
@@ -311,31 +340,32 @@ const visayasCities = [
     "To-ong Pardo",
     "Zapatera",
   ]),
-  city("c202", "Mandaue", defaultBarangays("c202")),
-  city("c203", "Lapu-Lapu", defaultBarangays("c203")),
-  city("c204", "Talisay (Cebu)", defaultBarangays("c204")),
-  city("c205", "Toledo", defaultBarangays("c205")),
-  city("c206", "Bacolod", defaultBarangays("c206")),
-  city("c207", "Iloilo City", defaultBarangays("c207")),
-  city("c208", "Roxas City", defaultBarangays("c208")),
-  city("c209", "Tacloban", defaultBarangays("c209")),
-  city("c210", "Ormoc", defaultBarangays("c210")),
-  city("c211", "Calbayog", defaultBarangays("c211")),
-  city("c212", "Catbalogan", defaultBarangays("c212")),
-  city("c213", "Borongan", defaultBarangays("c213")),
-  city("c214", "Dumaguete", defaultBarangays("c214")),
-  city("c215", "Bais", defaultBarangays("c215")),
-  city("c216", "Tagbilaran", defaultBarangays("c216")),
-  city("c217", "Cadiz", defaultBarangays("c217")),
-  city("c218", "Silay", defaultBarangays("c218")),
-  city("c219", "Victorias", defaultBarangays("c219")),
-  city("c220", "Kabankalan", defaultBarangays("c220")),
-  city("c221", "Bago City", defaultBarangays("c221")),
-  city("c222", "Escalante", defaultBarangays("c222")),
+  createCity("c202", "Mandaue", getDefaultBarangays()),
+  createCity("c203", "Lapu-Lapu", getDefaultBarangays()),
+  createCity("c204", "Talisay (Cebu)", getDefaultBarangays()),
+  createCity("c205", "Toledo", getDefaultBarangays()),
+  createCity("c206", "Bacolod", getDefaultBarangays()),
+  createCity("c207", "Iloilo City", getDefaultBarangays()),
+  createCity("c208", "Roxas City", getDefaultBarangays()),
+  createCity("c209", "Tacloban", getDefaultBarangays()),
+  createCity("c210", "Ormoc", getDefaultBarangays()),
+  createCity("c211", "Calbayog", getDefaultBarangays()),
+  createCity("c212", "Catbalogan", getDefaultBarangays()),
+  createCity("c213", "Borongan", getDefaultBarangays()),
+  createCity("c214", "Dumaguete", getDefaultBarangays()),
+  createCity("c215", "Bais", getDefaultBarangays()),
+  createCity("c216", "Tagbilaran", getDefaultBarangays()),
+  createCity("c217", "Cadiz", getDefaultBarangays()),
+  createCity("c218", "Silay", getDefaultBarangays()),
+  createCity("c219", "Victorias", getDefaultBarangays()),
+  createCity("c220", "Kabankalan", getDefaultBarangays()),
+  createCity("c221", "Bago City", getDefaultBarangays()),
+  createCity("c222", "Escalante", getDefaultBarangays()),
 ];
 
-const mindanaoCities = [
-  city("c301", "Davao City", [
+// ===== MINDANAO CITIES =====
+const mindanaoCities: City[] = [
+  createCity("c301", "Davao City", [
     "Acacia",
     "Agdao",
     "Alambre",
@@ -479,12 +509,12 @@ const mindanaoCities = [
     "Wilfredo Aquino",
     "Wines",
   ]),
-  city("c302", "Digos", defaultBarangays("c302")),
-  city("c303", "Mati", defaultBarangays("c303")),
-  city("c304", "Tagum", defaultBarangays("c304")),
-  city("c305", "Panabo", defaultBarangays("c305")),
-  city("c306", "Samal", defaultBarangays("c306")),
-  city("c307", "Cagayan de Oro", [
+  createCity("c302", "Digos", getDefaultBarangays()),
+  createCity("c303", "Mati", getDefaultBarangays()),
+  createCity("c304", "Tagum", getDefaultBarangays()),
+  createCity("c305", "Panabo", getDefaultBarangays()),
+  createCity("c306", "Samal", getDefaultBarangays()),
+  createCity("c307", "Cagayan de Oro", [
     "Agusan",
     "Baikingon",
     "Balubal",
@@ -534,30 +564,30 @@ const mindanaoCities = [
     "Tuburan",
     "Tumpagon",
   ]),
-  city("c308", "Gingoog", defaultBarangays("c308")),
-  city("c309", "Malaybalay", defaultBarangays("c309")),
-  city("c310", "Valencia", defaultBarangays("c310")),
-  city("c311", "Oroquieta", defaultBarangays("c311")),
-  city("c312", "Ozamiz", defaultBarangays("c312")),
-  city("c313", "Tangub", defaultBarangays("c313")),
-  city("c314", "Iligan", defaultBarangays("c314")),
-  city("c315", "Marawi", defaultBarangays("c315")),
-  city("c316", "Cotabato City", defaultBarangays("c316")),
-  city("c317", "General Santos", defaultBarangays("c317")),
-  city("c318", "Koronadal", defaultBarangays("c318")),
-  city("c319", "Tacurong", defaultBarangays("c319")),
-  city("c320", "Kidapawan", defaultBarangays("c320")),
-  city("c321", "Butuan", defaultBarangays("c321")),
-  city("c322", "Surigao City", defaultBarangays("c322")),
-  city("c323", "Bislig", defaultBarangays("c323")),
-  city("c324", "Tandag", defaultBarangays("c324")),
-  city("c325", "Pagadian", defaultBarangays("c325")),
-  city("c326", "Zamboanga City", defaultBarangays("c326")),
-  city("c327", "Dipolog", defaultBarangays("c327")),
-  city("c328", "Dapitan", defaultBarangays("c328")),
+  createCity("c308", "Gingoog", getDefaultBarangays()),
+  createCity("c309", "Malaybalay", getDefaultBarangays()),
+  createCity("c310", "Valencia", getDefaultBarangays()),
+  createCity("c311", "Oroquieta", getDefaultBarangays()),
+  createCity("c312", "Ozamiz", getDefaultBarangays()),
+  createCity("c313", "Tangub", getDefaultBarangays()),
+  createCity("c314", "Iligan", getDefaultBarangays()),
+  createCity("c315", "Marawi", getDefaultBarangays()),
+  createCity("c316", "Cotabato City", getDefaultBarangays()),
+  createCity("c317", "General Santos", getDefaultBarangays()),
+  createCity("c318", "Koronadal", getDefaultBarangays()),
+  createCity("c319", "Tacurong", getDefaultBarangays()),
+  createCity("c320", "Kidapawan", getDefaultBarangays()),
+  createCity("c321", "Butuan", getDefaultBarangays()),
+  createCity("c322", "Surigao City", getDefaultBarangays()),
+  createCity("c323", "Bislig", getDefaultBarangays()),
+  createCity("c324", "Tandag", getDefaultBarangays()),
+  createCity("c325", "Pagadian", getDefaultBarangays()),
+  createCity("c326", "Zamboanga City", getDefaultBarangays()),
+  createCity("c327", "Dipolog", getDefaultBarangays()),
+  createCity("c328", "Dapitan", getDefaultBarangays()),
 ];
 
-export const locationDefaults = [
+export const locationDefaults: Region[] = [
   {
     id: "r1",
     name: "Luzon",
