@@ -76,6 +76,26 @@
             <span v-if="errors.lastName" class="error-message">{{ errors.lastName }}</span>
           </div>
 
+          <!-- Country -->
+          <div class="input-group">
+            <label class="input-label">Country *</label>
+            <div class="input-wrapper" :class="{ error: errors.country }">
+              <ion-icon :icon="globeOutline" class="input-icon"></ion-icon>
+              <select 
+                v-model="formData.country" 
+                class="custom-input with-icon custom-select"
+                @blur="validateField('country')"
+                @change="errors.country = ''"
+              >
+                <option value="" disabled>Select your country</option>
+                <option v-for="c in countries" :key="c.code" :value="c.code">
+                  {{ c.name }}
+                </option>
+              </select>
+            </div>
+            <span v-if="errors.country" class="error-message">{{ errors.country }}</span>
+          </div>
+
           <!-- Birthdate -->
           <div class="input-group">
             <label class="input-label">Birthdate *</label>
@@ -206,16 +226,32 @@ import {
   calendarOutline,
   locationOutline,
   homeOutline,
-  shieldCheckmarkOutline
+  shieldCheckmarkOutline,
+  globeOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
+
+// Mock countries data (will be fetched from backend later)
+const countries = ref([
+  { code: 'PH', name: 'Philippines' },
+  { code: 'US', name: 'United States' },
+  { code: 'SG', name: 'Singapore' },
+  { code: 'JP', name: 'Japan' },
+  { code: 'AU', name: 'Australia' },
+  { code: 'CA', name: 'Canada' },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'DE', name: 'Germany' },
+  { code: 'FR', name: 'France' },
+  { code: 'KR', name: 'South Korea' },
+]);
 
 // Form data
 const formData = ref({
   firstName: '',
   middleName: '',
   lastName: '',
+  country: '',
   birthdate: '',
   birthplace: '',
   currentAddress: ''
@@ -228,6 +264,7 @@ const sameAsBirthplace = ref(false);
 const errors = ref({
   firstName: '',
   lastName: '',
+  country: '',
   birthdate: '',
   birthplace: '',
   currentAddress: ''
@@ -250,6 +287,7 @@ onMounted(() => {
     if (data.firstName) formData.value.firstName = data.firstName;
     if (data.middleName) formData.value.middleName = data.middleName;
     if (data.lastName) formData.value.lastName = data.lastName;
+    if (data.country) formData.value.country = data.country;
     if (data.birthdate) formData.value.birthdate = data.birthdate;
     if (data.birthplace) formData.value.birthplace = data.birthplace;
     if (data.currentAddress) formData.value.currentAddress = data.currentAddress;
@@ -282,6 +320,14 @@ const validateField = (fieldName) => {
         return false;
       }
       errors.value.lastName = '';
+      return true;
+
+    case 'country':
+      if (!formData.value.country) {
+        errors.value.country = 'Country is required';
+        return false;
+      }
+      errors.value.country = '';
       return true;
 
     case 'birthdate':
@@ -353,6 +399,7 @@ const onSameAsBirthplaceChange = () => {
 const isFormValid = computed(() => {
   return formData.value.firstName.trim() && 
          formData.value.lastName.trim() && 
+         formData.value.country &&
          formData.value.birthdate &&
          formData.value.birthplace.trim() &&
          formData.value.currentAddress.trim();
@@ -371,6 +418,7 @@ const saveData = () => {
     firstName: formData.value.firstName,
     middleName: formData.value.middleName,
     lastName: formData.value.lastName,
+    country: formData.value.country,
     birthdate: formData.value.birthdate,
     birthplace: formData.value.birthplace,
     currentAddress: formData.value.currentAddress,
@@ -382,11 +430,12 @@ const saveData = () => {
 const handleNext = () => {
   const isFirstNameValid = validateField('firstName');
   const isLastNameValid = validateField('lastName');
+  const isCountryValid = validateField('country');
   const isBirthdateValid = validateField('birthdate');
   const isBirthplaceValid = validateField('birthplace');
   const isAddressValid = validateField('currentAddress');
   
-  if (isFirstNameValid && isLastNameValid && isBirthdateValid && 
+  if (isFirstNameValid && isLastNameValid && isCountryValid && isBirthdateValid && 
       isBirthplaceValid && isAddressValid) {
     saveData();
     router.push('/register/step3');
@@ -566,6 +615,19 @@ const handleNext = () => {
 }
 
 .custom-input::placeholder {
+  color: var(--color-input-placeholder);
+}
+
+.custom-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+}
+
+.custom-select:invalid {
   color: var(--color-input-placeholder);
 }
 

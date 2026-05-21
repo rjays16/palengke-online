@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\CountryController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -18,4 +19,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/admin/locations', [LocationController::class, 'index']);
     Route::put('/admin/locations', [LocationController::class, 'update']);
+
+    Route::get('/admin/countries', [CountryController::class, 'index']);
+    Route::post('/admin/countries/{id}/toggle', [CountryController::class, 'toggle']);
+    Route::put('/admin/countries/bulk', [CountryController::class, 'bulkUpdate']);
 });
+
+// Public endpoint for seller app to fetch enabled countries
+Route::get('/countries', [CountryController::class, 'index']);
