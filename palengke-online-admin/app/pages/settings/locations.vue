@@ -46,9 +46,19 @@
       ✓ Location settings saved successfully
     </div>
 
-    <div class="settings-actions">
-      <button class="save-btn" @click="saveLocations">Save Changes</button>
-      <button class="reset-btn" @click="resetLocations">Reset to Default</button>
+    <div class="error-toast" v-if="error">
+      ✕ {{ error }}
+    </div>
+
+    <div v-if="isLoading" class="loading-state">Loading locations...</div>
+
+    <div class="settings-actions" v-if="!isLoading">
+      <button class="save-btn" @click="saveLocations" :disabled="isSaving">
+        {{ isSaving ? "Saving..." : "Save Changes" }}
+      </button>
+      <button class="reset-btn" @click="resetLocations" :disabled="isSaving">
+        Reset to Default
+      </button>
     </div>
   </div>
 </template>
@@ -72,12 +82,24 @@ onMounted(() => {
   }
 });
 
-const STORAGE_KEY = "palengke_settings_locations";
+function getApiBaseUrl() {
+  const config = useRuntimeConfig();
+  return config.public.apiBaseUrl || "http://localhost:8000";
+}
+
+function getToken() {
+  if (typeof localStorage === "undefined") return null;
+  return localStorage.getItem("palengke_auth_token");
+}
+
 const OPEN_KEY = "palengke_settings_locations_open";
 
 const openIds = ref<Set<string>>(new Set());
 const locations = ref<Region[]>(structuredClone(locationDefaults));
 const success = ref(false);
+const isLoading = ref(false);
+const isSaving = ref(false);
+const error = ref("");
 
 // ===== COMPUTED =====
 const enabledRegions = computed(() => locations.value.filter((r) => r.checked).length);
@@ -104,7 +126,7 @@ const totalBarangays = computed(() =>
   )
 );
 
-// ===== LOCAL STORAGE =====
+// ===== LOCAL STORAGE (UI state only) =====
 function safeSetItem(key: string, value: string): void {
   try {
     localStorage.setItem(key, value);
@@ -122,15 +144,6 @@ function safeGetItem(key: string): string | null {
   }
 }
 
-function safeRemoveItem(key: string): void {
-  try {
-    localStorage.removeItem(key);
-  } catch (err) {
-    console.warn(`Failed to remove from localStorage (${key}):`, err);
-  }
-}
-
-// ===== STATE MANAGEMENT =====
 function loadOpenState(): void {
   const raw = safeGetItem(OPEN_KEY);
   if (raw) {
@@ -146,18 +159,55 @@ function saveOpenState(): void {
   safeSetItem(OPEN_KEY, JSON.stringify([...openIds.value]));
 }
 
-function loadLocations(): void {
-  const saved = safeGetItem(STORAGE_KEY);
-  if (saved) {
-    try {
-      locations.value = JSON.parse(saved);
-      return;
-    } catch (err) {
-      console.warn("Failed to parse saved locations:", err);
-      safeRemoveItem(STORAGE_KEY);
+// ===== API =====
+async function loadLocations(): Promise<void> {
+  isLoading.value = true;
+  error.value = "";
+
+  try {
+    const token = getToken();
+    const response: any = await $fetch(`${getApiBaseUrl()}/api/admin/locations`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.locations) {
+      locations.value = response.locations;
+    } else {
+      locations.value = structuredClone(locationDefaults);
     }
+  } catch (err: any) {
+    error.value = err?.data?.message || "Failed to load locations";
+    locations.value = structuredClone(locationDefaults);
+  } finally {
+    isLoading.value = false;
   }
-  locations.value = structuredClone(locationDefaults);
+}
+
+async function saveLocations(): Promise<void> {
+  isSaving.value = true;
+  error.value = "";
+
+  try {
+    const token = getToken();
+    await $fetch(`${getApiBaseUrl()}/api/admin/locations`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: { locations: locations.value },
+    });
+
+    success.value = true;
+    setTimeout(() => {
+      success.value = false;
+    }, 2500);
+  } catch (err: any) {
+    error.value = err?.data?.message || "Failed to save locations";
+  } finally {
+    isSaving.value = false;
+  }
 }
 
 // ===== BULK ACTIONS =====
@@ -172,15 +222,6 @@ function expandAll(): void {
 function collapseAll(): void {
   openIds.value.clear();
   saveOpenState();
-}
-
-// ===== SAVE / RESET =====
-function saveLocations(): void {
-  safeSetItem(STORAGE_KEY, JSON.stringify(locations.value));
-  success.value = true;
-  setTimeout(() => {
-    success.value = false;
-  }, 2500);
 }
 
 function resetLocations(): void {
@@ -292,6 +333,21 @@ watch(openIds, saveOpenState, { deep: true });
   font-size: 13px;
   font-weight: 600;
 }
+.error-toast {
+  padding: 10px 16px;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.loading-state {
+  padding: 40px;
+  text-align: center;
+  font-size: 14px;
+  color: #6b7280;
+}
 .save-btn {
   padding: 12px 24px;
   background: #059669;
@@ -307,6 +363,10 @@ watch(openIds, saveOpenState, { deep: true });
 .save-btn:hover {
   background: #047857;
 }
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 .reset-btn {
   padding: 12px 24px;
   background: #fff;
@@ -321,6 +381,10 @@ watch(openIds, saveOpenState, { deep: true });
 }
 .reset-btn:hover {
   border-color: #9ca3af;
+}
+.reset-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 @media (max-width: 600px) {
   .summary-grid {

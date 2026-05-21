@@ -1,55 +1,80 @@
+const AUTH_TOKEN_KEY = "palengke_auth_token";
+
+function getToken() {
+  if (typeof localStorage === "undefined") return null;
+  return localStorage.getItem(AUTH_TOKEN_KEY);
+}
+
+function getApiBaseUrl() {
+  const config = useRuntimeConfig();
+  return config.public.apiBaseUrl || "http://localhost:8000";
+}
+
 export const useAdminUsersStore = defineStore("adminUsers", () => {
   const admins = ref<
     Array<{
       id: number;
       name: string;
       email: string;
-      password: string;
       role: string;
       createdAt: string;
       status: string;
     }>
-  >([
-    {
-      id: 1,
-      name: "Super Admin",
-      email: "superadmin@palengke.com",
-      password: "superadmin123",
-      role: "superadmin",
-      createdAt: "2024-01-01",
-      status: "active",
-    },
-    {
-      id: 2,
-      name: "Admin",
-      email: "admin@palengke.com",
-      password: "admin123",
-      role: "admin",
-      createdAt: "2024-01-15",
-      status: "active",
-    },
-  ]);
+  >([]);
 
-  let nextId = 3;
+  const isLoading = ref(false);
+  const error = ref("");
 
-  function addAdmin(data: {
+  async function fetchAdmins() {
+    isLoading.value = true;
+    error.value = "";
+
+    try {
+      const token = getToken();
+      const response: any = await $fetch(`${getApiBaseUrl()}/api/admin/users`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      admins.value = response.users;
+    } catch (err: any) {
+      error.value = err?.data?.message || "Failed to fetch admin users";
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  async function addAdmin(data: {
     name: string;
     email: string;
     password: string;
     role: string;
   }) {
-    admins.value.push({
-      id: nextId++,
-      name: data.name,
-      email: data.email,
-      password: data.password,
-      role: data.role,
-      createdAt: new Date().toISOString().slice(0, 10),
-      status: "active",
-    });
+    isLoading.value = true;
+    error.value = "";
+
+    try {
+      const token = getToken();
+      const response: any = await $fetch(`${getApiBaseUrl()}/api/admin/users`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: data,
+      });
+
+      admins.value.unshift(response.user);
+      return true;
+    } catch (err: any) {
+      error.value = err?.data?.message || "Failed to create admin user";
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  function updateAdmin(
+  async function updateAdmin(
     id: number,
     data: {
       name: string;
@@ -57,25 +82,69 @@ export const useAdminUsersStore = defineStore("adminUsers", () => {
       password?: string;
       role: string;
       status: string;
-    },
+    }
   ) {
-    const a = admins.value.find((a) => a.id === id);
-    if (a) {
-      a.name = data.name;
-      a.email = data.email;
-      if (data.password) a.password = data.password;
-      a.role = data.role;
-      a.status = data.status;
+    isLoading.value = true;
+    error.value = "";
+
+    try {
+      const token = getToken();
+      const response: any = await $fetch(`${getApiBaseUrl()}/api/admin/users/${id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: data,
+      });
+
+      const index = admins.value.findIndex((a) => a.id === id);
+      if (index !== -1) {
+        admins.value[index] = response.user;
+      }
+      return true;
+    } catch (err: any) {
+      error.value = err?.data?.message || "Failed to update admin user";
+      return false;
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  function deleteAdmin(id: number) {
-    admins.value = admins.value.filter((a) => a.id !== id);
+  async function deleteAdmin(id: number) {
+    isLoading.value = true;
+    error.value = "";
+
+    try {
+      const token = getToken();
+      await $fetch(`${getApiBaseUrl()}/api/admin/users/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      admins.value = admins.value.filter((a) => a.id !== id);
+      return true;
+    } catch (err: any) {
+      error.value = err?.data?.message || "Failed to delete admin user";
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   function findByEmail(email: string) {
     return admins.value.find((a) => a.email === email);
   }
 
-  return { admins, addAdmin, updateAdmin, deleteAdmin, findByEmail };
+  return {
+    admins,
+    isLoading,
+    error,
+    fetchAdmins,
+    addAdmin,
+    updateAdmin,
+    deleteAdmin,
+    findByEmail,
+  };
 });

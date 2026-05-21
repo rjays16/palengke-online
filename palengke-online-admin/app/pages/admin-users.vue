@@ -22,7 +22,13 @@
     </div>
 
     <div class="table-card">
-      <table class="data-table">
+      <div v-if="store.isLoading && store.admins.length === 0" class="loading-state">
+        Loading admin users...
+      </div>
+      <div v-else-if="store.error" class="error-state">
+        {{ store.error }}
+      </div>
+      <table v-else class="data-table">
         <thead>
           <tr>
             <th>Name</th>
@@ -146,13 +152,13 @@
           </div>
         </div>
         <div class="modal-actions">
-          <button class="modal-btn secondary" @click="closeForm">Cancel</button>
+          <button class="modal-btn secondary" @click="closeForm" :disabled="isSaving">Cancel</button>
           <button
             class="modal-btn primary"
-            :disabled="!formValid"
+            :disabled="!formValid || isSaving"
             @click="saveUser"
           >
-            {{ editing ? "Update" : "Add" }} Admin
+            {{ isSaving ? "Saving..." : (editing ? "Update" : "Add") }} Admin
           </button>
         </div>
       </div>
@@ -187,10 +193,12 @@
           <p class="confirm-hint">This action cannot be undone.</p>
         </div>
         <div class="modal-actions">
-          <button class="modal-btn secondary" @click="showDelete = false">
+          <button class="modal-btn secondary" @click="showDelete = false" :disabled="isDeleting">
             Cancel
           </button>
-          <button class="modal-btn danger" @click="handleDelete">Delete</button>
+          <button class="modal-btn danger" @click="handleDelete" :disabled="isDeleting">
+            {{ isDeleting ? "Deleting..." : "Delete" }}
+          </button>
         </div>
       </div>
     </div>
@@ -211,6 +219,11 @@ onMounted(() => {
 });
 
 const store = useAdminUsersStore();
+
+// Fetch admins on mount
+onMounted(() => {
+  store.fetchAdmins();
+});
 
 const search = ref("");
 const filtered = computed(() => {
@@ -282,8 +295,13 @@ const formValid = computed(() => {
   return true;
 });
 
-function saveUser() {
+const isSaving = ref(false);
+
+async function saveUser() {
   if (!formValid.value) return;
+  isSaving.value = true;
+
+  let success = false;
   if (editing.value) {
     const data = {
       name: form.value.name,
@@ -292,28 +310,40 @@ function saveUser() {
       status: form.value.status,
     };
     if (form.value.password) data.password = form.value.password;
-    store.updateAdmin(editing.value.id, data);
+    success = await store.updateAdmin(editing.value.id, data);
   } else {
-    store.addAdmin({
+    success = await store.addAdmin({
       name: form.value.name,
       email: form.value.email,
       password: form.value.password,
       role: form.value.role,
     });
   }
-  closeForm();
+
+  isSaving.value = false;
+  if (success) {
+    closeForm();
+  }
 }
 
 const showDelete = ref(false);
 const deleteTarget = ref(null);
+const isDeleting = ref(false);
+
 function confirmDelete(a) {
   deleteTarget.value = a;
   showDelete.value = true;
 }
-function handleDelete() {
-  if (deleteTarget.value) store.deleteAdmin(deleteTarget.value.id);
-  showDelete.value = false;
-  deleteTarget.value = null;
+
+async function handleDelete() {
+  if (!deleteTarget.value) return;
+  isDeleting.value = true;
+  const success = await store.deleteAdmin(deleteTarget.value.id);
+  isDeleting.value = false;
+  if (success) {
+    showDelete.value = false;
+    deleteTarget.value = null;
+  }
 }
 </script>
 
@@ -661,6 +691,16 @@ select.form-input {
   font-size: 12px;
   color: #9ca3af;
   margin: 0;
+}
+.loading-state,
+.error-state {
+  padding: 40px;
+  text-align: center;
+  font-size: 14px;
+  color: #6b7280;
+}
+.error-state {
+  color: #dc2626;
 }
 @media (max-width: 768px) {
   .data-table {
