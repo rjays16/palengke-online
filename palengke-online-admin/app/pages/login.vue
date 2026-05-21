@@ -178,15 +178,6 @@
           </svg>
           {{ auth.loginError }}
         </div>
-
-        <div class="form-footer">
-          <p>Super Admin: superadmin@palengke.com / superadmin123</p>
-          <p>Admin: admin@palengke.com / admin123</p>
-          <p style="margin-top: 8px">
-            Having trouble?
-            <a href="mailto:support@palengke-online.com">Contact support</a>
-          </p>
-        </div>
       </div>
     </div>
 
