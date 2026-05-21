@@ -1,23 +1,30 @@
-const AUTH_KEY = "palengke_auth_user";
+const AUTH_TOKEN_KEY = "palengke_auth_token";
 
-function restoreFromStorage() {
+function getTokenFromStorage() {
   if (typeof localStorage === "undefined") return null;
   try {
-    const saved = localStorage.getItem(AUTH_KEY);
-    return saved ? JSON.parse(saved) : null;
+    return localStorage.getItem(AUTH_TOKEN_KEY);
   } catch {
     return null;
   }
 }
 
+function getApiBaseUrl() {
+  const config = useRuntimeConfig();
+  return config.public.apiBaseUrl || "http://localhost:8000";
+}
+
 export const useAuthStore = defineStore("auth", () => {
   const user = ref<{
+    id: number;
     email: string;
     name: string;
     role: string;
   } | null>(null);
 
-  const isAuthenticated = computed(() => user.value !== null);
+  const token = ref<string | null>(getTokenFromStorage());
+
+  const isAuthenticated = computed(() => !!token.value && !!user.value);
   const isLoading = ref(false);
   const loginError = ref("");
 
@@ -30,38 +37,84 @@ export const useAuthStore = defineStore("auth", () => {
   async function login(email: string, password: string) {
     isLoading.value = true;
     loginError.value = "";
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    const adminUsersStore = useAdminUsersStore();
-    const found = adminUsersStore.findByEmail(email);
-    if (found && found.password === password && found.status === "active") {
-      user.value = { email: found.email, name: found.name, role: found.role };
-      localStorage.setItem(AUTH_KEY, JSON.stringify(user.value));
+
+    try {
+      const response: any = await $fetch(`${getApiBaseUrl()}/api/admin/login`, {
+        method: "POST",
+        body: { email, password },
+      });
+
+      token.value = response.token;
+      user.value = response.user;
+
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem(AUTH_TOKEN_KEY, response.token);
+      }
+
       isLoading.value = false;
       return true;
+    } catch (err: any) {
+      loginError.value = err?.data?.message || err?.data?.email?.[0] || "Invalid email or password";
+      isLoading.value = false;
+      return false;
     }
-    loginError.value = "Invalid email or password";
-    isLoading.value = false;
-    return false;
   }
 
-  function logout() {
+  async function logout() {
+    if (token.value) {
+      try {
+        await $fetch(`${getApiBaseUrl()}/api/admin/logout`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token.value}`,
+          },
+        });
+      } catch {
+        // ignore logout errors
+      }
+    }
+
     user.value = null;
-    localStorage.removeItem(AUTH_KEY);
+    token.value = null;
+
+    if (typeof localStorage !== "undefined") {
+      localStorage.removeItem(AUTH_TOKEN_KEY);
+    }
   }
 
-  function restore() {
-    const saved = restoreFromStorage();
-    if (saved) user.value = saved;
+  async function restore() {
+    const savedToken = getTokenFromStorage();
+    if (!savedToken) return;
+
+    token.value = savedToken;
+
+    try {
+      const response: any = await $fetch(`${getApiBaseUrl()}/api/admin/me`, {
+        headers: {
+          Authorization: `Bearer ${savedToken}`,
+        },
+      });
+
+      user.value = response.user;
+    } catch {
+      token.value = null;
+      user.value = null;
+      if (typeof localStorage !== "undefined") {
+        localStorage.removeItem(AUTH_TOKEN_KEY);
+      }
+    }
   }
 
   return {
     user,
+    token,
     isAuthenticated,
     isLoading,
     loginError,
     isSuperAdmin,
     isAdmin,
     canApprove,
+    canAccessSettings,
     login,
     logout,
     restore,

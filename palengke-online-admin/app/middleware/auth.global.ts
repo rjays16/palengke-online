@@ -1,17 +1,21 @@
-export default defineNuxtRouteMiddleware((to) => {
-  if (typeof localStorage === "undefined") return;
+export default defineNuxtRouteMiddleware(async (to) => {
+  if (process.server) return;
 
-  const saved = localStorage.getItem("palengke_auth_user");
+  const auth = useAuthStore();
+
+  // Ensure auth state is restored before checking
+  if (!auth.user && auth.token) {
+    await auth.restore();
+  }
 
   if (to.path === "/login") {
-    if (saved) return navigateTo("/dashboard");
+    if (auth.isAuthenticated) {
+      return navigateTo("/dashboard");
+    }
     return;
   }
 
-  if (!saved) {
+  if (!auth.isAuthenticated) {
     return navigateTo("/login");
   }
-
-  const auth = useAuthStore();
-  auth.restore();
 });

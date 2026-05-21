@@ -1007,8 +1007,9 @@ const toggleUserMenu = () => {
   showNotifPanel.value = false;
 };
 
-const handleLogout = () => {
+const handleLogout = async () => {
   showUserMenu.value = false;
+  await auth.logout();
   router.push("/login");
 };
 

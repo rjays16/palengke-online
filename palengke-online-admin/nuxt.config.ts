@@ -7,4 +7,9 @@ export default defineNuxtConfig({
     dirs: ["stores"],
   },
   css: ["leaflet/dist/leaflet.css"],
+  runtimeConfig: {
+    public: {
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || "http://localhost:8000",
+    },
+  },
 });
