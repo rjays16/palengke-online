@@ -27,3 +27,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Public endpoint for seller app to fetch enabled countries
 Route::get('/countries', [CountryController::class, 'index']);
+
+// Public endpoint for seller app to fetch enabled locations
+Route::get('/locations', [LocationController::class, 'index']);

@@ -115,21 +115,108 @@ const showLoadingModal = async (message = 'Loading...') => {
   }, 1500);
 };
 
+// Check if user's country is available
+const checkAvailability = async () => {
+  // Get user's registration data
+  const savedData = localStorage.getItem('registrationData');
+  if (!savedData) return { available: true }; // No registration data, allow login
+
+  const registration = JSON.parse(savedData);
+  const userCountry = registration.country;
+  const userCity = registration.birthplace || '';
+
+  if (!userCountry) return { available: true }; // No country set, allow login
+
+  try {
+    // Fetch enabled countries from backend
+    const response = await fetch('http://localhost:8000/api/countries');
+    const data = await response.json();
+
+    if (!data.countries || data.countries.length === 0) {
+      return { available: false, reason: 'country', message: 'No countries are currently enabled.' };
+    }
+
+    // Check if user's country is enabled
+    const countryEnabled = data.countries.find((c) => c.code === userCountry && c.enabled);
+
+    if (!countryEnabled) {
+      return {
+        available: false,
+        reason: 'country',
+        message: 'This app is not available in your country.',
+      };
+    }
+
+    // If Philippines, check if city is enabled
+    if (userCountry === 'PH') {
+      const locResponse = await fetch('http://localhost:8000/api/locations');
+      const locData = await locResponse.json();
+
+      if (locData.locations) {
+        // Search through all cities in all regions
+        let cityFound = false;
+        for (const region of locData.locations) {
+          for (const city of region.cities) {
+            if (city.checked && userCity.toLowerCase().includes(city.name.toLowerCase())) {
+              cityFound = true;
+              break;
+            }
+          }
+          if (cityFound) break;
+        }
+
+        if (!cityFound) {
+          return {
+            available: false,
+            reason: 'area',
+            message: 'This app is not available yet in your area.',
+          };
+        }
+      }
+    }
+
+    return { available: true };
+  } catch (err) {
+    console.error('Availability check failed:', err);
+    return { available: true }; // Allow login on API failure
+  }
+};
+
 // Login handler
 const handleLogin = async () => {
   if (!email.value || !password.value) return;
-  
+
   isLoading.value = true;
-  
+
   try {
     // Simulate API call to validate credentials
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     // TODO: Replace with actual login API
     console.log('Login:', { email: email.value, password: password.value });
-    
+
     isLoading.value = false;
-    
+
+    // Check country/location availability
+    const availability = await checkAvailability();
+
+    if (!availability.available) {
+      const alert = await alertController.create({
+        header: availability.reason === 'country' ? 'Country Not Available' : 'Area Not Available',
+        message: availability.message,
+        cssClass: 'availability-alert',
+        buttons: [
+          {
+            text: 'OK',
+            role: 'cancel',
+            cssClass: 'alert-button-cancel',
+          },
+        ],
+      });
+      await alert.present();
+      return;
+    }
+
     // Show OTP confirmation dialog (like GCash)
     const alert = await alertController.create({
       header: 'Verify Account',
@@ -504,5 +591,41 @@ const goToSignup = () => {
 
 :deep(.otp-confirm-alert .alert-button-cancel) {
   color: var(--color-text-secondary);
+}
+
+/* Availability Alert */
+:deep(.availability-alert .alert-wrapper) {
+  border-radius: 20px;
+  background: var(--color-modal-bg);
+  max-width: 320px;
+}
+
+:deep(.availability-alert .alert-head) {
+  background: var(--color-modal-bg);
+  padding-top: 24px;
+}
+
+:deep(.availability-alert .alert-head h2) {
+  color: var(--color-modal-text);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+:deep(.availability-alert .alert-message) {
+  background: var(--color-modal-bg);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+  padding-bottom: 8px;
+}
+
+:deep(.availability-alert .alert-button-group) {
+  background: var(--color-modal-bg);
+  padding: 0 16px 16px;
+}
+
+:deep(.availability-alert .alert-button) {
+  color: var(--color-primary);
+  font-weight: 600;
 }
 </style>
