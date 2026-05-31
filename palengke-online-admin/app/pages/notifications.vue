@@ -16,7 +16,7 @@
           :key="n.id"
           class="notif-item"
           :class="{ unread: !n.read }"
-          @click="store.markRead(n.id)"
+          @click="handleNotifClick(n)"
         >
           <div class="notif-icon" :class="n.type">
             <svg
@@ -92,9 +92,21 @@
 definePageMeta({ layout: "default" });
 
 const store = useNotificationsStore();
+const router = useRouter();
+
+onMounted(() => {
+  store.fetchNotifications();
+});
 
 const notifPage = ref(1);
 const notifPerPage = ref(5);
+
+function handleNotifClick(n) {
+  store.markRead(n.id);
+  if (n.link) {
+    router.push(n.link);
+  }
+}
 
 const paginatedNotifications = computed(() => {
   const start = (notifPage.value - 1) * notifPerPage.value;

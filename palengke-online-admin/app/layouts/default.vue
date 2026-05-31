@@ -743,7 +743,13 @@
         </button>
       </div>
       <div class="notif-list">
-        <div class="notif-item unread" v-for="n in notifications" :key="n.id">
+        <div
+          class="notif-item"
+          :class="{ unread: !n.read }"
+          v-for="n in notifications"
+          :key="n.id"
+          @click="handleNotifClick(n)"
+        >
           <div class="notif-dot" :class="n.type"></div>
           <div class="notif-body">
             <p class="notif-text">{{ n.message }}</p>
@@ -939,6 +945,14 @@ onMounted(() => {
   registrationsStore.fetchHistory();
   notificationsStore.fetchNotifications();
 });
+
+function handleNotifClick(n) {
+  notificationsStore.markRead(n.id);
+  showNotifPanel.value = false;
+  if (n.link) {
+    navigateTo(n.link);
+  }
+}
 
 // Derive page title from route
 const pageTitle = computed(() => {
