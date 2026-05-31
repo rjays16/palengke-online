@@ -54,8 +54,31 @@
           </ul>
         </div>
 
-        <!-- Camera Preview / Photo Display -->
-        <div class="camera-section">
+        <!-- Live Camera Preview -->
+        <div v-if="showCamera" class="camera-preview-section">
+          <div class="camera-preview-container">
+            <video ref="videoRef" autoplay playsinline class="camera-video"></video>
+            <canvas ref="canvasRef" style="display: none"></canvas>
+            <div class="id-frame-overlay">
+              <div class="corner top-left"></div>
+              <div class="corner top-right"></div>
+              <div class="corner bottom-left"></div>
+              <div class="corner bottom-right"></div>
+            </div>
+          </div>
+          <div class="camera-controls">
+            <ion-button fill="clear" class="cancel-camera-btn" @click="cancelCamera">
+              Cancel
+            </ion-button>
+            <div class="capture-circle" @click="capturePhoto">
+              <div class="capture-inner"></div>
+            </div>
+            <div style="width: 70px"></div>
+          </div>
+        </div>
+
+        <!-- Camera Preview / Photo Display (hidden when camera is live) -->
+        <div v-if="!showCamera" class="camera-section">
           <div class="camera-frame">
             <!-- When no photo taken yet -->
             <div v-if="currentPhoto === null" class="camera-placeholder">
@@ -88,26 +111,27 @@
             </div>
           </div>
 
-          <!-- Hidden file inputs for camera and upload -->
+          <!-- Hidden canvas and file inputs -->
+          <canvas ref="canvasRef" style="display: none"></canvas>
           <input 
-            ref="cameraInput" 
+            ref="fileInput" 
             type="file" 
             accept="image/*" 
             capture="environment"
             style="display: none"
-            @change="handlePhotoCapture"
+            @change="handleFileInput"
           >
           <input 
             ref="uploadInput" 
             type="file" 
             accept="image/*"
             style="display: none"
-            @change="handlePhotoCapture"
+            @change="handleFileInput"
           >
         </div>
 
-        <!-- Tips -->
-        <div class="tips-box">
+        <!-- Tips (hidden during camera preview) -->
+        <div v-if="!showCamera" class="tips-box">
           <ion-icon :icon="bulbOutline"></ion-icon>
           <div class="tips-text">
             <strong>Tips for best results:</strong><br>
@@ -115,8 +139,8 @@
           </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="button-group">
+        <!-- Action Buttons (hidden during camera preview) -->
+        <div v-if="!showCamera" class="button-group">
           <!-- Show "Take Photo" and "Upload Photo" when no photo -->
           <template v-if="currentPhoto === null">
             <ion-button 
@@ -164,8 +188,8 @@
           </template>
         </div>
 
-        <!-- Navigation Buttons (when both photos taken) -->
-        <div v-if="frontPhotoTaken && backPhotoTaken" class="nav-buttons">
+        <!-- Navigation Buttons (when both photos taken, hidden during camera preview) -->
+        <div v-if="!showCamera && frontPhotoTaken && backPhotoTaken" class="nav-buttons">
           <ion-button 
             expand="block" 
             fill="outline"
@@ -193,8 +217,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { Capacitor } from '@capacitor/core';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import {
   IonPage,
   IonContent,
@@ -215,14 +241,18 @@ import {
 } from 'ionicons/icons';
 
 const router = useRouter();
-const cameraInput = ref(null);
+const fileInput = ref(null);
 const uploadInput = ref(null);
+const videoRef = ref(null);
+const canvasRef = ref(null);
 
 // Form data
 const idTypeName = ref('');
 const currentPhotoStep = ref('front'); // 'front' or 'back'
 const frontPhoto = ref(null);
 const backPhoto = ref(null);
+const showCamera = ref(false);
+const cameraStream = ref(null);
 
 // Computed
 const currentPhoto = computed(() => {
@@ -257,28 +287,115 @@ onMounted(() => {
   }
 });
 
+onUnmounted(() => {
+  stopCamera();
+});
+
 // Open camera
-const openCamera = () => {
-  cameraInput.value.click();
+const openCamera = async () => {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const photo = await Camera.getPhoto({
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Camera,
+        quality: 90,
+      });
+      setPhoto(photo.dataUrl);
+    } catch (error) {
+      if (error.message !== 'User cancelled photos app') {
+        showToast('Failed to capture photo.', 'warning');
+      }
+    }
+  } else {
+    startCamera();
+  }
 };
 
 // Open upload/gallery
-const openUpload = () => {
-  uploadInput.value.click();
+const openUpload = async () => {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const photo = await Camera.getPhoto({
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Photos,
+        quality: 90,
+      });
+      setPhoto(photo.dataUrl);
+    } catch (error) {
+      if (error.message !== 'User cancelled photos app') {
+        showToast('Failed to load photo.', 'warning');
+      }
+    }
+  } else {
+    uploadInput.value?.click();
+  }
 };
 
-// Handle photo capture
-const handlePhotoCapture = (event) => {
+// Start live camera preview
+const startCamera = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: false,
+    });
+    cameraStream.value = stream;
+    showCamera.value = true;
+    await new Promise(resolve => { setTimeout(resolve, 100); });
+    if (videoRef.value) {
+      videoRef.value.srcObject = stream;
+    }
+  } catch {
+    fileInput.value?.click();
+  }
+};
+
+// Stop camera stream
+const stopCamera = () => {
+  if (cameraStream.value) {
+    cameraStream.value.getTracks().forEach(track => track.stop());
+    cameraStream.value = null;
+  }
+  showCamera.value = false;
+};
+
+// Capture photo from video
+const capturePhoto = () => {
+  const video = videoRef.value;
+  const canvas = canvasRef.value;
+  if (!video || !canvas) return;
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0);
+
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+  const approxBytes = dataUrl.length * 0.75;
+  if (approxBytes > 5 * 1024 * 1024) {
+    showToast('Photo is too large. Please use a photo under 5MB.', 'warning');
+    return;
+  }
+  if (currentPhotoStep.value === 'front') {
+    frontPhoto.value = dataUrl;
+  } else {
+    backPhoto.value = dataUrl;
+  }
+  stopCamera();
+};
+
+// Cancel camera preview
+const cancelCamera = () => {
+  stopCamera();
+};
+
+// Fallback file handler for web browser
+const handleFileInput = (event) => {
   const file = event.target.files[0];
   if (!file) return;
-
-  // Check file size (max 5MB)
   if (file.size > 5 * 1024 * 1024) {
     showToast('Photo is too large. Please use a photo under 5MB.', 'warning');
     return;
   }
-
-  // Read file as base64
   const reader = new FileReader();
   reader.onload = (e) => {
     if (currentPhotoStep.value === 'front') {
@@ -288,9 +405,21 @@ const handlePhotoCapture = (event) => {
     }
   };
   reader.readAsDataURL(file);
-
-  // Reset input
   event.target.value = '';
+};
+
+// Set photo for current step
+const setPhoto = (dataUrl) => {
+  const approxBytes = dataUrl.length * 0.75;
+  if (approxBytes > 5 * 1024 * 1024) {
+    showToast('Photo is too large. Please use a photo under 5MB.', 'warning');
+    return;
+  }
+  if (currentPhotoStep.value === 'front') {
+    frontPhoto.value = dataUrl;
+  } else {
+    backPhoto.value = dataUrl;
+  }
 };
 
 // Retake photo
@@ -815,6 +944,66 @@ const handleNext = () => {
   font-size: 15px;
   font-weight: 600;
   text-transform: none;
+}
+
+/* Live Camera Preview */
+.camera-preview-section {
+  margin-bottom: 20px;
+}
+
+.camera-preview-container {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  aspect-ratio: 1.6;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 4px 16px var(--color-card-shadow);
+}
+
+.camera-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.camera-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  padding: 20px 0;
+}
+
+.cancel-camera-btn {
+  --color: var(--color-text-secondary);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.capture-circle {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 4px solid var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.capture-circle:active {
+  transform: scale(0.9);
+}
+
+.capture-inner {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-text-primary);
 }
 
 /* Responsive */
