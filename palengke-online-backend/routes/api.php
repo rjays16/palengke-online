@@ -35,6 +35,9 @@ Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
 // Seller app registration
 Route::post('/seller/register', [SellerRegistrationController::class, 'register']);
 
+// Seller app login
+Route::post('/seller/login', [AuthController::class, 'login']);
+
 // Public endpoint for seller app to fetch enabled countries
 Route::get('/countries', [CountryController::class, 'index']);
 

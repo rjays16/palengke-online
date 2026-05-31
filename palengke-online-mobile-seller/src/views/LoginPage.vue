@@ -189,15 +189,22 @@ const handleLogin = async () => {
   isLoading.value = true;
 
   try {
-    // Simulate API call to validate credentials
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const response = await fetch('http://localhost:8000/api/seller/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.value, password: password.value }),
+    });
 
-    // TODO: Replace with actual login API
-    console.log('Login:', { email: email.value, password: password.value });
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Login failed.');
+    }
 
     isLoading.value = false;
 
-    // Check country/location availability
+    localStorage.setItem('token', data.token);
+
     const availability = await checkAvailability();
 
     if (!availability.available) {
@@ -233,17 +240,21 @@ const handleLogin = async () => {
           text: 'Send Code',
           cssClass: 'alert-button-confirm',
           handler: async () => {
-            // TODO: Call API to send OTP
-            console.log('Sending OTP code to email...');
-            
-            // Show loading modal
             await showLoadingModal('Sending verification code...');
-            
-            // Save auth state temporarily
+
+            try {
+              await fetch('http://localhost:8000/api/send-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email.value }),
+              });
+            } catch (e) {
+              // Silent — OTP may already have been sent
+            }
+
             localStorage.setItem('pendingAuth', 'true');
             localStorage.setItem('userEmail', email.value);
-            
-            // Navigate to OTP page after modal
+
             setTimeout(() => {
               router.push({
                 name: 'OTPVerification',
@@ -259,9 +270,10 @@ const handleLogin = async () => {
     
   } catch (error) {
     isLoading.value = false;
+    localStorage.removeItem('token');
     const alert = await alertController.create({
       header: 'Login Failed',
-      message: 'Invalid email or password. Please try again.',
+      message: error.message || 'Invalid email or password. Please try again.',
       buttons: ['OK']
     });
     await alert.present();

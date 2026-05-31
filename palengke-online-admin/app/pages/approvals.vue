@@ -334,6 +334,7 @@
           <button
             v-if="!rejectMode"
             class="modal-btn reject"
+            :disabled="isProcessing"
             @click="rejectMode = true"
           >
             Reject
@@ -341,6 +342,7 @@
           <template v-else>
             <button
               class="modal-btn cancel"
+              :disabled="isProcessing"
               @click="
                 rejectMode = false;
                 rejectReason = '';
@@ -350,14 +352,18 @@
             </button>
             <button
               class="modal-btn reject"
-              :disabled="!rejectReason.trim()"
+              :disabled="!rejectReason.trim() || isProcessing"
               @click="handleReject"
             >
-              Confirm Reject
+              {{ isProcessing ? 'Processing...' : 'Confirm Reject' }}
             </button>
           </template>
-          <button class="modal-btn approve" @click="handleApprove">
-            Approve
+          <button
+            class="modal-btn approve"
+            :disabled="isProcessing"
+            @click="handleApprove"
+          >
+            {{ isProcessing ? 'Processing...' : 'Approve' }}
           </button>
         </div>
       </div>
@@ -388,6 +394,7 @@ const roleFilter = ref("");
 const selected = ref(null);
 const rejectMode = ref(false);
 const rejectReason = ref("");
+const isProcessing = ref(false);
 
 const filtered = computed(() => {
   return store.pending.filter((r) => {
@@ -437,13 +444,17 @@ function openDetail(r) {
   rejectReason.value = "";
 }
 
-function handleApprove() {
-  store.approve(selected.value.id);
+async function handleApprove() {
+  isProcessing.value = true;
+  await store.approve(selected.value.id);
+  isProcessing.value = false;
   selected.value = null;
 }
 
-function handleReject() {
-  store.reject(selected.value.id, rejectReason.value);
+async function handleReject() {
+  isProcessing.value = true;
+  await store.reject(selected.value.id, rejectReason.value);
+  isProcessing.value = false;
   selected.value = null;
 }
 </script>

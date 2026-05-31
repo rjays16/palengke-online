@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Mail\OtpVerificationMail;
+use App\Models\SellerRegistration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
@@ -25,6 +27,42 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Verification code sent successfully.',
+        ]);
+    }
+
+    public function login(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        $seller = SellerRegistration::where('email', $validated['email'])->first();
+
+        if (!$seller || !Hash::check($validated['password'], $seller->password)) {
+            return response()->json([
+                'message' => 'Invalid email or password.',
+            ], 401);
+        }
+
+        if ($seller->status !== 'approved') {
+            return response()->json([
+                'message' => 'Your account is not yet approved. Please wait for admin approval.',
+            ], 403);
+        }
+
+        $token = $seller->createToken('seller-token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Login successful.',
+            'token' => $token,
+            'user' => [
+                'id' => $seller->id,
+                'email' => $seller->email,
+                'firstName' => $seller->first_name,
+                'lastName' => $seller->last_name,
+                'storeName' => $seller->store_name,
+            ],
         ]);
     }
 

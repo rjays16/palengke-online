@@ -124,7 +124,7 @@ class SellerRegistrationController extends Controller
 
     public function approve($id)
     {
-        $registration = SellerRegistration::findOrFail($id);
+        $registration = SellerRegistration::findOrFail($this->resolveId($id));
 
         if ($registration->status !== 'pending') {
             return response()->json(['message' => 'Registration is not pending.'], 400);
@@ -148,7 +148,7 @@ class SellerRegistrationController extends Controller
             'reason' => 'required|string|min:3',
         ]);
 
-        $registration = SellerRegistration::findOrFail($id);
+        $registration = SellerRegistration::findOrFail($this->resolveId($id));
 
         if ($registration->status !== 'pending') {
             return response()->json(['message' => 'Registration is not pending.'], 400);
@@ -165,6 +165,19 @@ class SellerRegistrationController extends Controller
             'message' => 'Registration rejected.',
             'registration' => $this->formatForAdmin($registration->fresh()),
         ]);
+    }
+
+    private function resolveId($id): int
+    {
+        if (is_numeric($id)) {
+            return (int) $id;
+        }
+
+        if (str_starts_with($id, 'SELLER-')) {
+            return hexdec(substr($id, 7));
+        }
+
+        return (int) $id;
     }
 
     private function formatForAdmin($r)
@@ -206,7 +219,7 @@ class SellerRegistrationController extends Controller
 
     public function show($id)
     {
-        $registration = SellerRegistration::findOrFail($id);
+        $registration = SellerRegistration::findOrFail($this->resolveId($id));
         return response()->json([
             'registration' => $this->formatForAdmin($registration),
         ]);

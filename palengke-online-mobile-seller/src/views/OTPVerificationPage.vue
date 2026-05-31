@@ -201,22 +201,27 @@ const startCountdown = () => {
 };
 
 const resendCode = async () => {
-  // TODO: Call API to resend OTP
-  console.log('Resending OTP...');
-  
+  try {
+    await fetch('http://localhost:8000/api/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: userEmail.value }),
+    });
+  } catch {
+    // silent
+  }
+
   const toast = await toastController.create({
-    message: '<font-awesome-icon icon="check-circle" /> Verification code sent!',
+    message: 'Verification code sent!',
     duration: 2000,
     color: 'success',
     position: 'top'
   });
   await toast.present();
-  
-  // Clear current OTP
+
   otpDigits.value = ['', '', '', '', '', ''];
   otpRefs.value[0]?.focus();
-  
-  // Restart countdown
+
   startCountdown();
 };
 
@@ -226,34 +231,33 @@ const verifyCode = async () => {
   isVerifying.value = true;
   
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // TODO: Replace with actual OTP verification API
-    console.log('Verifying OTP:', otpCode.value);
-    
-    // For demo: accept any 6-digit code
-    // In production: verify with backend
-    
-    // Save authentication - User is now fully logged in!
+    const response = await fetch('http://localhost:8000/api/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: userEmail.value, otp: otpCode.value }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Invalid code.');
+    }
+
     localStorage.setItem('isAuthenticated', 'true');
-    localStorage.removeItem('pendingAuth'); // Clean up pending state
-    
-    // Show success modal
+    localStorage.removeItem('pendingAuth');
+
     await showSuccessModal('Verification successful!');
-    
-    // Navigate to dashboard (not login!)
+
     router.push('/home');
-    
+
   } catch (error) {
     const alert = await alertController.create({
       header: 'Verification Failed',
-      message: 'Invalid code. Please try again.',
+      message: error.message || 'Invalid code. Please try again.',
       buttons: ['OK']
     });
     await alert.present();
-    
-    // Clear OTP on error
+
     otpDigits.value = ['', '', '', '', '', ''];
     otpRefs.value[0]?.focus();
   } finally {
