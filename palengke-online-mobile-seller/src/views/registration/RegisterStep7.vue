@@ -466,27 +466,49 @@ const submitVerification = async () => {
   await loading.present();
 
   try {
-    // Save selfie photo
     const existingData = JSON.parse(localStorage.getItem('registrationData') || '{}');
     existingData.selfiePhoto = selfiePhoto.value;
     existingData.verificationStatus = 'verified';
     existingData.verificationSubmittedAt = new Date().toISOString();
     localStorage.setItem('registrationData', JSON.stringify(existingData));
 
-    // Simulate API call (replace with actual API)
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    const response = await fetch('http://localhost:8000/api/seller/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: existingData.email,
+        country_code: existingData.countryCode,
+        phone: existingData.phone,
+        full_phone: existingData.fullPhone,
+        email_verified: existingData.emailVerified,
+        password: existingData.password,
+        first_name: existingData.firstName,
+        middle_name: existingData.middleName || '',
+        last_name: existingData.lastName,
+        country: existingData.country,
+        birthdate: existingData.birthdate,
+        birthplace: existingData.birthplace,
+        current_address: existingData.currentAddress,
+        store_name: existingData.storeName,
+        region: existingData.region,
+        city: existingData.city,
+        barangay: existingData.barangay,
+        store_place: existingData.storePlace,
+        complete_address: existingData.completeAddress,
+        verification_choice: existingData.verificationChoice,
+        verification_status: existingData.verificationStatus,
+        id_type: existingData.idType,
+        id_type_name: existingData.idTypeName,
+        id_front_photo: existingData.idFrontPhoto || null,
+        id_back_photo: existingData.idBackPhoto || null,
+        selfie_photo: existingData.selfiePhoto || null,
+      }),
+    });
 
-    // TODO: Send verification data to backend
-    // const response = await fetch('/api/verification/submit', {
-    //   method: 'POST',
-    //   body: JSON.stringify({
-    //     email: existingData.email,
-    //     idType: existingData.idType,
-    //     idFrontPhoto: existingData.idFrontPhoto,
-    //     idBackPhoto: existingData.idBackPhoto,
-    //     selfiePhoto: existingData.selfiePhoto
-    //   })
-    // });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Registration failed.');
+    }
 
     await loading.dismiss();
 

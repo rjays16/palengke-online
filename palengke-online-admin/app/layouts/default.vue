@@ -920,51 +920,25 @@ watch(searchFocused, (val) => {
   }
 });
 
-// Mock counts — replace with real API data
+// Counts
 const pendingOrders = ref(12);
 const complaintsStore = useComplaintsStore();
 const registrationsStore = useRegistrationsStore();
+const notificationsStore = useNotificationsStore();
 const openDisputes = ref(3);
 const openReports = ref(4);
 const pendingComplaints = computed(
   () => complaintsStore.pendingHighPriority.length,
 );
 const pendingApprovals = computed(() => registrationsStore.pending.length);
-const unreadNotifs = ref(5);
+const unreadNotifs = computed(() => notificationsStore.unreadCount);
+const notifications = computed(() => notificationsStore.allNotifications);
 
-// Mock notifications
-const notifications = ref([
-  {
-    id: 1,
-    type: "order",
-    message: "New order #ORD-1042 placed by Maria Santos",
-    time: "2 mins ago",
-  },
-  {
-    id: 2,
-    type: "driver",
-    message: "Driver Juan Dela Cruz went active",
-    time: "5 mins ago",
-  },
-  {
-    id: 3,
-    type: "dispute",
-    message: "Dispute opened on Order #ORD-1038",
-    time: "14 mins ago",
-  },
-  {
-    id: 4,
-    type: "seller",
-    message: "New seller registration: Ana's Palengke",
-    time: "1 hour ago",
-  },
-  {
-    id: 5,
-    type: "system",
-    message: "System backup completed successfully",
-    time: "2 hours ago",
-  },
-]);
+onMounted(() => {
+  registrationsStore.fetchPending();
+  registrationsStore.fetchHistory();
+  notificationsStore.fetchNotifications();
+});
 
 // Derive page title from route
 const pageTitle = computed(() => {

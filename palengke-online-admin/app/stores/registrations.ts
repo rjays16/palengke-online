@@ -1,151 +1,96 @@
+const AUTH_TOKEN_KEY = "palengke_auth_token";
+
+function getToken() {
+  if (typeof localStorage === "undefined") return null;
+  return localStorage.getItem(AUTH_TOKEN_KEY);
+}
+
+function getApiBaseUrl() {
+  const config = useRuntimeConfig();
+  return config.public.apiBaseUrl || "http://localhost:8000";
+}
+
 export const useRegistrationsStore = defineStore("registrations", () => {
-  const pending = ref([
-    {
-      id: "SELLER-A1B2C3",
-      role: "seller",
-      storeName: "Maria's Fresh Produce",
-      category: "vegetables",
-      address: "123 Rizal St., Brgy. Carmen, CDO City",
-      contact: "09171234567",
-      firstName: "Maria",
-      lastName: "Santos",
-      email: "maria.santos@email.com",
-      validIdPhoto: "",
-      businessPermitPhoto: "",
-      selfiePhoto: "",
-      status: "pending_review",
-      submittedAt: "2026-05-15",
-    },
-    {
-      id: "SELLER-D4E5F6",
-      role: "seller",
-      storeName: "Fresh Meat Shop",
-      category: "meat",
-      address: "456 Mabini St., Brgy. Cogon, CDO City",
-      contact: "09189876543",
-      firstName: "Pedro",
-      lastName: "Reyes",
-      email: "pedro.reyes@email.com",
-      validIdPhoto: "",
-      businessPermitPhoto: "",
-      selfiePhoto: "",
-      status: "pending_review",
-      submittedAt: "2026-05-14",
-    },
-    {
-      id: "DRIVER-G7H8I9",
-      role: "driver",
-      firstName: "Juan",
-      lastName: "Dela Cruz",
-      email: "juan.dc@email.com",
-      contact: "09151112233",
-      serviceArea: "cdo",
-      vehicleType: "motorcycle",
-      plateNumber: "XYZ 5678",
-      vehicleModel: "Honda Click 125",
-      licensePhoto: "",
-      validIdPhoto: "",
-      vehicleRegPhoto: "",
-      status: "pending_review",
-      submittedAt: "2026-05-13",
-    },
-    {
-      id: "DRIVER-J0K1L2",
-      role: "driver",
-      firstName: "Ana",
-      lastName: "Salvador",
-      email: "ana.salvador@email.com",
-      contact: "09174445566",
-      serviceArea: "davao",
-      vehicleType: "tricycle",
-      plateNumber: "TRI 1234",
-      vehicleModel: "",
-      licensePhoto: "",
-      validIdPhoto: "",
-      vehicleRegPhoto: "",
-      status: "pending_review",
-      submittedAt: "2026-05-12",
-    },
-    {
-      id: "SELLER-M3N4O5",
-      role: "seller",
-      storeName: "Ana's Bakeshop",
-      category: "mixed",
-      address: "789 Lapasan, CDO City",
-      contact: "09165557788",
-      firstName: "Ana",
-      lastName: "Garcia",
-      email: "ana.garcia@email.com",
-      validIdPhoto: "",
-      businessPermitPhoto: "",
-      selfiePhoto: "",
-      status: "pending_review",
-      submittedAt: "2026-05-11",
-    },
-  ]);
+  const pending = ref([]);
+  const history = ref([]);
+  const isLoading = ref(false);
+  const error = ref("");
 
-  const history = ref([
-    {
-      id: "SELLER-P6Q7R8",
-      role: "seller",
-      storeName: "Organic Greens",
-      category: "vegetables",
-      firstName: "Carlos",
-      lastName: "Mendoza",
-      status: "approved",
-      reviewedAt: "2026-05-10",
-      reviewedBy: "Super Admin",
-    },
-    {
-      id: "DRIVER-S9T0U1",
-      role: "driver",
-      firstName: "Rico",
-      lastName: "Suarez",
-      vehicleType: "motorcycle",
-      status: "rejected",
-      reviewedAt: "2026-05-09",
-      reviewedBy: "Super Admin",
-      rejectReason:
-        "Blurry license photo. Please resubmit with a clearer image.",
-    },
-  ]);
-
-  function approve(id) {
-    const reg = pending.value.find((r) => r.id === id);
-    if (reg) {
-      history.value.unshift({
-        id: reg.id,
-        role: reg.role,
-        storeName: reg.storeName,
-        category: reg.category,
-        firstName: reg.firstName,
-        lastName: reg.lastName,
-        vehicleType: reg.vehicleType,
-        status: "approved",
-        reviewedAt: new Date().toISOString().slice(0, 10),
-        reviewedBy: "Super Admin",
-      });
-      pending.value = pending.value.filter((r) => r.id !== id);
+  async function fetchPending() {
+    isLoading.value = true;
+    error.value = "";
+    try {
+      const token = getToken();
+      const data: any = await $fetch(
+        `${getApiBaseUrl()}/api/admin/sellers/pending`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      pending.value = data.pending;
+    } catch (err: any) {
+      error.value = err?.data?.message || "Failed to fetch pending registrations";
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  function reject(id, reason) {
-    const reg = pending.value.find((r) => r.id === id);
-    if (reg) {
-      history.value.unshift({
-        id: reg.id,
-        role: reg.role,
-        storeName: reg.storeName,
-        category: reg.category,
-        firstName: reg.firstName,
-        lastName: reg.lastName,
-        vehicleType: reg.vehicleType,
-        status: "rejected",
-        reviewedAt: new Date().toISOString().slice(0, 10),
-        reviewedBy: "Super Admin",
-        rejectReason: reason || "Requirements not met.",
+  async function fetchHistory() {
+    isLoading.value = true;
+    error.value = "";
+    try {
+      const token = getToken();
+      const data: any = await $fetch(
+        `${getApiBaseUrl()}/api/admin/sellers/history`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      history.value = data.history;
+    } catch (err: any) {
+      error.value = err?.data?.message || "Failed to fetch history";
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  async function approve(id) {
+    isLoading.value = true;
+    error.value = "";
+    try {
+      const token = getToken();
+      await $fetch(`${getApiBaseUrl()}/api/admin/sellers/${id}/approve`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
       });
-      pending.value = pending.value.filter((r) => r.id !== id);
+      await fetchPending();
+      await fetchHistory();
+    } catch (err: any) {
+      error.value = err?.data?.message || "Failed to approve registration";
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  async function reject(id, reason) {
+    isLoading.value = true;
+    error.value = "";
+    try {
+      const token = getToken();
+      await $fetch(`${getApiBaseUrl()}/api/admin/sellers/${id}/reject`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: { reason },
+      });
+      await fetchPending();
+      await fetchHistory();
+    } catch (err: any) {
+      error.value = err?.data?.message || "Failed to reject registration";
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -158,5 +103,5 @@ export const useRegistrationsStore = defineStore("registrations", () => {
     };
   });
 
-  return { pending, history, approve, reject, analytics };
+  return { pending, history, isLoading, error, fetchPending, fetchHistory, approve, reject, analytics };
 });

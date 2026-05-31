@@ -1,119 +1,89 @@
+const AUTH_TOKEN_KEY = "palengke_auth_token";
+
+function getToken() {
+  if (typeof localStorage === "undefined") return null;
+  return localStorage.getItem(AUTH_TOKEN_KEY);
+}
+
+function getApiBaseUrl() {
+  const config = useRuntimeConfig();
+  return config.public.apiBaseUrl || "http://localhost:8000";
+}
+
 export const useNotificationsStore = defineStore("notifications", () => {
-  const allNotifications = ref([
-    {
-      id: 1,
-      type: "order",
-      message: "New order #ORD-1042 placed by Maria Santos",
-      time: "2 mins ago",
-      read: false,
-    },
-    {
-      id: 2,
-      type: "order",
-      message: "Order #ORD-1041 marked as In Transit",
-      time: "8 mins ago",
-      read: false,
-    },
-    {
-      id: 3,
-      type: "system",
-      message: "System backup completed successfully",
-      time: "14 mins ago",
-      read: false,
-    },
-    {
-      id: 4,
-      type: "alert",
-      message: "Dispute opened on Order #ORD-1038 by Liza Morales",
-      time: "22 mins ago",
-      read: false,
-    },
-    {
-      id: 5,
-      type: "order",
-      message: "New seller registration: Rosa's Produce",
-      time: "1 hour ago",
-      read: true,
-    },
-    {
-      id: 6,
-      type: "system",
-      message: "New driver application: Leo Magno",
-      time: "2 hours ago",
-      read: true,
-    },
-    {
-      id: 7,
-      type: "promo",
-      message: "Promo code PALENGKE20 used 45 times today",
-      time: "3 hours ago",
-      read: true,
-    },
-    {
-      id: 8,
-      type: "warning",
-      message: "Payment payout for Pedro Merchants failed",
-      time: "5 hours ago",
-      read: true,
-    },
-    {
-      id: 9,
-      type: "order",
-      message: "Order #ORD-1033 delivered successfully",
-      time: "6 hours ago",
-      read: true,
-    },
-    {
-      id: 10,
-      type: "system",
-      message: "New app version 2.4.1 ready for deployment",
-      time: "1 day ago",
-      read: true,
-    },
-    {
-      id: 11,
-      type: "promo",
-      message: "Flash sale: 20% off on all seafood",
-      time: "1 day ago",
-      read: true,
-    },
-    {
-      id: 12,
-      type: "warning",
-      message: "Driver Mark Reyes reported late delivery",
-      time: "2 days ago",
-      read: true,
-    },
-  ]);
-  let nextId = 13;
+  const allNotifications = ref([]);
+  const unreadCount = ref(0);
+  const isLoading = ref(false);
 
-  const unreadCount = computed(
-    () => allNotifications.value.filter((n) => !n.read).length,
-  );
-
-  function markAllRead() {
-    allNotifications.value.forEach((n) => (n.read = true));
+  async function fetchNotifications() {
+    isLoading.value = true;
+    try {
+      const token = getToken();
+      const data: any = await $fetch(
+        `${getApiBaseUrl()}/api/admin/notifications`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      allNotifications.value = data.notifications;
+      unreadCount.value = data.unread_count;
+    } catch {
+      // silent fail — keep existing data
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  function markRead(id) {
-    const n = allNotifications.value.find((n) => n.id === id);
-    if (n) n.read = true;
+  async function markRead(id) {
+    try {
+      const token = getToken();
+      await $fetch(`${getApiBaseUrl()}/api/admin/notifications/${id}/read`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const n = allNotifications.value.find((n) => n.id === id);
+      if (n) n.read = true;
+      unreadCount.value = allNotifications.value.filter((n) => !n.read).length;
+    } catch {
+      // silent
+    }
   }
 
-  function deleteNotification(id) {
-    allNotifications.value = allNotifications.value.filter((n) => n.id !== id);
+  async function markAllRead() {
+    try {
+      const token = getToken();
+      await $fetch(`${getApiBaseUrl()}/api/admin/notifications/read-all`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      allNotifications.value.forEach((n) => (n.read = true));
+      unreadCount.value = 0;
+    } catch {
+      // silent
+    }
   }
 
-  function addNotification(data) {
-    allNotifications.value.unshift({ id: nextId++, ...data });
+  async function deleteNotification(id) {
+    try {
+      const token = getToken();
+      await $fetch(`${getApiBaseUrl()}/api/admin/notifications/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      allNotifications.value = allNotifications.value.filter((n) => n.id !== id);
+      unreadCount.value = allNotifications.value.filter((n) => !n.read).length;
+    } catch {
+      // silent
+    }
   }
 
   return {
     allNotifications,
     unreadCount,
-    markAllRead,
+    isLoading,
+    fetchNotifications,
     markRead,
+    markAllRead,
     deleteNotification,
-    addNotification,
   };
 });

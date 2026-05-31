@@ -377,6 +377,11 @@ definePageMeta({
 });
 const store = useRegistrationsStore();
 
+onMounted(() => {
+  store.fetchPending();
+  store.fetchHistory();
+});
+
 const tab = ref("pending");
 const search = ref("");
 const roleFilter = ref("");
