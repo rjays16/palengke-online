@@ -246,9 +246,15 @@ const verifyCode = async () => {
     localStorage.setItem('isAuthenticated', 'true');
     localStorage.removeItem('pendingAuth');
 
+    // Generate device ID if not exists
+    if (!localStorage.getItem('deviceId')) {
+      const deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
+      localStorage.setItem('deviceId', deviceId);
+    }
+
     await showSuccessModal('Verification successful!');
 
-    router.push('/home');
+    router.push('/create-pin');
 
   } catch (error) {
     const alert = await alertController.create({

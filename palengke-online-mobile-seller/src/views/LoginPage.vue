@@ -74,7 +74,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { 
   IonPage, 
@@ -313,6 +313,14 @@ const handleForgotPassword = async () => {
 const goToSignup = () => {
   router.push('/welcome');
 };
+
+// Ensure device ID exists
+onMounted(() => {
+  if (!localStorage.getItem('deviceId')) {
+    const deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
+    localStorage.setItem('deviceId', deviceId);
+  }
+});
 </script>
 
 <style scoped>

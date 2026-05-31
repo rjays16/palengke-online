@@ -9,6 +9,7 @@ use App\Http\Controllers\CountryController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\SellerRegistrationController;
 use App\Http\Controllers\Api\AdminNotificationController;
+use App\Http\Controllers\Api\SellerDeviceController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -37,6 +38,11 @@ Route::post('/seller/register', [SellerRegistrationController::class, 'register'
 
 // Seller app login
 Route::post('/seller/login', [AuthController::class, 'login']);
+
+// Seller device PIN management
+Route::post('/seller/device/register', [SellerDeviceController::class, 'register']);
+Route::post('/seller/device/verify-pin', [SellerDeviceController::class, 'verifyPin']);
+Route::post('/seller/device/status', [SellerDeviceController::class, 'status']);
 
 // Public endpoint for seller app to fetch enabled countries
 Route::get('/countries', [CountryController::class, 'index']);

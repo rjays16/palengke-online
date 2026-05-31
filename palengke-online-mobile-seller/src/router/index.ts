@@ -12,6 +12,8 @@ import AddProductPage from '@/views/AddProductPage.vue';
 import ProductsListPage from '@/views/ProductsListPage.vue';
 import EditProductPage from '@/views/EditProductPage.vue';
 import OTPVerificationPage from '@/views/OTPVerificationPage.vue';
+import PinLoginPage from '@/views/PinLoginPage.vue';
+import CreatePinPage from '@/views/CreatePinPage.vue';
 import OrdersManagementPage from '@/views/OrdersManagementPage.vue';
 import OrderDetailsPage from '@/views/OrderDetailsPage.vue';
 import MessagesPage from '@/views/MessagesPage.vue';
@@ -56,6 +58,18 @@ const routes: Array<RouteRecordRaw> = [
     path: '/otp-verify/:email?',
     name: 'OTPVerification',
     component: OTPVerificationPage,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/pin-login',
+    name: 'PinLogin',
+    component: PinLoginPage,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/create-pin',
+    name: 'CreatePin',
+    component: CreatePinPage,
     meta: { requiresAuth: false }
   },
 
@@ -228,9 +242,17 @@ const router = createRouter({
 // ============================================
 router.beforeEach((to, from, next) => {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  const hasPin = localStorage.getItem('hasPin') === 'true';
+  const userEmail = localStorage.getItem('userEmail');
 
   if (to.meta.requiresAuth && !isAuthenticated) {
-    next('/login');
+    if (hasPin && userEmail) {
+      next('/pin-login');
+    } else {
+      next('/login');
+    }
+  } else if (to.path === '/login' && hasPin && userEmail) {
+    next('/pin-login');
   } else if (to.path === '/login' && isAuthenticated) {
     next('/home');
   } else if (to.meta.requiresAuth && isAuthenticated && to.path !== '/plans') {
