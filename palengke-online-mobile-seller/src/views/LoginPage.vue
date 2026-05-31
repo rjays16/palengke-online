@@ -314,11 +314,35 @@ const goToSignup = () => {
   router.push('/welcome');
 };
 
-// Ensure device ID exists
-onMounted(() => {
+// Ensure device ID exists and check backend for PIN
+onMounted(async () => {
   if (!localStorage.getItem('deviceId')) {
     const deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
     localStorage.setItem('deviceId', deviceId);
+  }
+
+  const email = localStorage.getItem('userEmail');
+  const devId = localStorage.getItem('deviceId');
+  if (email && devId) {
+    try {
+      const res = await fetch('http://localhost:8000/api/seller/device/status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, device_id: devId }),
+      });
+      const data = await res.json();
+      if (data.hasPin) {
+        localStorage.setItem('hasPin', 'true');
+        router.replace('/pin-login');
+      } else {
+        localStorage.removeItem('hasPin');
+      }
+    } catch {
+      // fallback to localStorage check
+      if (localStorage.getItem('hasPin') === 'true') {
+        router.replace('/pin-login');
+      }
+    }
   }
 });
 </script>

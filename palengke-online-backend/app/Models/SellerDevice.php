@@ -10,7 +10,7 @@ class SellerDevice extends Model
         'seller_registration_id',
         'device_id',
         'device_name',
-        'pin',
+        'device_token_id',
         'ip_address',
         'user_agent',
         'last_used_at',

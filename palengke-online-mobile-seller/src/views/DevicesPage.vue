@@ -44,20 +44,17 @@
                 <span v-if="device.is_current" class="current-badge">Current</span>
               </p>
               <p class="device-meta">
-                <span v-if="device.has_pin">PIN enabled</span>
-                <span v-if="device.has_pin && device.last_used_at"> &middot; </span>
                 <span>Last used {{ device.last_used_at || 'never' }}</span>
               </p>
               <p class="device-meta">Added {{ device.created_at }}</p>
             </div>
             <ion-button
-              v-if="!device.is_current"
-              fill="clear"
               color="danger"
-              class="remove-btn"
-              @click="confirmRemove(device)"
+              fill="clear"
+              class="logout-btn"
+              @click="confirmLogout(device)"
             >
-              <ion-icon :icon="trashOutline" slot="icon-only"></ion-icon>
+              <ion-icon :icon="logOutOutline"></ion-icon>
             </ion-button>
           </div>
         </div>
@@ -68,6 +65,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import {
   IonPage,
   IonHeader,
@@ -84,8 +82,10 @@ import {
 import {
   phonePortraitOutline,
   laptopOutline,
-  trashOutline,
+  logOutOutline,
 } from 'ionicons/icons';
+
+const router = useRouter();
 
 const devices = ref([]);
 const loading = ref(true);
@@ -115,22 +115,46 @@ const fetchDevices = async () => {
   }
 };
 
-const confirmRemove = async (device) => {
+const confirmLogout = async (device) => {
+  const isCurrent = device.is_current;
+  const msg = isCurrent
+    ? 'Logout from this device? You will need to enter your email and password to sign in again.'
+    : `Logout "${device.device_name || 'Unknown Device'}"? It will be signed out and removed from your account.`;
+
   const alert = await alertController.create({
-    header: 'Remove Device',
-    message: `Remove "${device.device_name || 'Unknown Device'}" from your account? They will need to log in again.`,
+    header: isCurrent ? 'Logout Device' : 'Remove Device',
+    message: msg,
     buttons: [
       { text: 'Cancel', role: 'cancel' },
       {
-        text: 'Remove',
+        text: 'Logout',
         role: 'destructive',
         handler: async () => {
-          await removeDevice(device);
+          if (isCurrent) {
+            await logoutCurrent();
+          } else {
+            await removeDevice(device);
+          }
         },
       },
     ],
   });
   await alert.present();
+};
+
+const logoutCurrent = async () => {
+  try {
+    await fetch('http://localhost:8000/api/seller/devices/logout-current', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: userEmail.value }),
+    });
+  } catch {
+    // silent
+  }
+
+  ['isAuthenticated', 'token', 'pendingAuth'].forEach(k => localStorage.removeItem(k));
+  router.replace('/login');
 };
 
 const removeDevice = async (device) => {
@@ -148,7 +172,7 @@ const removeDevice = async (device) => {
       devices.value = devices.value.filter(d => d.id !== device.id);
       const toast = await alertController.create({
         header: 'Removed',
-        message: 'Device removed successfully.',
+        message: 'Device logged out successfully.',
         buttons: ['OK'],
       });
       await toast.present();
@@ -294,13 +318,13 @@ onMounted(() => {
   margin: 2px 0;
 }
 
-.remove-btn {
+.logout-btn {
   --padding-start: 8px;
   --padding-end: 8px;
   height: 40px;
 }
 
-.remove-btn ion-icon {
+.logout-btn ion-icon {
   font-size: 20px;
 }
 </style>

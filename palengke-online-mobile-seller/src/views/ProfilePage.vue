@@ -774,8 +774,23 @@ const handleLogout = async () => {
       {
         text: 'Logout',
         role: 'destructive',
-        handler: () => {
-          localStorage.removeItem('isAuthenticated');
+        handler: async () => {
+          const email = localStorage.getItem('userEmail');
+          const deviceId = localStorage.getItem('deviceId');
+          const hasPin = localStorage.getItem('hasPin');
+          try {
+            await fetch('http://localhost:8000/api/seller/devices/logout-current', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email }),
+            });
+          } catch {
+            // silent
+          }
+          ['isAuthenticated', 'token', 'pendingAuth'].forEach(k => localStorage.removeItem(k));
+          if (email) localStorage.setItem('userEmail', email);
+          if (deviceId) localStorage.setItem('deviceId', deviceId);
+          if (hasPin) localStorage.setItem('hasPin', hasPin);
           showSuccessLogout();
           setTimeout(() => {
             router.push('/login');

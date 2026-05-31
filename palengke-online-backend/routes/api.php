@@ -45,6 +45,7 @@ Route::post('/seller/device/verify-pin', [SellerDeviceController::class, 'verify
 Route::post('/seller/device/status', [SellerDeviceController::class, 'status']);
 Route::post('/seller/devices', [SellerDeviceController::class, 'list']);
 Route::post('/seller/devices/remove', [SellerDeviceController::class, 'remove']);
+Route::post('/seller/devices/logout-current', [SellerDeviceController::class, 'logoutCurrent']);
 
 // Public endpoint for seller app to fetch enabled countries
 Route::get('/countries', [CountryController::class, 'index']);

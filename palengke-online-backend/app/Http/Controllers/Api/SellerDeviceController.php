@@ -29,6 +29,13 @@ class SellerDeviceController extends Controller
             return response()->json(['message' => 'Account not yet approved.'], 403);
         }
 
+        // Save PIN to seller account (not per-device)
+        $seller->update(['pin' => Hash::make($validated['pin'])]);
+
+        // Create token for this device
+        $token = $seller->createToken('device-token');
+
+        // Register/update the device
         $device = SellerDevice::updateOrCreate(
             [
                 'seller_registration_id' => $seller->id,
@@ -36,7 +43,7 @@ class SellerDeviceController extends Controller
             ],
             [
                 'device_name' => $validated['device_name'] ?? request()->userAgent(),
-                'pin' => Hash::make($validated['pin']),
+                'device_token_id' => $token->accessToken->id,
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
                 'last_used_at' => now(),
@@ -44,7 +51,8 @@ class SellerDeviceController extends Controller
         );
 
         return response()->json([
-            'message' => 'Device registered successfully.',
+            'message' => 'PIN set successfully.',
+            'token' => $token->plainTextToken,
             'device' => [
                 'id' => $device->id,
                 'device_id' => $device->device_id,
@@ -66,25 +74,37 @@ class SellerDeviceController extends Controller
             return response()->json(['message' => 'Seller not found.'], 404);
         }
 
-        $device = SellerDevice::where('seller_registration_id', $seller->id)
-            ->where('device_id', $validated['device_id'])
-            ->first();
-
-        if (!$device || !$device->pin) {
-            return response()->json(['message' => 'No PIN set for this device.'], 404);
+        if (!$seller->pin) {
+            return response()->json(['message' => 'No PIN set for this account.'], 404);
         }
 
-        if (!Hash::check($validated['pin'], $device->pin)) {
+        if (!Hash::check($validated['pin'], $seller->pin)) {
             return response()->json(['message' => 'Invalid PIN.'], 401);
         }
 
-        $device->update(['last_used_at' => now()]);
+        // Verify the device exists, or create it
+        $device = SellerDevice::firstOrCreate(
+            [
+                'seller_registration_id' => $seller->id,
+                'device_id' => $validated['device_id'],
+            ],
+            [
+                'device_name' => request()->userAgent(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]
+        );
 
-        $token = $seller->createToken('seller-pin-token')->plainTextToken;
+        // Create a new token for this session
+        $token = $seller->createToken('device-token');
+        $device->update([
+            'device_token_id' => $token->accessToken->id,
+            'last_used_at' => now(),
+        ]);
 
         return response()->json([
             'message' => 'PIN verified successfully.',
-            'token' => $token,
+            'token' => $token->plainTextToken,
             'user' => [
                 'id' => $seller->id,
                 'email' => $seller->email,
@@ -108,12 +128,8 @@ class SellerDeviceController extends Controller
             return response()->json(['message' => 'Seller not found.'], 404);
         }
 
-        $device = SellerDevice::where('seller_registration_id', $seller->id)
-            ->where('device_id', $validated['device_id'])
-            ->first();
-
         return response()->json([
-            'hasPin' => $device && $device->pin !== null,
+            'hasPin' => $seller->pin !== null,
         ]);
     }
 
@@ -142,13 +158,32 @@ class SellerDeviceController extends Controller
                     'ip_address' => $device->ip_address,
                     'last_used_at' => $device->last_used_at?->diffForHumans(),
                     'created_at' => $device->created_at->diffForHumans(),
-                    'has_pin' => $device->pin !== null,
                     'is_current' => $device->device_id === $currentDeviceId,
                 ];
             });
 
         return response()->json([
+            'hasPin' => $seller->pin !== null,
             'devices' => $devices,
+        ]);
+    }
+
+    public function logoutCurrent(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $seller = SellerRegistration::where('email', $request->email)->first();
+
+        if (!$seller) {
+            return response()->json(['message' => 'Seller not found.'], 404);
+        }
+
+        $seller->tokens()->delete();
+
+        return response()->json([
+            'message' => 'Logged out successfully.',
         ]);
     }
 
@@ -165,13 +200,20 @@ class SellerDeviceController extends Controller
             return response()->json(['message' => 'Seller not found.'], 404);
         }
 
-        $deleted = SellerDevice::where('seller_registration_id', $seller->id)
+        $device = SellerDevice::where('seller_registration_id', $seller->id)
             ->where('device_id', $validated['device_id'])
-            ->delete();
+            ->first();
 
-        if (!$deleted) {
+        if (!$device) {
             return response()->json(['message' => 'Device not found.'], 404);
         }
+
+        // Revoke the associated token
+        if ($device->device_token_id) {
+            $seller->tokens()->where('id', $device->device_token_id)->delete();
+        }
+
+        $device->delete();
 
         return response()->json([
             'message' => 'Device removed successfully.',

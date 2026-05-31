@@ -182,7 +182,7 @@ const goToLogin = () => {
   router.push('/login');
 };
 
-onMounted(() => {
+onMounted(async () => {
   if (!localStorage.getItem('deviceId')) {
     const newId = 'device_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
     localStorage.setItem('deviceId', newId);
@@ -191,6 +191,26 @@ onMounted(() => {
   if (!userEmail.value) {
     router.replace('/login');
     return;
+  }
+  // Verify PIN exists on backend
+  try {
+    const res = await fetch('http://localhost:8000/api/seller/device/status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: userEmail.value, device_id: deviceId.value }),
+    });
+    const data = await res.json();
+    if (!data.hasPin) {
+      localStorage.removeItem('hasPin');
+      router.replace('/login');
+      return;
+    }
+  } catch {
+    // fallback — rely on localStorage
+    if (!localStorage.getItem('hasPin')) {
+      router.replace('/login');
+      return;
+    }
   }
   setTimeout(() => {
     pinRefs.value[0]?.focus();

@@ -162,6 +162,9 @@ const handleNext = async () => {
     }
 
     localStorage.setItem('hasPin', 'true');
+    if (data.token) {
+      localStorage.setItem('token', data.token);
+    }
 
     const alert = await alertController.create({
       cssClass: 'success-modal',
