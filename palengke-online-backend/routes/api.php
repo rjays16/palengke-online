@@ -25,6 +25,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/admin/countries/bulk', [CountryController::class, 'bulkUpdate']);
 });
 
+// Seller app OTP verification
+Route::post('/send-otp', [\App\Http\Controllers\Api\AuthController::class, 'sendOtp']);
+Route::post('/verify-otp', [\App\Http\Controllers\Api\AuthController::class, 'verifyOtp']);
+
 // Public endpoint for seller app to fetch enabled countries
 Route::get('/countries', [CountryController::class, 'index']);
 

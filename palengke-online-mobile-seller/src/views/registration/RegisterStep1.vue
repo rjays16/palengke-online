@@ -688,13 +688,18 @@ const sendOtp = async () => {
   isSendingOtp.value = true;
 
   try {
-    // TODO: Replace with actual API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Simulate sending OTP
-    console.log('Sending OTP to:', email.value);
-    
-    // Show success toast
+    const response = await fetch('http://localhost:8000/api/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.value }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to send code.');
+    }
+
     const toast = await toastController.create({
       message: `Verification code sent to ${maskedEmail.value}`,
       duration: 3000,
@@ -703,13 +708,9 @@ const sendOtp = async () => {
     });
     await toast.present();
 
-    // Show OTP section
     showOtpSection.value = true;
-    
-    // Start resend timer
     startResendTimer();
-    
-    // Focus first OTP input
+
     setTimeout(() => {
       if (otpInputs.value[0]) {
         otpInputs.value[0].focus();
@@ -718,7 +719,7 @@ const sendOtp = async () => {
 
   } catch (error) {
     const toast = await toastController.create({
-      message: 'Failed to send code. Please try again.',
+      message: error.message || 'Failed to send code. Please try again.',
       duration: 3000,
       color: 'danger',
       position: 'top'
@@ -804,26 +805,29 @@ const verifyOtp = async () => {
   otpError.value = '';
 
   try {
-    // TODO: Replace with actual API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Simulate OTP verification
-    const isValid = true; // Replace with actual validation
-    
-    if (isValid) {
-      isEmailVerified.value = true;
-      showOtpSection.value = false;
-      
-      const toast = await toastController.create({
-        message: 'Email verified successfully!',
-        duration: 2500,
-        color: 'success',
-        position: 'top'
-      });
-      await toast.present();
-    } else {
-      otpError.value = 'Invalid code. Please try again.';
+    const response = await fetch('http://localhost:8000/api/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.value, otp: otpValue.value }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      otpError.value = data.message || 'Invalid code. Please try again.';
+      return;
     }
+
+    isEmailVerified.value = true;
+    showOtpSection.value = false;
+
+    const toast = await toastController.create({
+      message: 'Email verified successfully!',
+      duration: 2500,
+      color: 'success',
+      position: 'top'
+    });
+    await toast.present();
 
   } catch (error) {
     otpError.value = 'Verification failed. Please try again.';
