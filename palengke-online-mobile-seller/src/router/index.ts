@@ -21,6 +21,7 @@ import AnalyticsPage from '@/views/AnalyticsPage.vue';
 import ProfilePage from '@/views/ProfilePage.vue';
 import NotificationPage from '@/views/NotificationsPage.vue';
 import HelpSupportPage from '@/views/HelpSupportPage.vue';
+import DevicesPage from '@/views/DevicesPage.vue';
 import AboutPage from '@/views/AboutPage.vue';
 import PlansPage from '@/views/PlansPage.vue';
 
@@ -208,6 +209,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/help',
     name: 'Help',
     component: HelpSupportPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/devices',
+    name: 'Devices',
+    component: DevicesPage,
     meta: { requiresAuth: true }
   },
   {

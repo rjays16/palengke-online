@@ -208,6 +208,17 @@
               <ion-icon :icon="chevronForwardOutline" class="settings-arrow"></ion-icon>
             </div>
 
+            <div class="settings-item" @click="goToDevices">
+              <div class="settings-icon">
+                <ion-icon :icon="phonePortraitOutline"></ion-icon>
+              </div>
+              <div class="settings-content">
+                <p class="settings-label">Devices</p>
+                <p class="settings-value">Manage logged-in devices</p>
+              </div>
+              <ion-icon :icon="chevronForwardOutline" class="settings-arrow"></ion-icon>
+            </div>
+
             <div class="settings-item" @click="notificationSettings">
               <div class="settings-icon">
                 <ion-icon :icon="notificationsOutline"></ion-icon>
@@ -395,7 +406,8 @@ import {
   closeOutline,
   homeOutline,
   cubeOutline,
-  receiptOutline
+  receiptOutline,
+  phonePortraitOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -673,6 +685,10 @@ const changePassword = async () => {
     ]
   });
   await alert.present();
+};
+
+const goToDevices = () => {
+  router.push('/devices');
 };
 
 const notificationSettings = () => {

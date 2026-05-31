@@ -116,4 +116,65 @@ class SellerDeviceController extends Controller
             'hasPin' => $device && $device->pin !== null,
         ]);
     }
+
+    public function list(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $seller = SellerRegistration::where('email', $validated['email'])->first();
+
+        if (!$seller) {
+            return response()->json(['message' => 'Seller not found.'], 404);
+        }
+
+        $currentDeviceId = $request->input('current_device_id');
+
+        $devices = SellerDevice::where('seller_registration_id', $seller->id)
+            ->orderBy('last_used_at', 'desc')
+            ->get()
+            ->map(function ($device) use ($currentDeviceId) {
+                return [
+                    'id' => $device->id,
+                    'device_id' => $device->device_id,
+                    'device_name' => $device->device_name,
+                    'ip_address' => $device->ip_address,
+                    'last_used_at' => $device->last_used_at?->diffForHumans(),
+                    'created_at' => $device->created_at->diffForHumans(),
+                    'has_pin' => $device->pin !== null,
+                    'is_current' => $device->device_id === $currentDeviceId,
+                ];
+            });
+
+        return response()->json([
+            'devices' => $devices,
+        ]);
+    }
+
+    public function remove(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'device_id' => 'required|string',
+        ]);
+
+        $seller = SellerRegistration::where('email', $validated['email'])->first();
+
+        if (!$seller) {
+            return response()->json(['message' => 'Seller not found.'], 404);
+        }
+
+        $deleted = SellerDevice::where('seller_registration_id', $seller->id)
+            ->where('device_id', $validated['device_id'])
+            ->delete();
+
+        if (!$deleted) {
+            return response()->json(['message' => 'Device not found.'], 404);
+        }
+
+        return response()->json([
+            'message' => 'Device removed successfully.',
+        ]);
+    }
 }

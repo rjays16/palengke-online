@@ -43,6 +43,8 @@ Route::post('/seller/login', [AuthController::class, 'login']);
 Route::post('/seller/device/register', [SellerDeviceController::class, 'register']);
 Route::post('/seller/device/verify-pin', [SellerDeviceController::class, 'verifyPin']);
 Route::post('/seller/device/status', [SellerDeviceController::class, 'status']);
+Route::post('/seller/devices', [SellerDeviceController::class, 'list']);
+Route::post('/seller/devices/remove', [SellerDeviceController::class, 'remove']);
 
 // Public endpoint for seller app to fetch enabled countries
 Route::get('/countries', [CountryController::class, 'index']);
