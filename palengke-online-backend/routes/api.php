@@ -6,6 +6,9 @@ use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\CountryController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\SellerRegistrationController;
+use App\Http\Controllers\Api\AdminNotificationController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -26,11 +29,11 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 // Seller app OTP verification
-Route::post('/send-otp', [\App\Http\Controllers\Api\AuthController::class, 'sendOtp']);
-Route::post('/verify-otp', [\App\Http\Controllers\Api\AuthController::class, 'verifyOtp']);
+Route::post('/send-otp', [AuthController::class, 'sendOtp']);
+Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
 
 // Seller app registration
-Route::post('/seller/register', [\App\Http\Controllers\Api\SellerRegistrationController::class, 'register']);
+Route::post('/seller/register', [SellerRegistrationController::class, 'register']);
 
 // Public endpoint for seller app to fetch enabled countries
 Route::get('/countries', [CountryController::class, 'index']);
@@ -40,15 +43,15 @@ Route::get('/locations', [LocationController::class, 'index']);
 
 // Admin — seller registrations (requires auth)
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/admin/sellers/pending', [\App\Http\Controllers\Api\SellerRegistrationController::class, 'pending']);
-    Route::get('/admin/sellers/history', [\App\Http\Controllers\Api\SellerRegistrationController::class, 'history']);
-    Route::get('/admin/sellers/{id}', [\App\Http\Controllers\Api\SellerRegistrationController::class, 'show']);
-    Route::post('/admin/sellers/{id}/approve', [\App\Http\Controllers\Api\SellerRegistrationController::class, 'approve']);
-    Route::post('/admin/sellers/{id}/reject', [\App\Http\Controllers\Api\SellerRegistrationController::class, 'reject']);
+    Route::get('/admin/sellers/pending', [SellerRegistrationController::class, 'pending']);
+    Route::get('/admin/sellers/history', [SellerRegistrationController::class, 'history']);
+    Route::get('/admin/sellers/{id}', [SellerRegistrationController::class, 'show']);
+    Route::post('/admin/sellers/{id}/approve', [SellerRegistrationController::class, 'approve']);
+    Route::post('/admin/sellers/{id}/reject', [SellerRegistrationController::class, 'reject']);
 
-    Route::get('/admin/notifications', [\App\Http\Controllers\Api\AdminNotificationController::class, 'index']);
-    Route::get('/admin/notifications/unread-count', [\App\Http\Controllers\Api\AdminNotificationController::class, 'unreadCount']);
-    Route::post('/admin/notifications/{id}/read', [\App\Http\Controllers\Api\AdminNotificationController::class, 'markRead']);
-    Route::post('/admin/notifications/read-all', [\App\Http\Controllers\Api\AdminNotificationController::class, 'markAllRead']);
-    Route::delete('/admin/notifications/{id}', [\App\Http\Controllers\Api\AdminNotificationController::class, 'destroy']);
+    Route::get('/admin/notifications', [AdminNotificationController::class, 'index']);
+    Route::get('/admin/notifications/unread-count', [AdminNotificationController::class, 'unreadCount']);
+    Route::post('/admin/notifications/{id}/read', [AdminNotificationController::class, 'markRead']);
+    Route::post('/admin/notifications/read-all', [AdminNotificationController::class, 'markAllRead']);
+    Route::delete('/admin/notifications/{id}', [AdminNotificationController::class, 'destroy']);
 });
