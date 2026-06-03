@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\SellerRegistrationController;
 use App\Http\Controllers\Api\AdminNotificationController;
 use App\Http\Controllers\Api\SellerDeviceController;
 use App\Http\Controllers\Api\ContactSupportController;
+use App\Http\Controllers\Api\ReportController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -48,6 +49,11 @@ Route::post('/seller/devices', [SellerDeviceController::class, 'list']);
 Route::post('/seller/devices/remove', [SellerDeviceController::class, 'remove']);
 Route::post('/seller/devices/logout-current', [SellerDeviceController::class, 'logoutCurrent']);
 
+// Seller app — submit a report
+Route::post('/reports', [ReportController::class, 'store']);
+// Seller app — view own reports
+Route::get('/reports', [ReportController::class, 'myReports']);
+
 // Public endpoint for seller app to fetch enabled contact supports
 Route::get('/contact-supports', [ContactSupportController::class, 'index']);
 
@@ -73,4 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/admin/contact-supports', [ContactSupportController::class, 'adminIndex']);
     Route::put('/admin/contact-supports', [ContactSupportController::class, 'update']);
+
+    Route::get('/admin/reports', [ReportController::class, 'adminIndex']);
+    Route::put('/admin/reports/{id}', [ReportController::class, 'updateStatus']);
 });

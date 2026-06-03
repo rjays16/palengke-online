@@ -75,6 +75,27 @@
           </div>
         </div>
 
+        <!-- My Reports -->
+        <div class="my-reports-section">
+          <h2 class="section-title">My Reports</h2>
+          
+          <div v-if="loadingReports" class="loading-state">Loading your reports...</div>
+          <div v-else-if="myReports.length === 0" class="no-reports">
+            <p>You haven't submitted any reports yet.</p>
+          </div>
+          <div v-else class="reports-list">
+            <div v-for="report in myReports" :key="report.id" class="report-card">
+              <div class="report-info">
+                <h3>{{ report.subject }}</h3>
+                <p class="report-date">{{ formatDate(report.created_at) }}</p>
+              </div>
+              <span class="report-status" :class="report.status">
+                {{ statusLabel(report.status) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
         <!-- FAQs -->
         <div class="faqs-section">
           <h2 class="section-title">Frequently Asked Questions</h2>
@@ -283,6 +304,19 @@ const searchQuery = ref('');
 const expandedFaq = ref(null);
 const contactSupports = ref([]);
 const loadingContacts = ref(true);
+const myReports = ref([]);
+const loadingReports = ref(false);
+
+// Helpers
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  return dateStr.slice(0, 10);
+}
+
+function statusLabel(status) {
+  if (status === 'in_progress') return 'In Progress';
+  return status.charAt(0).toUpperCase() + status.slice(1);
+}
 
 // FAQs Data
 const faqs = ref(MOCK_FAQS);
@@ -434,19 +468,39 @@ const toggleFaq = (index) => {
   expandedFaq.value = expandedFaq.value === index ? null : index;
 };
 
+async function fetchMyReports() {
+  const email = localStorage.getItem('userEmail');
+  if (!email) return;
+  loadingReports.value = true;
+  try {
+    const response = await fetch(`${API_BASE}/reports?email=${encodeURIComponent(email)}`);
+    const data = await response.json();
+    myReports.value = data.reports || [];
+  } catch {
+    myReports.value = [];
+  } finally {
+    loadingReports.value = false;
+  }
+}
+
 onMounted(() => {
   fetchContactSupports();
+  fetchMyReports();
 });
 
 const reportProblem = async () => {
   const alert = await alertController.create({
     header: 'Report a Problem',
-    message: 'Describe the issue you\'re experiencing:',
     inputs: [
       {
-        name: 'problem',
+        name: 'subject',
+        type: 'text',
+        placeholder: 'Subject (e.g., App bug, account issue)'
+      },
+      {
+        name: 'description',
         type: 'textarea',
-        placeholder: 'Describe the problem...'
+        placeholder: 'Describe the problem in detail...'
       }
     ],
     buttons: [
@@ -457,8 +511,29 @@ const reportProblem = async () => {
       {
         text: 'Submit',
         handler: async (data) => {
-          if (data.problem) {
-            await showSuccessModal('Problem report submitted!');
+          if (data.subject && data.description) {
+            try {
+              const response = await fetch(`${API_BASE}/reports`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  type: 'seller',
+                  submitted_by: localStorage.getItem('userEmail') || 'Seller',
+                  subject: data.subject,
+                  description: data.description,
+                  priority: 'medium',
+                }),
+              });
+              if (!response.ok) throw new Error('Failed to submit report');
+              await showSuccessModal('Problem report submitted!');
+            } catch {
+              const failAlert = await alertController.create({
+                header: 'Submission Failed',
+                message: 'Could not submit your report. Please try again later.',
+                buttons: ['OK'],
+              });
+              await failAlert.present();
+            }
           }
         }
       }
@@ -757,6 +832,77 @@ const viewPrivacy = async () => {
   font-size: 13px;
   font-weight: 600;
   color: #333;
+}
+
+/* My Reports Section */
+.my-reports-section {
+  padding: 0 20px 24px 20px;
+}
+.no-reports {
+  text-align: center;
+  padding: 24px;
+}
+.no-reports p {
+  font-size: 14px;
+  color: #999;
+  margin: 0;
+}
+.reports-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.report-card {
+  background: white;
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.report-info {
+  flex: 1;
+  min-width: 0;
+}
+.report-info h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.report-date {
+  font-size: 12px;
+  color: #999;
+  margin: 0;
+}
+.report-status {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.report-status.pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+.report-status.in_progress {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+.report-status.resolved {
+  background: #f0fdf4;
+  color: #059669;
+}
+.report-status.dismissed {
+  background: #f3f4f6;
+  color: #6b7280;
 }
 
 /* FAQs Section */

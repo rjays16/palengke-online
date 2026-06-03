@@ -1,120 +1,66 @@
-export const useReportsStore = defineStore("reports", () => {
-  const submissions = ref([
-    {
-      id: "RPT-001",
-      type: "seller",
-      submittedBy: "Juan's Farm",
-      subject: "Unfair rating deduction",
-      description:
-        "A customer gave a 1-star rating without proper reason. We request review.",
-      status: "pending",
-      priority: "high",
-      date: "2026-05-14",
-    },
-    {
-      id: "RPT-002",
-      type: "driver",
-      submittedBy: "Mark Reyes",
-      subject: "Hazardous road condition",
-      description:
-        "Delivery route to Brgy. San Isidro has deep potholes that damaged my motorcycle tire.",
-      status: "pending",
-      priority: "medium",
-      date: "2026-05-14",
-    },
-    {
-      id: "RPT-003",
-      type: "customer",
-      submittedBy: "Maria Santos",
-      subject: "Damaged product received",
-      description:
-        "Received a delivery with damaged tomatoes. The seller refused to replace.",
-      status: "resolved",
-      priority: "high",
-      date: "2026-05-13",
-    },
-    {
-      id: "RPT-004",
-      type: "seller",
-      submittedBy: "Fresh Fish Co.",
-      subject: "Delivery delay complaints",
-      description:
-        "Multiple customers complaining about late deliveries from assigned drivers.",
-      status: "in_progress",
-      priority: "high",
-      date: "2026-05-13",
-    },
-    {
-      id: "RPT-005",
-      type: "driver",
-      submittedBy: "Nina Salvador",
-      subject: "Wrong address provided",
-      description:
-        "Customer provided incorrect address. Had to return undelivered order.",
-      status: "resolved",
-      priority: "low",
-      date: "2026-05-12",
-    },
-    {
-      id: "RPT-006",
-      type: "customer",
-      submittedBy: "Pedro Reyes",
-      subject: "Overcharged on order",
-      description:
-        "Was charged ₱180 for cabbage but price listed was ₱150. Request refund of difference.",
-      status: "pending",
-      priority: "medium",
-      date: "2026-05-12",
-    },
-    {
-      id: "RPT-007",
-      type: "seller",
-      submittedBy: "Maria's Produce",
-      subject: "Driver misconduct",
-      description:
-        "Driver was rude to my staff during pickup. Screaming and using profanity.",
-      status: "dismissed",
-      priority: "high",
-      date: "2026-05-11",
-    },
-    {
-      id: "RPT-008",
-      type: "customer",
-      submittedBy: "Luisa Tan",
-      subject: "Missing items in delivery",
-      description:
-        "Ordered 6 items but only received 4. Missing pork and shrimp.",
-      status: "in_progress",
-      priority: "high",
-      date: "2026-05-10",
-    },
-    {
-      id: "RPT-009",
-      type: "driver",
-      submittedBy: "Tommy Cruz",
-      subject: "Payment dispute",
-      description:
-        "Customer claimed COD payment was made but I did not receive any payment.",
-      status: "pending",
-      priority: "medium",
-      date: "2026-05-10",
-    },
-    {
-      id: "RPT-010",
-      type: "seller",
-      submittedBy: "Meat Shop Inc.",
-      subject: "System glitch on inventory",
-      description:
-        "Inventory count not updating after sales. Showing incorrect stock levels.",
-      status: "resolved",
-      priority: "low",
-      date: "2026-05-09",
-    },
-  ]);
+const AUTH_TOKEN_KEY = "palengke_auth_token";
 
-  function updateStatus(id: string, status: string) {
-    const report = submissions.value.find((r) => r.id === id);
-    if (report) report.status = status;
+function getToken() {
+  if (typeof localStorage === "undefined") return null;
+  return localStorage.getItem(AUTH_TOKEN_KEY);
+}
+
+function getApiBaseUrl() {
+  const config = useRuntimeConfig();
+  return config.public.apiBaseUrl || "http://localhost:8000";
+}
+
+export const useReportsStore = defineStore("reports", () => {
+  const submissions = ref([]);
+  const isLoading = ref(false);
+  const error = ref("");
+
+  async function fetchReports() {
+    isLoading.value = true;
+    error.value = "";
+    try {
+      const token = getToken();
+      const data = await $fetch(
+        `${getApiBaseUrl()}/api/admin/reports`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      submissions.value = (data.reports || []).map((r) => ({
+        id: `RPT-${String(r.id).padStart(3, "0")}`,
+        type: r.type,
+        submittedBy: r.submitted_by,
+        subject: r.subject,
+        description: r.description,
+        status: r.status,
+        priority: r.priority,
+        date: r.created_at ? r.created_at.slice(0, 10) : "",
+      }));
+    } catch (err) {
+      error.value = err?.data?.message || "Failed to fetch reports";
+      submissions.value = [];
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  async function updateStatus(id, status) {
+    const token = getToken();
+    try {
+      const numericId = parseInt(id.replace("RPT-", ""), 10);
+      await $fetch(`${getApiBaseUrl()}/api/admin/reports/${numericId}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: { status },
+      });
+      const report = submissions.value.find((r) => r.id === id);
+      if (report) report.status = status;
+    } catch (err) {
+      error.value = err?.data?.message || "Failed to update report status";
+    }
   }
 
   const analytics = computed(() => {
@@ -183,5 +129,13 @@ export const useReportsStore = defineStore("reports", () => {
     URL.revokeObjectURL(url);
   }
 
-  return { submissions, updateStatus, analytics, exportCSV };
+  return {
+    submissions,
+    isLoading,
+    error,
+    fetchReports,
+    updateStatus,
+    analytics,
+    exportCSV,
+  };
 });

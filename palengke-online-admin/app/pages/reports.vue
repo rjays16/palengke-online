@@ -118,11 +118,19 @@
               </td>
               <td class="date-cell">{{ r.date }}</td>
               <td>
-                <div
-                  class="actions-drop"
-                  v-if="r.status === 'pending' || r.status === 'in_progress'"
-                >
+                <div class="actions-drop">
                   <button
+                    class="action-btn small view"
+                    @click="viewReport(r)"
+                    title="View details"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  </button>
+                  <button
+                    v-if="r.status === 'pending' || r.status === 'in_progress'"
                     class="action-btn small resolve"
                     @click="reportsStore.updateStatus(r.id, 'resolved')"
                     title="Resolve"
@@ -137,6 +145,7 @@
                     </svg>
                   </button>
                   <button
+                    v-if="r.status === 'pending' || r.status === 'in_progress'"
                     class="action-btn small dismiss"
                     @click="reportsStore.updateStatus(r.id, 'dismissed')"
                     title="Dismiss"
@@ -152,7 +161,7 @@
                     </svg>
                   </button>
                 </div>
-                <span v-else class="resolved-label">{{
+                <span v-if="r.status !== 'pending' && r.status !== 'in_progress'" class="resolved-label">{{
                   r.status === "resolved" ? "Resolved" : "Dismissed"
                 }}</span>
               </td>
@@ -164,6 +173,56 @@
           :total="filtered.length"
           :perPage="reportPerPage"
         />
+      </div>
+
+      <!-- Detail Panel -->
+      <div v-if="selectedReport" class="detail-panel-overlay" @click.self="selectedReport = null">
+        <div class="detail-panel">
+          <div class="detail-header">
+            <h2>{{ selectedReport.subject }}</h2>
+            <button class="close-btn" @click="selectedReport = null">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+          <div class="detail-meta">
+            <div class="meta-item">
+              <span class="meta-label">Report ID</span>
+              <span class="meta-value">{{ selectedReport.id }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Type</span>
+              <span class="type-badge" :class="selectedReport.type">{{
+                selectedReport.type === "seller" ? "Seller" : selectedReport.type === "driver" ? "Driver" : "Customer"
+              }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Submitted By</span>
+              <span class="meta-value">{{ selectedReport.submittedBy }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Priority</span>
+              <span class="priority-badge" :class="selectedReport.priority">{{ selectedReport.priority }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Status</span>
+              <span class="status-badge" :class="selectedReport.status">{{ statusLabel(selectedReport.status) }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Date</span>
+              <span class="meta-value">{{ selectedReport.date }}</span>
+            </div>
+          </div>
+          <div class="detail-body">
+            <h3>Description</h3>
+            <p>{{ selectedReport.description }}</p>
+          </div>
+          <div class="detail-actions" v-if="selectedReport.status === 'pending' || selectedReport.status === 'in_progress'">
+            <button class="action-btn resolve" @click="handleResolve">Resolve</button>
+            <button class="action-btn dismiss" @click="handleDismiss">Dismiss</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -291,10 +350,15 @@ definePageMeta({ layout: "default" });
 const reportsStore = useReportsStore();
 const a = reportsStore.analytics;
 
+onMounted(() => {
+  reportsStore.fetchReports();
+});
+
 const activeTab = ref("submissions");
 const search = ref("");
 const typeFilter = ref("");
 const statusFilter = ref("");
+const selectedReport = ref(null);
 
 const filtered = computed(() => {
   return reportsStore.submissions.filter((r) => {
@@ -303,12 +367,31 @@ const filtered = computed(() => {
       !q ||
       r.id.toLowerCase().includes(q) ||
       r.submittedBy.toLowerCase().includes(q) ||
-      r.subject.toLowerCase().includes(q);
+      r.subject.toLowerCase().includes(q) ||
+      (r.description && r.description.toLowerCase().includes(q));
     const matchType = !typeFilter.value || r.type === typeFilter.value;
     const matchStatus = !statusFilter.value || r.status === statusFilter.value;
     return matchSearch && matchType && matchStatus;
   });
 });
+
+function viewReport(r) {
+  selectedReport.value = r;
+}
+
+function handleResolve() {
+  if (selectedReport.value) {
+    reportsStore.updateStatus(selectedReport.value.id, "resolved");
+    selectedReport.value = null;
+  }
+}
+
+function handleDismiss() {
+  if (selectedReport.value) {
+    reportsStore.updateStatus(selectedReport.value.id, "dismissed");
+    selectedReport.value = null;
+  }
+}
 
 const reportPage = ref(1);
 const reportPerPage = ref(10);
@@ -764,6 +847,135 @@ function statusLabel(s) {
     justify-content: center;
   }
 }
+/* Detail Panel */
+.detail-panel-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+.detail-panel {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 32px;
+}
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.detail-header h2 {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+.close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  padding: 4px;
+  flex-shrink: 0;
+}
+.close-btn svg {
+  width: 20px;
+  height: 20px;
+}
+.close-btn:hover {
+  color: #374151;
+}
+.detail-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 10px;
+}
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.meta-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.meta-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+.detail-body {
+  margin-bottom: 24px;
+}
+.detail-body h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 8px 0;
+}
+.detail-body p {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.7;
+  margin: 0;
+  white-space: pre-wrap;
+}
+.detail-actions {
+  display: flex;
+  gap: 10px;
+}
+.detail-actions .action-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: "Inter", sans-serif;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.detail-actions .action-btn.resolve {
+  background: #059669;
+  color: #fff;
+}
+.detail-actions .action-btn.resolve:hover {
+  background: #047857;
+}
+.detail-actions .action-btn.dismiss {
+  background: #f3f4f6;
+  color: #374151;
+}
+.detail-actions .action-btn.dismiss:hover {
+  background: #e5e7eb;
+}
+
+.action-btn.small.view {
+  color: #6b7280;
+}
+.action-btn.small.view:hover {
+  border-color: #6b7280;
+  background: #f9fafb;
+}
+
 @media (max-width: 480px) {
   .page-toolbar {
     flex-direction: column;
