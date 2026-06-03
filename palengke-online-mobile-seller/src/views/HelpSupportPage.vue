@@ -562,7 +562,33 @@ const giveFeedback = async () => {
         text: 'Submit',
         handler: async (data) => {
           if (data.feedback) {
-            await showSuccessModal('Thank you for your feedback!');
+            const loading = await alertController.create({
+              cssClass: 'loading-modal-simple',
+              message: 'Sending feedback...',
+              buttons: [],
+            });
+            await loading.present();
+            try {
+              const response = await fetch(`${API_BASE}/feedbacks`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  submitted_by: localStorage.getItem('userEmail') || 'Seller',
+                  message: data.feedback,
+                }),
+              });
+              if (!response.ok) throw new Error('Failed to submit feedback');
+              await loading.dismiss();
+              await showSuccessModal('Thank you for your feedback!');
+            } catch {
+              await loading.dismiss();
+              const failAlert = await alertController.create({
+                header: 'Submission Failed',
+                message: 'Could not submit your feedback. Please try again later.',
+                buttons: ['OK'],
+              });
+              await failAlert.present();
+            }
           }
         }
       }

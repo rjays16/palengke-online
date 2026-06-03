@@ -42,6 +42,19 @@
         </svg>
         Analytics
       </button>
+      <button
+        class="tab-btn"
+        :class="{ active: activeTab === 'feedbacks' }"
+        @click="activeTab = 'feedbacks'"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+        Feedbacks
+        <span class="tab-badge" v-if="feedbacksStore.analytics.pending > 0">{{
+          feedbacksStore.analytics.pending
+        }}</span>
+      </button>
     </div>
 
     <div v-if="activeTab === 'submissions'" class="submissions-section">
@@ -342,16 +355,97 @@
         </div>
       </div>
     </div>
+
+    <!-- Feedbacks Tab -->
+    <div v-if="activeTab === 'feedbacks'" class="submissions-section">
+      <div class="page-toolbar">
+        <div class="toolbar-left">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input v-model="fbSearch" placeholder="Search feedbacks..." />
+          </div>
+          <select v-model="fbStatusFilter" class="filter-select">
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="reviewed">Reviewed</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+        <span class="result-count">{{ fbFiltered.length }} feedbacks</span>
+      </div>
+
+      <div class="table-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Submitted By</th>
+              <th>Message</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="f in fbPaginated" :key="f.id">
+              <td class="id-cell">{{ f.id }}</td>
+              <td><span class="name-cell">{{ f.submittedBy }}</span></td>
+              <td class="subject-cell">{{ f.message }}</td>
+              <td>
+                <span class="status-badge" :class="f.status">{{
+                  f.status.charAt(0).toUpperCase() + f.status.slice(1)
+                }}</span>
+              </td>
+              <td class="date-cell">{{ f.date }}</td>
+              <td>
+                <div class="actions-drop">
+                  <button
+                    v-if="f.status === 'pending'"
+                    class="action-btn small resolve"
+                    @click="feedbacksStore.updateStatus(f.id, 'reviewed')"
+                    title="Mark reviewed"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </button>
+                  <button
+                    v-if="f.status === 'pending' || f.status === 'reviewed'"
+                    class="action-btn small dismiss"
+                    @click="feedbacksStore.updateStatus(f.id, 'archived')"
+                    title="Archive"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="21 8 21 22 3 22 3 8" /><rect x="1" y="3" width="22" height="5" /><line x1="10" y1="12" x2="14" y2="12" />
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <PaginationBar
+          v-model="fbPage"
+          :total="fbFiltered.length"
+          :perPage="fbPerPage"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 definePageMeta({ layout: "default" });
 const reportsStore = useReportsStore();
+const feedbacksStore = useFeedbacksStore();
 const a = reportsStore.analytics;
+const fb = feedbacksStore.analytics;
 
 onMounted(() => {
   reportsStore.fetchReports();
+  feedbacksStore.fetchFeedbacks();
 });
 
 const activeTab = ref("submissions");
@@ -359,6 +453,33 @@ const search = ref("");
 const typeFilter = ref("");
 const statusFilter = ref("");
 const selectedReport = ref(null);
+
+// Feedbacks state
+const fbSearch = ref("");
+const fbStatusFilter = ref("");
+const fbPage = ref(1);
+const fbPerPage = ref(10);
+
+const fbFiltered = computed(() => {
+  return feedbacksStore.submissions.filter((f) => {
+    const q = fbSearch.value.toLowerCase();
+    const matchSearch =
+      !q ||
+      f.id.toLowerCase().includes(q) ||
+      f.submittedBy.toLowerCase().includes(q) ||
+      f.message.toLowerCase().includes(q);
+    const matchStatus = !fbStatusFilter.value || f.status === fbStatusFilter.value;
+    return matchSearch && matchStatus;
+  });
+});
+
+const fbPaginated = computed(() => {
+  const start = (fbPage.value - 1) * fbPerPage.value;
+  return fbFiltered.value.slice(start, start + fbPerPage.value);
+});
+watch([fbSearch, fbStatusFilter], () => {
+  fbPage.value = 1;
+});
 
 const filtered = computed(() => {
   return reportsStore.submissions.filter((r) => {
