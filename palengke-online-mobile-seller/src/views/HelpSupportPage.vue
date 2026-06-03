@@ -35,51 +35,20 @@
         <div class="contact-section">
           <h2 class="section-title">Contact Support</h2>
           
-          <div class="contact-cards">
-            <div class="contact-card" @click="openLiveChat">
-              <div class="contact-icon chat">
-                <ion-icon :icon="chatbubbleEllipsesOutline"></ion-icon>
+          <div v-if="loadingContacts" class="loading-state">Loading support options...</div>
+          <div v-else class="contact-cards">
+            <div
+              v-for="contact in contactSupports"
+              :key="contact.key"
+              class="contact-card"
+              @click="handleContactAction(contact)"
+            >
+              <div class="contact-icon" :class="getIconClass(contact.type)">
+                <ion-icon :icon="getIconForType(contact.type)"></ion-icon>
               </div>
               <div class="contact-content">
-                <h3>Live Chat</h3>
-                <p>Chat with our support team</p>
-                <span class="contact-status online"><span class="status-dot"></span> Online</span>
-              </div>
-              <ion-icon :icon="chevronForwardOutline" class="arrow"></ion-icon>
-            </div>
-
-            <div class="contact-card" @click="callSupport">
-              <div class="contact-icon phone">
-                <ion-icon :icon="callOutline"></ion-icon>
-              </div>
-              <div class="contact-content">
-                <h3>Call Us</h3>
-                <p>+63 912 345 6789</p>
-                <span class="contact-hours">Mon-Sat, 8AM-6PM</span>
-              </div>
-              <ion-icon :icon="chevronForwardOutline" class="arrow"></ion-icon>
-            </div>
-
-            <div class="contact-card" @click="emailSupport">
-              <div class="contact-icon email">
-                <ion-icon :icon="mailOutline"></ion-icon>
-              </div>
-              <div class="contact-content">
-                <h3>Email Support</h3>
-                <p>support@palengke-online.com</p>
-                <span class="contact-response">Response within 24 hours</span>
-              </div>
-              <ion-icon :icon="chevronForwardOutline" class="arrow"></ion-icon>
-            </div>
-
-            <div class="contact-card" @click="openFacebook">
-              <div class="contact-icon facebook">
-                <ion-icon :icon="logoFacebook"></ion-icon>
-              </div>
-              <div class="contact-content">
-                <h3>Facebook</h3>
-                <p>Message us on Facebook</p>
-                <span class="contact-social">@PalengkeOnlinePH</span>
+                <h3>{{ contact.title }}</h3>
+                <p>{{ contact.subtitle }}</p>
               </div>
               <ion-icon :icon="chevronForwardOutline" class="arrow"></ion-icon>
             </div>
@@ -265,7 +234,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage,
@@ -305,11 +274,15 @@ import {
 } from 'ionicons/icons';
 import { MOCK_FAQS } from '@/mock/faqs';
 
+const API_BASE = 'http://localhost:8000/api';
+
 const router = useRouter();
 
 // State
 const searchQuery = ref('');
 const expandedFaq = ref(null);
+const contactSupports = ref([]);
+const loadingContacts = ref(true);
 
 // FAQs Data
 const faqs = ref(MOCK_FAQS);
@@ -391,26 +364,79 @@ const showSuccessModal = async (message) => {
   }, 2000);
 };
 
+// Fetch contact supports from backend
+async function fetchContactSupports() {
+  try {
+    const response = await fetch(`${API_BASE}/contact-supports`);
+    const data = await response.json();
+    contactSupports.value = data.contacts || [];
+    // Fallback to defaults if API returns empty
+    if (contactSupports.value.length === 0) {
+      contactSupports.value = getDefaultContacts();
+    }
+  } catch {
+    contactSupports.value = getDefaultContacts();
+  } finally {
+    loadingContacts.value = false;
+  }
+}
+
+function getDefaultContacts() {
+  return [
+    { key: 'live_chat', title: 'Live Chat', subtitle: 'Chat with our support team', type: 'chat', value: null, enabled: true },
+    { key: 'call', title: 'Call Us', subtitle: '+63 912 345 6789', type: 'phone', value: '+639123456789', enabled: true },
+    { key: 'email', title: 'Email Support', subtitle: 'support@palengke-online.com', type: 'email', value: 'support@palengke-online.com', enabled: true },
+    { key: 'facebook', title: 'Facebook', subtitle: 'Message us on Facebook', type: 'facebook', value: 'https://facebook.com/PalengkeOnlinePH', enabled: true },
+  ];
+}
+
+function getIconForType(type) {
+  const icons = {
+    chat: chatbubbleEllipsesOutline,
+    phone: callOutline,
+    email: mailOutline,
+    facebook: logoFacebook,
+  };
+  return icons[type] || chatbubbleEllipsesOutline;
+}
+
+function getIconClass(type) {
+  const classes = {
+    chat: 'chat',
+    phone: 'phone',
+    email: 'email',
+    facebook: 'facebook',
+  };
+  return classes[type] || 'chat';
+}
+
+function handleContactAction(contact) {
+  switch (contact.type) {
+    case 'chat':
+      showLoadingModal('Opening live chat...');
+      break;
+    case 'phone':
+      if (contact.value) window.location.href = `tel:${contact.value}`;
+      break;
+    case 'email':
+      if (contact.value) window.location.href = `mailto:${contact.value}`;
+      break;
+    case 'facebook':
+      if (contact.value) window.open(contact.value, '_blank');
+      break;
+    default:
+      break;
+  }
+}
+
 // Methods
 const toggleFaq = (index) => {
   expandedFaq.value = expandedFaq.value === index ? null : index;
 };
 
-const openLiveChat = async () => {
-  await showLoadingModal('Opening live chat...');
-};
-
-const callSupport = () => {
-  window.location.href = 'tel:+639123456789';
-};
-
-const emailSupport = () => {
-  window.location.href = 'mailto:support@palengke-online.com';
-};
-
-const openFacebook = () => {
-  window.open('https://facebook.com/PalengkeOnlinePH', '_blank');
-};
+onMounted(() => {
+  fetchContactSupports();
+});
 
 const reportProblem = async () => {
   const alert = await alertController.create({
@@ -598,6 +624,13 @@ const viewPrivacy = async () => {
 /* Contact Section */
 .contact-section {
   padding: 24px 20px;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 24px;
+  color: #999;
+  font-size: 14px;
 }
 
 .contact-cards {

@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\SellerRegistrationController;
 use App\Http\Controllers\Api\AdminNotificationController;
 use App\Http\Controllers\Api\SellerDeviceController;
+use App\Http\Controllers\Api\ContactSupportController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -47,6 +48,9 @@ Route::post('/seller/devices', [SellerDeviceController::class, 'list']);
 Route::post('/seller/devices/remove', [SellerDeviceController::class, 'remove']);
 Route::post('/seller/devices/logout-current', [SellerDeviceController::class, 'logoutCurrent']);
 
+// Public endpoint for seller app to fetch enabled contact supports
+Route::get('/contact-supports', [ContactSupportController::class, 'index']);
+
 // Public endpoint for seller app to fetch enabled countries
 Route::get('/countries', [CountryController::class, 'index']);
 
@@ -66,4 +70,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/notifications/{id}/read', [AdminNotificationController::class, 'markRead']);
     Route::post('/admin/notifications/read-all', [AdminNotificationController::class, 'markAllRead']);
     Route::delete('/admin/notifications/{id}', [AdminNotificationController::class, 'destroy']);
+
+    Route::get('/admin/contact-supports', [ContactSupportController::class, 'adminIndex']);
+    Route::put('/admin/contact-supports', [ContactSupportController::class, 'update']);
 });
