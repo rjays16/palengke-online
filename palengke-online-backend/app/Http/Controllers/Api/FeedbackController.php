@@ -13,9 +13,11 @@ class FeedbackController extends Controller
         $validated = $request->validate([
             'submitted_by' => 'required|string|max:255',
             'message' => 'required|string',
+            'type' => 'sometimes|string|in:feedback,feature_request',
         ]);
 
         $feedback = Feedback::create([
+            'type' => $validated['type'] ?? 'feedback',
             'submitted_by' => $validated['submitted_by'],
             'message' => $validated['message'],
             'status' => 'pending',

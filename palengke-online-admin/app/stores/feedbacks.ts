@@ -28,6 +28,7 @@ export const useFeedbacksStore = defineStore("feedbacks", () => {
       );
       submissions.value = (data.feedbacks || []).map((f) => ({
         id: `FB-${String(f.id).padStart(3, "0")}`,
+        type: f.type || "feedback",
         submittedBy: f.submitted_by,
         message: f.message,
         status: f.status,

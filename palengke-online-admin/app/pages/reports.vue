@@ -366,6 +366,11 @@
             </svg>
             <input v-model="fbSearch" placeholder="Search feedbacks..." />
           </div>
+          <select v-model="fbTypeFilter" class="filter-select">
+            <option value="">All Types</option>
+            <option value="feedback">Feedback</option>
+            <option value="feature_request">Feature Request</option>
+          </select>
           <select v-model="fbStatusFilter" class="filter-select">
             <option value="">All Status</option>
             <option value="pending">Pending</option>
@@ -381,6 +386,7 @@
           <thead>
             <tr>
               <th>ID</th>
+              <th>Type</th>
               <th>Submitted By</th>
               <th>Message</th>
               <th>Status</th>
@@ -391,6 +397,11 @@
           <tbody>
             <tr v-for="f in fbPaginated" :key="f.id">
               <td class="id-cell">{{ f.id }}</td>
+              <td>
+                <span class="type-badge" :class="f.type">{{
+                  f.type === "feature_request" ? "Feature" : "Feedback"
+                }}</span>
+              </td>
               <td><span class="name-cell">{{ f.submittedBy }}</span></td>
               <td class="subject-cell">{{ f.message }}</td>
               <td>
@@ -456,6 +467,7 @@ const selectedReport = ref(null);
 
 // Feedbacks state
 const fbSearch = ref("");
+const fbTypeFilter = ref("");
 const fbStatusFilter = ref("");
 const fbPage = ref(1);
 const fbPerPage = ref(10);
@@ -468,8 +480,9 @@ const fbFiltered = computed(() => {
       f.id.toLowerCase().includes(q) ||
       f.submittedBy.toLowerCase().includes(q) ||
       f.message.toLowerCase().includes(q);
+    const matchType = !fbTypeFilter.value || f.type === fbTypeFilter.value;
     const matchStatus = !fbStatusFilter.value || f.status === fbStatusFilter.value;
-    return matchSearch && matchStatus;
+    return matchSearch && matchType && matchStatus;
   });
 });
 
@@ -477,7 +490,7 @@ const fbPaginated = computed(() => {
   const start = (fbPage.value - 1) * fbPerPage.value;
   return fbFiltered.value.slice(start, start + fbPerPage.value);
 });
-watch([fbSearch, fbStatusFilter], () => {
+watch([fbSearch, fbTypeFilter, fbStatusFilter], () => {
   fbPage.value = 1;
 });
 
@@ -713,6 +726,10 @@ function statusLabel(s) {
 .type-badge.customer {
   background: #f5f3ff;
   color: #7c3aed;
+}
+.type-badge.feature_request {
+  background: #fef3c7;
+  color: #d97706;
 }
 
 .priority-badge {

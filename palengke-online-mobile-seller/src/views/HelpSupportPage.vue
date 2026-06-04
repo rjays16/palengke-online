@@ -617,7 +617,34 @@ const requestFeature = async () => {
         text: 'Submit',
         handler: async (data) => {
           if (data.feature) {
-            await showSuccessModal('Feature request submitted!');
+            const loading = await alertController.create({
+              cssClass: 'loading-modal-simple',
+              message: 'Sending feature request...',
+              buttons: [],
+            });
+            await loading.present();
+            try {
+              const response = await fetch(`${API_BASE}/feedbacks`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  type: 'feature_request',
+                  submitted_by: localStorage.getItem('userEmail') || 'Seller',
+                  message: data.feature,
+                }),
+              });
+              if (!response.ok) throw new Error('Failed to submit feature request');
+              await loading.dismiss();
+              await showSuccessModal('Feature request submitted!');
+            } catch {
+              await loading.dismiss();
+              const failAlert = await alertController.create({
+                header: 'Submission Failed',
+                message: 'Could not submit your feature request. Please try again later.',
+                buttons: ['OK'],
+              });
+              await failAlert.present();
+            }
           }
         }
       }
