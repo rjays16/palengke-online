@@ -31,8 +31,36 @@
           </div>
         </div>
 
-        <!-- Contact Support Cards -->
-        <div class="contact-section">
+        <!-- Search Results -->
+        <div v-if="hasSearchQuery" class="search-results-section">
+          <h2 class="section-title">Search Results</h2>
+          <div v-if="searchResults.length === 0" class="no-results">
+            <ion-icon :icon="searchOutline"></ion-icon>
+            <p>No results found for "{{ searchQuery }}"</p>
+          </div>
+          <div v-else class="search-results-list">
+            <div
+              v-for="(result, index) in searchResults"
+              :key="index"
+              class="search-result-card"
+              @click="handleSearchResult(result)"
+            >
+              <div class="result-icon" :class="result.type">
+                <ion-icon :icon="result.type === 'faq' ? chatbubbleEllipsesOutline : result.type === 'topic' ? rocketOutline : result.type === 'quick_action' ? warningOutline : chatbubbleEllipsesOutline"></ion-icon>
+              </div>
+              <div class="result-content">
+                <h3>{{ result.title }}</h3>
+                <p>{{ result.snippet }}</p>
+              </div>
+              <ion-icon :icon="chevronForwardOutline" class="arrow"></ion-icon>
+            </div>
+          </div>
+        </div>
+
+        <!-- Normal Content (hidden during search) -->
+        <template v-if="!hasSearchQuery">
+          <!-- Contact Support Cards -->
+          <div class="contact-section">
           <h2 class="section-title">Contact Support</h2>
           
           <div v-if="loadingContacts" class="loading-state">Loading support options...</div>
@@ -102,7 +130,7 @@
           
           <div class="faq-list">
             <div 
-              v-for="(faq, index) in filteredFaqs" 
+              v-for="(faq, index) in faqs" 
               :key="index" 
               class="faq-item"
               @click="toggleFaq(index)"
@@ -117,11 +145,6 @@
                 <p>{{ faq.answer }}</p>
               </div>
             </div>
-          </div>
-
-          <div v-if="filteredFaqs.length === 0" class="no-results">
-            <ion-icon :icon="searchOutline"></ion-icon>
-            <p>No results found for "{{ searchQuery }}"</p>
           </div>
         </div>
 
@@ -249,6 +272,8 @@
           </div>
         </div>
 
+        </template>
+
       </div>
     </ion-content>
   </ion-page>
@@ -318,20 +343,59 @@ function statusLabel(status) {
   return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
+// Help Topics Data (for search)
+const helpTopics = [
+  { key: 'getting-started', title: 'Getting Started', description: 'Learn the basics' },
+  { key: 'orders', title: 'Managing Orders', description: 'Order workflows' },
+  { key: 'products', title: 'Products', description: 'Add & manage products' },
+  { key: 'payments', title: 'Payments', description: 'Payment methods' },
+  { key: 'account', title: 'Account Settings', description: 'Manage your account' },
+  { key: 'troubleshooting', title: 'Troubleshooting', description: 'Fix common issues' },
+];
+
+// Quick Actions Data (for search)
+const quickActions = [
+  { key: 'report', title: 'Report Problem', description: 'Submit a problem report' },
+  { key: 'feedback', title: 'Send Feedback', description: 'Share your feedback' },
+  { key: 'feature', title: 'Request Feature', description: 'Suggest a new feature' },
+];
+
 // FAQs Data
 const faqs = ref(MOCK_FAQS);
 
 // Computed
-const filteredFaqs = computed(() => {
-  if (!searchQuery.value) {
-    return faqs.value;
-  }
-  
-  const query = searchQuery.value.toLowerCase();
-  return faqs.value.filter(faq => 
-    faq.question.toLowerCase().includes(query) ||
-    faq.answer.toLowerCase().includes(query)
-  );
+const hasSearchQuery = computed(() => searchQuery.value.trim().length > 0);
+
+const searchResults = computed(() => {
+  if (!hasSearchQuery.value) return [];
+  const q = searchQuery.value.toLowerCase().trim();
+  const results = [];
+
+  faqs.value.forEach((faq) => {
+    if (faq.question.toLowerCase().includes(q) || faq.answer.toLowerCase().includes(q)) {
+      results.push({ type: 'faq', title: faq.question, snippet: faq.answer, faq });
+    }
+  });
+
+  helpTopics.forEach((topic) => {
+    if (topic.title.toLowerCase().includes(q) || topic.description.toLowerCase().includes(q)) {
+      results.push({ type: 'topic', title: topic.title, snippet: topic.description, topic });
+    }
+  });
+
+  contactSupports.value.forEach((contact) => {
+    if (contact.title.toLowerCase().includes(q) || contact.subtitle.toLowerCase().includes(q)) {
+      results.push({ type: 'contact', title: contact.title, snippet: contact.subtitle, contact });
+    }
+  });
+
+  quickActions.forEach((action) => {
+    if (action.title.toLowerCase().includes(q) || action.description.toLowerCase().includes(q)) {
+      results.push({ type: 'quick_action', title: action.title, snippet: action.description, actionKey: action.key });
+    }
+  });
+
+  return results;
 });
 
 // ✨ NEW: Loading Modal Function
@@ -460,6 +524,21 @@ function handleContactAction(contact) {
       break;
     default:
       break;
+  }
+}
+
+function handleSearchResult(result) {
+  if (result.type === 'faq') {
+    const idx = faqs.value.indexOf(result.faq);
+    if (idx !== -1) toggleFaq(idx);
+  } else if (result.type === 'topic') {
+    showTopic(result.topic.key);
+  } else if (result.type === 'contact') {
+    handleContactAction(result.contact);
+  } else if (result.type === 'quick_action') {
+    if (result.actionKey === 'report') reportProblem();
+    else if (result.actionKey === 'feedback') giveFeedback();
+    else if (result.actionKey === 'feature') requestFeature();
   }
 }
 
@@ -747,6 +826,77 @@ const viewPrivacy = async () => {
   font-weight: 700;
   color: #1a1a1a;
   margin: 0 0 16px 0;
+}
+
+/* Search Results */
+.search-results-section {
+  padding: 20px;
+}
+.search-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.search-result-card {
+  background: white;
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.search-result-card:active {
+  transform: scale(0.98);
+}
+.result-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.result-icon.faq {
+  background: #E8F5E9;
+  color: #4CAF50;
+}
+.result-icon.topic {
+  background: #E3F2FD;
+  color: #2196F3;
+}
+.result-icon.contact {
+  background: #FFF3E0;
+  color: #FF9800;
+}
+.result-icon.quick_action {
+  background: #fce4ec;
+  color: #e91e63;
+}
+.result-content {
+  flex: 1;
+  min-width: 0;
+}
+.result-content h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 3px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.result-content p {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Contact Section */
