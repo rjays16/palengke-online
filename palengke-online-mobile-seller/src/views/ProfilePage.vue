@@ -691,17 +691,71 @@ const changePassword = async () => {
       {
         text: 'Update',
         handler: async (data) => {
-          if (data.newPassword === data.confirmPassword) {
-            await showSuccessModal('Password updated successfully!');
-          } else {
+          if (!data.currentPassword || !data.newPassword || !data.confirmPassword) {
             const toast = await toastController.create({
-              message: '<font-awesome-icon icon="times-circle" /> Passwords do not match',
+              message: 'All fields are required',
               duration: 2000,
               color: 'danger',
               position: 'top'
             });
             await toast.present();
             return false;
+          }
+
+          if (data.newPassword !== data.confirmPassword) {
+            const toast = await toastController.create({
+              message: 'Passwords do not match',
+              duration: 2000,
+              color: 'danger',
+              position: 'top'
+            });
+            await toast.present();
+            return false;
+          }
+
+          if (data.newPassword.length < 6) {
+            const toast = await toastController.create({
+              message: 'Password must be at least 6 characters',
+              duration: 2000,
+              color: 'danger',
+              position: 'top'
+            });
+            await toast.present();
+            return false;
+          }
+
+          alert.dismiss();
+          await showLoadingModal('Updating password...', false);
+
+          try {
+            const response = await fetch('http://localhost:8000/api/seller/change-password', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: localStorage.getItem('userEmail') || '',
+                current_password: data.currentPassword,
+                new_password: data.newPassword,
+              }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+              throw new Error(result.message || 'Failed to change password');
+            }
+
+            await dismissLoadingModal();
+            await showSuccessModal('Password changed successfully!');
+          } catch (error) {
+            await dismissLoadingModal();
+            const toast = await toastController.create({
+              message: error.message || 'Failed to change password',
+              duration: 2000,
+              color: 'danger',
+              position: 'top'
+            });
+            await toast.present();
+            changePassword();
           }
         }
       }

@@ -96,4 +96,29 @@ class AuthController extends Controller
             'message' => 'Email verified successfully.',
         ]);
     }
+
+    public function changePassword(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:6',
+        ]);
+
+        $seller = SellerRegistration::where('email', $validated['email'])->first();
+
+        if (!$seller) {
+            return response()->json(['message' => 'Seller not found.'], 404);
+        }
+
+        if (!Hash::check($validated['current_password'], $seller->password)) {
+            return response()->json(['message' => 'Current password is incorrect.'], 401);
+        }
+
+        $seller->update(['password' => Hash::make($validated['new_password'])]);
+
+        return response()->json([
+            'message' => 'Password changed successfully.',
+        ]);
+    }
 }
