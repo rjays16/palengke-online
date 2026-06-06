@@ -208,6 +208,16 @@
               <ion-icon :icon="chevronForwardOutline" class="settings-arrow"></ion-icon>
             </div>
 
+            <div class="settings-item" @click="changePin">
+              <div class="settings-icon">
+                <ion-icon :icon="keypadOutline"></ion-icon>
+              </div>
+              <div class="settings-content">
+                <p class="settings-label">Change PIN</p>
+              </div>
+              <ion-icon :icon="chevronForwardOutline" class="settings-arrow"></ion-icon>
+            </div>
+
             <div class="settings-item" @click="goToDevices">
               <div class="settings-icon">
                 <ion-icon :icon="phonePortraitOutline"></ion-icon>
@@ -392,6 +402,7 @@ import {
   walletOutline,
   cardOutline,
   lockClosedOutline,
+  keypadOutline,
   notificationsOutline,
   moonOutline,
   languageOutline,
@@ -434,20 +445,32 @@ const profileData = ref({
 
 const darkMode = ref(false);
 
+let loadingModalRef = null;
+
 // ✨ NEW: Loading Modal Function
-const showLoadingModal = async (message = 'Loading...') => {
+const showLoadingModal = async (message = 'Loading...', autoDismiss = true) => {
   const alert = await alertController.create({
     cssClass: 'loading-modal-simple',
     message: message,
     buttons: []
   });
-  
+
   await alert.present();
-  
-  // Auto dismiss after 1.5 seconds
-  setTimeout(() => {
-    alert.dismiss();
-  }, 1500);
+  loadingModalRef = alert;
+
+  if (autoDismiss) {
+    setTimeout(() => {
+      alert.dismiss();
+      loadingModalRef = null;
+    }, 1500);
+  }
+};
+
+const dismissLoadingModal = async () => {
+  if (loadingModalRef) {
+    await loadingModalRef.dismiss();
+    loadingModalRef = null;
+  }
 };
 
 // Success Modal Function
@@ -679,6 +702,123 @@ const changePassword = async () => {
             });
             await toast.present();
             return false;
+          }
+        }
+      }
+    ]
+  });
+  await alert.present();
+};
+
+const changePin = async () => {
+  const alert = await alertController.create({
+    header: 'Change PIN',
+    inputs: [
+      {
+        name: 'currentPin',
+        type: 'password',
+        placeholder: 'Current PIN',
+        attributes: {
+          inputmode: 'numeric',
+          maxlength: 5,
+          pattern: '[0-9]*',
+        }
+      },
+      {
+        name: 'newPin',
+        type: 'password',
+        placeholder: 'New PIN (5 digits)',
+        attributes: {
+          inputmode: 'numeric',
+          maxlength: 5,
+          pattern: '[0-9]*',
+        }
+      },
+      {
+        name: 'confirmPin',
+        type: 'password',
+        placeholder: 'Confirm New PIN',
+        attributes: {
+          inputmode: 'numeric',
+          maxlength: 5,
+          pattern: '[0-9]*',
+        }
+      }
+    ],
+    buttons: [
+      { text: 'Cancel', role: 'cancel' },
+      {
+        text: 'Update',
+        handler: async (data) => {
+          if (!data.currentPin || !data.newPin || !data.confirmPin) {
+            const toast = await toastController.create({
+              message: 'All fields are required',
+              duration: 2000,
+              color: 'danger',
+              position: 'top'
+            });
+            await toast.present();
+            return false;
+          }
+
+          if (data.newPin !== data.confirmPin) {
+            const toast = await toastController.create({
+              message: 'New PINs do not match',
+              duration: 2000,
+              color: 'danger',
+              position: 'top'
+            });
+            await toast.present();
+            return false;
+          }
+
+          if (data.newPin.length !== 5 || !/^\d{5}$/.test(data.newPin)) {
+            const toast = await toastController.create({
+              message: 'PIN must be exactly 5 digits',
+              duration: 2000,
+              color: 'danger',
+              position: 'top'
+            });
+            await toast.present();
+            return false;
+          }
+
+          alert.dismiss();
+          await showLoadingModal('Updating PIN...', false);
+
+          try {
+            const response = await fetch('http://localhost:8000/api/seller/device/change-pin', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: localStorage.getItem('userEmail') || '',
+                device_id: localStorage.getItem('deviceId') || '',
+                current_pin: data.currentPin,
+                new_pin: data.newPin,
+              }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+              throw new Error(result.message || 'Failed to change PIN');
+            }
+
+            // Dismiss loading before showing success
+            await dismissLoadingModal();
+            await showSuccessModal('PIN changed successfully!');
+          } catch (error) {
+            // Dismiss loading before showing error
+            await dismissLoadingModal();
+            const toast = await toastController.create({
+              message: error.message || 'Failed to change PIN',
+              duration: 2000,
+              color: 'danger',
+              position: 'top'
+            });
+            await toast.present();
+            // Re-open the PIN alert for retry
+            changePin();
           }
         }
       }

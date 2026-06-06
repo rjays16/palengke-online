@@ -219,4 +219,34 @@ class SellerDeviceController extends Controller
             'message' => 'Device removed successfully.',
         ]);
     }
+
+    public function changePin(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'device_id' => 'required|string',
+            'current_pin' => 'required|string',
+            'new_pin' => 'required|string|min:4|max:6',
+        ]);
+
+        $seller = SellerRegistration::where('email', $validated['email'])->first();
+
+        if (!$seller) {
+            return response()->json(['message' => 'Seller not found.'], 404);
+        }
+
+        if (!$seller->pin) {
+            return response()->json(['message' => 'No PIN set for this account.'], 404);
+        }
+
+        if (!Hash::check($validated['current_pin'], $seller->pin)) {
+            return response()->json(['message' => 'Current PIN is incorrect.'], 401);
+        }
+
+        $seller->update(['pin' => Hash::make($validated['new_pin'])]);
+
+        return response()->json([
+            'message' => 'PIN changed successfully.',
+        ]);
+    }
 }

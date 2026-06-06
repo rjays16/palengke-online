@@ -45,6 +45,7 @@ Route::post('/seller/login', [AuthController::class, 'login']);
 // Seller device PIN management
 Route::post('/seller/device/register', [SellerDeviceController::class, 'register']);
 Route::post('/seller/device/verify-pin', [SellerDeviceController::class, 'verifyPin']);
+Route::post('/seller/device/change-pin', [SellerDeviceController::class, 'changePin']);
 Route::post('/seller/device/status', [SellerDeviceController::class, 'status']);
 Route::post('/seller/devices', [SellerDeviceController::class, 'list']);
 Route::post('/seller/devices/remove', [SellerDeviceController::class, 'remove']);
