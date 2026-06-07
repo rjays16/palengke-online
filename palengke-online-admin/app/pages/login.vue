@@ -134,8 +134,8 @@
               <span class="remember-custom"></span>
               <span>Remember me</span>
             </label>
-            <a href="#" class="forgot-link" @click.prevent="handleForgot"
-              >Forgot password?</a
+            <NuxtLink to="/forgot-password" class="forgot-link"
+              >Forgot password?</NuxtLink
             >
           </div>
 
@@ -262,9 +262,6 @@ const handleLogin = async () => {
   if (success) navigateTo("/dashboard");
 };
 
-const handleForgot = () => {
-  alert("Password reset link will be sent to your email.");
-};
 </script>
 
 <style scoped>

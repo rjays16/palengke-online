@@ -13,10 +13,13 @@ use App\Http\Controllers\Api\SellerDeviceController;
 use App\Http\Controllers\Api\ContactSupportController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\FeedbackController;
+use App\Http\Controllers\Api\SellerPaymentMethodController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
 Route::get('/admin/me', [AdminAuthController::class, 'me'])->middleware('auth:sanctum');
+Route::post('/admin/forgot-password', [AdminAuthController::class, 'forgotPassword']);
+Route::post('/admin/reset-password', [AdminAuthController::class, 'resetPassword']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/users', [AdminUserController::class, 'index']);
@@ -51,6 +54,12 @@ Route::post('/seller/device/status', [SellerDeviceController::class, 'status']);
 Route::post('/seller/devices', [SellerDeviceController::class, 'list']);
 Route::post('/seller/devices/remove', [SellerDeviceController::class, 'remove']);
 Route::post('/seller/devices/logout-current', [SellerDeviceController::class, 'logoutCurrent']);
+
+// Seller app — payment methods
+Route::get('/seller/payment-methods', [SellerPaymentMethodController::class, 'index']);
+Route::post('/seller/payment-methods', [SellerPaymentMethodController::class, 'store']);
+Route::delete('/seller/payment-methods/{id}', [SellerPaymentMethodController::class, 'destroy']);
+Route::post('/seller/payment-methods/{id}/default', [SellerPaymentMethodController::class, 'setDefault']);
 
 // Seller app — submit a report
 Route::post('/reports', [ReportController::class, 'store']);

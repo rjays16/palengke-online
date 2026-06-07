@@ -8,8 +8,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
     await auth.restore();
   }
 
-  if (to.path === "/login") {
-    if (auth.isAuthenticated) {
+  const publicPaths = ["/login", "/forgot-password", "/reset-password"];
+
+  if (publicPaths.includes(to.path)) {
+    if (auth.isAuthenticated && to.path === "/login") {
       return navigateTo("/dashboard");
     }
     return;

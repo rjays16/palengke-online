@@ -168,29 +168,34 @@
         <div class="section">
           <h3 class="section-title">Payment Information</h3>
           
-          <div class="info-list">
-            <div class="info-item" @click="editField('gcash')">
-              <div class="info-icon payment">
-                <ion-icon :icon="walletOutline"></ion-icon>
+          <div class="info-list" v-if="paymentMethods.length > 0">
+            <div
+              class="info-item"
+              v-for="method in paymentMethods"
+              :key="method.id"
+            >
+              <div class="info-icon" :class="method.type">
+                <ion-icon :icon="paymentIcon(method.type)"></ion-icon>
               </div>
               <div class="info-content">
-                <p class="info-label">GCash Number</p>
-                <p class="info-value">{{ profileData.gcashNumber || 'Not set' }}</p>
+                <p class="info-label">{{ displayType(method.type) }}</p>
+                <p class="info-value">{{ method.account_name }} - {{ maskAccount(method.account_number) }}</p>
               </div>
-              <ion-icon :icon="chevronForwardOutline" class="info-arrow"></ion-icon>
-            </div>
-
-            <div class="info-item" @click="editField('bank')">
-              <div class="info-icon payment">
-                <ion-icon :icon="cardOutline"></ion-icon>
-              </div>
-              <div class="info-content">
-                <p class="info-label">Bank Account</p>
-                <p class="info-value">{{ profileData.bankAccount || 'Not set' }}</p>
-              </div>
-              <ion-icon :icon="chevronForwardOutline" class="info-arrow"></ion-icon>
+              <ion-button fill="clear" color="danger" size="small" @click="deletePaymentMethod(method.id)">
+                <ion-icon :icon="trashOutline" slot="icon-only"></ion-icon>
+              </ion-button>
             </div>
           </div>
+
+          <div v-else class="no-payments">
+            <ion-icon :icon="cardOutline"></ion-icon>
+            <p>No payment methods added yet</p>
+          </div>
+
+          <ion-button expand="block" class="add-payment-btn" @click="showPaymentAgreement">
+            <ion-icon :icon="addOutline" slot="start"></ion-icon>
+            Add Payment Method
+          </ion-button>
         </div>
 
         <!-- Account Settings -->
@@ -369,7 +374,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage,
@@ -418,7 +423,10 @@ import {
   homeOutline,
   cubeOutline,
   receiptOutline,
-  phonePortraitOutline
+  phonePortraitOutline,
+  cashOutline,
+  businessOutline,
+  checkmarkCircleOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -471,6 +479,238 @@ const dismissLoadingModal = async () => {
     await loadingModalRef.dismiss();
     loadingModalRef = null;
   }
+};
+
+// Payment Methods
+const paymentMethods = ref([]);
+
+const loadPaymentMethods = async () => {
+  const email = localStorage.getItem('userEmail');
+  if (!email) return;
+
+  try {
+    const response = await fetch(`http://localhost:8000/api/seller/payment-methods?email=${encodeURIComponent(email)}`);
+    const data = await response.json();
+    if (response.ok) {
+      paymentMethods.value = data.payment_methods || [];
+    }
+  } catch {
+    // silent
+  }
+};
+
+const paymentIcon = (type) => {
+  const icons = {
+    gcash: walletOutline,
+    bdo: businessOutline,
+    bpi: businessOutline,
+    metrobank: businessOutline,
+    landbank: businessOutline,
+    unionbank: businessOutline,
+    pnb: businessOutline,
+  };
+  return icons[type] || cardOutline;
+};
+
+const displayType = (type) => {
+  const names = {
+    gcash: 'GCash',
+    bdo: 'BDO',
+    bpi: 'BPI',
+    metrobank: 'Metrobank',
+    landbank: 'Landbank',
+    unionbank: 'Unionbank',
+    pnb: 'PNB',
+  };
+  return names[type] || type.charAt(0).toUpperCase() + type.slice(1);
+};
+
+const maskAccount = (number) => {
+  if (!number) return '';
+  if (number.length <= 4) return number;
+  return '****' + number.slice(-4);
+};
+
+const showPaymentAgreement = async () => {
+  const alert = await alertController.create({
+    cssClass: 'agreement-modal',
+    header: ' ',
+    message: 'loading',
+    buttons: [
+      { text: 'Cancel', role: 'cancel' },
+      {
+        text: 'I Agree',
+        handler: () => {
+          showAddPaymentForm();
+        }
+      }
+    ]
+  });
+  await alert.present();
+
+  setTimeout(() => {
+    const alertElement = document.querySelector('.agreement-modal .alert-message');
+    if (alertElement) {
+      alertElement.innerHTML = `
+        <div class="agreement-content">
+          <div class="agreement-icon">
+            <img src="/assets/images/checkmark_success.png" alt="shield" style="width:36px;height:36px;">
+          </div>
+          <h3>Payment Information Agreement</h3>
+          <p>By adding your payment details, you agree that:</p>
+          <ul>
+            <li>Your payment information will be used for order payouts and refunds</li>
+            <li>You are the owner of the provided payment account</li>
+            <li>The information provided is accurate and up-to-date</li>
+            <li>Palengke Online may verify your payment details</li>
+          </ul>
+        </div>
+      `;
+    }
+  }, 50);
+};
+
+const showAddPaymentForm = async () => {
+  // Step 1: Select payment type
+  const typeAlert = await alertController.create({
+    header: 'Select Payment Type',
+    inputs: [
+      { type: 'radio', label: 'GCash', value: 'gcash', checked: true },
+      { type: 'radio', label: 'BDO', value: 'bdo' },
+      { type: 'radio', label: 'BPI', value: 'bpi' },
+      { type: 'radio', label: 'Metrobank', value: 'metrobank' },
+      { type: 'radio', label: 'Landbank', value: 'landbank' },
+      { type: 'radio', label: 'Unionbank', value: 'unionbank' },
+      { type: 'radio', label: 'PNB', value: 'pnb' },
+    ],
+    buttons: [
+      { text: 'Cancel', role: 'cancel' },
+      {
+        text: 'Next',
+        handler: (selectedType) => {
+          if (!selectedType) {
+            return false;
+          }
+          showPaymentDetailsForm(selectedType);
+        }
+      }
+    ]
+  });
+  await typeAlert.present();
+};
+
+const showPaymentDetailsForm = async (selectedType) => {
+  const alert = await alertController.create({
+    header: `${displayType(selectedType)} Details`,
+    inputs: [
+      {
+        name: 'account_name',
+        type: 'text',
+        placeholder: 'Account Name'
+      },
+      {
+        name: 'account_number',
+        type: 'text',
+        placeholder: 'Account Number'
+      }
+    ],
+    buttons: [
+      { text: 'Back', role: 'cancel' },
+      {
+        text: 'Add',
+        handler: async (data) => {
+          if (!data.account_name || !data.account_number) {
+            const toast = await toastController.create({
+              message: 'All fields are required',
+              duration: 2000,
+              color: 'danger',
+              position: 'top'
+            });
+            await toast.present();
+            return false;
+          }
+
+          alert.dismiss();
+          await showLoadingModal('Adding payment method...', false);
+
+          try {
+            const response = await fetch('http://localhost:8000/api/seller/payment-methods', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: localStorage.getItem('userEmail') || '',
+                type: selectedType,
+                account_name: data.account_name,
+                account_number: data.account_number,
+                agreed: true,
+              }),
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+              throw new Error(result.message || 'Failed to add payment method');
+            }
+
+            await dismissLoadingModal();
+            await showSuccessModal('Payment method added successfully!');
+            await loadPaymentMethods();
+          } catch (error) {
+            await dismissLoadingModal();
+            const toast = await toastController.create({
+              message: error.message || 'Failed to add payment method',
+              duration: 2000,
+              color: 'danger',
+              position: 'top'
+            });
+            await toast.present();
+          }
+        }
+      }
+    ]
+  });
+  await alert.present();
+};
+
+const deletePaymentMethod = async (id) => {
+  const alert = await alertController.create({
+    header: 'Remove Payment Method',
+    message: 'Are you sure you want to remove this payment method?',
+    buttons: [
+      { text: 'Cancel', role: 'cancel' },
+      {
+        text: 'Remove',
+        role: 'destructive',
+        handler: async () => {
+          await showLoadingModal('Removing...', false);
+
+          try {
+            const response = await fetch(`http://localhost:8000/api/seller/payment-methods/${id}`, {
+              method: 'DELETE',
+            });
+
+            if (!response.ok) {
+              throw new Error('Failed to remove payment method');
+            }
+
+            await dismissLoadingModal();
+            await showSuccessModal('Payment method removed successfully!');
+            await loadPaymentMethods();
+          } catch (error) {
+            await dismissLoadingModal();
+            const toast = await toastController.create({
+              message: error.message || 'Failed to remove payment method',
+              duration: 2000,
+              color: 'danger',
+              position: 'top'
+            });
+            await toast.present();
+          }
+        }
+      }
+    ]
+  });
+  await alert.present();
 };
 
 // Success Modal Function
@@ -1067,6 +1307,10 @@ const goToOrders = () => {
 const goToProfile = () => {
   // Already on profile page
 };
+
+onMounted(() => {
+  loadPaymentMethods();
+});
 </script>
 
 <style scoped>
@@ -1479,5 +1723,147 @@ const goToProfile = () => {
 
 :deep(.loading-modal-simple .alert-button-group) {
   display: none;
+}
+
+/* Payment Methods */
+.no-payments {
+  text-align: center;
+  padding: 24px 0;
+  color: #999;
+}
+
+.no-payments ion-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  color: #ccc;
+}
+
+.no-payments p {
+  font-size: 14px;
+  margin: 0;
+}
+
+.add-payment-btn {
+  --background: #E8F5E9;
+  --color: #4CAF50;
+  --border-radius: 12px;
+  --border-color: #4CAF50;
+  --border-style: dashed;
+  --border-width: 2px;
+  height: 48px;
+  font-weight: 600;
+  text-transform: none;
+  font-size: 14px;
+  margin-top: 16px;
+}
+
+/* Payment Type Icon Colors */
+.info-icon.gcash {
+  background: #E8F5E9;
+  color: #4CAF50;
+}
+
+.info-icon.bdo {
+  background: #E3F2FD;
+  color: #1565C0;
+}
+
+.info-icon.bpi {
+  background: #FFF3E0;
+  color: #E65100;
+}
+
+.info-icon.metrobank {
+  background: #F3E5F5;
+  color: #7B1FA2;
+}
+
+.info-icon.landbank {
+  background: #E8F5E9;
+  color: #2E7D32;
+}
+
+.info-icon.unionbank {
+  background: #FFF8E1;
+  color: #F9A825;
+}
+
+.info-icon.pnb {
+  background: #FCE4EC;
+  color: #C62828;
+}
+
+/* Agreement Modal */
+:deep(.agreement-modal .alert-wrapper) {
+  border-radius: 20px;
+  max-width: 340px;
+  padding: 24px 20px;
+}
+
+:deep(.agreement-modal .alert-head) {
+  display: none;
+}
+
+:deep(.agreement-modal .alert-message) {
+  padding: 0;
+  color: #1a1a1a;
+}
+
+.agreement-content {
+  text-align: center;
+}
+
+.agreement-icon {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px auto;
+}
+
+.agreement-icon ion-icon {
+  font-size: 36px;
+  color: white;
+}
+
+.agreement-content h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+}
+
+.agreement-content p {
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 12px 0;
+  text-align: left;
+}
+
+.agreement-content ul {
+  text-align: left;
+  padding-left: 20px;
+  margin: 0;
+}
+
+.agreement-content ul li {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+:deep(.agreement-modal button) {
+  margin-top: 8px;
+  border-radius: 12px;
+  height: 44px;
+  font-weight: 600;
+}
+
+:deep(.agreement-modal .alert-button-group) {
+  padding: 12px 0 0 0;
 }
 </style>
