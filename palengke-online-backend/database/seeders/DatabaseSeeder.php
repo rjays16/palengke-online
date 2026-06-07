@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             CountrySeeder::class,
             IdTypeSeeder::class,
             ContactSupportSeeder::class,
+            SystemSettingSeeder::class,
         ]);
     }
 }

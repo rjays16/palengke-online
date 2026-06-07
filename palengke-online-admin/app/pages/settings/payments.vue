@@ -3,6 +3,24 @@
     <SettingsSubnav />
 
     <div class="settings-section">
+      <h3>Seller Payment Information</h3>
+      <p class="settings-desc">
+        Show or hide the Payment Information section in the seller mobile app (where sellers add their GCash/bank accounts for payouts).
+      </p>
+      <div class="pref-row">
+        <div class="pref-info">
+          <span class="pref-label">Enable Seller Payment Information</span>
+          <span class="pref-desc">When disabled, sellers won't see the Payment Information section on their profile.</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" v-model="enableSellerPaymentInfo" @change="togglePaymentInfo" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <span class="save-toast" v-if="settingSaved">✓ Saved</span>
+    </div>
+
+    <div class="settings-section">
       <h3>Payment Methods</h3>
       <p class="settings-desc">
         Toggle visibility and "Coming Soon" status for each payment method.
@@ -67,14 +85,14 @@
             <div class="toggle-label-wrap">
               <span class="toggle-text">Visible</span>
               <label class="toggle-label">
-                <input type="checkbox" v-model="pm.visible" @change="save" />
+                <input type="checkbox" v-model="pm.visible" @change="saveMethods" />
                 <span class="toggle-slider"></span>
               </label>
             </div>
             <div class="toggle-label-wrap">
               <span class="toggle-text coming-soon-text">Coming Soon</span>
               <label class="toggle-label">
-                <input type="checkbox" v-model="pm.comingSoon" @change="save" />
+                <input type="checkbox" v-model="pm.comingSoon" @change="saveMethods" />
                 <span class="toggle-slider"></span>
               </label>
             </div>
@@ -153,20 +171,73 @@ const defaults = [
   },
 ];
 
+function getApiBaseUrl() {
+  const config = useRuntimeConfig();
+  return config.public.apiBaseUrl || "http://localhost:8000";
+}
+
+function getToken() {
+  if (typeof localStorage === "undefined") return null;
+  return localStorage.getItem("palengke_auth_token");
+}
+
+const enableSellerPaymentInfo = ref(true);
+const settingSaved = ref(false);
 const saved = ref(false);
 const methods = ref([]);
 
-function load() {
+async function loadSettings() {
+  const t = getToken();
+  if (!t) return;
+  try {
+    const res = await fetch(`${getApiBaseUrl()}/api/admin/settings`, {
+      headers: { Authorization: `Bearer ${t}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.enable_seller_payment_methods !== undefined) {
+        enableSellerPaymentInfo.value = data.enable_seller_payment_methods === 'true' || data.enable_seller_payment_methods === true;
+      }
+    }
+  } catch {
+    // fallback to default
+  }
+}
+
+async function togglePaymentInfo() {
+  const t = getToken();
+  if (!t) return;
+  try {
+    await fetch(`${getApiBaseUrl()}/api/admin/settings`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${t}`,
+      },
+      body: JSON.stringify({
+        settings: {
+          enable_seller_payment_methods: enableSellerPaymentInfo.value ? 'true' : 'false',
+        },
+      }),
+    });
+    settingSaved.value = true;
+    setTimeout(() => { settingSaved.value = false; }, 2000);
+  } catch {
+    enableSellerPaymentInfo.value = !enableSellerPaymentInfo.value;
+  }
+}
+
+function loadMethods() {
   const raw = localStorage.getItem(KEY);
   if (raw) {
     methods.value = JSON.parse(raw);
   } else {
     methods.value = JSON.parse(JSON.stringify(defaults));
-    save();
+    saveMethods();
   }
 }
 
-function save() {
+function saveMethods() {
   localStorage.setItem(KEY, JSON.stringify(methods.value));
   saved.value = true;
   setTimeout(() => {
@@ -176,7 +247,10 @@ function save() {
 
 const visibleMethods = computed(() => methods.value.filter((m) => m.visible));
 
-load();
+onMounted(() => {
+  loadSettings();
+  loadMethods();
+});
 </script>
 
 <style scoped>
@@ -383,6 +457,63 @@ load();
 .no-methods {
   font-size: 13px;
   color: #9ca3af;
+}
+
+/* Seller Payment Info Toggle */
+.pref-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.pref-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pref-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+.pref-desc {
+  font-size: 12px;
+  color: #9ca3af;
+}
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.toggle input {
+  display: none;
+}
+.toggle .toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: #d1d5db;
+  border-radius: 24px;
+  transition: 0.2s;
+}
+.toggle .toggle-slider::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  bottom: 2px;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+.toggle input:checked + .toggle-slider {
+  background: #059669;
+}
+.toggle input:checked + .toggle-slider::before {
+  transform: translateX(20px);
 }
 
 @media (max-width: 600px) {

@@ -165,7 +165,7 @@
         </div>
 
         <!-- Payment Information -->
-        <div class="section">
+        <div class="section" v-if="paymentMethodsEnabled">
           <h3 class="section-title">Payment Information</h3>
           
           <div class="info-list" v-if="paymentMethods.length > 0">
@@ -452,6 +452,7 @@ const profileData = ref({
 });
 
 const darkMode = ref(false);
+const paymentMethodsEnabled = ref(true);
 
 let loadingModalRef = null;
 
@@ -483,6 +484,21 @@ const dismissLoadingModal = async () => {
 
 // Payment Methods
 const paymentMethods = ref([]);
+
+const loadSettings = async () => {
+  try {
+    const response = await fetch('http://localhost:8000/api/settings');
+    const data = await response.json();
+    if (response.ok) {
+      const val = data.enable_seller_payment_methods;
+      if (val !== undefined) {
+        paymentMethodsEnabled.value = val === 'true' || val === true;
+      }
+    }
+  } catch {
+    // default to enabled on error
+  }
+};
 
 const loadPaymentMethods = async () => {
   const email = localStorage.getItem('userEmail');
@@ -1309,6 +1325,7 @@ const goToProfile = () => {
 };
 
 onMounted(() => {
+  loadSettings();
   loadPaymentMethods();
 });
 </script>

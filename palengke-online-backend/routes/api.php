@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\ContactSupportController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\FeedbackController;
 use App\Http\Controllers\Api\SellerPaymentMethodController;
+use App\Http\Controllers\Api\SystemSettingController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -68,6 +69,9 @@ Route::get('/reports', [ReportController::class, 'myReports']);
 // Seller app — submit feedback
 Route::post('/feedbacks', [FeedbackController::class, 'store']);
 
+// Public endpoint for seller app to fetch system settings
+Route::get('/settings', [SystemSettingController::class, 'index']);
+
 // Public endpoint for seller app to fetch enabled contact supports
 Route::get('/contact-supports', [ContactSupportController::class, 'index']);
 
@@ -76,6 +80,12 @@ Route::get('/countries', [CountryController::class, 'index']);
 
 // Public endpoint for seller app to fetch enabled locations
 Route::get('/locations', [LocationController::class, 'index']);
+
+// Admin — system settings
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/admin/settings', [SystemSettingController::class, 'index']);
+    Route::put('/admin/settings', [SystemSettingController::class, 'update']);
+});
 
 // Admin — seller registrations (requires auth)
 Route::middleware('auth:sanctum')->group(function () {
