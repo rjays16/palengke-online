@@ -97,6 +97,62 @@ class AuthController extends Controller
         ]);
     }
 
+    public function profile(Request $request)
+    {
+        $seller = SellerRegistration::where('email', $request->email)->first();
+
+        if (!$seller) {
+            return response()->json(['message' => 'Seller not found.'], 404);
+        }
+
+        return response()->json([
+            'user' => [
+                'id' => $seller->id,
+                'email' => $seller->email,
+                'firstName' => $seller->first_name,
+                'lastName' => $seller->last_name,
+                'phone' => $seller->full_phone,
+                'address' => $seller->current_address,
+                'storeName' => $seller->store_name,
+                'storeAddress' => $seller->store_place . ', ' . $seller->barangay . ', ' . $seller->city,
+                'operatingHours' => $seller->operating_hours,
+                'description' => $seller->description,
+                'categories' => $seller->categories ?? [],
+                'avatar' => null,
+            ],
+        ]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $seller = SellerRegistration::where('email', $request->email)->first();
+
+        if (!$seller) {
+            return response()->json(['message' => 'Seller not found.'], 404);
+        }
+
+        $validated = $request->validate([
+            'store_name' => 'sometimes|string|max:255',
+            'store_place' => 'sometimes|string|max:255',
+            'operating_hours' => 'nullable|string',
+            'description' => 'nullable|string|max:1000',
+            'current_address' => 'sometimes|string',
+        ]);
+
+        $seller->update($validated);
+
+        return response()->json([
+            'message' => 'Profile updated successfully.',
+            'user' => [
+                'storeName' => $seller->store_name,
+                'storeAddress' => $seller->store_place . ', ' . $seller->barangay . ', ' . $seller->city,
+                'operatingHours' => $seller->operating_hours,
+                'description' => $seller->description,
+                'address' => $seller->current_address,
+            ],
+        ]);
+    }
+
     public function changePassword(Request $request)
     {
         $validated = $request->validate([

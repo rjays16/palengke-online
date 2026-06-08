@@ -125,13 +125,13 @@
               <ion-icon :icon="chevronForwardOutline" class="info-arrow"></ion-icon>
             </div>
 
-            <div class="info-item" @click="editField('shopHours')">
+            <div class="info-item" @click="editOperatingHours">
               <div class="info-icon">
                 <ion-icon :icon="timeOutline"></ion-icon>
               </div>
               <div class="info-content">
                 <p class="info-label">Operating Hours</p>
-                <p class="info-value">{{ profileData.shopHours }}</p>
+                <p class="info-value">{{ hoursDisplayText }}</p>
               </div>
               <ion-icon :icon="chevronForwardOutline" class="info-arrow"></ion-icon>
             </div>
@@ -347,6 +347,53 @@
       </div>
     </ion-content>
 
+    <!-- Operating Hours Modal -->
+    <div class="hours-overlay" v-if="showHoursModal" @click.self="showHoursModal = false">
+      <div class="hours-modal">
+        <div class="hours-header">
+          <h3>Operating Hours</h3>
+          <button class="hours-close" @click="showHoursModal = false">&times;</button>
+        </div>
+        <div class="hours-body">
+          <div class="hours-day" v-for="day in dayKeys" :key="day">
+            <div class="hours-day-name">{{ dayLabels[day] }}</div>
+            <label class="hours-closed-toggle">
+              <input type="checkbox" v-model="hoursData[day].closed" />
+              Closed
+            </label>
+            <div class="hours-time-group" v-if="!hoursData[day].closed">
+              <select v-model="hoursData[day].openHour">
+                <option v-for="h in 12" :key="'oh'+h" :value="h">{{ h }}</option>
+              </select>
+              <span class="hours-sep">:</span>
+              <select v-model="hoursData[day].openMin">
+                <option v-for="m in ['00','15','30','45']" :key="'om'+m" :value="m">{{ m }}</option>
+              </select>
+              <select v-model="hoursData[day].openAmPm">
+                <option value="AM">AM</option><option value="PM">PM</option>
+              </select>
+              <span class="hours-to">to</span>
+              <select v-model="hoursData[day].closeHour">
+                <option v-for="h in 12" :key="'ch'+h" :value="h">{{ h }}</option>
+              </select>
+              <span class="hours-sep">:</span>
+              <select v-model="hoursData[day].closeMin">
+                <option v-for="m in ['00','15','30','45']" :key="'cm'+m" :value="m">{{ m }}</option>
+              </select>
+              <select v-model="hoursData[day].closeAmPm">
+                <option value="AM">AM</option><option value="PM">PM</option>
+              </select>
+            </div>
+            <div class="hours-closed-text" v-else>Closed</div>
+          </div>
+        </div>
+        <div class="hours-footer">
+          <button class="hours-cancel" @click="showHoursModal = false">Cancel</button>
+          <button class="hours-save" @click="saveOperatingHours">Save</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Bottom Navigation -->
     <ion-footer>
       <ion-toolbar>
@@ -374,7 +421,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage,
@@ -433,27 +480,175 @@ const router = useRouter();
 
 // Profile Data
 const profileData = ref({
-  name: 'Juan Dela Cruz',
-  phone: '+63 912 345 6789',
-  email: 'juan.delacruz@email.com',
-  address: 'Brgy. San Isidro, Cagayan de Oro City',
-  businessType: 'Fresh Produce Seller',
-  shopName: 'Juan\'s Fresh Market',
-  shopAddress: 'Stall #15, CDO City Palengke',
-  shopHours: 'Mon-Sun, 5:00 AM - 6:00 PM',
-  description: 'Fresh vegetables, fruits, and seafood daily. Quality products at affordable prices.',
-  categories: ['Fish', 'Vegetables', 'Fruits', 'Seafood'],
-  gcashNumber: '0912 345 6789',
-  bankAccount: 'BDO - 1234 5678 9012',
+  name: 'Loading...',
+  phone: '',
+  email: '',
+  address: '',
+  businessType: 'Seller',
+  shopName: 'Loading...',
+  shopAddress: '',
+  shopHours: '',
+  description: '',
+  categories: [],
   avatar: null,
-  totalOrders: 342,
-  rating: 4.8,
-  joinedDays: 45
+  totalOrders: 0,
+  rating: 0,
+  joinedDays: 0
 });
+
+const loadProfile = async () => {
+  const email = localStorage.getItem('userEmail');
+  if (!email) return;
+
+  try {
+    const response = await fetch(`http://localhost:8000/api/seller/profile?email=${encodeURIComponent(email)}`);
+    const data = await response.json();
+    if (response.ok && data.user) {
+      const u = data.user;
+      profileData.value = {
+        ...profileData.value,
+        name: u.firstName + ' ' + u.lastName,
+        phone: u.phone || '',
+        email: u.email || '',
+        address: u.address || '',
+        businessType: 'Seller',
+        shopName: u.storeName || '',
+        shopAddress: u.storeAddress || '',
+        shopHours: u.operatingHours || '',
+        description: u.description || '',
+        categories: u.categories || [],
+        avatar: u.avatar || null,
+      };
+    }
+  } catch {
+    // keep defaults
+  }
+};
 
 const darkMode = ref(false);
 const paymentMethodsEnabled = ref(true);
 const availableCategories = ref([]);
+const showHoursModal = ref(false);
+
+const dayKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+const dayLabels = {
+  monday: 'Monday', tuesday: 'Tuesday', wednesday: 'Wednesday',
+  thursday: 'Thursday', friday: 'Friday', saturday: 'Saturday', sunday: 'Sunday'
+};
+
+const defaultDayHours = { openHour: 7, openMin: '00', openAmPm: 'AM', closeHour: 5, closeMin: '00', closeAmPm: 'PM', closed: false };
+const hoursData = ref({});
+
+function initDefaultHours() {
+  const h = {};
+  dayKeys.forEach(day => {
+    h[day] = { ...defaultDayHours };
+  });
+  h.saturday = { ...defaultDayHours, openHour: 8, closeHour: 12 };
+  h.sunday = { ...defaultDayHours, closed: true };
+  return h;
+}
+
+function parseHoursFromString(str) {
+  if (!str) return initDefaultHours();
+  try {
+    const parsed = JSON.parse(str);
+    const h = initDefaultHours();
+    dayKeys.forEach(day => {
+      if (parsed[day]) {
+        h[day] = { ...h[day], ...parsed[day] };
+      }
+    });
+    return h;
+  } catch {
+    return initDefaultHours();
+  }
+}
+
+function formatOpenClose(day) {
+  const d = hoursData.value[day];
+  if (!d || d.closed) return 'Closed';
+  return `${d.openHour}:${d.openMin} ${d.openAmPm} - ${d.closeHour}:${d.closeMin} ${d.closeAmPm}`;
+}
+
+function formatOperatingHours(hoursObj) {
+  const lines = dayKeys.map(day => {
+    const d = hoursObj[day];
+    if (!d || d.closed) return `${dayLabels[day]}: Closed`;
+    return `${dayLabels[day]}: ${d.openHour}:${d.openMin} ${d.openAmPm} - ${d.closeHour}:${d.closeMin} ${d.closeAmPm}`;
+  });
+  return lines.join('\n');
+}
+
+function getHoursSummary(str) {
+  if (!str) return 'Set operating hours';
+  try {
+    const parsed = JSON.parse(str);
+    const openDays = dayKeys.filter(d => parsed[d] && !parsed[d].closed);
+    if (openDays.length === 0) return 'Closed all week';
+    if (openDays.length === 7) return 'Open daily';
+    const first = parsed[openDays[0]];
+    const allSame = openDays.every(d =>
+      parsed[d].openHour === first.openHour &&
+      parsed[d].openMin === first.openMin &&
+      parsed[d].openAmPm === first.openAmPm &&
+      parsed[d].closeHour === first.closeHour &&
+      parsed[d].closeMin === first.closeMin &&
+      parsed[d].closeAmPm === first.closeAmPm
+    );
+    if (allSame) {
+      if (openDays.length === 5 && openDays[0] === 'monday' && openDays[4] === 'friday')
+        return `Mon-Fri: ${first.openHour}:${first.openMin} ${first.openAmPm} - ${first.closeHour}:${first.closeMin} ${first.closeAmPm}`;
+      return `${openDays.length} days, ${first.openHour}:${first.openMin} ${first.openAmPm} - ${first.closeHour}:${first.closeMin} ${first.closeAmPm}`;
+    }
+    return `${openDays.length} days open`;
+  } catch {
+    return str;
+  }
+}
+
+const hoursDisplayText = computed(() => getHoursSummary(profileData.value.shopHours));
+
+function editOperatingHours() {
+  hoursData.value = parseHoursFromString(profileData.value.shopHours);
+  showHoursModal.value = true;
+}
+
+const saveOperatingHours = async () => {
+  const hoursString = JSON.stringify(hoursData.value);
+  const email = localStorage.getItem('userEmail');
+  if (!email) return;
+
+  showHoursModal.value = false;
+  await showLoadingModal('Saving operating hours...', false);
+
+  try {
+    const response = await fetch('http://localhost:8000/api/seller/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, operating_hours: hoursString }),
+    });
+
+    await dismissLoadingModal();
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.message || 'Failed to save');
+    }
+
+    profileData.value.shopHours = hoursString;
+    await showSuccessModal('Operating hours updated!');
+  } catch (error) {
+    await dismissLoadingModal();
+    const toast = await toastController.create({
+      message: error.message || 'Failed to save operating hours',
+      duration: 2000,
+      color: 'danger',
+      position: 'top',
+    });
+    await toast.present();
+  }
+};
 
 let loadingModalRef = null;
 
@@ -894,10 +1089,55 @@ const editField = async (field) => {
       {
         text: 'Save',
         handler: async (data) => {
-          if (data.value) {
-            profileData.value[field] = data.value;
-            await showSuccessModal('Updated successfully!');
+          if (!data.value) return;
+
+          profileData.value[field] = data.value;
+
+          const shopFields = ['shopName', 'shopAddress', 'description', 'address'];
+          if (shopFields.includes(field)) {
+            const email = localStorage.getItem('userEmail');
+            if (!email) {
+              await showSuccessModal('Updated successfully!');
+              return;
+            }
+
+            alert.dismiss();
+            await showLoadingModal('Saving...', false);
+
+            try {
+              const body = { email };
+              if (field === 'shopName') body.store_name = data.value;
+              if (field === 'shopAddress') body.store_place = data.value;
+              if (field === 'shopHours') body.operating_hours = data.value;
+              if (field === 'description') body.description = data.value;
+              if (field === 'address') body.current_address = data.value;
+
+              const response = await fetch('http://localhost:8000/api/seller/profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+              });
+
+              await dismissLoadingModal();
+
+              if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.message || 'Failed to save');
+              }
+            } catch (error) {
+              await dismissLoadingModal();
+              const toast = await toastController.create({
+                message: error.message || 'Failed to save',
+                duration: 2000,
+                color: 'danger',
+                position: 'top'
+              });
+              await toast.present();
+              return;
+            }
           }
+
+          await showSuccessModal('Updated successfully!');
         }
       }
     ]
@@ -1334,6 +1574,7 @@ const goToProfile = () => {
 };
 
 onMounted(() => {
+  loadProfile();
   loadSettings();
   loadCategories();
   loadPaymentMethods();
@@ -1892,5 +2133,174 @@ onMounted(() => {
 
 :deep(.agreement-modal .alert-button-group) {
   padding: 12px 0 0 0;
+}
+
+/* Operating Hours Modal */
+.hours-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.hours-modal {
+  background: white;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.hours-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 0;
+}
+
+.hours-header h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.hours-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #999;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+}
+
+.hours-body {
+  padding: 16px 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.hours-day {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  flex-wrap: wrap;
+}
+
+.hours-day:last-child {
+  border-bottom: none;
+}
+
+.hours-day-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  min-width: 90px;
+  flex-shrink: 0;
+}
+
+.hours-closed-toggle {
+  font-size: 13px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.hours-closed-toggle input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #4CAF50;
+}
+
+.hours-time-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.hours-time-group select {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 13px;
+  background: white;
+  color: #333;
+  outline: none;
+  min-width: 48px;
+}
+
+.hours-sep {
+  font-size: 14px;
+  color: #999;
+}
+
+.hours-to {
+  font-size: 12px;
+  color: #999;
+  margin: 0 2px;
+}
+
+.hours-closed-text {
+  font-size: 13px;
+  color: #999;
+  font-style: italic;
+}
+
+.hours-footer {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.hours-cancel {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  background: white;
+  color: #666;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+
+.hours-save {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: #4CAF50;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+}
+
+.hours-cancel:active {
+  background: #f5f5f5;
+}
+
+.hours-save:active {
+  background: #45a049;
 }
 </style>

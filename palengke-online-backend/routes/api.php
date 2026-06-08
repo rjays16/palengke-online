@@ -47,6 +47,8 @@ Route::post('/seller/register', [SellerRegistrationController::class, 'register'
 // Seller app login
 Route::post('/seller/login', [AuthController::class, 'login']);
 Route::post('/seller/change-password', [AuthController::class, 'changePassword']);
+Route::get('/seller/profile', [AuthController::class, 'profile']);
+Route::post('/seller/profile', [AuthController::class, 'updateProfile']);
 
 // Seller device PIN management
 Route::post('/seller/device/register', [SellerDeviceController::class, 'register']);
