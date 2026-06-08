@@ -16,13 +16,14 @@ class SellerRegistration extends Model
         'verification_choice', 'verification_status',
         'id_type', 'id_type_name',
         'id_front_photo', 'id_back_photo', 'selfie_photo',
-        'operating_hours', 'description',
+        'operating_hours', 'description', 'categories',
         'status', 'rejection_reason', 'reviewed_by', 'reviewed_at',
     ];
 
     protected $casts = [
         'email_verified' => 'boolean',
         'reviewed_at' => 'datetime',
+        'categories' => 'array',
     ];
 
     public function reviewedBy()

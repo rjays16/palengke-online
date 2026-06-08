@@ -137,6 +137,8 @@ class AuthController extends Controller
             'operating_hours' => 'nullable|string',
             'description' => 'nullable|string|max:1000',
             'current_address' => 'sometimes|string',
+            'categories' => 'nullable|array',
+            'categories.*' => 'string|distinct',
         ]);
 
         $seller->update($validated);
@@ -148,6 +150,7 @@ class AuthController extends Controller
                 'storeAddress' => $seller->store_place . ', ' . $seller->barangay . ', ' . $seller->city,
                 'operatingHours' => $seller->operating_hours,
                 'description' => $seller->description,
+                'categories' => $seller->categories ?? [],
                 'address' => $seller->current_address,
             ],
         ]);

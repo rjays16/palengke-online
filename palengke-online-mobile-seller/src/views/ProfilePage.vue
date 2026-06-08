@@ -1163,7 +1163,41 @@ const manageCategories = async () => {
         text: 'Save',
         handler: async (data) => {
           profileData.value.categories = data;
-          await showSuccessModal('Categories updated!');
+
+          const email = localStorage.getItem('userEmail');
+          if (!email) {
+            await showSuccessModal('Categories updated!');
+            return;
+          }
+
+          alert.dismiss();
+          await showLoadingModal('Saving categories...', false);
+
+          try {
+            const response = await fetch('http://localhost:8000/api/seller/profile', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, categories: data }),
+            });
+
+            await dismissLoadingModal();
+
+            if (!response.ok) {
+              const err = await response.json();
+              throw new Error(err.message || 'Failed to save');
+            }
+
+            await showSuccessModal('Categories updated!');
+          } catch (error) {
+            await dismissLoadingModal();
+            const toast = await toastController.create({
+              message: error.message || 'Failed to save categories',
+              duration: 2000,
+              color: 'danger',
+              position: 'top',
+            });
+            await toast.present();
+          }
         }
       }
     ]
