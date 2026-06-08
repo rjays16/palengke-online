@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -118,7 +119,7 @@ class AuthController extends Controller
                 'operatingHours' => $seller->operating_hours,
                 'description' => $seller->description,
                 'categories' => $seller->categories ?? [],
-                'avatar' => null,
+                'avatar' => $seller->avatar,
             ],
         ]);
     }
@@ -141,6 +142,8 @@ class AuthController extends Controller
             'categories.*' => 'string|distinct',
             'phone' => 'sometimes|string|max:30',
             'new_email' => 'sometimes|email|unique:seller_registrations,email,' . $seller->id,
+            'avatar' => 'nullable|string',
+            'remove_avatar' => 'nullable|boolean',
         ]);
 
         if ($request->has('phone')) {
@@ -151,6 +154,18 @@ class AuthController extends Controller
         if ($request->has('new_email')) {
             $validated['email'] = $validated['new_email'];
             unset($validated['new_email']);
+        }
+
+        if ($request->has('remove_avatar') && $request->remove_avatar) {
+            if ($seller->avatar) {
+                Storage::disk('public')->delete(str_replace(Storage::disk('public')->url(''), '', $seller->avatar));
+            }
+            $seller->avatar = null;
+            $seller->save();
+        }
+
+        if ($request->has('avatar') && $request->avatar) {
+            $validated['avatar'] = $this->saveAvatarImage($request->avatar);
         }
 
         $seller->update($validated);
@@ -166,6 +181,7 @@ class AuthController extends Controller
                 'phone' => $seller->full_phone,
                 'email' => $seller->email,
                 'address' => $seller->current_address,
+                'avatar' => $seller->avatar,
             ],
         ]);
     }
@@ -193,5 +209,25 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'Password changed successfully.',
         ]);
+    }
+
+    private function saveAvatarImage(string $dataUrl): string
+    {
+        if (!preg_match('/^data:image\/(\w+);base64,(.+)$/', $dataUrl, $matches)) {
+            return $dataUrl;
+        }
+
+        $extension = $matches[1] === 'jpeg' ? 'jpg' : $matches[1];
+        $base64Data = $matches[2];
+        $decoded = base64_decode($base64Data);
+
+        if ($decoded === false) {
+            return $dataUrl;
+        }
+
+        $filename = 'avatars/' . uniqid('avatar_') . '.' . $extension;
+        Storage::disk('public')->put($filename, $decoded);
+
+        return Storage::disk('public')->url($filename);
     }
 }

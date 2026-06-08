@@ -16,7 +16,7 @@ class SellerRegistration extends Model
         'verification_choice', 'verification_status',
         'id_type', 'id_type_name',
         'id_front_photo', 'id_back_photo', 'selfie_photo',
-        'operating_hours', 'description', 'categories',
+        'operating_hours', 'description', 'categories', 'avatar',
         'status', 'rejection_reason', 'reviewed_by', 'reviewed_at',
     ];
 

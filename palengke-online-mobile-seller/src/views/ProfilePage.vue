@@ -346,6 +346,15 @@
       </div>
     </ion-content>
 
+    <!-- Hidden file input for web fallback -->
+    <input
+      type="file"
+      accept="image/*"
+      ref="fileInputRef"
+      @change="handleFileInput"
+      style="display:none"
+    />
+
     <!-- Operating Hours Modal -->
     <div class="hours-overlay" v-if="showHoursModal" @click.self="showHoursModal = false">
       <div class="hours-modal">
@@ -422,6 +431,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { Capacitor } from '@capacitor/core';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import {
   IonPage,
   IonHeader,
@@ -528,6 +539,9 @@ const darkMode = ref(false);
 const paymentMethodsEnabled = ref(true);
 const availableCategories = ref([]);
 const showHoursModal = ref(false);
+
+const fileInputRef = ref(null);
+let cameraCaptureMode = ref('camera');
 
 const dayKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 const dayLabels = {
@@ -1028,22 +1042,117 @@ const changePhoto = async () => {
         text: 'Take Photo',
         icon: cameraOutline,
         handler: async () => {
-          await showLoadingModal('Opening camera...');
+          if (Capacitor.isNativePlatform()) {
+            try {
+              const photo = await Camera.getPhoto({
+                resultType: CameraResultType.DataUrl,
+                source: CameraSource.Camera,
+                quality: 80,
+                width: 500,
+                height: 500,
+              });
+              if (photo?.dataUrl) {
+                await uploadAvatar(photo.dataUrl);
+              }
+            } catch (e) {
+              if (e?.message !== 'User cancelled photos app') {
+                const toast = await toastController.create({
+                  message: 'Failed to take photo',
+                  duration: 2000,
+                  color: 'danger',
+                  position: 'top',
+                });
+                await toast.present();
+              }
+            }
+          } else {
+            const input = fileInputRef.value;
+            if (input) {
+              input.setAttribute('capture', 'user');
+              input.value = '';
+              cameraCaptureMode.value = 'camera';
+              input.click();
+            }
+          }
         }
       },
       {
         text: 'Choose from Gallery',
         icon: imagesOutline,
         handler: async () => {
-          await showLoadingModal('Opening gallery...');
+          if (Capacitor.isNativePlatform()) {
+            try {
+              const photo = await Camera.getPhoto({
+                resultType: CameraResultType.DataUrl,
+                source: CameraSource.Photos,
+                quality: 80,
+                width: 500,
+                height: 500,
+              });
+              if (photo?.dataUrl) {
+                await uploadAvatar(photo.dataUrl);
+              }
+            } catch (e) {
+              if (e?.message !== 'User cancelled photos app') {
+                const toast = await toastController.create({
+                  message: 'Failed to pick photo',
+                  duration: 2000,
+                  color: 'danger',
+                  position: 'top',
+                });
+                await toast.present();
+              }
+            }
+          } else {
+            const input = fileInputRef.value;
+            if (input) {
+              input.removeAttribute('capture');
+              input.value = '';
+              cameraCaptureMode.value = 'gallery';
+              input.click();
+            }
+          }
         }
       },
       {
         text: 'Remove Photo',
         icon: trashOutline,
         role: 'destructive',
-        handler: () => {
-          profileData.value.avatar = null;
+        handler: async () => {
+          const email = localStorage.getItem('userEmail');
+          if (!email) {
+            profileData.value.avatar = null;
+            return;
+          }
+
+          await showLoadingModal('Removing photo...', false);
+
+          try {
+            const response = await fetch('http://localhost:8000/api/seller/profile', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              body: JSON.stringify({ email, remove_avatar: true }),
+            });
+
+            await dismissLoadingModal();
+
+            if (!response.ok) {
+              const err = await response.json();
+              throw new Error(err.message || 'Failed to remove photo');
+            }
+
+            profileData.value.avatar = null;
+            await showSuccessModal('Photo removed!');
+          } catch (error) {
+            await dismissLoadingModal();
+            const toast = await toastController.create({
+              message: error.message || 'Failed to remove photo',
+              duration: 2000,
+              color: 'danger',
+              position: 'top',
+            });
+            await toast.present();
+          }
         }
       },
       {
@@ -1054,6 +1163,56 @@ const changePhoto = async () => {
     ]
   });
   await actionSheet.present();
+};
+
+const handleFileInput = async (event) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const dataUrl = e.target?.result;
+    if (dataUrl) {
+      await uploadAvatar(dataUrl);
+    }
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+};
+
+const uploadAvatar = async (dataUrl) => {
+  const email = localStorage.getItem('userEmail');
+  if (!email) return;
+
+  await showLoadingModal('Uploading photo...', false);
+
+  try {
+    const response = await fetch('http://localhost:8000/api/seller/profile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ email, avatar: dataUrl }),
+    });
+
+    await dismissLoadingModal();
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.message || 'Failed to upload photo');
+    }
+
+    const result = await response.json();
+    profileData.value.avatar = result.user?.avatar || null;
+    await showSuccessModal('Photo updated!');
+  } catch (error) {
+    await dismissLoadingModal();
+    const toast = await toastController.create({
+      message: error.message || 'Failed to upload photo',
+      duration: 2000,
+      color: 'danger',
+      position: 'top',
+    });
+    await toast.present();
+  }
 };
 
 const editField = async (field) => {
