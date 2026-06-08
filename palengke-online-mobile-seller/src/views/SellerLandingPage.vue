@@ -322,15 +322,53 @@ import {
 const router = useRouter();
 
 // Seller Data
-const sellerName = ref('Juan Dela Cruz');
+const sellerName = ref('Loading...');
 const notificationCount = ref(3);
+const selectedCategories = ref([]);
+const availableCategories = ref([]);
 const sub = ref(getSubscription())
 
 function refreshSub() {
   sub.value = getSubscription()
 }
 
-onIonViewWillEnter(refreshSub)
+const loadProfile = async () => {
+  const email = localStorage.getItem('userEmail');
+  if (!email) return;
+  try {
+    const response = await fetch(`http://localhost:8000/api/seller/profile?email=${encodeURIComponent(email)}`, {
+      headers: { 'Accept': 'application/json' },
+    });
+    const data = await response.json();
+    if (response.ok && data.user) {
+      const u = data.user;
+      sellerName.value = u.firstName + ' ' + u.lastName;
+      selectedCategories.value = u.categories || [];
+    }
+  } catch {
+    // keep defaults
+  }
+};
+
+const loadCategories = async () => {
+  try {
+    const response = await fetch('http://localhost:8000/api/categories', {
+      headers: { 'Accept': 'application/json' },
+    });
+    const data = await response.json();
+    if (response.ok) {
+      availableCategories.value = data || [];
+    }
+  } catch {
+    // silent
+  }
+};
+
+onIonViewWillEnter(() => {
+  refreshSub();
+  loadProfile();
+  loadCategories();
+});
 
 // Notice banner
 const NOTICE_KEY = 'palengke_notices'
@@ -440,9 +478,6 @@ const todayOrders = ref(12);
 const todaySales = ref(3450);
 const totalProducts = ref(28);
 const weekSales = ref(18750);
-
-// Categories
-const selectedCategories = ref(['Fish', 'Vegetables', 'Fruits']);
 
 // Recent Orders
 const recentOrders = ref([
@@ -763,11 +798,16 @@ const viewOrderDetails = (orderId) => {
 };
 
 const manageCategories = async () => {
-  const alert = await alertController.create({
-    header: 'Manage Categories',
-    message: 'Select the types of products you sell',
-    inputs: [
-      { type: 'checkbox', label: 'Fish', value: 'Fish', checked: true },
+  const inputs = availableCategories.value.map(c => ({
+    type: 'checkbox',
+    label: c.name,
+    value: c.name,
+    checked: selectedCategories.value.includes(c.name),
+  }));
+
+  if (inputs.length === 0) {
+    inputs.push(
+      { type: 'checkbox', label: 'Fish', value: 'Fish' },
       { type: 'checkbox', label: 'Shellfish', value: 'Shellfish' },
       { type: 'checkbox', label: 'Squid & Octopus', value: 'Squid' },
       { type: 'checkbox', label: 'Pork', value: 'Pork' },
@@ -776,14 +816,33 @@ const manageCategories = async () => {
       { type: 'checkbox', label: 'Fruits', value: 'Fruits', checked: true },
       { type: 'checkbox', label: 'Condiments', value: 'Condiments' },
       { type: 'checkbox', label: 'Dairy & Goods', value: 'Dairy' },
-      { type: 'checkbox', label: 'Rice & Grains', value: 'Rice' }
-    ],
+      { type: 'checkbox', label: 'Rice & Grains', value: 'Rice' },
+    );
+  }
+
+  const alert = await alertController.create({
+    header: 'Manage Categories',
+    message: 'Select the types of products you sell',
+    inputs,
     buttons: [
       { text: 'Cancel', role: 'cancel' },
       {
         text: 'Save',
-        handler: (data) => {
+        handler: async (data) => {
           selectedCategories.value = data;
+
+          const email = localStorage.getItem('userEmail');
+          if (!email) return;
+
+          try {
+            await fetch('http://localhost:8000/api/seller/profile', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              body: JSON.stringify({ email, categories: data }),
+            });
+          } catch {
+            // silent
+          }
         }
       }
     ]

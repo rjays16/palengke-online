@@ -148,21 +148,6 @@
           </div>
         </div>
 
-        <!-- Categories -->
-        <div class="section">
-          <h3 class="section-title">Product Categories</h3>
-          
-          <div class="categories-display">
-            <div class="category-chip" v-for="category in profileData.categories" :key="category">
-              {{ category }}
-            </div>
-            <div class="category-chip add" @click="manageCategories">
-              <ion-icon :icon="addOutline"></ion-icon>
-              Edit
-            </div>
-          </div>
-        </div>
-
         <!-- Payment Information -->
         <div class="section" v-if="paymentMethodsEnabled">
           <h3 class="section-title">Payment Information</h3>
@@ -537,7 +522,6 @@ const loadProfile = async () => {
 
 const darkMode = ref(false);
 const paymentMethodsEnabled = ref(true);
-const availableCategories = ref([]);
 const showHoursModal = ref(false);
 
 const fileInputRef = ref(null);
@@ -688,18 +672,6 @@ const dismissLoadingModal = async () => {
   if (loadingModalRef) {
     await loadingModalRef.dismiss();
     loadingModalRef = null;
-  }
-};
-
-const loadCategories = async () => {
-  try {
-    const response = await fetch('http://localhost:8000/api/categories');
-    const data = await response.json();
-    if (response.ok) {
-      availableCategories.value = data || [];
-    }
-  } catch {
-    // silent
   }
 };
 
@@ -1309,65 +1281,6 @@ const editField = async (field) => {
   await alert.present();
 };
 
-const manageCategories = async () => {
-  const inputs = availableCategories.value.map(c => ({
-    type: 'checkbox',
-    label: c.name,
-    value: c.name,
-    checked: profileData.value.categories.includes(c.name),
-  }));
-
-  const alert = await alertController.create({
-    header: 'Manage Categories',
-    message: 'Select product categories',
-    inputs,
-    buttons: [
-      { text: 'Cancel', role: 'cancel' },
-      {
-        text: 'Save',
-        handler: async (data) => {
-          profileData.value.categories = data;
-
-          const email = localStorage.getItem('userEmail');
-          if (!email) {
-            await showSuccessModal('Categories updated!');
-            return;
-          }
-
-          alert.dismiss();
-          await showLoadingModal('Saving categories...', false);
-
-          try {
-            const response = await fetch('http://localhost:8000/api/seller/profile', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email, categories: data }),
-            });
-
-            await dismissLoadingModal();
-
-            if (!response.ok) {
-              const err = await response.json();
-              throw new Error(err.message || 'Failed to save');
-            }
-
-            await showSuccessModal('Categories updated!');
-          } catch (error) {
-            await dismissLoadingModal();
-            const toast = await toastController.create({
-              message: error.message || 'Failed to save categories',
-              duration: 2000,
-              color: 'danger',
-              position: 'top',
-            });
-            await toast.present();
-          }
-        }
-      }
-    ]
-  });
-  await alert.present();
-};
 
 const changePassword = async () => {
   const alert = await alertController.create({
@@ -1774,7 +1687,6 @@ const goToProfile = () => {
 onMounted(() => {
   loadProfile();
   loadSettings();
-  loadCategories();
   loadPaymentMethods();
 });
 </script>
@@ -1961,31 +1873,6 @@ onMounted(() => {
 .info-arrow {
   font-size: 20px;
   color: #ccc;
-}
-
-/* Categories */
-.categories-display {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.category-chip {
-  background: #f0f0f0;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 13px;
-  color: #333;
-  font-weight: 500;
-}
-
-.category-chip.add {
-  background: #E8F5E9;
-  color: #4CAF50;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
 }
 
 /* Settings List */
