@@ -52,7 +52,7 @@
           <h3 class="section-title">Personal Information</h3>
           
           <div class="info-list">
-            <div class="info-item" @click="editField('name')">
+            <div class="info-item disabled">
               <div class="info-icon">
                 <ion-icon :icon="personOutline"></ion-icon>
               </div>
@@ -60,7 +60,6 @@
                 <p class="info-label">Full Name</p>
                 <p class="info-value">{{ profileData.name }}</p>
               </div>
-              <ion-icon :icon="chevronForwardOutline" class="info-arrow"></ion-icon>
             </div>
 
             <div class="info-item" @click="editField('phone')">
@@ -1093,7 +1092,7 @@ const editField = async (field) => {
 
           profileData.value[field] = data.value;
 
-          const shopFields = ['shopName', 'shopAddress', 'description', 'address'];
+          const shopFields = ['shopName', 'shopAddress', 'description', 'address', 'phone', 'email'];
           if (shopFields.includes(field)) {
             const email = localStorage.getItem('userEmail');
             if (!email) {
@@ -1111,10 +1110,12 @@ const editField = async (field) => {
               if (field === 'shopHours') body.operating_hours = data.value;
               if (field === 'description') body.description = data.value;
               if (field === 'address') body.current_address = data.value;
+              if (field === 'phone') body.phone = data.value;
+              if (field === 'email') body.new_email = data.value;
 
               const response = await fetch('http://localhost:8000/api/seller/profile', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                 body: JSON.stringify(body),
               });
 
@@ -1123,6 +1124,10 @@ const editField = async (field) => {
               if (!response.ok) {
                 const err = await response.json();
                 throw new Error(err.message || 'Failed to save');
+              }
+
+              if (field === 'email') {
+                localStorage.setItem('userEmail', data.value);
               }
             } catch (error) {
               await dismissLoadingModal();
@@ -1744,6 +1749,15 @@ onMounted(() => {
 
 .info-item:active {
   background: #f8f9fa;
+}
+
+.info-item.disabled {
+  cursor: default;
+  opacity: 0.8;
+}
+
+.info-item.disabled:active {
+  background: transparent;
 }
 
 .info-icon {

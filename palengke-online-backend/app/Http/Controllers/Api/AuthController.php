@@ -139,7 +139,19 @@ class AuthController extends Controller
             'current_address' => 'sometimes|string',
             'categories' => 'nullable|array',
             'categories.*' => 'string|distinct',
+            'phone' => 'sometimes|string|max:30',
+            'new_email' => 'sometimes|email|unique:seller_registrations,email,' . $seller->id,
         ]);
+
+        if ($request->has('phone')) {
+            $validated['full_phone'] = $validated['phone'];
+            unset($validated['phone']);
+        }
+
+        if ($request->has('new_email')) {
+            $validated['email'] = $validated['new_email'];
+            unset($validated['new_email']);
+        }
 
         $seller->update($validated);
 
@@ -151,6 +163,8 @@ class AuthController extends Controller
                 'operatingHours' => $seller->operating_hours,
                 'description' => $seller->description,
                 'categories' => $seller->categories ?? [],
+                'phone' => $seller->full_phone,
+                'email' => $seller->email,
                 'address' => $seller->current_address,
             ],
         ]);
