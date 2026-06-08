@@ -1,84 +1,93 @@
+function getApiBaseUrl() {
+  const config = useRuntimeConfig();
+  return config.public.apiBaseUrl || "http://localhost:8000";
+}
+
+function getToken() {
+  if (typeof localStorage === "undefined") return null;
+  return localStorage.getItem("palengke_auth_token");
+}
+
 export const useCategoriesStore = defineStore("categories", () => {
-  const categories = ref([
-    {
-      id: 1,
-      name: "Vegetables",
-      icon: "🥬",
-      color: "#059669",
-      products: 48,
-      pct: 100,
-    },
-    {
-      id: 2,
-      name: "Fruits",
-      icon: "🍎",
-      color: "#dc2626",
-      products: 36,
-      pct: 75,
-    },
-    {
-      id: 3,
-      name: "Seafood",
-      icon: "🐟",
-      color: "#3b82f6",
-      products: 28,
-      pct: 58,
-    },
-    {
-      id: 4,
-      name: "Meat & Poultry",
-      icon: "🍗",
-      color: "#f59e0b",
-      products: 32,
-      pct: 67,
-    },
-    {
-      id: 5,
-      name: "Pork",
-      icon: "🥩",
-      color: "#ec4899",
-      products: 20,
-      pct: 42,
-    },
-    {
-      id: 6,
-      name: "Chicken",
-      icon: "🐔",
-      color: "#f97316",
-      products: 18,
-      pct: 38,
-    },
-    {
-      id: 7,
-      name: "Bundles",
-      icon: "📦",
-      color: "#8b5cf6",
-      products: 12,
-      pct: 25,
-    },
-    {
-      id: 8,
-      name: "Rice & Grains",
-      icon: "🌾",
-      color: "#14b8a6",
-      products: 15,
-      pct: 31,
-    },
-  ]);
-  let nextId = 9;
+  const categories = ref([]);
+  const loading = ref(false);
 
-  function addCategory(data) {
-    categories.value.push({ id: nextId++, ...data, products: 0, pct: 0 });
+  async function fetchCategories() {
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/api/categories`);
+      if (res.ok) {
+        categories.value = await res.json();
+      }
+    } catch {
+      // silent
+    }
   }
 
-  function updateCategory(id, data) {
-    const cat = categories.value.find((c) => c.id === id);
-    if (cat) Object.assign(cat, data);
+  function authHeaders() {
+    return {
+      Authorization: `Bearer ${getToken()}`,
+      Accept: "application/json",
+    };
   }
 
-  function deleteCategory(id) {
-    categories.value = categories.value.filter((c) => c.id !== id);
+  async function addCategory(formData) {
+    loading.value = true;
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/api/admin/categories`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: formData,
+      });
+      if (res.ok) {
+        await fetchCategories();
+        return { ok: true };
+      }
+      const data = await res.json();
+      const msg = data.message || Object.values(data.errors || {}).flat().join(", ") || "Failed to create";
+      return { ok: false, error: msg };
+    } catch {
+      return { ok: false, error: "Network error" };
+    } finally {
+      loading.value = false;
+    }
   }
 
-  return { categories, addCategory, updateCategory, deleteCategory };
+  async function updateCategory(id, formData) {
+    loading.value = true;
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/api/admin/categories/${id}`, {
+        method: "POST",
+        headers: authHeaders(),
+        body: formData,
+      });
+      if (res.ok) {
+        await fetchCategories();
+        return { ok: true };
+      }
+      const data = await res.json();
+      const msg = data.message || Object.values(data.errors || {}).flat().join(", ") || "Failed to update";
+      return { ok: false, error: msg };
+    } catch {
+      return { ok: false, error: "Network error" };
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function deleteCategory(id) {
+    loading.value = true;
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/api/admin/categories/${id}`, {
+        method: "DELETE",
+        headers: authHeaders(),
+      });
+      if (res.ok) await fetchCategories();
+    } catch {
+      // silent
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  return { categories, loading, fetchCategories, addCategory, updateCategory, deleteCategory };
 });

@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\FeedbackController;
 use App\Http\Controllers\Api\SellerPaymentMethodController;
 use App\Http\Controllers\Api\SystemSettingController;
+use App\Http\Controllers\Api\CategoryController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -69,6 +70,9 @@ Route::get('/reports', [ReportController::class, 'myReports']);
 // Seller app — submit feedback
 Route::post('/feedbacks', [FeedbackController::class, 'store']);
 
+// Public endpoint for seller app to fetch categories
+Route::get('/categories', [CategoryController::class, 'index']);
+
 // Public endpoint for seller app to fetch system settings
 Route::get('/settings', [SystemSettingController::class, 'index']);
 
@@ -80,6 +84,14 @@ Route::get('/countries', [CountryController::class, 'index']);
 
 // Public endpoint for seller app to fetch enabled locations
 Route::get('/locations', [LocationController::class, 'index']);
+
+// Admin — categories
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/admin/categories', [CategoryController::class, 'index']);
+    Route::post('/admin/categories', [CategoryController::class, 'store']);
+    Route::post('/admin/categories/{id}', [CategoryController::class, 'update']);
+    Route::delete('/admin/categories/{id}', [CategoryController::class, 'destroy']);
+});
 
 // Admin — system settings
 Route::middleware('auth:sanctum')->group(function () {

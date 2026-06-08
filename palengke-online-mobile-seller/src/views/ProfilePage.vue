@@ -453,6 +453,7 @@ const profileData = ref({
 
 const darkMode = ref(false);
 const paymentMethodsEnabled = ref(true);
+const availableCategories = ref([]);
 
 let loadingModalRef = null;
 
@@ -479,6 +480,18 @@ const dismissLoadingModal = async () => {
   if (loadingModalRef) {
     await loadingModalRef.dismiss();
     loadingModalRef = null;
+  }
+};
+
+const loadCategories = async () => {
+  try {
+    const response = await fetch('http://localhost:8000/api/categories');
+    const data = await response.json();
+    if (response.ok) {
+      availableCategories.value = data || [];
+    }
+  } catch {
+    // silent
   }
 };
 
@@ -893,21 +906,17 @@ const editField = async (field) => {
 };
 
 const manageCategories = async () => {
+  const inputs = availableCategories.value.map(c => ({
+    type: 'checkbox',
+    label: c.name,
+    value: c.name,
+    checked: profileData.value.categories.includes(c.name),
+  }));
+
   const alert = await alertController.create({
     header: 'Manage Categories',
     message: 'Select product categories',
-    inputs: [
-      { type: 'checkbox', label: 'Fish', value: 'Fish', checked: profileData.value.categories.includes('Fish') },
-      { type: 'checkbox', label: 'Shellfish', value: 'Shellfish', checked: profileData.value.categories.includes('Shellfish') },
-      { type: 'checkbox', label: 'Squid & Octopus', value: 'Squid', checked: profileData.value.categories.includes('Squid') },
-      { type: 'checkbox', label: 'Pork', value: 'Pork', checked: profileData.value.categories.includes('Pork') },
-      { type: 'checkbox', label: 'Chicken', value: 'Chicken', checked: profileData.value.categories.includes('Chicken') },
-      { type: 'checkbox', label: 'Vegetables', value: 'Vegetables', checked: profileData.value.categories.includes('Vegetables') },
-      { type: 'checkbox', label: 'Fruits', value: 'Fruits', checked: profileData.value.categories.includes('Fruits') },
-      { type: 'checkbox', label: 'Condiments', value: 'Condiments', checked: profileData.value.categories.includes('Condiments') },
-      { type: 'checkbox', label: 'Dairy & Goods', value: 'Dairy', checked: profileData.value.categories.includes('Dairy') },
-      { type: 'checkbox', label: 'Rice & Grains', value: 'Rice', checked: profileData.value.categories.includes('Rice') }
-    ],
+    inputs,
     buttons: [
       { text: 'Cancel', role: 'cancel' },
       {
@@ -1326,6 +1335,7 @@ const goToProfile = () => {
 
 onMounted(() => {
   loadSettings();
+  loadCategories();
   loadPaymentMethods();
 });
 </script>
