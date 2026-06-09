@@ -130,7 +130,7 @@
           </div>
           <div class="info-row">
             <span class="label">Payment Method:</span>
-            <span class="value">Cash on Delivery</span>
+            <span class="value">{{ order.paymentMethod ? order.paymentMethod.toUpperCase() : 'N/A' }}</span>
           </div>
           <div class="info-row">
             <span class="label">Payment Status:</span>
@@ -471,6 +471,16 @@ const getStatusMessage = (status) => {
   return messages[status] || '';
 };
 
+const showLoadingModal = async () => {
+  const alert = await alertController.create({
+    cssClass: 'loading-modal',
+    message: 'Processing...',
+    buttons: [],
+  });
+  await alert.present();
+  return alert;
+};
+
 const showSuccessModal = async (message) => {
   const alert = await alertController.create({
     cssClass: 'success-modal',
@@ -554,7 +564,9 @@ const acceptOrder = async () => {
       {
         text: 'Accept',
         handler: async () => {
+          const loading = await showLoadingModal();
           const ok = await updateOrderStatus('processing');
+          await loading.dismiss();
           if (ok) {
             order.value.status = 'processing';
             await showSuccessModal('Order accepted successfully!');
@@ -580,7 +592,9 @@ const completeOrder = async () => {
       {
         text: 'Complete',
         handler: async () => {
+          const loading = await showLoadingModal();
           const ok = await updateOrderStatus('completed');
+          await loading.dismiss();
           if (ok) {
             order.value.status = 'completed';
             await showSuccessModal('Order completed successfully!');
@@ -614,7 +628,9 @@ const cancelOrder = async () => {
         text: 'Decline',
         role: 'destructive',
         handler: async () => {
+          const loading = await showLoadingModal();
           const ok = await updateOrderStatus('cancelled');
+          await loading.dismiss();
           if (ok) {
             order.value.status = 'cancelled';
             const declineAlert = await alertController.create({
@@ -1063,6 +1079,47 @@ const showToast = async (message, color = 'dark') => {
   font-weight: 600;
   border-radius: 12px;
   height: 44px;
+}
+
+/* Loading Modal */
+:deep(.loading-modal .alert-wrapper) {
+  border-radius: 20px;
+  text-align: center;
+  max-width: 260px;
+  padding: 40px 30px;
+  background: white;
+}
+:deep(.loading-modal .alert-head) {
+  display: none;
+}
+:deep(.loading-modal .alert-message) {
+  padding: 0;
+  position: relative;
+  padding-top: 56px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+:deep(.loading-modal .alert-message::before) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: -20px;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4CAF50;
+  border-radius: 50%;
+  animation: loadingSpin 1s linear infinite;
+}
+:deep(.loading-modal .alert-button-group) {
+  display: none;
+}
+
+@keyframes loadingSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Decline Modal */
