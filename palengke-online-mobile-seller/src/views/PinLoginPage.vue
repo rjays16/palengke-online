@@ -179,6 +179,11 @@ const verifyPin = async () => {
 };
 
 const goToLogin = () => {
+  localStorage.removeItem('isAuthenticated');
+  localStorage.removeItem('token');
+  localStorage.removeItem('hasPin');
+  localStorage.removeItem('deviceId');
+  localStorage.removeItem('userEmail');
   router.push('/login');
 };
 

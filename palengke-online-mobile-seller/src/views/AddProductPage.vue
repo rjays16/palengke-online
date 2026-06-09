@@ -19,22 +19,16 @@
             Product Images
           </h2>
           
-          <div class="image-upload-area" @click="selectImages">
-            <div class="uploaded-images" v-if="productImages.length > 0">
-              <div class="image-item" v-for="(image, index) in productImages" :key="index">
-                <img :src="image" alt="Product">
-                <div class="remove-image" @click.stop="removeImage(index)">
-                  <ion-icon :icon="closeCircle"></ion-icon>
-                </div>
-              </div>
-              <div class="add-more-image">
-                <ion-icon :icon="addOutline"></ion-icon>
-                <span>Add More</span>
+          <div class="image-upload-area" @click="selectImage">
+            <div class="uploaded-image" v-if="productImage">
+              <img :src="productImage" alt="Product">
+              <div class="remove-image" @click.stop="productImage = ''">
+                <ion-icon :icon="closeCircle"></ion-icon>
               </div>
             </div>
             <div class="upload-placeholder" v-else>
               <ion-icon :icon="cloudUploadOutline" class="upload-icon"></ion-icon>
-              <p>Click to upload product images</p>
+              <p>Click to upload product image</p>
               <span>PNG, JPG, WEBP (Max 5MB)</span>
             </div>
           </div>
@@ -61,14 +55,7 @@
             <label>Category *</label>
             <select v-model="category" class="form-select">
               <option value="">Select a category</option>
-              <option value="fish"><font-awesome-icon icon="fish" /> Fish & Seafood</option>
-              <option value="pork"><font-awesome-icon icon="piggy-bank" /> Pork</option>
-              <option value="chicken"><font-awesome-icon icon="crow" /> Chicken</option>
-              <option value="vegetables"><font-awesome-icon icon="carrot" /> Vegetables</option>
-              <option value="fruits"><font-awesome-icon icon="apple-alt" /> Fruits</option>
-              <option value="condiments"><font-awesome-icon icon="wine-bottle" /> Condiments</option>
-              <option value="dairy"><font-awesome-icon icon="cow" /> Dairy & Goods</option>
-              <option value="rice"><font-awesome-icon icon="seedling" /> Rice & Grains</option>
+              <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
             </select>
           </div>
 
@@ -204,12 +191,6 @@
             <small class="helper-text">Optional - for your reference</small>
           </div>
 
-          <div class="form-group">
-            <label class="checkbox-label">
-              <input type="checkbox" v-model="trackInventory" checked>
-              <span> Track inventory (reduce stock when sold)</span>
-            </label>
-          </div>
         </div>
 
         <!-- Additional Details -->
@@ -221,12 +202,10 @@
 
           <div class="form-group">
             <label>Origin/Source</label>
-            <input 
-              v-model="origin" 
-              type="text" 
-              placeholder="e.g., Davao, Baguio, Local Farm"
-              class="form-input"
-            >
+            <select v-model="origin" class="form-select">
+              <option value="">Select origin</option>
+              <option v-for="loc in locations" :key="loc" :value="loc">{{ loc }}</option>
+            </select>
           </div>
 
           <div class="form-group">
@@ -239,14 +218,7 @@
             >
           </div>
 
-          <div class="form-group">
-            <label class="checkbox-label">
-              <input type="checkbox" v-model="isOrganic">
-              <span> Organic product</span>
-            </label>
-          </div>
-
-          <div class="form-group">
+          <div class="form-group" v-if="canFeature">
             <label class="checkbox-label">
               <input type="checkbox" v-model="isFeatured">
               <span> Feature this product (show first)</span>
@@ -288,8 +260,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { getSubscription } from '@/services/subscriptionService';
 import {
   IonPage,
   IonHeader,
@@ -321,8 +294,13 @@ import {
 
 const router = useRouter();
 
+const userEmail = localStorage.getItem('userEmail');
+const categories = ref([]);
+const locations = ref([]);
+const saving = ref(false);
+
 // Form Data
-const productImages = ref([]);
+const productImage = ref('');
 const productName = ref('');
 const category = ref('');
 const description = ref('');
@@ -333,12 +311,12 @@ const hasDiscount = ref(false);
 const discountPrice = ref('');
 const stockQuantity = ref('');
 const sku = ref('');
-const trackInventory = ref(true);
 const origin = ref('');
 const brand = ref('');
-const isOrganic = ref(false);
 const isFeatured = ref(false);
 const isActive = ref(true);
+
+const canFeature = computed(() => getSubscription().status === 'active');
 
 // Computed
 const discountPercentage = computed(() => {
@@ -353,22 +331,24 @@ const discountPercentage = computed(() => {
 });
 
 // Methods
-const selectImages = () => {
-  // TODO: Implement actual image picker
-  console.log('Select images');
-  // For demo, add a placeholder
-  const demoImage = 'https://via.placeholder.com/300x300?text=Product+Image';
-  if (productImages.value.length < 5) {
-    productImages.value.push(demoImage);
-  }
+const selectImage = () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/png,image/jpg,image/jpeg,image/webp';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        productImage.value = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  input.click();
 };
 
-const removeImage = (index) => {
-  productImages.value.splice(index, 1);
-};
-
-const saveProduct = async () => {
-  // Validation
+const saveWithStatus = async (status) => {
   if (!productName.value || !category.value || !description.value || !price.value || !stockQuantity.value) {
     const alert = await alertController.create({
       header: 'Missing Information',
@@ -379,34 +359,53 @@ const saveProduct = async () => {
     return;
   }
 
-  // TODO: Save to backend
-  const productData = {
-    images: productImages.value,
-    name: productName.value,
-    category: category.value,
-    description: description.value,
-    sellingUnit: sellingUnit.value,
-    price: parseFloat(price.value),
-    minimumOrder: minimumOrder.value ? parseFloat(minimumOrder.value) : null,
-    discountPrice: hasDiscount.value ? parseFloat(discountPrice.value) : null,
-    stockQuantity: parseFloat(stockQuantity.value),
-    sku: sku.value,
-    trackInventory: trackInventory.value,
-    origin: origin.value,
-    brand: brand.value,
-    isOrganic: isOrganic.value,
-    isFeatured: isFeatured.value,
-    isActive: isActive.value
-  };
+  saving.value = true;
+  try {
+    const res = await fetch('http://localhost:8000/api/seller/products', {
+      method: 'POST',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: userEmail,
+        name: productName.value,
+        category: category.value,
+        description: description.value,
+        selling_unit: sellingUnit.value,
+        price: parseFloat(price.value),
+        minimum_order: minimumOrder.value ? parseFloat(minimumOrder.value) : null,
+        has_discount: hasDiscount.value,
+        discount_price: hasDiscount.value ? parseFloat(discountPrice.value) : null,
+        stock_quantity: parseFloat(stockQuantity.value),
+        sku: sku.value,
+        track_inventory: true,
+        origin: origin.value,
+        brand: brand.value,
+        is_featured: isFeatured.value,
+        is_active: isActive.value,
+        images: productImage.value ? [productImage.value] : [],
+        status,
+      }),
+    });
 
-  console.log('Saving product:', productData);
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.message || 'Failed to save product');
+    }
 
-  // Show success modal
-  await showSuccessModal('Product added successfully!');
-
-  // Navigate back to products
-  router.push('/products');
+    await showSuccessModal(status === 'draft' ? 'Draft saved!' : 'Product added successfully!');
+    router.push('/products');
+  } catch (e) {
+    const alert = await alertController.create({
+      header: 'Error',
+      message: e.message || 'Failed to save product. Please try again.',
+      buttons: ['OK']
+    });
+    await alert.present();
+  } finally {
+    saving.value = false;
+  }
 };
+
+const saveProduct = () => saveWithStatus('active');
 
 const showSuccessModal = async (message) => {
   const alert = await alertController.create({
@@ -462,15 +461,44 @@ const showSuccessModal = async (message) => {
   await alert.onDidDismiss();
 };
 
-const saveDraft = async () => {
-  const toast = await toastController.create({
-    message: 'Draft saved!',
-    duration: 2000,
-    color: 'medium',
-    position: 'top'
-  });
-  await toast.present();
-};
+const saveDraft = () => saveWithStatus('draft');
+
+onMounted(async () => {
+  if (!userEmail) return;
+  try {
+    const [profileRes, locRes] = await Promise.all([
+      fetch(`http://localhost:8000/api/seller/profile?email=${encodeURIComponent(userEmail)}`, {
+        headers: { 'Accept': 'application/json' }
+      }),
+      fetch('http://localhost:8000/api/locations', {
+        headers: { 'Accept': 'application/json' }
+      }),
+    ]);
+
+    const profileData = await profileRes.json();
+    let cats = (profileData.user && profileData.user.categories) || [];
+    if (!cats.length) {
+      const allRes = await fetch('http://localhost:8000/api/categories', {
+        headers: { 'Accept': 'application/json' }
+      });
+      const allData = await allRes.json();
+      cats = (Array.isArray(allData) ? allData : (allData.categories || [])).map(c => c.name);
+    }
+    categories.value = cats;
+
+    const locData = await locRes.json();
+    const locs = locData.locations || [];
+    const cityNames = [];
+    locs.forEach(region => {
+      (region.cities || []).forEach(city => {
+        cityNames.push(city.name);
+      });
+    });
+    locations.value = cityNames;
+  } catch (e) {
+    console.error('Failed to load data:', e);
+  }
+});
 </script>
 
 <style scoped>
@@ -542,24 +570,20 @@ const saveDraft = async () => {
   color: #999;
 }
 
-.uploaded-images {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-.image-item {
+.uploaded-image {
   position: relative;
-  aspect-ratio: 1;
+  max-width: 300px;
+  margin: 0 auto;
   border-radius: 12px;
   overflow: hidden;
   background: #f5f5f5;
 }
 
-.image-item img {
+.uploaded-image img {
   width: 100%;
-  height: 100%;
+  aspect-ratio: 1;
   object-fit: cover;
+  display: block;
 }
 
 .remove-image {
@@ -576,28 +600,6 @@ const saveDraft = async () => {
   color: white;
   cursor: pointer;
   font-size: 20px;
-}
-
-.add-more-image {
-  aspect-ratio: 1;
-  border: 2px dashed #e0e0e0;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: #4CAF50;
-  cursor: pointer;
-}
-
-.add-more-image ion-icon {
-  font-size: 32px;
-}
-
-.add-more-image span {
-  font-size: 12px;
-  font-weight: 600;
 }
 
 /* Form Elements */
@@ -829,10 +831,6 @@ const saveDraft = async () => {
 
 /* Responsive */
 @media (max-width: 360px) {
-  .uploaded-images {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
   .form-row {
     grid-template-columns: 1fr;
   }

@@ -15,26 +15,30 @@
     </ion-header>
 
     <ion-content :fullscreen="true" class="edit-product-content">
-      <div class="edit-product-container">
+      <div class="loading-state" v-if="loading">
+        <ion-icon :icon="cubeOutline" class="loading-icon"></ion-icon>
+        <p>Loading product...</p>
+      </div>
+
+      <div class="edit-product-container" v-else>
 
         <!-- Product Images -->
         <div class="section">
           <h2 class="section-title">Product Images</h2>
           
-          <div class="images-grid">
-            <div class="image-item" v-for="(image, index) in productImages" :key="index">
-              <img :src="image" :alt="`Product ${index + 1}`">
-              <button class="remove-image-btn" @click="removeImage(index)">
+          <div class="image-upload-area" @click="selectImage">
+            <div class="uploaded-image" v-if="productImage">
+              <img :src="productImage" alt="Product">
+              <div class="remove-image" @click.stop="productImage = ''">
                 <ion-icon :icon="closeCircle"></ion-icon>
-              </button>
+              </div>
             </div>
-            
-            <div class="add-image-btn" @click="addImage" v-if="productImages.length < 5">
-              <ion-icon :icon="addOutline"></ion-icon>
-              <span>Add Image</span>
+            <div class="upload-placeholder" v-else>
+              <ion-icon :icon="cloudUploadOutline" class="upload-icon"></ion-icon>
+              <p>Click to upload product image</p>
+              <span>PNG, JPG, WEBP (Max 5MB)</span>
             </div>
           </div>
-          <p class="helper-text">Maximum 5 images. First image will be the main photo.</p>
         </div>
 
         <!-- Basic Information -->
@@ -55,16 +59,7 @@
             <label>Category <span class="required">*</span></label>
             <select v-model="productData.category" class="custom-select">
               <option value="">Select category</option>
-              <option value="Fish">Fish</option>
-              <option value="Shellfish">Shellfish</option>
-              <option value="Squid">Squid & Octopus</option>
-              <option value="Pork">Pork</option>
-              <option value="Chicken">Chicken</option>
-              <option value="Vegetables">Vegetables</option>
-              <option value="Fruits">Fruits</option>
-              <option value="Condiments">Condiments</option>
-              <option value="Dairy">Dairy & Goods</option>
-              <option value="Rice">Rice & Grains</option>
+              <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
             </select>
           </div>
 
@@ -188,12 +183,6 @@
             >
           </div>
 
-          <div class="checkbox-group">
-            <label class="checkbox-label">
-              <input type="checkbox" v-model="productData.trackInventory">
-              <span>Track inventory for this product</span>
-            </label>
-          </div>
         </div>
 
         <!-- Additional Details -->
@@ -202,12 +191,10 @@
           
           <div class="input-group">
             <label>Origin/Source</label>
-            <input 
-              v-model="productData.origin" 
-              type="text" 
-              placeholder="e.g., Davao, Baguio"
-              class="custom-input"
-            >
+            <select v-model="productData.origin" class="custom-select">
+              <option value="">Select origin</option>
+              <option v-for="loc in locations" :key="loc" :value="loc">{{ loc }}</option>
+            </select>
           </div>
 
           <div class="input-group">
@@ -220,14 +207,7 @@
             >
           </div>
 
-          <div class="checkbox-group">
-            <label class="checkbox-label">
-              <input type="checkbox" v-model="productData.isOrganic">
-              <span>This is an organic product</span>
-            </label>
-          </div>
-
-          <div class="checkbox-group">
+          <div class="checkbox-group" v-if="canFeature">
             <label class="checkbox-label">
               <input type="checkbox" v-model="productData.isFeatured">
               <span>Feature this product</span>
@@ -294,6 +274,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { getSubscription } from '@/services/subscriptionService';
 import {
   IonPage,
   IonHeader,
@@ -311,37 +292,111 @@ import {
   trashOutline,
   closeCircle,
   addOutline,
+  cloudUploadOutline,
   checkmarkCircle
 } from 'ionicons/icons';
 
 const router = useRouter();
 const route = useRoute();
 
-// Product Data (pre-filled with existing data)
+const userEmail = localStorage.getItem('userEmail');
+const loading = ref(true);
+const categories = ref([]);
+const locations = ref([]);
+const saving = ref(false);
+
+const canFeature = computed(() => getSubscription().status === 'active');
+
 const productData = ref({
-  id: 1,
-  name: 'Fresh Tilapia',
-  category: 'Fish',
-  description: 'Fresh tilapia caught daily from local fish farms. Clean and gutted, ready to cook.',
+  id: null,
+  name: '',
+  category: '',
+  description: '',
   unit: 'kilo',
-  price: 180,
-  minOrder: 0.5,
+  price: 0,
+  minOrder: null,
   hasDiscount: false,
   discountPrice: null,
-  stock: 50,
-  sku: 'FISH-TIL-001',
-  trackInventory: true,
-  origin: 'Laguna Fish Farm',
+  stock: 0,
+  sku: '',
+  origin: '',
   brand: '',
-  isOrganic: false,
   isFeatured: false,
-  isActive: true
+  isActive: true,
 });
 
-const productImages = ref([
-  'https://picsum.photos/seed/tilapia1/200/200',
-  'https://picsum.photos/seed/tilapia2/200/200'
-]);
+const productImage = ref('');
+
+async function loadProduct() {
+  const productId = route.params.id;
+  if (!userEmail || !productId) return;
+  loading.value = true;
+  try {
+    const [profileRes, prodRes, locRes] = await Promise.all([
+      fetch(`http://localhost:8000/api/seller/profile?email=${encodeURIComponent(userEmail)}`, {
+        headers: { 'Accept': 'application/json' }
+      }),
+      fetch(`http://localhost:8000/api/seller/products/${productId}?email=${encodeURIComponent(userEmail)}`, {
+        headers: { 'Accept': 'application/json' }
+      }),
+      fetch('http://localhost:8000/api/locations', {
+        headers: { 'Accept': 'application/json' }
+      }),
+    ]);
+
+    const profileData = await profileRes.json();
+    let cats = (profileData.user && profileData.user.categories) || [];
+    if (!cats.length) {
+      const allRes = await fetch('http://localhost:8000/api/categories', {
+        headers: { 'Accept': 'application/json' }
+      });
+      const allData = await allRes.json();
+      cats = (Array.isArray(allData) ? allData : (allData.categories || [])).map(c => c.name);
+    }
+    categories.value = cats;
+
+    const locData = await locRes.json();
+    const locs = locData.locations || [];
+    const cityNames = [];
+    locs.forEach(region => {
+      (region.cities || []).forEach(city => {
+        cityNames.push(city.name);
+      });
+    });
+    locations.value = cityNames;
+
+    const prodData = await prodRes.json();
+    const p = prodData.product;
+    if (p) {
+      productData.value = {
+        id: p.id,
+        name: p.name,
+        category: p.category,
+        description: p.description || '',
+        unit: p.selling_unit,
+        price: p.price,
+        minOrder: p.minimum_order,
+        hasDiscount: !!p.has_discount,
+        discountPrice: p.discount_price,
+        stock: p.stock_quantity,
+        sku: p.sku || '',
+        origin: p.origin || '',
+        brand: p.brand || '',
+        isFeatured: !!p.is_featured,
+        isActive: !!p.is_active,
+      };
+      productImage.value = p.images?.[0] || '';
+
+      if (p.category && !categories.value.includes(p.category)) {
+        categories.value.push(p.category);
+      }
+    }
+  } catch (e) {
+    console.error('Failed to load product:', e);
+  } finally {
+    loading.value = false;
+  }
+}
 
 // Computed
 const stockPlaceholder = computed(() => {
@@ -358,35 +413,24 @@ const discountPercentage = computed(() => {
 });
 
 // Methods
-const addImage = () => {
-  // TODO: Implement image picker
-  if (productImages.value.length < 5) {
-    productImages.value.push(`https://picsum.photos/seed/product${Date.now()}/200/200`);
-    showToast('Image added', 'success');
-  }
-};
-
-const removeImage = async (index) => {
-  const alert = await alertController.create({
-    header: 'Remove Image',
-    message: 'Are you sure you want to remove this image?',
-    buttons: [
-      { text: 'Cancel', role: 'cancel' },
-      {
-        text: 'Remove',
-        role: 'destructive',
-        handler: () => {
-          productImages.value.splice(index, 1);
-          showToast('Image removed', 'success');
-        }
-      }
-    ]
-  });
-  await alert.present();
+const selectImage = () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/png,image/jpg,image/jpeg,image/webp';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        productImage.value = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  input.click();
 };
 
 const updateProduct = async () => {
-  // Validate required fields
   if (!productData.value.name || !productData.value.category || !productData.value.price || !productData.value.stock) {
     const alert = await alertController.create({
       header: 'Missing Information',
@@ -397,10 +441,48 @@ const updateProduct = async () => {
     return;
   }
 
-  // TODO: Send update to API
-  console.log('Updating product:', productData.value);
-  
-  await showSuccessModal('Product updated successfully!');
+  saving.value = true;
+  try {
+    const res = await fetch(`http://localhost:8000/api/seller/products/${productData.value.id}`, {
+      method: 'POST',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: userEmail,
+        name: productData.value.name,
+        category: productData.value.category,
+        description: productData.value.description,
+        selling_unit: productData.value.unit,
+        price: productData.value.price,
+        minimum_order: productData.value.minOrder,
+        has_discount: productData.value.hasDiscount,
+        discount_price: productData.value.hasDiscount ? productData.value.discountPrice : null,
+        stock_quantity: productData.value.stock,
+        sku: productData.value.sku,
+        track_inventory: productData.value.trackInventory,
+        origin: productData.value.origin,
+        brand: productData.value.brand,
+        is_featured: productData.value.isFeatured,
+        is_active: productData.value.isActive,
+        images: productImage.value ? [productImage.value] : [],
+      }),
+    });
+
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.message || 'Failed to update product');
+    }
+
+    await showSuccessModal('Product updated successfully!');
+  } catch (e) {
+    const alert = await alertController.create({
+      header: 'Error',
+      message: e.message || 'Failed to update product. Please try again.',
+      buttons: ['OK']
+    });
+    await alert.present();
+  } finally {
+    saving.value = false;
+  }
 };
 
 const showSuccessModal = async (message) => {
@@ -470,10 +552,24 @@ const deleteProduct = async () => {
         text: 'Delete',
         role: 'destructive',
         handler: async () => {
-          // TODO: Delete from API
-          console.log('Deleting product:', productData.value.id);
-          
-          await showSuccessModal('Product successfully deleted');
+          saving.value = true;
+          try {
+            const res = await fetch(`http://localhost:8000/api/seller/products/${productData.value.id}?email=${encodeURIComponent(userEmail)}`, {
+              method: 'DELETE',
+              headers: { 'Accept': 'application/json' }
+            });
+            if (!res.ok) throw new Error('Failed to delete product');
+            await showSuccessModal('Product successfully deleted');
+          } catch (e) {
+            const alert = await alertController.create({
+              header: 'Error',
+              message: e.message || 'Failed to delete product.',
+              buttons: ['OK']
+            });
+            await alert.present();
+          } finally {
+            saving.value = false;
+          }
         }
       }
     ]
@@ -496,13 +592,7 @@ const showToast = async (message, color = 'success', icon = null) => {
   await toast.present();
 };
 
-// Load product data on mount
-onMounted(() => {
-  // TODO: Load product data from API using route.params.id
-  const productId = route.params.id;
-  console.log('Loading product:', productId);
-  // For now, using mock data
-});
+onMounted(loadProduct);
 </script>
 
 <style scoped>
@@ -513,6 +603,30 @@ onMounted(() => {
 .edit-product-container {
   padding: 20px;
   padding-bottom: 40px;
+}
+
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.loading-icon {
+  font-size: 60px;
+  color: #4CAF50;
+  margin-bottom: 16px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+.loading-state p {
+  font-size: 15px;
+  color: #666;
+  margin: 0;
 }
 
 /* Sections */
@@ -531,77 +645,71 @@ onMounted(() => {
   margin: 0 0 20px 0;
 }
 
-/* Images Grid */
-.images-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 12px;
+/* Image Upload */
+.image-upload-area {
+  border: 2px dashed #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: border-color 0.2s;
 }
 
-.image-item {
+.image-upload-area:hover {
+  border-color: #4CAF50;
+}
+
+.upload-placeholder {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.upload-icon {
+  font-size: 64px;
+  color: #ccc;
+  margin-bottom: 16px;
+}
+
+.upload-placeholder p {
+  font-size: 16px;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.upload-placeholder span {
+  font-size: 13px;
+  color: #999;
+}
+
+.uploaded-image {
   position: relative;
-  aspect-ratio: 1;
+  max-width: 300px;
+  margin: 0 auto;
   border-radius: 12px;
   overflow: hidden;
   background: #f5f5f5;
 }
 
-.image-item img {
+.uploaded-image img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.remove-image-btn {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: rgba(244, 67, 54, 0.9);
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: white;
-  font-size: 16px;
-}
-
-.add-image-btn {
   aspect-ratio: 1;
-  border: 2px dashed #4CAF50;
-  border-radius: 12px;
-  background: #E8F5E9;
+  object-fit: cover;
+  display: block;
+}
+
+.remove-image {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 50%;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
+  color: white;
   cursor: pointer;
-  color: #4CAF50;
-  gap: 4px;
-  transition: all 0.2s;
-}
-
-.add-image-btn:active {
-  transform: scale(0.95);
-}
-
-.add-image-btn ion-icon {
-  font-size: 32px;
-}
-
-.add-image-btn span {
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.helper-text {
-  font-size: 12px;
-  color: #666;
-  margin: 0;
+  font-size: 20px;
 }
 
 /* Input Groups */
@@ -832,10 +940,6 @@ input:checked + .slider:before {
 @media (max-width: 360px) {
   .edit-product-container {
     padding: 16px;
-  }
-  
-  .images-grid {
-    grid-template-columns: repeat(2, 1fr);
   }
   
   .unit-selector {

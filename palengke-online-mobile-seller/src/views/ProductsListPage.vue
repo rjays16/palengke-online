@@ -65,8 +65,14 @@
           </div>
         </div>
 
+        <!-- Loading State -->
+        <div class="loading-state" v-if="loading">
+          <ion-icon :icon="cubeOutline" class="loading-icon"></ion-icon>
+          <p>Loading products...</p>
+        </div>
+
         <!-- Products List -->
-        <div class="products-list">
+        <div class="products-list" v-else>
           <div 
             class="product-card" 
             v-for="product in filteredProducts" 
@@ -74,7 +80,7 @@
           >
             <!-- Product Image -->
             <div class="product-image">
-              <img :src="product.image" :alt="product.name">
+              <img :src="product.image" :alt="product.name" @error="$event.target.src = '/assets/images/product-placeholder.svg'">
               <div class="product-badge" :class="product.status">
                 {{ product.status }}
               </div>
@@ -192,7 +198,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage,
@@ -221,16 +227,44 @@ import {
   receiptOutline,
   personOutline
 } from 'ionicons/icons';
-import { MOCK_PRODUCTS } from '@/mock/products';
-
 const router = useRouter();
+
+const userEmail = localStorage.getItem('userEmail');
+const loading = ref(false);
 
 // Search & Filter
 const searchQuery = ref('');
 const selectedFilter = ref('all');
 
-// Mock Products Data (replace with API call later)
-const products = ref(MOCK_PRODUCTS);
+const products = ref([]);
+
+async function loadProducts() {
+  if (!userEmail) return;
+  loading.value = true;
+  try {
+    const res = await fetch(`http://localhost:8000/api/seller/products?email=${encodeURIComponent(userEmail)}`, {
+      headers: { 'Accept': 'application/json' }
+    });
+    const data = await res.json();
+    products.value = (data.products || []).map(p => ({
+      ...p,
+      image: p.images?.[0] || '/assets/images/product-placeholder.svg',
+      unit: p.selling_unit,
+      originalPrice: p.has_discount ? p.price : null,
+      stock: p.stock_quantity,
+      views: 0,
+      sold: 0,
+      status: p.is_active ? 'active' : 'inactive',
+      price: p.has_discount && p.discount_price ? p.discount_price : p.price,
+    }));
+  } catch (e) {
+    console.error('Failed to load products:', e);
+  } finally {
+    loading.value = false;
+  }
+}
+
+onMounted(loadProducts);
 
 // Computed Properties
 const filteredProducts = computed(() => {
@@ -281,22 +315,33 @@ const editProduct = (product) => {
 };
 
 const toggleProductStatus = async (product) => {
-  const newStatus = product.status === 'active' ? 'inactive' : 'active';
-  const statusText = newStatus === 'active' ? 'activate' : 'deactivate';
+  const newIsActive = !product.is_active;
+  const statusText = newIsActive ? 'activate' : 'deactivate';
   
   const alert = await alertController.create({
     header: 'Change Status',
     message: `Do you want to ${statusText} "${product.name}"?`,
     buttons: [
-      {
-        text: 'Cancel',
-        role: 'cancel'
-      },
+      { text: 'Cancel', role: 'cancel' },
       {
         text: statusText.charAt(0).toUpperCase() + statusText.slice(1),
-        handler: () => {
-          product.status = newStatus;
-          showToast(`Product ${newStatus}`, 'success');
+        handler: async () => {
+          try {
+            const res = await fetch(`http://localhost:8000/api/seller/products/${product.id}`, {
+              method: 'POST',
+              headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: userEmail, is_active: newIsActive })
+            });
+            if (res.ok) {
+              product.is_active = newIsActive;
+              product.status = newIsActive ? 'active' : 'inactive';
+              showToast(`Product ${newIsActive ? 'activated' : 'deactivated'}`, 'success');
+            } else {
+              showToast('Failed to update status', 'danger');
+            }
+          } catch (e) {
+            showToast('Failed to update status', 'danger');
+          }
         }
       }
     ]
@@ -310,18 +355,25 @@ const deleteProduct = async (product) => {
     header: 'Delete Product',
     message: `Are you sure you want to delete "${product.name}"? This action cannot be undone.`,
     buttons: [
-      {
-        text: 'Cancel',
-        role: 'cancel'
-      },
+      { text: 'Cancel', role: 'cancel' },
       {
         text: 'Delete',
         role: 'destructive',
         handler: async () => {
-          const index = products.value.findIndex(p => p.id === product.id);
-          if (index > -1) {
-            products.value.splice(index, 1);
-            await showSuccessModal('Product successfully deleted');
+          try {
+            const res = await fetch(`http://localhost:8000/api/seller/products/${product.id}?email=${encodeURIComponent(userEmail)}`, {
+              method: 'DELETE',
+              headers: { 'Accept': 'application/json' }
+            });
+            if (res.ok) {
+              const index = products.value.findIndex(p => p.id === product.id);
+              if (index > -1) products.value.splice(index, 1);
+              await showSuccessModal('Product successfully deleted');
+            } else {
+              showToast('Failed to delete product', 'danger');
+            }
+          } catch (e) {
+            showToast('Failed to delete product', 'danger');
           }
         }
       }
@@ -655,6 +707,30 @@ const goToProfile = () => {
 
 .text-danger {
   color: #f44336;
+}
+
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.loading-icon {
+  font-size: 60px;
+  color: #4CAF50;
+  margin-bottom: 16px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+.loading-state p {
+  font-size: 15px;
+  color: #666;
+  margin: 0;
 }
 
 /* Empty State */
