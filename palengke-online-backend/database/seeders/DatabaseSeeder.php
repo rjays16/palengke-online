@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             IdTypeSeeder::class,
             ContactSupportSeeder::class,
             SystemSettingSeeder::class,
+            OrderSeeder::class,
         ]);
     }
 }

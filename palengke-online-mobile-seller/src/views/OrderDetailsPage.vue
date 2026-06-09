@@ -79,9 +79,16 @@
                 <span class="label">Delivery Address</span>
                 <span class="value">{{ order.deliveryAddress }}</span>
               </div>
-              <ion-button fill="clear" size="small" @click="openMap">
+              <ion-button fill="clear" size="small" @click="toggleMap">
                 <ion-icon :icon="navigateOutline"></ion-icon>
               </ion-button>
+            </div>
+            <div v-if="showMap && order.latitude && order.longitude">
+              <div class="map-info-bar">
+                <span><ion-icon :icon="navigateOutline"></ion-icon> {{ mapDistance }}</span>
+                <span><ion-icon :icon="timeOutline"></ion-icon> {{ mapDuration }}</span>
+              </div>
+              <div id="customer-map" class="customer-map"></div>
             </div>
           </div>
         </div>
@@ -234,7 +241,15 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { getDisputeByOrderId } from '../services/disputeService';
-import { MOCK_ORDERS } from '@/mock/orders';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
 import {
   IonPage,
   IonHeader,
@@ -276,35 +291,128 @@ const dispute = computed(() => {
   return getDisputeByOrderId(order.value.id)
 })
 
-// Mock order data (TODO: Replace with API call)
-const mockOrders = MOCK_ORDERS;
-
 onMounted(() => {
   loadOrderDetails();
 });
 
-const loadOrderDetails = () => {
+const loadOrderDetails = async () => {
   const orderId = route.params.id;
-  // TODO: Replace with actual API call
-  setTimeout(() => {
-    order.value = mockOrders[orderId];
-    
-    // If order not found, show error and go back
-    if (!order.value) {
-      alertController.create({
-        header: 'Order Not Found',
-        message: `Order #${orderId} does not exist.`,
-        buttons: [
-          {
-            text: 'OK',
-            handler: () => {
-              router.push('/orders');
-            }
-          }
-        ]
-      }).then(alert => alert.present());
+  const email = localStorage.getItem('userEmail');
+  if (!email) return;
+
+  try {
+    const response = await fetch(`http://localhost:8000/api/seller/orders/${orderId}?email=${encodeURIComponent(email)}`, {
+      headers: { 'Accept': 'application/json' },
+    });
+    const data = await response.json();
+
+    if (response.ok && data.order) {
+      const o = data.order;
+      order.value = {
+        id: o.id,
+        customerName: o.customer_name,
+        customerPhone: o.customer_phone,
+        deliveryAddress: o.delivery_address,
+        latitude: o.latitude,
+        longitude: o.longitude,
+        itemCount: o.item_count,
+        total: o.total,
+        status: o.status,
+        date: o.created_at,
+        items: o.items || [],
+        paymentMethod: o.payment_method,
+      };
+    } else {
+      showOrderNotFound(orderId);
     }
-  }, 500);
+  } catch {
+    showOrderNotFound(orderId);
+  }
+};
+
+const showMap = ref(false);
+const mapDistance = ref('');
+const mapDuration = ref('');
+let mapInstance = null;
+
+const toggleMap = () => {
+  showMap.value = !showMap.value;
+  if (showMap.value && order.value.latitude && order.value.longitude) {
+    setTimeout(() => initMap(), 200);
+  }
+};
+
+const initMap = () => {
+  if (mapInstance) {
+    mapInstance.invalidateSize();
+    return;
+  }
+  const el = document.getElementById('customer-map');
+  if (!el) return;
+  const custLat = order.value.latitude;
+  const custLng = order.value.longitude;
+
+  mapInstance = L.map(el, { zoomControl: false }).setView([custLat, custLng], 15);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+  }).addTo(mapInstance);
+
+  L.marker([custLat, custLng]).addTo(mapInstance)
+    .bindPopup('<b>Customer</b><br>' + order.value.deliveryAddress);
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const sellerLat = pos.coords.latitude;
+      const sellerLng = pos.coords.longitude;
+
+      L.marker([sellerLat, sellerLng], {
+        icon: L.divIcon({
+          className: 'seller-marker',
+          html: '<div class="seller-dot"></div>',
+          iconSize: [16, 16],
+          iconAnchor: [8, 8],
+        }),
+      }).addTo(mapInstance).bindPopup('<b>You (Seller)</b>');
+
+      L.polyline([[sellerLat, sellerLng], [custLat, custLng]], {
+        color: '#4CAF50',
+        weight: 3,
+        dashArray: '8, 8',
+      }).addTo(mapInstance);
+
+      const distMeters = mapInstance.distance([sellerLat, sellerLng], [custLat, custLng]);
+      const distKm = distMeters / 1000;
+      mapDistance.value = distKm < 1 ? `${Math.round(distMeters)} m` : `${distKm.toFixed(1)} km`;
+
+      const avgSpeedKmh = 30;
+      const minutes = Math.round((distKm / avgSpeedKmh) * 60);
+      mapDuration.value = minutes < 1 ? 'Less than 1 min' : `${minutes} min${minutes > 1 ? 's' : ''}`;
+
+      mapInstance.fitBounds([[sellerLat, sellerLng], [custLat, custLng]], { padding: [40, 40] });
+    },
+    () => {
+      mapInstance.setView([custLat, custLng], 16);
+      mapDistance.value = '';
+      mapDuration.value = '';
+    },
+    { enableHighAccuracy: true, timeout: 10000 },
+  );
+};
+
+const showOrderNotFound = (orderId) => {
+  alertController.create({
+    header: 'Order Not Found',
+    message: `Order #${orderId} does not exist.`,
+    buttons: [
+      {
+        text: 'OK',
+        handler: () => {
+          router.push('/orders');
+        }
+      }
+    ]
+  }).then(alert => alert.present());
 };
 
 const formatPrice = (price) => {
@@ -419,6 +527,21 @@ const showSuccessModal = async (message) => {
   }, 2000);
 };
 
+const updateOrderStatus = async (newStatus) => {
+  const email = localStorage.getItem('userEmail');
+  if (!email) return false;
+  try {
+    const response = await fetch(`http://localhost:8000/api/seller/orders/${order.value.id}/status`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ email, status: newStatus }),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+};
+
 const acceptOrder = async () => {
   const alert = await alertController.create({
     header: 'Accept Order',
@@ -431,8 +554,13 @@ const acceptOrder = async () => {
       {
         text: 'Accept',
         handler: async () => {
-          order.value.status = 'processing';
-          await showSuccessModal('Order accepted successfully!');
+          const ok = await updateOrderStatus('processing');
+          if (ok) {
+            order.value.status = 'processing';
+            await showSuccessModal('Order accepted successfully!');
+          } else {
+            showToast('Failed to accept order', 'danger');
+          }
         }
       }
     ]
@@ -452,8 +580,13 @@ const completeOrder = async () => {
       {
         text: 'Complete',
         handler: async () => {
-          order.value.status = 'completed';
-          await showSuccessModal('Order completed successfully!');
+          const ok = await updateOrderStatus('completed');
+          if (ok) {
+            order.value.status = 'completed';
+            await showSuccessModal('Order completed successfully!');
+          } else {
+            showToast('Failed to complete order', 'danger');
+          }
         }
       }
     ]
@@ -481,21 +614,20 @@ const cancelOrder = async () => {
         text: 'Decline',
         role: 'destructive',
         handler: async () => {
-          order.value.status = 'cancelled';
-          
-          // Show error/warning modal instead of toast
-          const declineAlert = await alertController.create({
-            cssClass: 'decline-modal',
-            header: ' ',
-            message: '<font-awesome-icon icon="times-circle" /> Order declined',
-            buttons: ['OK']
-          });
-          await declineAlert.present();
-          
-          // Auto dismiss after 2 seconds
-          setTimeout(() => {
-            declineAlert.dismiss();
-          }, 2000);
+          const ok = await updateOrderStatus('cancelled');
+          if (ok) {
+            order.value.status = 'cancelled';
+            const declineAlert = await alertController.create({
+              cssClass: 'decline-modal',
+              header: ' ',
+              message: 'Order declined',
+              buttons: ['OK']
+            });
+            await declineAlert.present();
+            setTimeout(() => declineAlert.dismiss(), 2000);
+          } else {
+            showToast('Failed to decline order', 'danger');
+          }
         }
       }
     ]
@@ -507,10 +639,7 @@ const callCustomer = () => {
   window.location.href = `tel:${order.value.customerPhone}`;
 };
 
-const openMap = () => {
-  const address = encodeURIComponent(order.value.deliveryAddress);
-  window.open(`https://www.google.com/maps/search/?api=1&query=${address}`, '_blank');
-};
+
 
 const showMoreOptions = async () => {
   const actionSheet = await actionSheetController.create({
@@ -962,6 +1091,46 @@ const showToast = async (message, color = 'dark') => {
   font-weight: 600;
   border-radius: 12px;
   height: 44px;
+}
+
+/* Customer Map */
+.customer-map {
+  width: 100%;
+  height: 400px;
+  border-radius: 12px;
+  margin-top: 12px;
+  z-index: 0;
+}
+
+:deep(.seller-marker) {
+  background: none;
+  border: none;
+}
+:deep(.seller-dot) {
+  width: 16px;
+  height: 16px;
+  background: #2196F3;
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.map-info-bar {
+  display: flex;
+  justify-content: space-around;
+  background: white;
+  padding: 10px 16px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+.map-info-bar ion-icon {
+  vertical-align: middle;
+  margin-right: 4px;
+  color: #4CAF50;
 }
 
 /* Responsive */

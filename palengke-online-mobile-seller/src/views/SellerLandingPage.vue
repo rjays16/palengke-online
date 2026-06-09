@@ -368,6 +368,7 @@ onIonViewWillEnter(() => {
   refreshSub();
   loadProfile();
   loadCategories();
+  loadOrders();
 });
 
 // Notice banner
@@ -474,38 +475,42 @@ async function submitBannerRequest() {
 }
 
 // Stats
-const todayOrders = ref(12);
-const todaySales = ref(3450);
-const totalProducts = ref(28);
-const weekSales = ref(18750);
+const todayOrders = ref(0);
+const todaySales = ref(0);
+const totalProducts = ref(0);
+const weekSales = ref(0);
 
 // Recent Orders
-const recentOrders = ref([
-  {
-    id: '1234',
-    customer: 'Maria Santos',
-    items: 3,
-    amount: 450,
-    time: '10 mins ago',
-    status: 'pending'
-  },
-  {
-    id: '1233',
-    customer: 'Pedro Cruz',
-    items: 5,
-    amount: 890,
-    time: '1 hour ago',
-    status: 'processing'
-  },
-  {
-    id: '1232',
-    customer: 'Ana Lopez',
-    items: 2,
-    amount: 320,
-    time: '2 hours ago',
-    status: 'completed'
+const recentOrders = ref([]);
+
+const loadOrders = async () => {
+  const email = localStorage.getItem('userEmail');
+  if (!email) return;
+  try {
+    const response = await fetch(`http://localhost:8000/api/seller/orders?email=${encodeURIComponent(email)}`, {
+      headers: { 'Accept': 'application/json' },
+    });
+    const data = await response.json();
+    if (response.ok && data.orders) {
+      recentOrders.value = data.orders.map(o => ({
+        id: o.id,
+        customer: o.customer_name,
+        items: o.item_count,
+        amount: o.total,
+        time: o.time || 'recent',
+        status: o.status,
+      }));
+      if (data.stats) {
+        todayOrders.value = data.stats.today_orders;
+        todaySales.value = data.stats.today_sales;
+        totalProducts.value = data.stats.total_products;
+        weekSales.value = data.stats.week_sales;
+      }
+    }
+  } catch {
+    // keep defaults
   }
-]);
+};
 
 // Methods
 const showNotifications = () => {

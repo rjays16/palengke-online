@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\FeedbackController;
 use App\Http\Controllers\Api\SellerPaymentMethodController;
 use App\Http\Controllers\Api\SystemSettingController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\OrderController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -58,6 +59,11 @@ Route::post('/seller/device/status', [SellerDeviceController::class, 'status']);
 Route::post('/seller/devices', [SellerDeviceController::class, 'list']);
 Route::post('/seller/devices/remove', [SellerDeviceController::class, 'remove']);
 Route::post('/seller/devices/logout-current', [SellerDeviceController::class, 'logoutCurrent']);
+
+// Seller app — orders
+Route::get('/seller/orders', [OrderController::class, 'index']);
+Route::get('/seller/orders/{id}', [OrderController::class, 'show']);
+Route::post('/seller/orders/{id}/status', [OrderController::class, 'updateStatus']);
 
 // Seller app — payment methods
 Route::get('/seller/payment-methods', [SellerPaymentMethodController::class, 'index']);
