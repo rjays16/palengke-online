@@ -126,6 +126,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { onIonViewWillEnter } from '@ionic/vue';
 import {
   IonPage,
   IonHeader,
@@ -163,110 +164,37 @@ const router = useRouter();
 const selectedTab = ref('all');
 const searchQuery = ref('');
 
-// Orders Data - Load from localStorage (synced with Driver App) + fallback static data
-const loadOrders = () => {
+const orders = ref([]);
+
+const loadOrders = async () => {
+  const email = localStorage.getItem('userEmail');
+  if (!email) return;
   try {
-    const saved = localStorage.getItem('sellerOrders');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed.length > 0) return parsed;
+    const response = await fetch(`http://localhost:8000/api/seller/orders?email=${encodeURIComponent(email)}`, {
+      headers: { 'Accept': 'application/json' },
+    });
+    const data = await response.json();
+    if (response.ok && data.orders) {
+      orders.value = data.orders.map(o => ({
+        id: o.id,
+        customerName: o.customer_name,
+        customerPhone: o.customer_phone,
+        deliveryAddress: o.delivery_address,
+        items: o.items || [],
+        itemCount: o.item_count,
+        total: o.total,
+        status: o.status,
+        date: o.created_at,
+      }));
     }
-  } catch (e) {
-    console.log('No seller orders in localStorage');
+  } catch {
+    // keep empty
   }
-  
-  // Fallback static data
-  return [
-    {
-      id: '001',
-      customerName: 'Maria Santos',
-      date: '2026-01-02T10:30:00',
-      status: 'pending',
-      itemCount: 5,
-      total: 1250.50,
-      items: [
-        { name: 'Tomatoes', qty: '1', unit: 'kg', price: 80 },
-        { name: 'Lettuce', qty: '1/2', unit: 'kg', price: 45 },
-        { name: 'Carrots', qty: '1.5', unit: 'kg', price: 60 },
-        { name: 'Onions', qty: '2', unit: 'kg', price: 50 },
-        { name: 'Potatoes', qty: '3', unit: 'kg', price: 100 }
-      ],
-      customerPhone: '+63 917 123 4567',
-      deliveryAddress: '123 Main St, Cagayan de Oro City'
-    },
-    {
-      id: '002',
-      customerName: 'Juan Dela Cruz',
-      date: '2026-01-02T09:15:00',
-      status: 'processing',
-      itemCount: 3,
-      total: 850.00,
-      items: [
-        { name: 'Cabbage', qty: '2', unit: 'kg', price: 70 },
-        { name: 'Eggplant', qty: '1.5', unit: 'kg', price: 120 },
-        { name: 'Bell Peppers', qty: '1', unit: 'kg', price: 150 }
-      ],
-      customerPhone: '+63 918 234 5678',
-      deliveryAddress: '456 Oak Ave, Cagayan de Oro City'
-    },
-    {
-      id: '003',
-      customerName: 'Ana Reyes',
-      date: '2026-01-01T14:20:00',
-      status: 'completed',
-      itemCount: 7,
-      total: 2100.75,
-      items: [
-        { name: 'Mangoes', qty: '2', unit: 'kg', price: 300 },
-        { name: 'Bananas', qty: '3', unit: 'kg', price: 150 },
-        { name: 'Oranges', qty: '2.5', unit: 'kg', price: 200 },
-        { name: 'Apples', qty: '1.5', unit: 'kg', price: 250 },
-        { name: 'Grapes', qty: '1', unit: 'kg', price: 180 },
-        { name: 'Watermelon', qty: '1', unit: 'pc', price: 200 },
-        { name: 'Pineapple', qty: '2', unit: 'pcs', price: 160 }
-      ],
-      customerPhone: '+63 919 345 6789',
-      deliveryAddress: '789 Pine Rd, Cagayan de Oro City'
-    },
-    {
-      id: '004',
-      customerName: 'Pedro Garcia',
-      date: '2026-01-01T11:45:00',
-      status: 'cancelled',
-      itemCount: 2,
-      total: 450.00,
-      items: [
-        { name: 'Garlic', qty: '1/2', unit: 'kg', price: 90 },
-        { name: 'Ginger', qty: '1/4', unit: 'kg', price: 80 }
-      ],
-      customerPhone: '+63 920 456 7890',
-      deliveryAddress: '321 Elm St, Cagayan de Oro City'
-    },
-    {
-      id: '005',
-      customerName: 'Lisa Ramos',
-      date: '2026-01-02T12:00:00',
-      status: 'pending',
-      itemCount: 4,
-      total: 980.00,
-      items: [
-        { name: 'Pork (Liempo)', qty: '1.5', unit: 'kg', price: 350 },
-        { name: 'Chicken', qty: '2', unit: 'kg', price: 280 },
-        { name: 'Bangus', qty: '3', unit: 'pcs', price: 200 },
-        { name: 'Shrimp', qty: '1/2', unit: 'kg', price: 150 }
-      ],
-      customerPhone: '+63 921 567 8901',
-      deliveryAddress: '654 Maple Dr, Cagayan de Oro City'
-    }
-  ];
 };
 
-const orders = ref(loadOrders());
-
-// Save orders to localStorage whenever they change
-const saveOrdersToStorage = () => {
-  localStorage.setItem('sellerOrders', JSON.stringify(orders.value));
-};
+onIonViewWillEnter(() => {
+  loadOrders();
+});
 
 // Computed
 const orderStats = computed(() => {
@@ -383,6 +311,31 @@ const quickAction = async (order) => {
   }
 };
 
+const showLoadingModal = async () => {
+  const alert = await alertController.create({
+    cssClass: 'loading-modal',
+    message: 'Processing...',
+    buttons: [],
+  });
+  await alert.present();
+  return alert;
+};
+
+const updateOrderStatus = async (orderId, newStatus) => {
+  const email = localStorage.getItem('userEmail');
+  if (!email) return false;
+  try {
+    const response = await fetch(`http://localhost:8000/api/seller/orders/${orderId}/status`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ email, status: newStatus }),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+};
+
 const showSuccessModal = async (message) => {
   const alert = await alertController.create({
     cssClass: 'success-modal',
@@ -451,37 +404,15 @@ const acceptOrder = async (order) => {
       {
         text: 'Accept',
         handler: async () => {
-          order.status = 'processing';
-          
-          // 🚀 CREATE DRIVER ORDER - Bridge to Driver App
-          const driverOrder = {
-            id: order.id,
-            status: 'available',
-            sellerName: "Your Store", // In real app, this would be the seller's store name
-            pickupAddress: 'Stall #15, CDO City Palengke',
-            customerName: order.customerName,
-            deliveryAddress: order.deliveryAddress,
-            customerPhone: order.customerPhone,
-            distance: (Math.random() * 5 + 1).toFixed(1),
-            estimatedTime: Math.floor(Math.random() * 20 + 10),
-            itemCount: order.itemCount,
-            totalAmount: order.total,
-            driverEarnings: Math.floor(order.total * 0.1), // 10% of total
-            paymentMethod: Math.random() > 0.5 ? 'cash' : 'gcash',
-            time: 'Just now',
-            tipped: false,
-            completedTime: null
-          };
-          
-          // Save to localStorage for driver app to pick up
-          const driverOrders = JSON.parse(localStorage.getItem('driverOrders') || '[]');
-          driverOrders.push(driverOrder);
-          localStorage.setItem('driverOrders', JSON.stringify(driverOrders));
-          
-          // 🚀 SAVE SELLER ORDERS TO LOCALSTORAGE
-          saveOrdersToStorage();
-          
-          await showSuccessModal('Order accepted!\nDriver has been notified.');
+          const loading = await showLoadingModal();
+          const ok = await updateOrderStatus(order.id, 'processing');
+          await loading.dismiss();
+          if (ok) {
+            order.status = 'processing';
+            await showSuccessModal('Order accepted!');
+          } else {
+            showToast('Failed to accept order', 'danger');
+          }
         }
       }
     ]
@@ -501,8 +432,15 @@ const completeOrder = async (order) => {
       {
         text: 'Complete',
         handler: async () => {
-          order.status = 'completed';
-          await showSuccessModal('Order completed successfully!');
+          const loading = await showLoadingModal();
+          const ok = await updateOrderStatus(order.id, 'completed');
+          await loading.dismiss();
+          if (ok) {
+            order.status = 'completed';
+            await showSuccessModal('Order completed successfully!');
+          } else {
+            showToast('Failed to complete order', 'danger');
+          }
         }
       }
     ]
@@ -830,6 +768,47 @@ ion-segment-button {
   font-weight: 600;
   border-radius: 12px;
   height: 44px;
+}
+
+/* Loading Modal */
+:deep(.loading-modal .alert-wrapper) {
+  border-radius: 20px;
+  text-align: center;
+  max-width: 260px;
+  padding: 40px 30px;
+  background: white;
+}
+:deep(.loading-modal .alert-head) {
+  display: none;
+}
+:deep(.loading-modal .alert-message) {
+  padding: 0;
+  position: relative;
+  padding-top: 56px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+:deep(.loading-modal .alert-message::before) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: -20px;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4CAF50;
+  border-radius: 50%;
+  animation: loadingSpin 1s linear infinite;
+}
+:deep(.loading-modal .alert-button-group) {
+  display: none;
+}
+
+@keyframes loadingSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Decline Modal Styling */
