@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\SystemSettingController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\MessageController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -73,6 +74,14 @@ Route::delete('/seller/products/{id}', [ProductController::class, 'destroy']);
 Route::get('/seller/orders', [OrderController::class, 'index']);
 Route::get('/seller/orders/{id}', [OrderController::class, 'show']);
 Route::post('/seller/orders/{id}/status', [OrderController::class, 'updateStatus']);
+
+// Seller app — messages / conversations
+Route::get('/seller/conversations', [MessageController::class, 'index']);
+Route::get('/seller/conversations/{id}', [MessageController::class, 'show']);
+Route::post('/seller/conversations/{id}/messages', [MessageController::class, 'sendMessage']);
+Route::post('/seller/conversations/{id}/upload-image', [MessageController::class, 'uploadImage']);
+Route::post('/seller/conversations/{id}/read', [MessageController::class, 'markRead']);
+Route::delete('/seller/conversations/{id}', [MessageController::class, 'destroy']);
 
 // Seller app — payment methods
 Route::get('/seller/payment-methods', [SellerPaymentMethodController::class, 'index']);

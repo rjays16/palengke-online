@@ -55,8 +55,14 @@
           </div>
         </div>
 
+        <!-- Loading State -->
+        <div class="loading-state" v-if="loading">
+          <ion-icon :icon="cubeOutline" class="loading-icon"></ion-icon>
+          <p>Loading conversations...</p>
+        </div>
+
         <!-- Conversations List -->
-        <div class="conversations-list">
+        <div class="conversations-list" v-else>
           <div 
             v-for="conversation in filteredConversations" 
             :key="conversation.id"
@@ -128,6 +134,13 @@
       </ion-header>
 
       <ion-content ref="chatContent" class="chat-content">
+        <!-- Loading Messages -->
+        <div class="loading-state" v-if="loadingMessages">
+          <ion-spinner name="crescent" color="success"></ion-spinner>
+          <p>Loading messages...</p>
+        </div>
+
+        <template v-else>
         <!-- Date Divider -->
         <div class="date-divider">
           <span>{{ chatDate }}</span>
@@ -173,8 +186,10 @@
           </div>
         </div>
 
+        </template>
+
         <!-- Typing Indicator -->
-        <div v-if="isTyping" class="typing-indicator">
+        <div v-if="isTyping && !loadingMessages" class="typing-indicator">
           <div class="typing-bubble">
             <span></span>
             <span></span>
@@ -213,12 +228,13 @@
             ></ion-textarea>
             
             <ion-button 
-              :disabled="!newMessage.trim()" 
+              :disabled="!newMessage.trim() || sendingMessage" 
               @click="sendMessage"
               class="send-button"
-              :class="{ active: newMessage.trim() }"
+              :class="{ active: newMessage.trim() && !sendingMessage }"
             >
-              <ion-icon :icon="sendOutline"></ion-icon>
+              <ion-icon v-if="!sendingMessage" :icon="sendOutline"></ion-icon>
+              <ion-spinner v-else name="crescent" color="white"></ion-spinner>
             </ion-button>
           </div>
         </ion-toolbar>
@@ -243,6 +259,7 @@ import {
   IonIcon,
   IonSearchbar,
   IonTextarea,
+  IonSpinner,
   actionSheetController,
   alertController,
   toastController
@@ -262,11 +279,15 @@ import {
   sendOutline,
   trashOutline,
   volumeMuteOutline,
-  informationCircleOutline
+  informationCircleOutline,
+  cubeOutline
 } from 'ionicons/icons';
-import { MOCK_CONVERSATIONS, QUICK_REPLIES, AUTO_RESPONSES } from '@/mock/conversations';
+import { QUICK_REPLIES } from '@/mock/conversations';
 
 const router = useRouter();
+
+const API_BASE = 'http://localhost:8000/api';
+const userEmail = localStorage.getItem('userEmail');
 
 // State
 const showSearch = ref(false);
@@ -276,9 +297,11 @@ const selectedChat = ref(null);
 const newMessage = ref('');
 const isTyping = ref(false);
 const chatContent = ref(null);
+const loading = ref(false);
+const sendingMessage = ref(false);
+const loadingMessages = ref(false);
 
-// Mock Conversations Data
-const conversations = ref(MOCK_CONVERSATIONS);
+const conversations = ref([]);
 
 // Quick Replies
 const quickReplies = ref(QUICK_REPLIES);
@@ -317,17 +340,66 @@ const chatDate = computed(() => {
   return 'Today';
 });
 
+// API Calls
+async function loadConversations() {
+  if (!userEmail) return;
+  loading.value = true;
+  try {
+    const res = await fetch(`${API_BASE}/seller/conversations?email=${encodeURIComponent(userEmail)}`, {
+      headers: { 'Accept': 'application/json' }
+    });
+    const data = await res.json();
+    conversations.value = data.conversations || [];
+  } catch (e) {
+    console.error('Failed to load conversations:', e);
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function loadMessages(conversationId) {
+  if (!userEmail) return;
+  loadingMessages.value = true;
+  try {
+    const res = await fetch(`${API_BASE}/seller/conversations/${conversationId}?email=${encodeURIComponent(userEmail)}`, {
+      headers: { 'Accept': 'application/json' }
+    });
+    const data = await res.json();
+    return data.messages || [];
+  } catch (e) {
+    console.error('Failed to load messages:', e);
+    return [];
+  } finally {
+    loadingMessages.value = false;
+  }
+}
+
 // Methods
 const filterConversations = () => {
   // Triggered on search input
 };
 
-const openChat = (conversation) => {
-  selectedChat.value = conversation;
-  // Mark as read
+const openChat = async (conversation) => {
+  selectedChat.value = { ...conversation, messages: [] };
+
+  const messages = await loadMessages(conversation.id);
+  if (selectedChat.value) {
+    selectedChat.value.messages = messages;
+  }
+
   conversation.unread = 0;
-  
-  // Scroll to bottom
+
+  // Mark as read on server
+  try {
+    await fetch(`${API_BASE}/seller/conversations/${conversation.id}/read`, {
+      method: 'POST',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: userEmail }),
+    });
+  } catch (e) {
+    console.error('Failed to mark as read:', e);
+  }
+
   nextTick(() => {
     scrollToBottom();
   });
@@ -344,30 +416,44 @@ const scrollToBottom = () => {
   }
 };
 
-const sendMessage = () => {
-  if (!newMessage.value.trim()) return;
-  
-  const message = {
-    text: newMessage.value.trim(),
+const sendMessage = async () => {
+  if (!newMessage.value.trim() || !selectedChat.value || sendingMessage.value) return;
+
+  const text = newMessage.value.trim();
+  newMessage.value = '';
+
+  const tempMessage = {
+    id: Date.now(),
+    text,
     sent: true,
     time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
     status: 'delivered'
   };
-  
-  selectedChat.value.messages.push(message);
-  
-  // Update last message in conversation
-  selectedChat.value.lastMessage = message.text;
+
+  selectedChat.value.messages.push(tempMessage);
+  selectedChat.value.lastMessage = text;
   selectedChat.value.time = 'Just now';
-  
-  newMessage.value = '';
-  
-  nextTick(() => {
-    scrollToBottom();
-  });
-  
-  // Simulate typing response
-  simulateTyping();
+
+  nextTick(() => { scrollToBottom(); });
+
+  sendingMessage.value = true;
+  try {
+    const res = await fetch(`${API_BASE}/seller/conversations/${selectedChat.value.id}/messages`, {
+      method: 'POST',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: userEmail, message: text }),
+    });
+    const data = await res.json();
+    if (res.ok && data.data) {
+      tempMessage.id = data.data.id;
+      tempMessage.time = data.data.time;
+      tempMessage.status = data.data.status;
+    }
+  } catch (e) {
+    console.error('Failed to send message:', e);
+  } finally {
+    sendingMessage.value = false;
+  }
 };
 
 const sendQuickReply = (reply) => {
@@ -375,38 +461,40 @@ const sendQuickReply = (reply) => {
   sendMessage();
 };
 
-const simulateTyping = () => {
-  isTyping.value = true;
-  
-  setTimeout(() => {
-    isTyping.value = false;
-    
-    // Simulate received message
-    const response = {
-      text: AUTO_RESPONSES[Math.floor(Math.random() * AUTO_RESPONSES.length)],
-      sent: false,
-      time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-      status: 'delivered'
-    };
-    
-    selectedChat.value.messages.push(response);
-    selectedChat.value.lastMessage = response.text;
-    selectedChat.value.time = 'Just now';
-    
-    nextTick(() => {
-      scrollToBottom();
-    });
-  }, 2000);
-};
-
 const attachImage = async () => {
-  const toast = await toastController.create({
-    message: 'Image upload feature coming soon!',
-    duration: 2000,
-    color: 'primary',
-    position: 'top'
-  });
-  await toast.present();
+  if (!selectedChat.value) return;
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/png,image/jpg,image/jpeg,image/webp';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    sendingMessage.value = true;
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('email', userEmail);
+
+    try {
+      const res = await fetch(`${API_BASE}/seller/conversations/${selectedChat.value.id}/upload-image`, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: formData,
+      });
+      const data = await res.json();
+      if (res.ok && data.data) {
+        selectedChat.value.messages.push(data.data);
+        selectedChat.value.lastMessage = 'Sent an image';
+        selectedChat.value.time = 'Just now';
+        nextTick(() => { scrollToBottom(); });
+      }
+    } catch (e) {
+      console.error('Failed to upload image:', e);
+    } finally {
+      sendingMessage.value = false;
+    }
+  };
+  input.click();
 };
 
 const makeCall = async () => {
@@ -483,7 +571,15 @@ const deleteChat = async () => {
       {
         text: 'Delete',
         role: 'destructive',
-        handler: () => {
+        handler: async () => {
+          try {
+            await fetch(`${API_BASE}/seller/conversations/${selectedChat.value.id}?email=${encodeURIComponent(userEmail)}`, {
+              method: 'DELETE',
+              headers: { 'Accept': 'application/json' }
+            });
+          } catch (e) {
+            console.error('Failed to delete conversation:', e);
+          }
           const index = conversations.value.findIndex(c => c.id === selectedChat.value.id);
           if (index > -1) {
             conversations.value.splice(index, 1);
@@ -497,7 +593,7 @@ const deleteChat = async () => {
 };
 
 onMounted(() => {
-  // Initial setup if needed
+  loadConversations();
 });
 </script>
 
@@ -505,6 +601,35 @@ onMounted(() => {
 /* Messages View */
 .messages-view {
   height: 100%;
+}
+
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.loading-icon {
+  font-size: 60px;
+  color: #4CAF50;
+  margin-bottom: 16px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+.loading-state p {
+  font-size: 15px;
+  color: #666;
+  margin-top: 12px;
+}
+
+.loading-state ion-spinner {
+  width: 40px;
+  height: 40px;
 }
 
 /* Filter Tabs */

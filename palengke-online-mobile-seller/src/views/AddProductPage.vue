@@ -261,8 +261,8 @@
           </ion-button>
         </div>
 
-      </div>
       </template>
+      </div>
 
       <!-- Saving Overlay -->
       <div class="saving-overlay" v-if="saving">
