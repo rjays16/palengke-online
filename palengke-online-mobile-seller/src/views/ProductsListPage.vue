@@ -177,6 +177,14 @@
           <p>Deleting product...</p>
         </div>
       </div>
+
+      <!-- Toggling Overlay -->
+      <div class="saving-overlay" v-if="toggling">
+        <div class="saving-spinner">
+          <ion-spinner name="crescent" color="success"></ion-spinner>
+          <p>Updating status...</p>
+        </div>
+      </div>
     </ion-content>
 
     <!-- Bottom Navigation -->
@@ -242,6 +250,7 @@ const router = useRouter();
 const userEmail = localStorage.getItem('userEmail');
 const loading = ref(false);
 const deleting = ref(false);
+const toggling = ref(false);
 
 // Search & Filter
 const searchQuery = ref('');
@@ -337,6 +346,7 @@ const toggleProductStatus = async (product) => {
       {
         text: statusText.charAt(0).toUpperCase() + statusText.slice(1),
         handler: async () => {
+          toggling.value = true;
           try {
             const res = await fetch(`http://localhost:8000/api/seller/products/${product.id}`, {
               method: 'POST',
@@ -352,6 +362,8 @@ const toggleProductStatus = async (product) => {
             }
           } catch (e) {
             showToast('Failed to update status', 'danger');
+          } finally {
+            toggling.value = false;
           }
         }
       }

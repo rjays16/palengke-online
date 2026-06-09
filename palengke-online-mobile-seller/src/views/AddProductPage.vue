@@ -12,6 +12,13 @@
     <ion-content :fullscreen="true" class="add-product-content">
       <div class="add-product-container">
 
+        <!-- Loading State -->
+        <div class="loading-state" v-if="pageLoading">
+          <ion-icon :icon="cubeOutline" class="loading-icon"></ion-icon>
+          <p>Loading...</p>
+        </div>
+
+        <template v-else>
         <!-- Product Images Section -->
         <div class="section">
           <h2 class="section-title">
@@ -255,6 +262,7 @@
         </div>
 
       </div>
+      </template>
 
       <!-- Saving Overlay -->
       <div class="saving-overlay" v-if="saving">
@@ -307,6 +315,7 @@ const userEmail = localStorage.getItem('userEmail');
 const categories = ref([]);
 const locations = ref([]);
 const saving = ref(false);
+const pageLoading = ref(true);
 
 // Form Data
 const productImage = ref('');
@@ -483,7 +492,7 @@ const showSuccessModal = async (message) => {
 const saveDraft = () => saveWithStatus('draft');
 
 onMounted(async () => {
-  if (!userEmail) return;
+  if (!userEmail) { pageLoading.value = false; return; }
   try {
     const [profileRes, locRes] = await Promise.all([
       fetch(`http://localhost:8000/api/seller/profile?email=${encodeURIComponent(userEmail)}`, {
@@ -516,6 +525,8 @@ onMounted(async () => {
     locations.value = cityNames;
   } catch (e) {
     console.error('Failed to load data:', e);
+  } finally {
+    pageLoading.value = false;
   }
 });
 </script>
@@ -528,6 +539,30 @@ onMounted(async () => {
 .add-product-container {
   padding: 20px;
   padding-bottom: 170px;
+}
+
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.loading-icon {
+  font-size: 60px;
+  color: #4CAF50;
+  margin-bottom: 16px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+.loading-state p {
+  font-size: 15px;
+  color: #666;
+  margin: 0;
 }
 
 /* Section */
