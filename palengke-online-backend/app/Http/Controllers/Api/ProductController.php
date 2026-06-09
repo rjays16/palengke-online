@@ -124,11 +124,42 @@ class ProductController extends Controller
         }
 
         unset($validated['email']);
+
+        if (isset($validated['images'])) {
+            foreach ($product->images ?? [] as $oldImg) {
+                if (!in_array($oldImg, $validated['images'])) {
+                    $relative = str_replace(url('storage/'), '', $oldImg);
+                    if ($relative && Storage::disk('public')->exists($relative)) {
+                        Storage::disk('public')->delete($relative);
+                    }
+                }
+            }
+        }
+
         $product->update($validated);
 
         return response()->json([
             'message' => 'Product updated successfully.',
             'product' => $this->formatProduct($product),
+        ]);
+    }
+
+    public function uploadImage(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'image' => 'required|file|mimes:png,jpg,jpeg,webp|max:5120',
+        ]);
+
+        $seller = SellerRegistration::where('email', $request->email)->first();
+        if (!$seller) {
+            return response()->json(['message' => 'Seller not found.'], 404);
+        }
+
+        $path = $request->file('image')->store('products', 'public');
+
+        return response()->json([
+            'url' => url('storage/' . $path),
         ]);
     }
 
@@ -146,6 +177,13 @@ class ProductController extends Controller
 
         if (!$product) {
             return response()->json(['message' => 'Product not found.'], 404);
+        }
+
+        foreach ($product->images ?? [] as $img) {
+            $relative = str_replace(url('storage/'), '', $img);
+            if ($relative && Storage::disk('public')->exists($relative)) {
+                Storage::disk('public')->delete($relative);
+            }
         }
 
         $product->delete();

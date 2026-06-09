@@ -169,6 +169,14 @@
         </div>
 
       </div>
+
+      <!-- Deleting Overlay -->
+      <div class="saving-overlay" v-if="deleting">
+        <div class="saving-spinner">
+          <ion-spinner name="crescent" color="success"></ion-spinner>
+          <p>Deleting product...</p>
+        </div>
+      </div>
     </ion-content>
 
     <!-- Bottom Navigation -->
@@ -198,7 +206,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage,
@@ -210,6 +218,8 @@ import {
   IonButton,
   IonButtons,
   IonIcon,
+  IonSpinner,
+  onIonViewWillEnter,
   alertController,
   toastController
 } from '@ionic/vue';
@@ -231,6 +241,7 @@ const router = useRouter();
 
 const userEmail = localStorage.getItem('userEmail');
 const loading = ref(false);
+const deleting = ref(false);
 
 // Search & Filter
 const searchQuery = ref('');
@@ -264,7 +275,7 @@ async function loadProducts() {
   }
 }
 
-onMounted(loadProducts);
+onIonViewWillEnter(loadProducts);
 
 // Computed Properties
 const filteredProducts = computed(() => {
@@ -360,6 +371,7 @@ const deleteProduct = async (product) => {
         text: 'Delete',
         role: 'destructive',
         handler: async () => {
+          deleting.value = true;
           try {
             const res = await fetch(`http://localhost:8000/api/seller/products/${product.id}?email=${encodeURIComponent(userEmail)}`, {
               method: 'DELETE',
@@ -374,6 +386,8 @@ const deleteProduct = async (product) => {
             }
           } catch (e) {
             showToast('Failed to delete product', 'danger');
+          } finally {
+            deleting.value = false;
           }
         }
       }

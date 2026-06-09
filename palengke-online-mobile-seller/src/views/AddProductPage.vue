@@ -255,6 +255,14 @@
         </div>
 
       </div>
+
+      <!-- Saving Overlay -->
+      <div class="saving-overlay" v-if="saving">
+        <div class="saving-spinner">
+          <ion-spinner name="crescent" color="success"></ion-spinner>
+          <p>Saving product...</p>
+        </div>
+      </div>
     </ion-content>
   </ion-page>
 </template>
@@ -274,6 +282,7 @@ import {
   IonButton,
   IonIcon,
   IonToggle,
+  IonSpinner,
   alertController,
   toastController
 } from '@ionic/vue';
@@ -335,14 +344,24 @@ const selectImage = () => {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/png,image/jpg,image/jpeg,image/webp';
-  input.onchange = (e) => {
+  input.onchange = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        productImage.value = ev.target.result;
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('email', userEmail);
+    try {
+      const res = await fetch('http://localhost:8000/api/seller/products/upload-image', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: formData,
+      });
+      const data = await res.json();
+      if (res.ok) {
+        productImage.value = data.url;
+      }
+    } catch (e) {
+      console.error('Upload failed:', e);
     }
   };
   input.click();
@@ -508,7 +527,7 @@ onMounted(async () => {
 
 .add-product-container {
   padding: 20px;
-  padding-bottom: 100px;
+  padding-bottom: 170px;
 }
 
 /* Section */
@@ -838,5 +857,37 @@ onMounted(async () => {
   .unit-selector {
     grid-template-columns: 1fr;
   }
+}
+
+/* Saving Overlay */
+.saving-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.saving-spinner {
+  background: white;
+  padding: 32px 40px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+}
+
+.saving-spinner ion-spinner {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 12px;
+}
+
+.saving-spinner p {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
 }
 </style>

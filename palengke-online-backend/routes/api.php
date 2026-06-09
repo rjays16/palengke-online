@@ -65,6 +65,7 @@ Route::post('/seller/devices/logout-current', [SellerDeviceController::class, 'l
 Route::get('/seller/products', [ProductController::class, 'index']);
 Route::get('/seller/products/{id}', [ProductController::class, 'show']);
 Route::post('/seller/products', [ProductController::class, 'store']);
+Route::post('/seller/products/upload-image', [ProductController::class, 'uploadImage']);
 Route::post('/seller/products/{id}', [ProductController::class, 'update']);
 Route::delete('/seller/products/{id}', [ProductController::class, 'destroy']);
 
