@@ -274,7 +274,6 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { onIonViewWillEnter } from '@ionic/vue';
 import { getSubscription, daysLeft, isExpired } from '@/services/subscriptionService';
-import { SELLER_NOTICES } from '@/mock/notices';
 import {
   IonPage,
   IonHeader,
@@ -364,29 +363,14 @@ const loadCategories = async () => {
   }
 };
 
-onIonViewWillEnter(() => {
-  refreshSub();
-  loadProfile();
-  loadCategories();
-  loadOrders();
-});
-
 // Notice banner
-const NOTICE_KEY = 'palengke_notices'
 const DISMISS_KEY = 'palengke_seller_dismissed_notices'
 const dismissedNotices = ref(JSON.parse(localStorage.getItem(DISMISS_KEY) || '[]'))
-
-function seedNotices() {
-  const existing = JSON.parse(localStorage.getItem(NOTICE_KEY) || '[]')
-  if (existing.length) return
-  localStorage.setItem(NOTICE_KEY, JSON.stringify(SELLER_NOTICES))
-}
-
-seedNotices()
+const allNotices = ref([])
+const showNoticeModal = ref(false)
 
 const activeNotice = computed(() => {
-  const all = JSON.parse(localStorage.getItem(NOTICE_KEY) || '[]')
-  return all.find(n => n.active && (n.target === 'all' || n.target === 'seller')) || null
+  return allNotices.value.find(n => n.active && (n.target === 'all' || n.target === 'seller')) || null
 })
 
 function dismissNotice(id) {
@@ -396,22 +380,40 @@ function dismissNotice(id) {
   }
 }
 
-const showNoticeModal = ref(false)
-
 function checkNotice() {
-  const all = JSON.parse(localStorage.getItem(NOTICE_KEY) || '[]')
-  const val = all.find(n => n.active && (n.target === 'all' || n.target === 'seller')) || null
+  const val = activeNotice.value
   if (val && !dismissedNotices.value.includes(val.id)) {
     showNoticeModal.value = true
   }
 }
 
-onIonViewWillEnter(checkNotice)
-
 function closeNoticeModal() {
   if (activeNotice.value) dismissNotice(activeNotice.value.id)
   showNoticeModal.value = false
 }
+
+const loadNotices = async () => {
+  try {
+    const response = await fetch('http://localhost:8000/api/notices?target=seller', {
+      headers: { 'Accept': 'application/json' },
+    });
+    const data = await response.json();
+    if (response.ok && data.notices) {
+      allNotices.value = data.notices;
+    }
+  } catch {
+    // silent
+  }
+};
+
+onIonViewWillEnter(async () => {
+  refreshSub();
+  loadProfile();
+  loadCategories();
+  loadOrders();
+  await loadNotices();
+  checkNotice();
+});
 
 const remaining = computed(() => daysLeft(sub.value))
 const expired = computed(() => isExpired(sub.value))

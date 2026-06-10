@@ -235,52 +235,33 @@
 <script setup>
 definePageMeta({ layout: "default" });
 
-const KEY = "palengke_notices";
+const config = useRuntimeConfig();
+const apiBaseUrl = config.public.apiBaseUrl || "http://localhost:8000";
+
+function getToken() {
+  if (typeof localStorage === "undefined") return null;
+  return localStorage.getItem("palengke_auth_token");
+}
 
 const notices = ref([]);
-let nextId = 1;
+const loading = ref(true);
 
-if (import.meta.client) {
-  const raw = localStorage.getItem(KEY);
-  if (raw) {
-    notices.value = JSON.parse(raw);
-  } else {
-    const mock = [
-      {
-        id: 1,
-        title: "System Maintenance Tonight",
-        message:
-          "The app will be down from 2AM to 4AM for scheduled maintenance. Please plan your orders accordingly.",
-        target: "all",
-        active: true,
-        createdAt: "2026-05-17",
-      },
-      {
-        id: 2,
-        title: "Seller Portal Updates",
-        message:
-          "New product analytics and bulk edit features are now available on your seller dashboard.",
-        target: "seller",
-        active: true,
-        createdAt: "2026-05-16",
-      },
-      {
-        id: 3,
-        title: "Delivery Schedule Change",
-        message:
-          "Due to the holiday, deliveries will run until 5PM only on May 20.",
-        target: "customer",
-        active: true,
-        createdAt: "2026-05-15",
-      },
-    ];
-    localStorage.setItem(KEY, JSON.stringify(mock));
-    notices.value = mock;
+async function fetchNotices() {
+  loading.value = true;
+  try {
+    const token = getToken();
+    const data = await $fetch(`${apiBaseUrl}/api/admin/notices`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    notices.value = data.notices;
+  } catch {
+    // silent
+  } finally {
+    loading.value = false;
   }
-  nextId = notices.value.length
-    ? Math.max(...notices.value.map((n) => n.id)) + 1
-    : 1;
 }
+
+fetchNotices();
 
 const showModal = ref(false);
 const editing = ref(null);
@@ -295,10 +276,6 @@ const targets = [
 ];
 
 const form = ref({ title: "", message: "", target: "all", active: true });
-
-function save() {
-  localStorage.setItem(KEY, JSON.stringify(notices.value));
-}
 
 function openAddModal() {
   editing.value = null;
@@ -317,35 +294,62 @@ function openEditModal(n) {
   showModal.value = true;
 }
 
-function saveNotice() {
+async function saveNotice() {
   if (!form.value.title || !form.value.message) return;
-  if (editing.value) {
-    Object.assign(editing.value, { ...form.value });
-  } else {
-    notices.value.push({
-      id: nextId++,
-      ...form.value,
-      createdAt: new Date().toISOString().slice(0, 10),
-    });
+  const token = getToken();
+  try {
+    if (editing.value) {
+      const data = await $fetch(`${apiBaseUrl}/api/admin/notices/${editing.value.id}`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+        body: { ...form.value },
+      });
+      Object.assign(editing.value, data.notice);
+    } else {
+      const data = await $fetch(`${apiBaseUrl}/api/admin/notices`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: { ...form.value },
+      });
+      notices.value.unshift(data.notice);
+    }
+  } catch {
+    // silent
   }
-  save();
   showModal.value = false;
   editing.value = null;
 }
 
-function toggleActive(n) {
-  n.active = !n.active;
-  save();
+async function toggleActive(n) {
+  const token = getToken();
+  try {
+    const data = await $fetch(`${apiBaseUrl}/api/admin/notices/${n.id}`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${token}` },
+      body: { title: n.title, message: n.message, target: n.target, active: !n.active },
+    });
+    n.active = data.notice.active;
+  } catch {
+    // silent
+  }
 }
 
 function confirmDelete(n) {
   deleting.value = n;
   showDeleteModal.value = true;
 }
-function doDelete() {
-  if (deleting.value) {
+
+async function doDelete() {
+  if (!deleting.value) return;
+  const token = getToken();
+  try {
+    await $fetch(`${apiBaseUrl}/api/admin/notices/${deleting.value.id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
     notices.value = notices.value.filter((n) => n.id !== deleting.value.id);
-    save();
+  } catch {
+    // silent
   }
   showDeleteModal.value = false;
   deleting.value = null;
