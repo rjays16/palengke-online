@@ -53,8 +53,9 @@
           <p v-if="countdown > 0" class="countdown-text">
             Resend code in {{ countdown }}s
           </p>
-          <button v-else class="resend-button" @click="resendCode">
-            Didn't get the code? <strong>Resend code</strong>
+          <button v-else class="resend-button" @click="resendCode" :disabled="isVerifying">
+            <span v-if="!isVerifying">Didn't get the code? <strong>Resend code</strong></span>
+            <span v-else><ion-spinner name="crescent" color="success"></ion-spinner> Sending...</span>
           </button>
         </div>
 
@@ -201,28 +202,42 @@ const startCountdown = () => {
 };
 
 const resendCode = async () => {
+  isVerifying.value = true;
   try {
-    await fetch('http://localhost:8000/api/send-otp', {
+    const res = await fetch('http://localhost:8000/api/send-otp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: userEmail.value }),
     });
-  } catch {
-    // silent
+
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.message || 'Failed to resend code');
+    }
+
+    const toast = await toastController.create({
+      message: 'Verification code sent!',
+      duration: 2000,
+      color: 'success',
+      position: 'top'
+    });
+    await toast.present();
+
+    otpDigits.value = ['', '', '', '', '', ''];
+    otpRefs.value[0]?.focus();
+
+    startCountdown();
+  } catch (e) {
+    const toast = await toastController.create({
+      message: e.message || 'Failed to resend code',
+      duration: 2000,
+      color: 'danger',
+      position: 'top'
+    });
+    await toast.present();
+  } finally {
+    isVerifying.value = false;
   }
-
-  const toast = await toastController.create({
-    message: 'Verification code sent!',
-    duration: 2000,
-    color: 'success',
-    position: 'top'
-  });
-  await toast.present();
-
-  otpDigits.value = ['', '', '', '', '', ''];
-  otpRefs.value[0]?.focus();
-
-  startCountdown();
 };
 
 const verifyCode = async () => {

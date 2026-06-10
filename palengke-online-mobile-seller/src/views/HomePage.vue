@@ -37,21 +37,21 @@
         <!-- Quick Stats -->
         <div class="stats-grid">
           <div class="stat-card">
+            <ion-icon :icon="cashOutline" class="stat-icon"></ion-icon>
+            <div class="stat-value">₱{{ formatPrice(stats.today_sales) }}</div>
+            <div class="stat-label">Today's Sale</div>
+          </div>
+          
+          <div class="stat-card">
+            <ion-icon :icon="cubeOutline" class="stat-icon"></ion-icon>
+            <div class="stat-value">{{ stats.total_products }}</div>
+            <div class="stat-label">Total Products</div>
+          </div>
+          
+          <div class="stat-card">
             <ion-icon :icon="cartOutline" class="stat-icon"></ion-icon>
-            <div class="stat-value">0</div>
-            <div class="stat-label">Orders</div>
-          </div>
-          
-          <div class="stat-card">
-            <ion-icon :icon="heartOutline" class="stat-icon"></ion-icon>
-            <div class="stat-value">0</div>
-            <div class="stat-label">Favorites</div>
-          </div>
-          
-          <div class="stat-card">
-            <ion-icon :icon="walletOutline" class="stat-icon"></ion-icon>
-            <div class="stat-value">₱0</div>
-            <div class="stat-label">Wallet</div>
+            <div class="stat-value">{{ stats.total_orders }}</div>
+            <div class="stat-label">Total Orders</div>
           </div>
         </div>
 
@@ -100,8 +100,8 @@ import { onIonViewWillEnter } from '@ionic/vue';
 import { 
   logOutOutline,
   cartOutline,
-  heartOutline,
-  walletOutline,
+  cashOutline,
+  cubeOutline,
   searchOutline,
   personOutline,
   chevronForwardOutline,
@@ -113,13 +113,39 @@ import { getSubscription, daysLeft, isExpired } from '@/services/subscriptionSer
 
 const router = useRouter();
 
+const stats = ref({
+  today_sales: 0,
+  today_orders: 0,
+  total_products: 0,
+  total_orders: 0,
+});
+
 const sub = ref(getSubscription())
 
 function refreshSub() {
   sub.value = getSubscription()
 }
 
-onIonViewWillEnter(refreshSub)
+async function loadStats() {
+  const email = localStorage.getItem('userEmail');
+  if (!email) return;
+  try {
+    const res = await fetch(`http://localhost:8000/api/seller/dashboard/stats?email=${encodeURIComponent(email)}`, {
+      headers: { 'Accept': 'application/json' }
+    });
+    const data = await res.json();
+    if (res.ok && data.stats) {
+      stats.value = data.stats;
+    }
+  } catch (e) {
+    console.error('Failed to load stats:', e);
+  }
+}
+
+onIonViewWillEnter(() => {
+  refreshSub();
+  loadStats();
+});
 
 const remaining = computed(() => daysLeft(sub.value))
 const expired = computed(() => isExpired(sub.value))
@@ -147,6 +173,10 @@ const subDesc = computed(() => {
   if (remaining.value <= 3) return `${remaining.value} day${remaining.value > 1 ? 's' : ''} left — renew soon!`
   return `${remaining.value} days remaining in your trial`
 })
+
+const formatPrice = (price) => {
+  return (price || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
 
 const goToPlans = () => router.push('/plans')
 

@@ -487,12 +487,18 @@ const loadOrders = async () => {
   const email = localStorage.getItem('userEmail');
   if (!email) return;
   try {
-    const response = await fetch(`http://localhost:8000/api/seller/orders?email=${encodeURIComponent(email)}`, {
-      headers: { 'Accept': 'application/json' },
-    });
-    const data = await response.json();
-    if (response.ok && data.orders) {
-      recentOrders.value = data.orders.map(o => ({
+    const [ordersRes, statsRes] = await Promise.all([
+      fetch(`http://localhost:8000/api/seller/orders?email=${encodeURIComponent(email)}`, {
+        headers: { 'Accept': 'application/json' },
+      }),
+      fetch(`http://localhost:8000/api/seller/dashboard/stats?email=${encodeURIComponent(email)}`, {
+        headers: { 'Accept': 'application/json' },
+      }),
+    ]);
+
+    const ordersData = await ordersRes.json();
+    if (ordersRes.ok && ordersData.orders) {
+      recentOrders.value = ordersData.orders.map(o => ({
         id: o.id,
         customer: o.customer_name,
         items: o.item_count,
@@ -500,12 +506,16 @@ const loadOrders = async () => {
         time: o.time || 'recent',
         status: o.status,
       }));
-      if (data.stats) {
-        todayOrders.value = data.stats.today_orders;
-        todaySales.value = data.stats.today_sales;
-        totalProducts.value = data.stats.total_products;
-        weekSales.value = data.stats.week_sales;
+      if (ordersData.stats) {
+        todayOrders.value = ordersData.stats.today_orders;
+        todaySales.value = ordersData.stats.today_sales;
       }
+    }
+
+    const statsData = await statsRes.json();
+    if (statsRes.ok && statsData.stats) {
+      totalProducts.value = statsData.stats.total_products;
+      weekSales.value = statsData.stats.week_sales;
     }
   } catch {
     // keep defaults

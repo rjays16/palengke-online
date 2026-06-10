@@ -100,7 +100,7 @@ const showPassword = ref(false);
 const isLoading = ref(false);
 
 // ✨ NEW: Loading Modal Function
-const showLoadingModal = async (message = 'Loading...') => {
+const showLoadingModal = async (message = 'Loading...', autoDismiss = true) => {
   const alert = await alertController.create({
     cssClass: 'loading-modal-simple',
     message: message,
@@ -108,11 +108,14 @@ const showLoadingModal = async (message = 'Loading...') => {
   });
   
   await alert.present();
+
+  if (autoDismiss) {
+    setTimeout(() => {
+      alert.dismiss();
+    }, 1500);
+  }
   
-  // Auto dismiss after 1.5 seconds
-  setTimeout(() => {
-    alert.dismiss();
-  }, 1500);
+  return alert;
 };
 
 // Check if user's country is available
@@ -204,6 +207,7 @@ const handleLogin = async () => {
     isLoading.value = false;
 
     localStorage.setItem('token', data.token);
+    localStorage.setItem('userEmail', email.value);
 
     const availability = await checkAvailability();
 
@@ -240,7 +244,7 @@ const handleLogin = async () => {
           text: 'Send Code',
           cssClass: 'alert-button-confirm',
           handler: async () => {
-            await showLoadingModal('Sending verification code...');
+            const loading = await showLoadingModal('Sending verification code...', false);
 
             try {
               await fetch('http://localhost:8000/api/send-otp', {
@@ -255,12 +259,11 @@ const handleLogin = async () => {
             localStorage.setItem('pendingAuth', 'true');
             localStorage.setItem('userEmail', email.value);
 
-            setTimeout(() => {
-              router.push({
-                name: 'OTPVerification',
-                params: { email: email.value }
-              });
-            }, 1500);
+            await loading.dismiss();
+            router.push({
+              name: 'OTPVerification',
+              params: { email: email.value }
+            });
           }
         }
       ]

@@ -39,8 +39,14 @@
     </ion-header>
 
     <ion-content :fullscreen="true">
+      <!-- Loading State -->
+      <div v-if="loading" class="loading-state">
+        <ion-icon :icon="receiptOutline" class="loading-icon"></ion-icon>
+        <p>Loading orders...</p>
+      </div>
+
       <!-- Empty State -->
-      <div v-if="filteredOrders.length === 0" class="empty-state">
+      <div v-else-if="filteredOrders.length === 0" class="empty-state">
         <div class="empty-icon">
           <ion-icon :icon="receiptOutline"></ion-icon>
         </div>
@@ -163,12 +169,14 @@ const router = useRouter();
 // State
 const selectedTab = ref('all');
 const searchQuery = ref('');
+const loading = ref(false);
 
 const orders = ref([]);
 
 const loadOrders = async () => {
   const email = localStorage.getItem('userEmail');
   if (!email) return;
+  loading.value = true;
   try {
     const response = await fetch(`http://localhost:8000/api/seller/orders?email=${encodeURIComponent(email)}`, {
       headers: { 'Accept': 'application/json' },
@@ -189,6 +197,8 @@ const loadOrders = async () => {
     }
   } catch {
     // keep empty
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -218,7 +228,7 @@ const filteredOrders = computed(() => {
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase();
     filtered = filtered.filter(order =>
-      order.id.toLowerCase().includes(query) ||
+      String(order.id).toLowerCase().includes(query) ||
       order.customerName.toLowerCase().includes(query)
     );
   }
@@ -525,6 +535,34 @@ const goToProfile = () => {
 /* Segment Tabs */
 ion-segment {
   padding: 8px 16px;
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.loading-icon {
+  font-size: 60px;
+  color: #4CAF50;
+  margin-bottom: 16px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+.loading-state p {
+  font-size: 15px;
+  color: #666;
+  margin: 0;
 }
 
 ion-segment-button {

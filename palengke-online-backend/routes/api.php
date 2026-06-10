@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\MessageController;
+use App\Http\Controllers\Api\DashboardController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -82,6 +83,9 @@ Route::post('/seller/conversations/{id}/messages', [MessageController::class, 's
 Route::post('/seller/conversations/{id}/upload-image', [MessageController::class, 'uploadImage']);
 Route::post('/seller/conversations/{id}/read', [MessageController::class, 'markRead']);
 Route::delete('/seller/conversations/{id}', [MessageController::class, 'destroy']);
+
+// Seller app — dashboard stats
+Route::get('/seller/dashboard/stats', [DashboardController::class, 'stats']);
 
 // Seller app — payment methods
 Route::get('/seller/payment-methods', [SellerPaymentMethodController::class, 'index']);
