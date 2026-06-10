@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             ContactSupportSeeder::class,
             SystemSettingSeeder::class,
             OrderSeeder::class,
+            PaymentMethodSeeder::class,
         ]);
     }
 }

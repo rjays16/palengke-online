@@ -88,13 +88,15 @@ export function isExpired(sub: Subscription): boolean {
   return daysLeft(sub) === 0
 }
 
-export async function subscribePlan(planId: string): Promise<Subscription> {
+export async function subscribePlan(planId: string, paymentMethodId?: number | null): Promise<Subscription> {
   const email = localStorage.getItem('userEmail')
   if (!email) throw new Error('User not logged in')
+  const body: Record<string, any> = { email, plan_id: planId }
+  if (paymentMethodId) body.payment_method_id = paymentMethodId
   const res = await fetch(`${API_BASE}/seller/subscription/subscribe`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-    body: JSON.stringify({ email, plan_id: planId }),
+    body: JSON.stringify(body),
   })
   if (!res.ok) {
     const data = await res.json()

@@ -26,6 +26,8 @@ use App\Http\Controllers\Api\FaqController;
 use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SubscriptionController;
+use App\Http\Controllers\Api\PaymentMethodController;
+use App\Http\Controllers\Api\AdminPaymentMethodController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -102,6 +104,9 @@ Route::post('/seller/goals', [AnalyticsController::class, 'updateGoals']);
 // Seller app — subscription / trial
 Route::get('/seller/subscription', [SubscriptionController::class, 'index']);
 Route::post('/seller/subscription/subscribe', [SubscriptionController::class, 'subscribe']);
+
+// Public — payment methods for seller app
+Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
 
 // Seller app — notifications
 Route::get('/seller/notifications', [SellerNotificationController::class, 'index']);
@@ -184,6 +189,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/faqs', [FaqController::class, 'store']);
     Route::put('/admin/faqs/{id}', [FaqController::class, 'update']);
     Route::delete('/admin/faqs/{id}', [FaqController::class, 'destroy']);
+
+    Route::get('/admin/payment-methods', [AdminPaymentMethodController::class, 'index']);
+    Route::post('/admin/payment-methods', [AdminPaymentMethodController::class, 'store']);
+    Route::put('/admin/payment-methods/{id}', [AdminPaymentMethodController::class, 'update']);
+    Route::delete('/admin/payment-methods/{id}', [AdminPaymentMethodController::class, 'destroy']);
 });
 
 // Public — fetch active notices for seller / customer / driver apps

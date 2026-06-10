@@ -134,43 +134,6 @@
 <script setup>
 definePageMeta({ layout: "default" });
 
-const KEY = "palengke_payment_methods";
-
-const defaults = [
-  {
-    id: "gcash",
-    name: "GCash",
-    desc: "Mobile wallet payments",
-    color: "#059669",
-    visible: true,
-    comingSoon: false,
-  },
-  {
-    id: "paypal",
-    name: "PayPal",
-    desc: "Pay with PayPal account",
-    color: "#2563eb",
-    visible: true,
-    comingSoon: true,
-  },
-  {
-    id: "stripe",
-    name: "Stripe",
-    desc: "Credit/debit card payments",
-    color: "#7c3aed",
-    visible: true,
-    comingSoon: true,
-  },
-  {
-    id: "cod",
-    name: "Cash on Delivery",
-    desc: "Pay when order arrives",
-    color: "#d97706",
-    visible: true,
-    comingSoon: false,
-  },
-];
-
 function getApiBaseUrl() {
   const config = useRuntimeConfig();
   return config.public.apiBaseUrl || "http://localhost:8000";
@@ -179,6 +142,13 @@ function getApiBaseUrl() {
 function getToken() {
   if (typeof localStorage === "undefined") return null;
   return localStorage.getItem("palengke_auth_token");
+}
+
+function apiHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${getToken()}`,
+  };
 }
 
 const enableSellerPaymentInfo = ref(true);
@@ -227,22 +197,51 @@ async function togglePaymentInfo() {
   }
 }
 
-function loadMethods() {
-  const raw = localStorage.getItem(KEY);
-  if (raw) {
-    methods.value = JSON.parse(raw);
-  } else {
-    methods.value = JSON.parse(JSON.stringify(defaults));
-    saveMethods();
+async function loadMethods() {
+  const t = getToken();
+  if (!t) return;
+  try {
+    const res = await fetch(`${getApiBaseUrl()}/api/admin/payment-methods`, {
+      headers: { Authorization: `Bearer ${t}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      methods.value = data.map(m => ({
+        id: m.id,
+        name: m.name,
+        desc: m.description || '',
+        color: m.color,
+        visible: m.visible,
+        comingSoon: m.coming_soon,
+      }));
+    }
+  } catch {
+    methods.value = [];
   }
 }
 
-function saveMethods() {
-  localStorage.setItem(KEY, JSON.stringify(methods.value));
-  saved.value = true;
-  setTimeout(() => {
-    saved.value = false;
-  }, 2000);
+async function saveMethods() {
+  const t = getToken();
+  if (!t) return;
+  try {
+    await Promise.all(methods.value.map(m =>
+      fetch(`${getApiBaseUrl()}/api/admin/payment-methods/${m.id}`, {
+        method: 'PUT',
+        headers: apiHeaders(),
+        body: JSON.stringify({
+          name: m.name,
+          description: m.desc,
+          color: m.color,
+          visible: m.visible,
+          coming_soon: m.comingSoon,
+        }),
+      })
+    ));
+    saved.value = true;
+    setTimeout(() => { saved.value = false; }, 2000);
+  } catch {
+    // silent
+  }
 }
 
 const visibleMethods = computed(() => methods.value.filter((m) => m.visible));

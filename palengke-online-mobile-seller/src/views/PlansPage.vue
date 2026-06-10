@@ -57,8 +57,36 @@
           </div>
         </div>
 
+        <!-- Payment Methods -->
+        <div class="payment-section" v-if="selected">
+          <h4 class="payment-label">Select Payment Method</h4>
+          <div class="payment-methods">
+            <div
+              v-for="pm in paymentMethods"
+              :key="pm.id"
+              class="payment-item"
+              :class="{ selected: selectedPayment === pm.id, disabled: pm.coming_soon }"
+              @click="selectPayment(pm)"
+            >
+              <img
+                v-if="pmLogo(pm.name)"
+                :src="pmLogo(pm.name)"
+                :alt="pm.name"
+                class="payment-img"
+              >
+              <div v-else class="payment-dot" :style="{ background: pm.color }"></div>
+              <div class="pm-info">
+                <span class="pm-name">{{ pm.name }}</span>
+                <span class="pm-desc">{{ pm.coming_soon ? 'Coming Soon' : pm.description }}</span>
+              </div>
+              <div class="radio-btn" :class="{ selected: selectedPayment === pm.id }"></div>
+              <span class="coming-tag" v-if="pm.coming_soon">Coming Soon</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Subscribe Button -->
-        <ion-button expand="block" class="subscribe-btn" :disabled="!selected" @click="handleSubscribe">
+        <ion-button expand="block" class="subscribe-btn" :disabled="!selected || !selectedPayment" @click="openPaymentModal">
           Subscribe Now — ₱{{ selectedPlan?.price.toLocaleString() }}
         </ion-button>
         <p class="secure-note">
@@ -75,11 +103,86 @@
         </div>
       </div>
     </ion-content>
+
+    <!-- Payment Modal -->
+    <div class="modal-overlay" v-if="showPaymentModal" @click.self="closePaymentModal">
+      <div class="payment-modal">
+        <div v-if="paymentStep === 'confirm'">
+          <div class="modal-header">
+            <h3>Complete Payment</h3>
+            <button class="modal-close" @click="closePaymentModal">&times;</button>
+          </div>
+
+          <div class="modal-plan-summary">
+            <div class="summary-row">
+              <span class="summary-label">Plan</span>
+              <span class="summary-value">{{ selectedPlan?.name }}</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">Amount</span>
+              <span class="summary-value price">₱{{ selectedPlan?.price.toLocaleString() }}</span>
+            </div>
+          </div>
+
+          <div class="modal-pm-section">
+            <span class="modal-pm-label">Paying with</span>
+            <div class="modal-pm-card">
+              <img
+                v-if="pmLogo(selectedPM?.name)"
+                :src="pmLogo(selectedPM?.name)"
+                :alt="selectedPM?.name"
+                class="modal-pm-img"
+              >
+              <div v-else class="modal-pm-dot" :style="{ background: selectedPM?.color }"></div>
+              <div class="modal-pm-info">
+                <span class="modal-pm-name">{{ selectedPM?.name }}</span>
+                <span class="modal-pm-desc">{{ selectedPM?.description }}</span>
+              </div>
+            </div>
+          </div>
+
+          <button class="pay-now-btn" @click="processPayment">
+            <ion-icon :icon="lockClosedOutline"></ion-icon>
+            Pay ₱{{ selectedPlan?.price.toLocaleString() }}
+          </button>
+          <button class="cancel-btn" @click="closePaymentModal">Cancel</button>
+        </div>
+
+        <div v-else-if="paymentStep === 'processing'">
+          <div class="processing-state">
+            <div class="spinner"></div>
+            <h3>Processing Payment</h3>
+            <p>Please wait while we process your payment...</p>
+          </div>
+        </div>
+
+        <div v-else-if="paymentStep === 'success'">
+          <div class="success-state">
+            <div class="success-icon">
+              <ion-icon :icon="checkmarkCircle"></ion-icon>
+            </div>
+            <h3>Payment Successful!</h3>
+            <p class="success-sub">{{ selectedPlan?.name }} plan activated via {{ selectedPM?.name }}</p>
+            <div class="success-details">
+              <div class="success-row">
+                <span>Amount Paid</span>
+                <span class="success-price">₱{{ selectedPlan?.price.toLocaleString() }}</span>
+              </div>
+              <div class="success-row">
+                <span>Valid Until</span>
+                <span>{{ sub.planEnd || sub.trialEnd }}</span>
+              </div>
+            </div>
+            <button class="done-btn" @click="goHome">Done</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </ion-page>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
@@ -87,67 +190,101 @@ import {
 } from '@ionic/vue'
 import {
   arrowBackOutline, timeOutline, checkmarkCircleOutline,
-  alertCircleOutline, checkmarkOutline, lockClosedOutline, logOutOutline
+  alertCircleOutline, checkmarkOutline, lockClosedOutline, logOutOutline,
+  checkmarkCircle
 } from 'ionicons/icons'
 import { PLANS, getSubscription, daysLeft, refreshSubscription, subscribePlan } from '@/services/subscriptionService'
+
+const API_BASE = 'http://localhost:8000/api'
 
 const router = useRouter()
 const sub = ref(getSubscription())
 const remaining = ref(daysLeft(sub.value))
 const plans = PLANS
 const selected = ref('')
+const selectedPayment = ref(null)
+const paymentMethods = ref([])
 const subscribing = ref(false)
 
+const showPaymentModal = ref(false)
+const paymentStep = ref('confirm')
+
 const selectedPlan = computed(() => plans.find(p => p.id === selected.value))
+const selectedPM = computed(() => paymentMethods.value.find(p => p.id === selectedPayment.value))
 
 const goBack = () => router.back()
 
-// Refresh subscription from API on mount
 refreshSubscription().then(s => {
   sub.value = s
   remaining.value = daysLeft(s)
 })
 
-const handleSubscribe = async () => {
-  if (!selected.value) return
+onMounted(async () => {
+  try {
+    const res = await fetch(`${API_BASE}/payment-methods`, {
+      headers: { 'Accept': 'application/json' },
+    })
+    if (res.ok) {
+      const all = await res.json()
+      // Exclude Cash on Delivery — customer-side only
+      paymentMethods.value = all.filter(p => p.name !== 'Cash on Delivery')
+      const first = paymentMethods.value.find(p => !p.coming_soon)
+      if (first) selectedPayment.value = first.id
+    }
+  } catch { /* silent */ }
+})
 
-  const plan = selectedPlan.value
+const pmLogo = (name) => {
+  const map = {
+    'GCash': '/assets/payment-methods-logo/gcash.png',
+    'PayPal': '/assets/payment-methods-logo/paypal.png',
+    'Stripe': '/assets/payment-methods-logo/cards.png',
+    'Cash on Delivery': null,
+  }
+  return map[name] || null
+}
 
-  const alert = await alertController.create({
-    header: 'Confirm Subscription',
-    subHeader: `${plan.name} — ₱${plan.price.toLocaleString()}`,
-    message: 'This is a mock payment. No real charge will be made.',
-    buttons: [
-      { text: 'Cancel', role: 'cancel', cssClass: 'alert-button-cancel' },
-      {
-        text: 'Confirm',
-        cssClass: 'alert-button-confirm',
-        handler: async () => {
-          subscribing.value = true
-          try {
-            const s = await subscribePlan(selected.value)
-            sub.value = s
-            remaining.value = daysLeft(s)
-            const toast = await toastController.create({
-              message: `Subscribed to ${plan.name} plan!`,
-              duration: 2000, color: 'success', position: 'top',
-            })
-            await toast.present()
-            setTimeout(() => router.push('/home'), 500)
-          } catch {
-            const toast = await toastController.create({
-              message: 'Subscription failed. Please try again.',
-              duration: 2000, color: 'danger', position: 'top',
-            })
-            await toast.present()
-          } finally {
-            subscribing.value = false
-          }
-        }
-      }
-    ]
-  })
-  await alert.present()
+const selectPayment = (pm) => {
+  if (pm.coming_soon) return
+  selectedPayment.value = pm.id
+}
+
+const openPaymentModal = () => {
+  if (!selected.value || !selectedPayment.value) return
+  paymentStep.value = 'confirm'
+  showPaymentModal.value = true
+}
+
+const closePaymentModal = () => {
+  if (paymentStep.value === 'processing') return
+  showPaymentModal.value = false
+}
+
+const processPayment = async () => {
+  paymentStep.value = 'processing'
+  subscribing.value = true
+  try {
+    // Simulate payment delay
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    await subscribePlan(selected.value, selectedPayment.value)
+    sub.value = await refreshSubscription()
+    remaining.value = daysLeft(sub.value)
+    paymentStep.value = 'success'
+  } catch {
+    const toast = await toastController.create({
+      message: 'Payment failed. Please try again.',
+      duration: 2000, color: 'danger', position: 'top',
+    })
+    await toast.present()
+    closePaymentModal()
+  } finally {
+    subscribing.value = false
+  }
+}
+
+const goHome = () => {
+  showPaymentModal.value = false
+  router.push('/home')
 }
 
 const handleLogout = async () => {
@@ -155,17 +292,13 @@ const handleLogout = async () => {
     header: 'Logout',
     message: 'Are you sure you want to logout?',
     buttons: [
+      { text: 'Cancel', role: 'cancel' },
       {
-        text: 'Cancel',
-        role: 'cancel'
-      },
-      {
-        text: 'Logout',
-        role: 'destructive',
+        text: 'Logout', role: 'destructive',
         handler: async () => {
           const email = localStorage.getItem('userEmail')
           try {
-            await fetch('http://localhost:8000/api/seller/devices/logout-current', {
+            await fetch(`${API_BASE}/seller/devices/logout-current`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ email }),
@@ -174,9 +307,7 @@ const handleLogout = async () => {
           ;['isAuthenticated', 'token', 'pendingAuth'].forEach(k => localStorage.removeItem(k))
           const toast = await toastController.create({
             message: 'Logged out successfully.',
-            duration: 1500,
-            color: 'success',
-            position: 'top',
+            duration: 1500, color: 'success', position: 'top',
           })
           await toast.present()
           setTimeout(() => router.push('/login'), 500)
@@ -208,18 +339,15 @@ ion-toolbar ion-button { --color: var(--color-text-secondary); }
   border-radius: 14px;
   margin-bottom: 24px;
 }
-
 .status-banner.trial { background: #E3F2FD; color: #1565C0; }
 .status-banner.active { background: #E8F5E9; color: #2E7D32; }
 .status-banner.expired { background: #FFEBEE; color: #c62828; }
-
 .status-icon ion-icon { font-size: 28px; }
 .status-title { font-size: 15px; font-weight: 700; margin: 0 0 2px; }
 .status-days { font-size: 13px; margin: 0; opacity: 0.85; }
 
 /* Plans Grid */
 .plans-grid { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
-
 .plan-card {
   position: relative;
   background: var(--color-card-bg, #fff);
@@ -229,11 +357,9 @@ ion-toolbar ion-button { --color: var(--color-text-secondary); }
   cursor: pointer;
   transition: all 0.2s;
 }
-
 .plan-card.popular { border-color: #4CAF50; }
 .plan-card.selected { border-color: #4CAF50; background: #f0fdf4; }
 .plan-card:active { transform: scale(0.98); }
-
 .plan-badge {
   position: absolute;
   top: -10px;
@@ -247,23 +373,18 @@ ion-toolbar ion-button { --color: var(--color-text-secondary); }
   border-radius: 20px;
   white-space: nowrap;
 }
-
 .plan-header { text-align: center; margin-bottom: 16px; padding-top: 4px; }
-
 .plan-name {
   font-size: 16px;
   font-weight: 600;
   color: var(--color-text-primary, #1a1a1a);
   margin: 0 0 8px;
 }
-
 .plan-price { display: flex; align-items: baseline; justify-content: center; gap: 2px; }
 .price-symbol { font-size: 18px; font-weight: 600; color: var(--color-text-primary, #1a1a1a); }
 .price-value { font-size: 32px; font-weight: 800; font-family: 'Plus Jakarta Sans', sans-serif; color: var(--color-text-primary, #1a1a1a); }
 .plan-per { font-size: 12px; color: #4CAF50; font-weight: 500; margin: 4px 0 0; }
-
 .plan-features { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-
 .feature {
   display: flex;
   align-items: center;
@@ -271,9 +392,7 @@ ion-toolbar ion-button { --color: var(--color-text-secondary); }
   font-size: 13px;
   color: var(--color-text-secondary, #666);
 }
-
 .feature ion-icon { font-size: 16px; color: #4CAF50; flex-shrink: 0; }
-
 .select-btn {
   --border-radius: 10px;
   font-size: 13px;
@@ -282,6 +401,7 @@ ion-toolbar ion-button { --color: var(--color-text-secondary); }
   height: 42px;
 }
 
+/* Subscribe Button */
 .subscribe-btn {
   --border-radius: 14px;
   height: 54px;
@@ -291,7 +411,6 @@ ion-toolbar ion-button { --color: var(--color-text-secondary); }
   --background: #4CAF50;
   margin-bottom: 12px;
 }
-
 .secure-note {
   text-align: center;
   font-size: 12px;
@@ -302,10 +421,235 @@ ion-toolbar ion-button { --color: var(--color-text-secondary); }
   justify-content: center;
   gap: 6px;
 }
-
 .secure-note ion-icon { font-size: 14px; }
 
-/* Dark mode overrides */
+/* Payment Methods */
+.payment-section { margin-bottom: 20px; }
+.payment-label { font-size: 14px; font-weight: 600; color: var(--color-text-primary, #1a1a1a); margin: 0 0 10px; }
+.payment-methods { display: flex; flex-direction: column; }
+.payment-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px;
+  border: 2px solid var(--color-border, #e0e0e0);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 10px;
+}
+.payment-item.selected { border-color: #4CAF50; background: #f0fdf4; }
+.payment-item.disabled { opacity: 0.5; cursor: default; }
+.payment-item:active:not(.disabled) { transform: scale(0.98); }
+.payment-img {
+  width: 48px; height: 48px; border-radius: 14px;
+  object-fit: contain; background: #f5f5f5; padding: 4px;
+  flex-shrink: 0;
+}
+.payment-dot { width: 48px; height: 48px; border-radius: 14px; flex-shrink: 0; }
+.pm-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.pm-name { font-size: 15px; font-weight: 700; color: var(--color-text-primary, #1a1a1a); }
+.pm-desc { font-size: 13px; color: var(--color-text-tertiary, #999); }
+.radio-btn {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid #e0e0e0; flex-shrink: 0; transition: all 0.2s;
+}
+.radio-btn.selected {
+  border-color: #4CAF50; background: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76,175,80,0.2);
+}
+.coming-tag {
+  font-size: 10px; font-weight: 700; color: #f59e0b;
+  background: #fef3c7; padding: 3px 8px; border-radius: 6px;
+  white-space: nowrap; flex-shrink: 0;
+}
+
+/* Payment Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s;
+}
+.payment-modal {
+  background: #fff;
+  width: 100%;
+  max-width: 500px;
+  border-radius: 20px 20px 0 0;
+  padding: 24px 20px 32px;
+  animation: slideUp 0.3s ease;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.modal-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+/* Plan Summary */
+.modal-plan-summary {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+}
+.summary-row + .summary-row { border-top: 1px solid #e5e7eb; }
+.summary-label { font-size: 14px; color: #6b7280; }
+.summary-value { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+.summary-value.price { color: #059669; font-size: 18px; font-weight: 800; }
+
+/* Payment Method in Modal */
+.modal-pm-section { margin-bottom: 24px; }
+.modal-pm-label { font-size: 13px; color: #6b7280; margin-bottom: 8px; display: block; }
+.modal-pm-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+}
+.modal-pm-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+.modal-pm-img {
+  width: 40px; height: 40px; border-radius: 10px;
+  object-fit: contain; background: #f5f5f5; padding: 3px;
+  flex-shrink: 0;
+}
+.modal-pm-info { flex: 1; }
+.modal-pm-name { font-size: 14px; font-weight: 600; color: #1a1a1a; display: block; }
+.modal-pm-desc { font-size: 12px; color: #9ca3af; }
+
+/* Pay Button */
+.pay-now-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  background: #4CAF50;
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: background 0.2s;
+}
+.pay-now-btn:hover { background: #43A047; }
+.pay-now-btn:active { transform: scale(0.98); }
+.cancel-btn {
+  width: 100%;
+  padding: 12px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: #9ca3af;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* Processing State */
+.processing-state {
+  text-align: center;
+  padding: 40px 0;
+}
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #4CAF50;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 20px;
+}
+.processing-state h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px;
+}
+.processing-state p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Success State */
+.success-state {
+  text-align: center;
+  padding: 20px 0;
+}
+.success-icon ion-icon {
+  font-size: 64px;
+  color: #4CAF50;
+  margin-bottom: 16px;
+}
+.success-state h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 6px;
+}
+.success-sub {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 24px;
+}
+.success-details {
+  background: #f0fdf4;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+.success-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  padding: 6px 0;
+  color: #374151;
+}
+.success-row + .success-row { border-top: 1px solid #d1fae5; }
+.success-price { font-weight: 700; color: #059669; }
+.done-btn {
+  width: 100%;
+  padding: 16px;
+  background: #4CAF50;
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Logout */
 .logout-section { margin-top: 32px; border-top: 1px solid var(--color-border, #e0e0e0); padding-top: 20px; }
 .logout-btn {
   --color: var(--ion-color-danger, #c62828);
@@ -314,9 +658,30 @@ ion-toolbar ion-button { --color: var(--color-text-secondary); }
   text-transform: none;
 }
 
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Dark mode overrides */
 @media (prefers-color-scheme: dark) {
   .plan-card { background: #2d2d2d; border-color: #404040; }
   .plan-card.selected { background: rgba(76, 175, 80, 0.1); border-color: #66BB6A; }
   .plan-badge { background: #66BB6A; }
+  .payment-item { background: #2d2d2d; border-color: #404040; }
+  .payment-item.selected { background: rgba(76, 175, 80, 0.1); border-color: #66BB6A; }
+  .payment-img { background: #3d3d3d; }
+  .payment-modal { background: #1e1e1e; }
+  .modal-header h3 { color: #e5e5e5; }
+  .modal-plan-summary { background: #2d2d2d; }
+  .summary-label { color: #9ca3af; }
+  .summary-value { color: #e5e5e5; }
+  .modal-pm-card { background: #2d2d2d; border-color: #404040; }
+  .modal-pm-name { color: #e5e5e5; }
+  .modal-pm-img { background: #3d3d3d; }
+  .success-details { background: rgba(76, 175, 80, 0.1); }
+  .success-row { color: #d1d5db; }
+  .success-state h3 { color: #e5e5e5; }
+  .processing-state h3 { color: #e5e5e5; }
 }
 </style>
