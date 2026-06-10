@@ -26,11 +26,11 @@
           <tr>
             <th>Store</th>
             <th>Email</th>
-            <th>Plan</th>
+            <th>Type</th>
+            <th>Details</th>
             <th>Amount</th>
             <th>Payment Method</th>
-            <th>Plan Period</th>
-            <th>Subscribed At</th>
+            <th>Date</th>
           </tr>
         </thead>
         <tbody>
@@ -42,11 +42,13 @@
               </NuxtLink>
             </td>
             <td class="email-cell">{{ p.seller_email }}</td>
-            <td><span class="plan-badge">{{ p.plan_name }}</span></td>
+            <td>
+              <span class="type-badge" :class="p.type">{{ p.type === 'subscription' ? 'Subscription' : 'Top Up' }}</span>
+            </td>
+            <td>{{ p.plan_name }}<br><span class="date-cell">{{ p.period }}</span></td>
             <td class="amount-cell">₱{{ p.amount.toLocaleString() }}</td>
             <td>{{ p.payment_method_name }}</td>
-            <td class="date-cell">{{ p.plan_start }} → {{ p.plan_end }}</td>
-            <td class="date-cell">{{ p.subscribed_at }}</td>
+            <td class="date-cell">{{ p.date }}</td>
           </tr>
         </tbody>
       </table>
@@ -185,5 +187,15 @@ onMounted(fetchPayments);
 .plan-badge {
   display: inline-block; padding: 3px 10px; border-radius: 6px;
   background: #f0fdf4; color: #059669; font-size: 11px; font-weight: 600;
+}
+.type-badge {
+  display: inline-block; padding: 3px 10px; border-radius: 6px;
+  font-size: 11px; font-weight: 600;
+}
+.type-badge.subscription {
+  background: #f0fdf4; color: #059669;
+}
+.type-badge.top_up {
+  background: #eff6ff; color: #3b82f6;
 }
 </style>

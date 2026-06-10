@@ -7,6 +7,7 @@ use App\Models\SellerRegistration;
 use App\Models\Notification;
 use App\Models\PaymentMethod;
 use App\Models\SubscriptionPayment;
+use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
 
 class SubscriptionController extends Controller
@@ -68,9 +69,11 @@ class SubscriptionController extends Controller
         $price = $plan['price'];
 
         // Wallet balance check
+        $walletUsed = false;
         if (!empty($validated['payment_method_id'])) {
             $pm = PaymentMethod::find($validated['payment_method_id']);
             if ($pm && strtolower($pm->name) === 'palengke wallet') {
+                $walletUsed = true;
                 if ((float) $seller->wallet_balance < $price) {
                     return response()->json([
                         'message' => 'Insufficient wallet balance.',
@@ -92,6 +95,19 @@ class SubscriptionController extends Controller
         $seller->plan_ends_at = $now->copy()->addMonths($plan['months']);
         $seller->subscription_status = 'active';
         $seller->save();
+
+        // Record wallet transaction
+        if ($walletUsed) {
+            WalletTransaction::create([
+                'seller_registration_id' => $seller->id,
+                'type' => 'subscription_payment',
+                'amount' => -$price,
+                'payment_method_id' => $validated['payment_method_id'],
+                'payment_method_name' => 'Palengke Wallet',
+                'reference' => 'Subscription ' . $validated['plan_id'],
+                'notes' => 'Subscription payment for ' . $plan['name'] . ' via Palengke Wallet',
+            ]);
+        }
 
         // Record payment
         $pmName = null;

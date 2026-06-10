@@ -455,7 +455,7 @@ const remainingText = computed(() => {
 })
 
 const goToPlans = () => router.push('/plans')
-const goToWallet = () => router.push('/plans')
+const goToWallet = () => router.push('/wallet')
 const canRequestBanner = computed(() => subActive.value && sub.value.planId === '8m')
 
 const showBannerModal = ref(false)

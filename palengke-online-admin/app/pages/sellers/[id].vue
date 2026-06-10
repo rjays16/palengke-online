@@ -109,6 +109,22 @@
           </div>
         </div>
 
+        <div class="info-card">
+          <h3>Palengke Wallet</h3>
+          <div class="wallet-balance">
+            <span class="wallet-amount">₱{{ seller.walletBalance.toLocaleString() }}</span>
+            <span class="wallet-label">Current Balance</span>
+          </div>
+          <div class="info-card-actions">
+            <button class="ghost-btn" @click="openTopUpModal">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Top Up
+            </button>
+          </div>
+        </div>
+
         <div class="info-card sub-card">
           <h3>Subscription</h3>
           <div class="info-rows">
@@ -439,6 +455,53 @@
         </div>
       </div>
     </div>
+
+    <div
+      class="modal-overlay"
+      v-if="showTopUp"
+      @click.self="closeTopUp"
+    >
+      <div class="modal-card modal-sm" @click.stop>
+        <div class="modal-top">
+          <span class="modal-title">Top Up Wallet — {{ seller?.name }}</span>
+          <button class="modal-close" @click="closeTopUp">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="topup-section">
+            <label class="topup-label">Amount to Add</label>
+            <div class="topup-input-wrap">
+              <span class="topup-currency">₱</span>
+              <input type="number" v-model.number="topUpAmount" min="1" class="topup-input" placeholder="0" />
+            </div>
+          </div>
+          <div class="topup-section">
+            <label class="topup-label">Payment Method</label>
+            <div class="pm-options">
+              <label
+                v-for="pm in topUpMethods"
+                :key="pm.id"
+                class="pm-option"
+                :class="{ selected: selectedTopUpMethod === pm.id }"
+              >
+                <input type="radio" :value="pm.id" v-model="selectedTopUpMethod" />
+                <span class="pm-option-name">{{ pm.name }}</span>
+              </label>
+            </div>
+          </div>
+          <div v-if="topUpError" class="topup-error">{{ topUpError }}</div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn secondary" @click="closeTopUp">Cancel</button>
+          <button class="modal-btn primary" @click="confirmTopUp" :disabled="topUpping">
+            {{ topUpping ? "Processing..." : "Add Balance" }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -476,6 +539,7 @@ function mapSeller(raw) {
       phone: raw.contact || "",
       email: raw.email || "",
     },
+    walletBalance: raw.walletBalance || 0,
     subscription: raw.subscription || { plan: "Trial", amount: 0, start: "", end: "", status: "trial" },
   };
 }
@@ -541,6 +605,88 @@ const activeTab = ref("products");
 const subAction = ref(null);
 const selectedPlan = ref("");
 const extendDays = ref(30);
+
+// Wallet top-up
+const showTopUp = ref(false);
+const topUpAmount = ref(100);
+const selectedTopUpMethod = ref(null);
+const topUpMethods = ref([]);
+const topUpping = ref(false);
+const topUpError = ref(null);
+
+async function loadTopUpMethods() {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${apiBase}/api/payment-methods`, {
+      headers: { Accept: "application/json" },
+    });
+    if (res.ok) {
+      const json = await res.json();
+      const methods = Array.isArray(json) ? json : (json.methods || []);
+      const exclude = ['cash on delivery', 'cod', 'palengke wallet'];
+      topUpMethods.value = methods.filter(
+        (m) => !exclude.includes(m.name.toLowerCase()),
+      ).map((m) => ({ id: m.id, name: m.name }));
+    }
+  } catch {
+    topUpMethods.value = [
+      { id: 1, name: 'GCash' },
+      { id: 2, name: 'PayPal' },
+      { id: 3, name: 'Stripe' },
+    ];
+  }
+}
+
+function openTopUpModal() {
+  topUpAmount.value = 100;
+  selectedTopUpMethod.value = null;
+  topUpError.value = null;
+  loadTopUpMethods();
+  showTopUp.value = true;
+}
+
+function closeTopUp() {
+  showTopUp.value = false;
+  topUpError.value = null;
+  topUpping.value = false;
+}
+
+async function confirmTopUp() {
+  if (!topUpAmount.value || topUpAmount.value < 1) {
+    topUpError.value = "Enter a valid amount.";
+    return;
+  }
+  if (!selectedTopUpMethod.value) {
+    topUpError.value = "Select a payment method.";
+    return;
+  }
+  topUpping.value = true;
+  topUpError.value = null;
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${apiBase}/api/admin/sellers/${route.params.id}/wallet/top-up`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: "application/json" },
+      body: JSON.stringify({
+        amount: topUpAmount.value,
+        payment_method_id: selectedTopUpMethod.value,
+      }),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      topUpError.value = json.message || "Top up failed.";
+      return;
+    }
+    if (seller.value) seller.value.walletBalance = json.balance;
+    closeTopUp();
+  } catch (e) {
+    topUpError.value = e.message || "Network error.";
+  } finally {
+    topUpping.value = false;
+  }
+}
 
 const toggleStatus = () => {
   if (seller.value) sellersStore.toggleStatus(seller.value.id);
@@ -945,6 +1091,102 @@ function confirmCancel() {
   color: #9ca3af;
 }
 
+.wallet-balance {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0 8px;
+}
+.wallet-amount {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #059669;
+}
+.wallet-label {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+.topup-section {
+  margin-bottom: 20px;
+}
+.topup-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+.topup-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 4px 16px;
+  transition: border-color 0.15s;
+}
+.topup-input-wrap:focus-within {
+  border-color: #059669;
+}
+.topup-currency {
+  font-size: 20px;
+  font-weight: 700;
+  color: #9ca3af;
+}
+.topup-input {
+  flex: 1;
+  border: none;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  outline: none;
+  padding: 8px 0;
+  width: 100%;
+}
+.pm-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pm-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+.pm-option:hover {
+  border-color: #059669;
+}
+.pm-option.selected {
+  border-color: #059669;
+  background: #f0fdf4;
+  color: #059669;
+  font-weight: 600;
+}
+.pm-option input {
+  accent-color: #059669;
+}
+.pm-option-name {
+  flex: 1;
+}
+.topup-error {
+  font-size: 13px;
+  color: #dc2626;
+  background: #fef2f2;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 4px;
+}
 .sub-card {
   grid-column: 1 / -1;
 }

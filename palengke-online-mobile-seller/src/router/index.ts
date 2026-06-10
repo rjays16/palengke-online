@@ -234,6 +234,18 @@ const routes: Array<RouteRecordRaw> = [
     component: PlansPage,
     meta: { requiresAuth: true }
   },
+  {
+    path: '/wallet',
+    name: 'WalletTopUp',
+    component: () => import('@/views/WalletTopUpPage.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/wallet/transactions',
+    name: 'WalletTransactions',
+    component: () => import('@/views/WalletTransactionsPage.vue'),
+    meta: { requiresAuth: true }
+  },
 ];
 
 // ============================================
@@ -262,7 +274,7 @@ router.beforeEach((to, from, next) => {
     next('/pin-login');
   } else if (to.path === '/login' && isAuthenticated) {
     next('/home');
-  } else if (to.meta.requiresAuth && isAuthenticated && to.path !== '/plans') {
+  } else if (to.meta.requiresAuth && isAuthenticated && to.path !== '/plans' && to.path !== '/wallet') {
     const sub = getSubscription()
     if (isExpired(sub)) {
       next('/plans')

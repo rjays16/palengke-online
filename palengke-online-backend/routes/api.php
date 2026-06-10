@@ -29,6 +29,7 @@ use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\AdminPaymentMethodController;
 use App\Http\Controllers\Api\AdminSubscriptionPaymentController;
+use App\Http\Controllers\Api\AdminWalletController;
 use App\Http\Controllers\Api\WalletController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
@@ -110,8 +111,10 @@ Route::post('/seller/subscription/subscribe', [SubscriptionController::class, 's
 // Public — payment methods for seller app
 Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
 
-// Seller app — wallet balance
+// Seller app — wallet
 Route::get('/seller/wallet/balance', [WalletController::class, 'balance']);
+Route::get('/seller/wallet/transactions', [WalletController::class, 'transactions']);
+Route::post('/seller/wallet/top-up', [WalletController::class, 'topUp']);
 
 // Seller app — notifications
 Route::get('/seller/notifications', [SellerNotificationController::class, 'index']);
@@ -204,6 +207,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/admin/payment-methods/{id}', [AdminPaymentMethodController::class, 'destroy']);
 
     Route::get('/admin/subscription-payments', [AdminSubscriptionPaymentController::class, 'index']);
+
+    Route::post('/admin/sellers/{id}/wallet/top-up', [AdminWalletController::class, 'topUp']);
+    Route::get('/admin/sellers/{id}/wallet/transactions', [AdminWalletController::class, 'transactions']);
 });
 
 // Public — fetch active notices for seller / customer / driver apps

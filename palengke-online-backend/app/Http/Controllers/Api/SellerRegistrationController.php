@@ -233,6 +233,7 @@ class SellerRegistrationController extends Controller
             'currentAddress' => $r->current_address,
             'idType' => $r->id_type,
             'idTypeName' => $r->id_type_name,
+            'walletBalance' => (float) ($r->wallet_balance ?? 0),
             'productCount' => $r->products_count ?? $r->products->count() ?? 0,
             'subscription' => [
                 'plan' => $plan ? $plan['name'] : 'Trial',
