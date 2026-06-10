@@ -15,21 +15,10 @@ class AdminWalletController extends Controller
     {
         $validated = $request->validate([
             'amount' => 'required|numeric|min:1',
-            'payment_method_id' => 'required|integer|exists:payment_methods,id',
         ]);
 
         $sellerId = $this->resolveSellerId($id);
         $seller = SellerRegistration::findOrFail($sellerId);
-
-        $pm = PaymentMethod::findOrFail($validated['payment_method_id']);
-        $pmName = strtolower($pm->name);
-
-        // Block COD and Palengke Wallet for top-ups
-        if (in_array($pmName, ['cash on delivery', 'cod', 'palengke wallet'])) {
-            return response()->json([
-                'message' => 'Cannot top up using ' . $pm->name . '. Please use GCash, PayPal, or Stripe.',
-            ], 422);
-        }
 
         $amount = (float) $validated['amount'];
 
@@ -40,20 +29,21 @@ class AdminWalletController extends Controller
             'seller_registration_id' => $seller->id,
             'type' => 'top_up',
             'amount' => $amount,
-            'payment_method_id' => $pm->id,
-            'payment_method_name' => $pm->name,
-            'notes' => 'Admin top-up via ' . $pm->name,
+            'payment_method_id' => null,
+            'payment_method_name' => 'Admin',
+            'notes' => 'Admin top-up',
         ]);
+
+        $adminName = $request->user()?->name ?? 'An admin';
 
         Notification::create([
             'type' => 'wallet_top_up',
             'title' => 'Wallet Top-Up (Admin)',
-            'message' => $seller->store_name . ' was topped up ₱' . number_format($amount) . ' via ' . $pm->name . '.',
+            'message' => $adminName . ' added ₱' . number_format($amount) . ' to ' . $seller->store_name . '\'s wallet.',
             'link' => '/sellers/' . 'SELLER-' . strtoupper(dechex($seller->id)),
             'data' => [
                 'seller_id' => $seller->id,
                 'amount' => $amount,
-                'payment_method' => $pm->name,
             ],
             'is_read' => false,
         ]);
@@ -62,7 +52,6 @@ class AdminWalletController extends Controller
             'message' => 'Wallet topped up successfully!',
             'balance' => (float) $seller->wallet_balance,
             'amount_added' => $amount,
-            'payment_method' => $pm->name,
         ]);
     }
 

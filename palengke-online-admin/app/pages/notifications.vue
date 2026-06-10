@@ -24,33 +24,80 @@
               fill="none"
               stroke="currentColor"
               stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
             >
-              <path
-                v-if="n.type === 'order'"
-                d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"
-              />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <path d="M16 10a4 4 0 0 1-8 0" />
-              <circle v-if="n.type === 'system'" cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-              <path
-                v-if="n.type === 'alert'"
-                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
-              />
-              <line x1="12" y1="9" x2="12" y2="13" />
-              <line x1="12" y1="17" x2="12.01" y2="17" />
-              <path
-                v-if="n.type === 'promo'"
-                d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"
-              />
-              <line x1="7" y1="7" x2="7.01" y2="7" />
-              <polygon
-                v-if="n.type === 'warning'"
-                points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"
-              />
-              <line x1="9" y1="3" x2="9" y2="18" />
-              <line x1="15" y1="6" x2="15" y2="21" />
+              <!-- order -->
+              <template v-if="n.type === 'order'">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <path d="M16 10a4 4 0 0 1-8 0" />
+              </template>
+
+              <!-- system -->
+              <template v-if="n.type === 'system'">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </template>
+
+              <!-- alert -->
+              <template v-if="n.type === 'alert'">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </template>
+
+              <!-- promo -->
+              <template v-if="n.type === 'promo'">
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                <line x1="7" y1="7" x2="7.01" y2="7" />
+              </template>
+
+              <!-- warning -->
+              <template v-if="n.type === 'warning'">
+                <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
+                <line x1="9" y1="3" x2="9" y2="18" />
+                <line x1="15" y1="6" x2="15" y2="21" />
+              </template>
+
+              <!-- wallet_top_up -->
+              <template v-if="n.type === 'wallet_top_up'">
+                <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+                <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+                <path d="M18 12a2 2 0 0 0 0 4h4v-4z" />
+                <line x1="9" y1="13" x2="9" y2="17" />
+                <line x1="7" y1="15" x2="11" y2="15" />
+              </template>
+
+              <!-- subscription_change -->
+              <template v-if="n.type === 'subscription_change'">
+                <polyline points="23 4 23 10 17 10" />
+                <polyline points="1 20 1 14 7 14" />
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+              </template>
+
+              <!-- subscription_extend -->
+              <template v-if="n.type === 'subscription_extend'">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+                <line x1="9" y1="12" x2="15" y2="12" />
+              </template>
+
+              <!-- subscription_cancel -->
+              <template v-if="n.type === 'subscription_cancel'">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="15" y1="9" x2="9" y2="15" />
+                <line x1="9" y1="9" x2="15" y2="15" />
+              </template>
+
+              <!-- new_seller -->
+              <template v-if="n.type === 'new_seller'">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="8.5" cy="7" r="4" />
+                <line x1="20" y1="8" x2="20" y2="14" />
+                <line x1="23" y1="11" x2="17" y2="11" />
+              </template>
             </svg>
           </div>
           <div class="notif-content">
@@ -206,6 +253,26 @@ const paginatedNotifications = computed(() => {
 .notif-icon.warning {
   background: #fef3c7;
   color: #d97706;
+}
+.notif-icon.wallet_top_up {
+  background: #f0fdf4;
+  color: #059669;
+}
+.notif-icon.subscription_change {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+.notif-icon.subscription_extend {
+  background: #fefce8;
+  color: #a16207;
+}
+.notif-icon.subscription_cancel {
+  background: #fef2f2;
+  color: #dc2626;
+}
+.notif-icon.new_seller {
+  background: #f5f3ff;
+  color: #7c3aed;
 }
 .notif-content {
   flex: 1;

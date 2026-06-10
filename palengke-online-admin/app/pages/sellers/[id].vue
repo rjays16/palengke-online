@@ -221,10 +221,11 @@
                 </div>
               </label>
             </div>
+            <div v-if="subError" class="sub-error">{{ subError }}</div>
             <div class="sub-action-btns">
               <button class="ghost-btn" @click="cancelSubAction">Cancel</button>
-              <button class="primary-btn" @click="confirmChangePlan">
-                Confirm Change
+              <button class="primary-btn" @click="confirmChangePlan" :disabled="subProcessing">
+                {{ subProcessing ? "Processing..." : "Confirm Change" }}
               </button>
             </div>
           </div>
@@ -250,9 +251,12 @@
               <button class="extend-btn" @click="extendDays += 7">+7</button>
             </div>
             <span class="extend-label">days</span>
+            <div v-if="subError" class="sub-error">{{ subError }}</div>
             <div class="sub-action-btns">
               <button class="ghost-btn" @click="cancelSubAction">Cancel</button>
-              <button class="primary-btn" @click="confirmExtend">Extend</button>
+              <button class="primary-btn" @click="confirmExtend" :disabled="subProcessing">
+                {{ subProcessing ? "Processing..." : "Extend" }}
+              </button>
             </div>
           </div>
 
@@ -262,12 +266,13 @@
               This will mark the subscription as cancelled. The seller will lose
               access to premium features.
             </p>
+            <div v-if="subError" class="sub-error">{{ subError }}</div>
             <div class="sub-action-btns">
               <button class="ghost-btn" @click="cancelSubAction">
                 Keep Active
               </button>
-              <button class="danger-btn" @click="confirmCancel">
-                Yes, Cancel
+              <button class="danger-btn" @click="confirmCancel" :disabled="subProcessing">
+                {{ subProcessing ? "Processing..." : "Yes, Cancel" }}
               </button>
             </div>
           </div>
@@ -478,20 +483,6 @@
               <input type="number" v-model.number="topUpAmount" min="1" class="topup-input" placeholder="0" />
             </div>
           </div>
-          <div class="topup-section">
-            <label class="topup-label">Payment Method</label>
-            <div class="pm-options">
-              <label
-                v-for="pm in topUpMethods"
-                :key="pm.id"
-                class="pm-option"
-                :class="{ selected: selectedTopUpMethod === pm.id }"
-              >
-                <input type="radio" :value="pm.id" v-model="selectedTopUpMethod" />
-                <span class="pm-option-name">{{ pm.name }}</span>
-              </label>
-            </div>
-          </div>
           <div v-if="topUpError" class="topup-error">{{ topUpError }}</div>
         </div>
         <div class="modal-actions">
@@ -605,44 +596,18 @@ const activeTab = ref("products");
 const subAction = ref(null);
 const selectedPlan = ref("");
 const extendDays = ref(30);
+const subProcessing = ref(false);
+const subError = ref(null);
 
 // Wallet top-up
 const showTopUp = ref(false);
 const topUpAmount = ref(100);
-const selectedTopUpMethod = ref(null);
-const topUpMethods = ref([]);
 const topUpping = ref(false);
 const topUpError = ref(null);
 
-async function loadTopUpMethods() {
-  const token = getToken();
-  if (!token) return;
-  try {
-    const res = await fetch(`${apiBase}/api/payment-methods`, {
-      headers: { Accept: "application/json" },
-    });
-    if (res.ok) {
-      const json = await res.json();
-      const methods = Array.isArray(json) ? json : (json.methods || []);
-      const exclude = ['cash on delivery', 'cod', 'palengke wallet'];
-      topUpMethods.value = methods.filter(
-        (m) => !exclude.includes(m.name.toLowerCase()),
-      ).map((m) => ({ id: m.id, name: m.name }));
-    }
-  } catch {
-    topUpMethods.value = [
-      { id: 1, name: 'GCash' },
-      { id: 2, name: 'PayPal' },
-      { id: 3, name: 'Stripe' },
-    ];
-  }
-}
-
 function openTopUpModal() {
   topUpAmount.value = 100;
-  selectedTopUpMethod.value = null;
   topUpError.value = null;
-  loadTopUpMethods();
   showTopUp.value = true;
 }
 
@@ -657,10 +622,6 @@ async function confirmTopUp() {
     topUpError.value = "Enter a valid amount.";
     return;
   }
-  if (!selectedTopUpMethod.value) {
-    topUpError.value = "Select a payment method.";
-    return;
-  }
   topUpping.value = true;
   topUpError.value = null;
   const token = getToken();
@@ -671,7 +632,6 @@ async function confirmTopUp() {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: "application/json" },
       body: JSON.stringify({
         amount: topUpAmount.value,
-        payment_method_id: selectedTopUpMethod.value,
       }),
     });
     const json = await res.json();
@@ -699,37 +659,88 @@ function openContactModal() {
   showContact.value = true;
 }
 
+const planIdMap = {
+  '1 Month': '1m',
+  '2 Months': '2m',
+  '4 Months': '4m',
+  '8 Months': '8m',
+};
+
 function cancelSubAction() {
   subAction.value = null;
   selectedPlan.value = "";
   extendDays.value = 30;
+  subError.value = null;
 }
 
-function confirmChangePlan() {
+async function confirmChangePlan() {
   if (!seller.value || !selectedPlan.value) return;
-  const plan = sellersStore.AVAILABLE_PLANS.find(
-    (p) => p.name === selectedPlan.value,
-  );
-  if (!plan) return;
-  sellersStore.changeSubscriptionPlan(
-    seller.value.id,
-    plan.name,
-    plan.amount,
-    plan.months,
-  );
-  cancelSubAction();
+  const planId = planIdMap[selectedPlan.value];
+  if (!planId) return;
+  subProcessing.value = true;
+  subError.value = null;
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${apiBase}/api/admin/sellers/${route.params.id}/subscription/change`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ plan_id: planId }),
+    });
+    const json = await res.json();
+    if (!res.ok) { subError.value = json.message || 'Failed to change plan.'; return; }
+    if (seller.value) seller.value.subscription = json.subscription;
+    cancelSubAction();
+  } catch (e) {
+    subError.value = e.message || 'Network error.';
+  } finally {
+    subProcessing.value = false;
+  }
 }
 
-function confirmExtend() {
+async function confirmExtend() {
   if (!seller.value || !extendDays.value || extendDays.value < 1) return;
-  sellersStore.extendSubscriptionDays(seller.value.id, extendDays.value);
-  cancelSubAction();
+  subProcessing.value = true;
+  subError.value = null;
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${apiBase}/api/admin/sellers/${route.params.id}/subscription/extend`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ days: extendDays.value }),
+    });
+    const json = await res.json();
+    if (!res.ok) { subError.value = json.message || 'Failed to extend.'; return; }
+    if (seller.value) seller.value.subscription = json.subscription;
+    cancelSubAction();
+  } catch (e) {
+    subError.value = e.message || 'Network error.';
+  } finally {
+    subProcessing.value = false;
+  }
 }
 
-function confirmCancel() {
+async function confirmCancel() {
   if (!seller.value) return;
-  sellersStore.cancelSubscription(seller.value.id);
-  cancelSubAction();
+  subProcessing.value = true;
+  subError.value = null;
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${apiBase}/api/admin/sellers/${route.params.id}/subscription/cancel`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' },
+    });
+    const json = await res.json();
+    if (!res.ok) { subError.value = json.message || 'Failed to cancel.'; return; }
+    if (seller.value) seller.value.subscription = json.subscription;
+    cancelSubAction();
+  } catch (e) {
+    subError.value = e.message || 'Network error.';
+  } finally {
+    subProcessing.value = false;
+  }
 }
 </script>
 
@@ -1146,39 +1157,6 @@ function confirmCancel() {
   padding: 8px 0;
   width: 100%;
 }
-.pm-options {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.pm-option {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  border: 1.5px solid #e5e7eb;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.15s;
-  font-size: 14px;
-  font-weight: 500;
-  color: #374151;
-}
-.pm-option:hover {
-  border-color: #059669;
-}
-.pm-option.selected {
-  border-color: #059669;
-  background: #f0fdf4;
-  color: #059669;
-  font-weight: 600;
-}
-.pm-option input {
-  accent-color: #059669;
-}
-.pm-option-name {
-  flex: 1;
-}
 .topup-error {
   font-size: 13px;
   color: #dc2626;
@@ -1354,6 +1332,14 @@ function confirmCancel() {
   font-size: 12px;
   color: #9ca3af;
   margin-bottom: 8px;
+}
+.sub-error {
+  font-size: 13px;
+  color: #dc2626;
+  background: #fef2f2;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 4px;
 }
 .contact-row {
   display: flex;

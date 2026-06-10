@@ -31,6 +31,7 @@ use App\Http\Controllers\Api\AdminPaymentMethodController;
 use App\Http\Controllers\Api\AdminSubscriptionPaymentController;
 use App\Http\Controllers\Api\AdminWalletController;
 use App\Http\Controllers\Api\WalletController;
+use App\Http\Controllers\Api\AdminSubscriptionController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -210,6 +211,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/admin/sellers/{id}/wallet/top-up', [AdminWalletController::class, 'topUp']);
     Route::get('/admin/sellers/{id}/wallet/transactions', [AdminWalletController::class, 'transactions']);
+
+    Route::post('/admin/sellers/{id}/subscription/change', [AdminSubscriptionController::class, 'changePlan']);
+    Route::post('/admin/sellers/{id}/subscription/extend', [AdminSubscriptionController::class, 'extend']);
+    Route::post('/admin/sellers/{id}/subscription/cancel', [AdminSubscriptionController::class, 'cancel']);
 });
 
 // Public — fetch active notices for seller / customer / driver apps
