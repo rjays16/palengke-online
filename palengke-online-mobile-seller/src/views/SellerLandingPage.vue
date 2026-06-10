@@ -273,7 +273,7 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { onIonViewWillEnter } from '@ionic/vue';
-import { getSubscription, daysLeft, isExpired } from '@/services/subscriptionService';
+import { getSubscription, daysLeft, isExpired, refreshSubscription } from '@/services/subscriptionService';
 import {
   IonPage,
   IonHeader,
@@ -327,8 +327,8 @@ const selectedCategories = ref([]);
 const availableCategories = ref([]);
 const sub = ref(getSubscription())
 
-function refreshSub() {
-  sub.value = getSubscription()
+async function refreshSub() {
+  sub.value = await refreshSubscription()
 }
 
 const loadProfile = async () => {

@@ -1,4 +1,5 @@
 const SUB_KEY = 'palengke_subscription'
+const API_BASE = 'http://localhost:8000/api'
 
 export interface Plan {
   id: string
@@ -50,6 +51,32 @@ export function getSubscription(): Subscription {
   return JSON.parse(raw)
 }
 
+export async function refreshSubscription(): Promise<Subscription> {
+  const email = localStorage.getItem('userEmail')
+  if (!email) return getSubscription()
+  try {
+    const res = await fetch(`${API_BASE}/seller/subscription?email=${encodeURIComponent(email)}`, {
+      headers: { 'Accept': 'application/json' },
+    })
+    if (res.ok) {
+      const data = await res.json()
+      const sub: Subscription = {
+        trialStart: data.trial_start,
+        trialEnd: data.trial_end,
+        planId: data.plan_id,
+        planStart: data.plan_start,
+        planEnd: data.plan_end,
+        status: data.status,
+      }
+      localStorage.setItem(SUB_KEY, JSON.stringify(sub))
+      return sub
+    }
+  } catch {
+    // silent — use cached
+  }
+  return getSubscription()
+}
+
 export function daysLeft(sub: Subscription): number {
   const end = sub.status === 'trial' ? new Date(sub.trialEnd) : new Date(sub.planEnd!)
   const now = new Date()
@@ -61,20 +88,17 @@ export function isExpired(sub: Subscription): boolean {
   return daysLeft(sub) === 0
 }
 
-export function subscribe(planId: string): Subscription {
-  const plan = PLANS.find(p => p.id === planId)
-  if (!plan) throw new Error('Invalid plan')
-
-  const sub = getSubscription()
-  const now = new Date()
-  const end = new Date(now)
-  end.setMonth(end.getMonth() + plan.months)
-
-  sub.planId = planId
-  sub.planStart = now.toISOString().slice(0, 10)
-  sub.planEnd = end.toISOString().slice(0, 10)
-  sub.status = 'active'
-
-  localStorage.setItem(SUB_KEY, JSON.stringify(sub))
-  return sub
+export async function subscribePlan(planId: string): Promise<Subscription> {
+  const email = localStorage.getItem('userEmail')
+  if (!email) throw new Error('User not logged in')
+  const res = await fetch(`${API_BASE}/seller/subscription/subscribe`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({ email, plan_id: planId }),
+  })
+  if (!res.ok) {
+    const data = await res.json()
+    throw new Error(data.message || 'Subscription failed')
+  }
+  return refreshSubscription()
 }

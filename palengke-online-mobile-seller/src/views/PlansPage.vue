@@ -81,17 +81,24 @@ import {
   arrowBackOutline, timeOutline, checkmarkCircleOutline,
   alertCircleOutline, checkmarkOutline, lockClosedOutline
 } from 'ionicons/icons'
-import { PLANS, getSubscription, daysLeft, subscribe } from '@/services/subscriptionService'
+import { PLANS, getSubscription, daysLeft, refreshSubscription, subscribePlan } from '@/services/subscriptionService'
 
 const router = useRouter()
-const sub = getSubscription()
-const remaining = daysLeft(sub)
+const sub = ref(getSubscription())
+const remaining = ref(daysLeft(sub.value))
 const plans = PLANS
 const selected = ref('')
+const subscribing = ref(false)
 
 const selectedPlan = computed(() => plans.find(p => p.id === selected.value))
 
 const goBack = () => router.back()
+
+// Refresh subscription from API on mount
+refreshSubscription().then(s => {
+  sub.value = s
+  remaining.value = daysLeft(s)
+})
 
 const handleSubscribe = async () => {
   if (!selected.value) return
@@ -107,15 +114,27 @@ const handleSubscribe = async () => {
       {
         text: 'Confirm',
         cssClass: 'alert-button-confirm',
-        handler: () => {
-          subscribe(selected.value)
-          toastController.create({
-            message: `Subscribed to ${plan.name} plan!`,
-            duration: 2000,
-            color: 'success',
-            position: 'top',
-          }).then(t => t.present())
-          setTimeout(() => router.push('/home'), 500)
+        handler: async () => {
+          subscribing.value = true
+          try {
+            const s = await subscribePlan(selected.value)
+            sub.value = s
+            remaining.value = daysLeft(s)
+            const toast = await toastController.create({
+              message: `Subscribed to ${plan.name} plan!`,
+              duration: 2000, color: 'success', position: 'top',
+            })
+            await toast.present()
+            setTimeout(() => router.push('/home'), 500)
+          } catch {
+            const toast = await toastController.create({
+              message: 'Subscription failed. Please try again.',
+              duration: 2000, color: 'danger', position: 'top',
+            })
+            await toast.present()
+          } finally {
+            subscribing.value = false
+          }
         }
       }
     ]

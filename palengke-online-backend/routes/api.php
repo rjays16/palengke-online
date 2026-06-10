@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\SellerNotificationController;
 use App\Http\Controllers\Api\FaqController;
 use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\SubscriptionController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -97,6 +98,10 @@ Route::get('/seller/analytics', [AnalyticsController::class, 'index']);
 
 // Seller app — update monthly goals
 Route::post('/seller/goals', [AnalyticsController::class, 'updateGoals']);
+
+// Seller app — subscription / trial
+Route::get('/seller/subscription', [SubscriptionController::class, 'index']);
+Route::post('/seller/subscription/subscribe', [SubscriptionController::class, 'subscribe']);
 
 // Seller app — notifications
 Route::get('/seller/notifications', [SellerNotificationController::class, 'index']);

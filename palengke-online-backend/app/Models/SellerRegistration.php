@@ -18,6 +18,8 @@ class SellerRegistration extends Model
         'id_front_photo', 'id_back_photo', 'selfie_photo',
         'operating_hours', 'description', 'categories', 'avatar',
         'monthly_sales_target', 'monthly_orders_target',
+        'trial_started_at', 'trial_ends_at', 'subscription_status',
+        'plan_id', 'plan_started_at', 'plan_ends_at',
         'status', 'rejection_reason', 'reviewed_by', 'reviewed_at',
     ];
 
@@ -25,6 +27,10 @@ class SellerRegistration extends Model
         'email_verified' => 'boolean',
         'reviewed_at' => 'datetime',
         'categories' => 'array',
+        'trial_started_at' => 'datetime',
+        'trial_ends_at' => 'datetime',
+        'plan_started_at' => 'datetime',
+        'plan_ends_at' => 'datetime',
     ];
 
     public function reviewedBy()
