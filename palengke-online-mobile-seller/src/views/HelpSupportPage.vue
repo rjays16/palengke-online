@@ -318,8 +318,6 @@ import {
   documentTextOutline,
   shieldCheckmarkOutline
 } from 'ionicons/icons';
-import { MOCK_FAQS } from '@/mock/faqs';
-
 const API_BASE = 'http://localhost:8000/api';
 
 const router = useRouter();
@@ -361,7 +359,27 @@ const quickActions = [
 ];
 
 // FAQs Data
-const faqs = ref(MOCK_FAQS);
+const faqs = ref([]);
+const loadingFaqs = ref(true);
+
+const loadFaqs = async () => {
+  loadingFaqs.value = true;
+  try {
+    const response = await fetch(`${API_BASE}/faqs`, {
+      headers: { 'Accept': 'application/json' },
+    });
+    const data = await response.json();
+    if (response.ok && data.faqs) {
+      faqs.value = data.faqs;
+    }
+  } catch {
+    // silent
+  } finally {
+    loadingFaqs.value = false;
+  }
+};
+
+loadFaqs();
 
 // Computed
 const hasSearchQuery = computed(() => searchQuery.value.trim().length > 0);

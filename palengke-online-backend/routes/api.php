@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\NoticeController;
 use App\Http\Controllers\Api\SellerNotificationController;
+use App\Http\Controllers\Api\FaqController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -165,7 +166,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/notices', [NoticeController::class, 'store']);
     Route::put('/admin/notices/{id}', [NoticeController::class, 'update']);
     Route::delete('/admin/notices/{id}', [NoticeController::class, 'destroy']);
+
+    Route::get('/admin/faqs', [FaqController::class, 'index']);
+    Route::post('/admin/faqs', [FaqController::class, 'store']);
+    Route::put('/admin/faqs/{id}', [FaqController::class, 'update']);
+    Route::delete('/admin/faqs/{id}', [FaqController::class, 'destroy']);
 });
 
 // Public — fetch active notices for seller / customer / driver apps
 Route::get('/notices', [NoticeController::class, 'active']);
+
+// Public — fetch active FAQs for seller app
+Route::get('/faqs', [FaqController::class, 'active']);
