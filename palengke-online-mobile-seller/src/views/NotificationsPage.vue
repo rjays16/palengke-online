@@ -7,7 +7,7 @@
         </ion-buttons>
         <ion-title>Notifications</ion-title>
         <ion-buttons slot="end">
-          <ion-button @click="markAllAsRead" v-if="unreadCount > 0">
+          <ion-button @click="markAllAsRead" v-if="unreadCount > 0 && !loading">
             <ion-icon :icon="checkmarkDoneOutline"></ion-icon>
           </ion-button>
           <ion-button @click="showOptions">
@@ -36,8 +36,14 @@
     </ion-header>
 
     <ion-content :fullscreen="true">
+      <!-- Loading State -->
+      <div v-if="loading" class="empty-state">
+        <ion-spinner name="crescent" color="success" style="width: 48px; height: 48px;"></ion-spinner>
+        <h3>Loading...</h3>
+      </div>
+
       <!-- Empty State -->
-      <div v-if="filteredNotifications.length === 0" class="empty-state">
+      <div v-else-if="filteredNotifications.length === 0" class="empty-state">
         <div class="empty-icon">
           <ion-icon :icon="notificationsOffOutline"></ion-icon>
         </div>
@@ -97,6 +103,7 @@ import {
   IonSegmentButton,
   IonLabel,
   IonBadge,
+  IonSpinner,
   actionSheetController,
   alertController,
   toastController
@@ -114,15 +121,33 @@ import {
   warningOutline,
   closeCircleOutline
 } from 'ionicons/icons';
-import { MOCK_NOTIFICATIONS } from '@/mock/notifications';
-
 const router = useRouter();
 
 // State
 const selectedFilter = ref('all');
+const notifications = ref([]);
+const loading = ref(true);
 
-// Mock Notifications Data (TODO: Replace with API)
-const notifications = ref(MOCK_NOTIFICATIONS);
+const loadNotifications = async () => {
+  loading.value = true;
+  const email = localStorage.getItem('userEmail');
+  if (!email) return;
+  try {
+    const response = await fetch(`http://localhost:8000/api/seller/notifications?email=${encodeURIComponent(email)}`, {
+      headers: { 'Accept': 'application/json' },
+    });
+    const data = await response.json();
+    if (response.ok && data.notifications) {
+      notifications.value = data.notifications;
+    }
+  } catch {
+    // silent
+  } finally {
+    loading.value = false;
+  }
+};
+
+loadNotifications();
 
 // Computed
 const unreadCount = computed(() => {
@@ -255,11 +280,21 @@ const formatTime = (dateString) => {
   }
 };
 
-const handleNotificationClick = (notification) => {
-  // Mark as read
+const handleNotificationClick = async (notification) => {
   notification.read = true;
 
-  // Navigate based on notification type
+  const email = localStorage.getItem('userEmail');
+  if (email) {
+    try {
+      await fetch(`http://localhost:8000/api/seller/notifications/${notification.id}/read?email=${encodeURIComponent(email)}`, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+      });
+    } catch {
+      // silent
+    }
+  }
+
   if (notification.type === 'order' && notification.orderId) {
     router.push(`/orders/${notification.orderId}`);
   } else if (notification.type === 'message' && notification.customerId) {
@@ -283,6 +318,17 @@ const markAllAsRead = async () => {
       {
         text: 'Mark All',
         handler: async () => {
+          const email = localStorage.getItem('userEmail');
+          if (email) {
+            try {
+              await fetch(`http://localhost:8000/api/seller/notifications/read-all?email=${encodeURIComponent(email)}`, {
+                method: 'POST',
+                headers: { 'Accept': 'application/json' },
+              });
+            } catch {
+              // silent
+            }
+          }
           notifications.value.forEach(n => n.read = true);
           await showSuccessModal('All notifications marked as read');
         }
@@ -320,6 +366,17 @@ const showOptions = async () => {
                 text: 'Clear',
                 role: 'destructive',
                 handler: async () => {
+                  const email = localStorage.getItem('userEmail');
+                  if (email) {
+                    try {
+                      await fetch(`http://localhost:8000/api/seller/notifications?email=${encodeURIComponent(email)}`, {
+                        method: 'DELETE',
+                        headers: { 'Accept': 'application/json' },
+                      });
+                    } catch {
+                      // silent
+                    }
+                  }
                   notifications.value = [];
                   await showSuccessModal('All notifications cleared');
                 }

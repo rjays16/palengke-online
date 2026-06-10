@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\NoticeController;
+use App\Http\Controllers\Api\SellerNotificationController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -87,6 +88,13 @@ Route::delete('/seller/conversations/{id}', [MessageController::class, 'destroy'
 
 // Seller app — dashboard stats
 Route::get('/seller/dashboard/stats', [DashboardController::class, 'stats']);
+
+// Seller app — notifications
+Route::get('/seller/notifications', [SellerNotificationController::class, 'index']);
+Route::delete('/seller/notifications', [SellerNotificationController::class, 'clearAll']);
+Route::post('/seller/notifications/read-all', [SellerNotificationController::class, 'markAllRead']);
+Route::post('/seller/notifications/{id}/read', [SellerNotificationController::class, 'markRead']);
+Route::delete('/seller/notifications/{id}', [SellerNotificationController::class, 'destroy']);
 
 // Seller app — payment methods
 Route::get('/seller/payment-methods', [SellerPaymentMethodController::class, 'index']);
