@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\SellerRegistration;
 use App\Models\Notification;
 use App\Models\PaymentMethod;
+use App\Models\SubscriptionPayment;
 use Illuminate\Http\Request;
 
 class SubscriptionController extends Controller
@@ -92,6 +93,25 @@ class SubscriptionController extends Controller
         $seller->subscription_status = 'active';
         $seller->save();
 
+        // Record payment
+        $pmName = null;
+        if (!empty($validated['payment_method_id'])) {
+            $pm = PaymentMethod::find($validated['payment_method_id']);
+            $pmName = $pm?->name;
+        }
+        SubscriptionPayment::create([
+            'seller_registration_id' => $seller->id,
+            'plan_id' => $validated['plan_id'],
+            'plan_name' => $plan['name'],
+            'amount' => $price,
+            'payment_method_id' => $validated['payment_method_id'] ?? null,
+            'payment_method_name' => $pmName,
+            'status' => 'completed',
+            'subscribed_at' => $now,
+            'plan_start' => $now->toDateString(),
+            'plan_end' => $now->copy()->addMonths($plan['months'])->toDateString(),
+        ]);
+
         // Create admin notification
         $paymentLabel = '';
         if (!empty($validated['payment_method_id'])) {
@@ -104,7 +124,7 @@ class SubscriptionController extends Controller
             'type' => 'subscription',
             'title' => 'New Subscription',
             'message' => $seller->store_name . ' subscribed to ' . $plan['name'] . $paymentLabel . '.',
-            'link' => '/admin/sellers/' . $seller->id,
+            'link' => '/sellers/' . $seller->id,
             'data' => [
                 'seller_id' => $seller->id,
                 'plan_id' => $validated['plan_id'],

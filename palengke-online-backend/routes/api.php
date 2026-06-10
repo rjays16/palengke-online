@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\AdminPaymentMethodController;
+use App\Http\Controllers\Api\AdminSubscriptionPaymentController;
 use App\Http\Controllers\Api\WalletController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
@@ -163,9 +164,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Admin — seller registrations (requires auth)
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/admin/sellers', [SellerRegistrationController::class, 'index']);
     Route::get('/admin/sellers/pending', [SellerRegistrationController::class, 'pending']);
     Route::get('/admin/sellers/history', [SellerRegistrationController::class, 'history']);
     Route::get('/admin/sellers/{id}', [SellerRegistrationController::class, 'show']);
+    Route::get('/admin/sellers/{id}/products', [ProductController::class, 'adminIndex']);
+    Route::get('/admin/sellers/{id}/orders', [OrderController::class, 'adminIndex']);
     Route::post('/admin/sellers/{id}/approve', [SellerRegistrationController::class, 'approve']);
     Route::post('/admin/sellers/{id}/reject', [SellerRegistrationController::class, 'reject']);
 
@@ -198,6 +202,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/payment-methods', [AdminPaymentMethodController::class, 'store']);
     Route::put('/admin/payment-methods/{id}', [AdminPaymentMethodController::class, 'update']);
     Route::delete('/admin/payment-methods/{id}', [AdminPaymentMethodController::class, 'destroy']);
+
+    Route::get('/admin/subscription-payments', [AdminSubscriptionPaymentController::class, 'index']);
 });
 
 // Public — fetch active notices for seller / customer / driver apps

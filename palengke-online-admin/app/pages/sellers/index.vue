@@ -21,7 +21,13 @@
       </div>
     </div>
 
-    <div class="table-card">
+    <div v-if="sellersStore.loading" class="loading-state">
+      <span>Loading sellers...</span>
+    </div>
+    <div v-else-if="sellersStore.error" class="error-state">
+      <span>Failed to load sellers: {{ sellersStore.error }}</span>
+    </div>
+    <div v-else class="table-card">
       <table class="data-table">
         <thead>
           <tr>
@@ -238,6 +244,8 @@
 definePageMeta({ layout: "default" });
 const sellersStore = useSellersStore();
 
+onMounted(() => sellersStore.fetchSellers());
+
 const search = ref("");
 
 const filteredSellers = computed(() => {
@@ -392,6 +400,19 @@ function handleDelete() {
 .result-count {
   font-size: 13px;
   color: #9ca3af;
+}
+.loading-state,
+.error-state {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 40px 24px;
+  text-align: center;
+  font-size: 14px;
+  color: #6b7280;
+}
+.error-state {
+  color: #dc2626;
 }
 .table-card {
   background: #fff;

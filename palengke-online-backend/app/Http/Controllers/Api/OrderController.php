@@ -92,6 +92,40 @@ class OrderController extends Controller
         ]);
     }
 
+    public function adminIndex($id)
+    {
+        $sellerId = $this->resolveSellerId($id);
+        $seller = SellerRegistration::findOrFail($sellerId);
+
+        $orders = Order::where('seller_registration_id', $seller->id)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($order) {
+                return [
+                    'id' => $order->id,
+                    'customer_name' => $order->customer_name,
+                    'customer_phone' => $order->customer_phone,
+                    'delivery_address' => $order->delivery_address,
+                    'items' => $order->items,
+                    'item_count' => count($order->items ?? []),
+                    'total' => (float) $order->total,
+                    'status' => $order->status,
+                    'payment_method' => $order->payment_method,
+                    'created_at' => $order->created_at,
+                    'date' => $order->created_at ? $order->created_at->format('Y-m-d') : null,
+                ];
+            });
+
+        return response()->json(['orders' => $orders]);
+    }
+
+    private function resolveSellerId($id): int
+    {
+        if (is_numeric($id)) return (int) $id;
+        if (str_starts_with($id, 'SELLER-')) return hexdec(substr($id, 7));
+        return (int) $id;
+    }
+
     public function updateStatus(Request $request, $id)
     {
         $validated = $request->validate([

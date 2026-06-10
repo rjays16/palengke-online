@@ -191,6 +191,26 @@ class ProductController extends Controller
         return response()->json(['message' => 'Product deleted successfully.']);
     }
 
+    public function adminIndex($id)
+    {
+        $sellerId = $this->resolveSellerId($id);
+        $seller = SellerRegistration::findOrFail($sellerId);
+
+        $products = Product::where('seller_registration_id', $seller->id)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(fn($p) => $this->formatProduct($p));
+
+        return response()->json(['products' => $products]);
+    }
+
+    private function resolveSellerId($id): int
+    {
+        if (is_numeric($id)) return (int) $id;
+        if (str_starts_with($id, 'SELLER-')) return hexdec(substr($id, 7));
+        return (int) $id;
+    }
+
     private function formatProduct($p)
     {
         return [

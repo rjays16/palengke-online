@@ -12,7 +12,9 @@
       Back to Sellers
     </button>
 
-    <div v-if="seller" class="detail-content">
+    <div v-if="loading" class="loading-state">Loading seller...</div>
+    <div v-else-if="loadError" class="loading-state error">Failed to load: {{ loadError }}</div>
+    <div v-else-if="seller" class="detail-content">
       <div class="detail-header">
         <div class="detail-avatar" :style="{ background: '#059669' }">
           {{ seller.name.charAt(0) }}
@@ -263,7 +265,7 @@
             :class="{ active: activeTab === 'products' }"
             @click="activeTab = 'products'"
           >
-            Products ({{ seller.products }})
+            Products ({{ sellerProducts.length }})
           </button>
           <button
             class="tab"
@@ -282,7 +284,8 @@
         </div>
 
         <div v-if="activeTab === 'products'" class="tab-content">
-          <div class="table-card">
+          <div v-if="sellerProducts.length === 0" class="empty-tab">No products found.</div>
+          <div v-else class="table-card">
             <table class="data-table">
               <thead>
                 <tr>
@@ -294,7 +297,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="p in mockProducts" :key="p.id">
+                <tr v-for="p in sellerProducts" :key="p.id">
                   <td>
                     <div class="cell-product">
                       <div class="product-thumb">{{ p.name.charAt(0) }}</div>
@@ -302,13 +305,13 @@
                     </div>
                   </td>
                   <td>₱{{ p.price }}</td>
-                  <td>{{ p.unit }}</td>
-                  <td>{{ p.stock }}</td>
+                  <td>{{ p.selling_unit }}</td>
+                  <td>{{ p.stock_quantity }}</td>
                   <td>
                     <span
                       class="status-badge"
-                      :class="p.stock > 0 ? 'in_stock' : 'out_of_stock'"
-                      >{{ p.stock > 0 ? "In Stock" : "Out of Stock" }}</span
+                      :class="p.stock_quantity > 0 ? 'in_stock' : 'out_of_stock'"
+                      >{{ p.stock_quantity > 0 ? "In Stock" : "Out of Stock" }}</span
                     >
                   </td>
                 </tr>
@@ -318,7 +321,8 @@
         </div>
 
         <div v-if="activeTab === 'orders'" class="tab-content">
-          <div class="table-card">
+          <div v-if="sellerOrders.length === 0" class="empty-tab">No orders found.</div>
+          <div v-else class="table-card">
             <table class="data-table">
               <thead>
                 <tr>
@@ -331,10 +335,10 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="o in mockOrders" :key="o.id">
+                <tr v-for="o in sellerOrders" :key="o.id">
                   <td class="id-cell">#{{ o.id }}</td>
-                  <td>{{ o.customer }}</td>
-                  <td>{{ o.items }}</td>
+                  <td>{{ o.customer_name }}</td>
+                  <td>{{ o.item_count }}</td>
                   <td>₱{{ o.total.toLocaleString() }}</td>
                   <td>
                     <span class="status-badge" :class="o.status">{{
@@ -442,25 +446,101 @@
 definePageMeta({ layout: "default" });
 const route = useRoute();
 const sellersStore = useSellersStore();
+const config = useRuntimeConfig();
+const apiBase = config.public.apiBaseUrl || "http://localhost:8000";
 
-const seller = computed(() =>
-  sellersStore.getSellerById(Number(route.params.id)),
-);
+function getToken() {
+  if (typeof localStorage === "undefined") return null;
+  return localStorage.getItem("palengke_auth_token");
+}
+
+const loading = ref(true);
+const loadError = ref(null);
+const seller = ref(null);
+const sellerProducts = ref([]);
+const sellerOrders = ref([]);
+
+function mapSeller(raw) {
+  return {
+    id: raw.id,
+    name: raw.storeName || "",
+    owner: [raw.firstName, raw.lastName].filter(Boolean).join(" ") || "—",
+    category: raw.category || "",
+    location: [raw.barangay, raw.city].filter(Boolean).join(", ") || raw.completeAddress || "",
+    products: raw.productCount || 0,
+    revenue: 0,
+    rating: 0,
+    status: raw.status === "approved" ? "active" : "inactive",
+    joined: raw.submittedAt || "",
+    contact: {
+      phone: raw.contact || "",
+      email: raw.email || "",
+    },
+    subscription: raw.subscription || { plan: "Trial", amount: 0, start: "", end: "", status: "trial" },
+  };
+}
+
+async function fetchSeller() {
+  const token = getToken();
+  if (!token) { loading.value = false; return; }
+  try {
+    const res = await fetch(`${apiBase}/api/admin/sellers/${route.params.id}`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+    });
+    if (!res.ok) throw new Error(`Failed to load seller (${res.status})`);
+    const json = await res.json();
+    seller.value = mapSeller(json.registration);
+  } catch (e) {
+    loadError.value = e.message;
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function fetchProducts() {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${apiBase}/api/admin/sellers/${route.params.id}/products`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+    });
+    if (res.ok) {
+      const json = await res.json();
+      sellerProducts.value = json.products || [];
+    }
+  } catch {
+    // silent
+  }
+}
+
+async function fetchOrders() {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${apiBase}/api/admin/sellers/${route.params.id}/orders`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+    });
+    if (res.ok) {
+      const json = await res.json();
+      sellerOrders.value = json.orders || [];
+    }
+  } catch {
+    // silent
+  }
+}
+
+onMounted(async () => {
+  await fetchSeller();
+  if (seller.value) {
+    await Promise.all([fetchProducts(), fetchOrders()]);
+  }
+});
+
 const activeTab = ref("products");
 
 const subAction = ref(null);
 const selectedPlan = ref("");
 const extendDays = ref(30);
-
-const mockProducts = computed(() => {
-  if (!seller.value) return [];
-  return sellersStore.getSellerProducts(seller.value.id);
-});
-
-const mockOrders = computed(() => {
-  if (!seller.value) return [];
-  return sellersStore.getSellerOrders(seller.value.id);
-});
 
 const toggleStatus = () => {
   if (seller.value) sellersStore.toggleStatus(seller.value.id);
@@ -717,6 +797,12 @@ function confirmCancel() {
 .tab-content {
   padding: 16px;
 }
+.empty-tab {
+  text-align: center;
+  padding: 40px 16px;
+  font-size: 13px;
+  color: #9ca3af;
+}
 .table-card {
   overflow: hidden;
 }
@@ -829,6 +915,18 @@ function confirmCancel() {
   height: 100%;
   background: #3b82f6;
   border-radius: 3px;
+}
+.loading-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  color: #6b7280;
+}
+.loading-state.error {
+  color: #dc2626;
 }
 .not-found {
   text-align: center;

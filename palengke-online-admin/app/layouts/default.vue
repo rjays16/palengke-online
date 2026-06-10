@@ -295,6 +295,24 @@
           <span class="nav-label">Payouts</span>
         </NuxtLink>
 
+        <NuxtLink to="/payments" class="nav-item" active-class="active">
+          <span class="nav-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="2" y="5" width="20" height="14" rx="2" />
+              <line x1="2" y1="10" x2="22" y2="10" />
+              <line x1="12" y1="15" x2="12" y2="19" />
+            </svg>
+          </span>
+          <span class="nav-label">Payments</span>
+        </NuxtLink>
+
         <NuxtLink to="/disputes" class="nav-item" active-class="active">
           <span class="nav-icon">
             <svg

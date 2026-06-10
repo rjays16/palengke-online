@@ -12,6 +12,13 @@ use Illuminate\Support\Facades\Storage;
 
 class SellerRegistrationController extends Controller
 {
+    const PLANS = [
+        '1m' => ['name' => '1 Month', 'months' => 1, 'price' => 600],
+        '2m' => ['name' => '2 Months', 'months' => 2, 'price' => 1200],
+        '4m' => ['name' => '4 Months', 'months' => 4, 'price' => 2100],
+        '8m' => ['name' => '8 Months', 'months' => 8, 'price' => 4000],
+    ];
+
     public function register(Request $request)
     {
         $validated = $request->validate([
@@ -167,6 +174,19 @@ class SellerRegistrationController extends Controller
         ]);
     }
 
+    public function index()
+    {
+        $registrations = SellerRegistration::withCount('products')
+            ->with('products')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(fn ($r) => $this->formatForAdmin($r));
+
+        return response()->json([
+            'sellers' => $registrations,
+        ]);
+    }
+
     private function resolveId($id): int
     {
         if (is_numeric($id)) {
@@ -182,11 +202,13 @@ class SellerRegistrationController extends Controller
 
     private function formatForAdmin($r)
     {
+        $plan = $r->plan_id ? (self::PLANS[$r->plan_id] ?? null) : null;
+
         return [
             'id' => 'SELLER-' . strtoupper(dechex($r->id)),
             'role' => 'seller',
             'storeName' => $r->store_name,
-            'category' => '',
+            'category' => $r->categories ? (is_array($r->categories) ? implode(', ', $r->categories) : $r->categories) : '',
             'address' => $r->complete_address,
             'contact' => $r->full_phone,
             'firstName' => $r->first_name,
@@ -200,20 +222,25 @@ class SellerRegistrationController extends Controller
             'reviewedAt' => $r->reviewed_at?->toDateString(),
             'reviewedBy' => $r->reviewedBy?->name ?? null,
             'rejectReason' => $r->rejection_reason,
-            'storeName' => $r->store_name,
             'region' => $r->region,
             'city' => $r->city,
             'barangay' => $r->barangay,
             'storePlace' => $r->store_place,
             'completeAddress' => $r->complete_address,
-            'firstName' => $r->first_name,
-            'lastName' => $r->last_name,
             'middleName' => $r->middle_name,
             'birthdate' => $r->birthdate,
             'birthplace' => $r->birthplace,
             'currentAddress' => $r->current_address,
             'idType' => $r->id_type,
             'idTypeName' => $r->id_type_name,
+            'productCount' => $r->products_count ?? $r->products->count() ?? 0,
+            'subscription' => [
+                'plan' => $plan ? $plan['name'] : 'Trial',
+                'amount' => $plan ? $plan['price'] : 0,
+                'start' => $r->plan_started_at?->toDateString(),
+                'end' => $r->plan_ends_at?->toDateString(),
+                'status' => $r->subscription_status ?? ($r->status === 'approved' ? 'trial' : 'inactive'),
+            ],
         ];
     }
 

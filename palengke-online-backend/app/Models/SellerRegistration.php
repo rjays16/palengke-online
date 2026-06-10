@@ -39,4 +39,14 @@ class SellerRegistration extends Model
     {
         return $this->belongsTo(User::class, 'reviewed_by');
     }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'seller_registration_id');
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'seller_registration_id');
+    }
 }
