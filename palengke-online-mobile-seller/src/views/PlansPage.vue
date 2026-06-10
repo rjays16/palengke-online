@@ -65,6 +65,14 @@
           <ion-icon :icon="lockClosedOutline"></ion-icon>
           Secure payment. Your info is protected.
         </p>
+
+        <!-- Logout -->
+        <div class="logout-section">
+          <ion-button expand="block" fill="clear" class="logout-btn" @click="handleLogout">
+            <ion-icon :icon="logOutOutline" slot="start"></ion-icon>
+            Logout
+          </ion-button>
+        </div>
       </div>
     </ion-content>
   </ion-page>
@@ -79,7 +87,7 @@ import {
 } from '@ionic/vue'
 import {
   arrowBackOutline, timeOutline, checkmarkCircleOutline,
-  alertCircleOutline, checkmarkOutline, lockClosedOutline
+  alertCircleOutline, checkmarkOutline, lockClosedOutline, logOutOutline
 } from 'ionicons/icons'
 import { PLANS, getSubscription, daysLeft, refreshSubscription, subscribePlan } from '@/services/subscriptionService'
 
@@ -135,6 +143,43 @@ const handleSubscribe = async () => {
           } finally {
             subscribing.value = false
           }
+        }
+      }
+    ]
+  })
+  await alert.present()
+}
+
+const handleLogout = async () => {
+  const alert = await alertController.create({
+    header: 'Logout',
+    message: 'Are you sure you want to logout?',
+    buttons: [
+      {
+        text: 'Cancel',
+        role: 'cancel'
+      },
+      {
+        text: 'Logout',
+        role: 'destructive',
+        handler: async () => {
+          const email = localStorage.getItem('userEmail')
+          try {
+            await fetch('http://localhost:8000/api/seller/devices/logout-current', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email }),
+            })
+          } catch { /* silent */ }
+          ;['isAuthenticated', 'token', 'pendingAuth'].forEach(k => localStorage.removeItem(k))
+          const toast = await toastController.create({
+            message: 'Logged out successfully.',
+            duration: 1500,
+            color: 'success',
+            position: 'top',
+          })
+          await toast.present()
+          setTimeout(() => router.push('/login'), 500)
         }
       }
     ]
@@ -261,6 +306,14 @@ ion-toolbar ion-button { --color: var(--color-text-secondary); }
 .secure-note ion-icon { font-size: 14px; }
 
 /* Dark mode overrides */
+.logout-section { margin-top: 32px; border-top: 1px solid var(--color-border, #e0e0e0); padding-top: 20px; }
+.logout-btn {
+  --color: var(--ion-color-danger, #c62828);
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: none;
+}
+
 @media (prefers-color-scheme: dark) {
   .plan-card { background: #2d2d2d; border-color: #404040; }
   .plan-card.selected { background: rgba(76, 175, 80, 0.1); border-color: #66BB6A; }
