@@ -52,7 +52,12 @@
     </ion-header>
 
     <ion-content :fullscreen="true">
-      <div class="analytics-container">
+      <div v-if="loading" class="loading-state">
+        <ion-spinner name="crescent" color="success" style="width: 48px; height: 48px;"></ion-spinner>
+        <h3>Loading analytics...</h3>
+      </div>
+
+      <div v-else class="analytics-container">
 
         <!-- Revenue Overview -->
         <div class="section">
@@ -94,9 +99,9 @@
               <div class="revenue-content">
                 <p class="revenue-label">Avg. Order Value</p>
                 <h3 class="revenue-amount">₱{{ currentStats.avgOrderValue.toLocaleString() }}</h3>
-                <div class="revenue-change negative">
-                  <ion-icon :icon="arrowDownOutline"></ion-icon>
-                  <span>2.5%</span>
+                <div class="revenue-change" :class="avgOrderValueGrowth >= 0 ? 'positive' : 'negative'">
+                  <ion-icon :icon="avgOrderValueGrowth >= 0 ? arrowUpOutline : arrowDownOutline"></ion-icon>
+                  <span>{{ Math.abs(avgOrderValueGrowth) }}% vs last period</span>
                 </div>
               </div>
             </div>
@@ -160,13 +165,15 @@
               />
               
               <!-- Labels -->
-              <text x="50" y="290" font-size="12" fill="#999" text-anchor="middle">Mon</text>
-              <text x="166" y="290" font-size="12" fill="#999" text-anchor="middle">Tue</text>
-              <text x="282" y="290" font-size="12" fill="#999" text-anchor="middle">Wed</text>
-              <text x="398" y="290" font-size="12" fill="#999" text-anchor="middle">Thu</text>
-              <text x="514" y="290" font-size="12" fill="#999" text-anchor="middle">Fri</text>
-              <text x="630" y="290" font-size="12" fill="#999" text-anchor="middle">Sat</text>
-              <text x="746" y="290" font-size="12" fill="#999" text-anchor="middle">Sun</text>
+              <text
+                v-for="(data, index) in salesData"
+                :key="'label-' + index"
+                :x="50 + (index * 116)"
+                y="290"
+                font-size="12"
+                fill="#999"
+                text-anchor="middle"
+              >{{ data.day }}</text>
             </svg>
           </div>
         </div>
@@ -299,32 +306,38 @@
           <h2 class="section-title">Monthly Goals</h2>
           
           <div class="goals-list">
-            <div class="goal-item">
-              <div class="goal-header">
-                <span class="goal-name">Sales Target</span>
-                <span class="goal-progress-text">₱{{ currentStats.totalSales.toLocaleString() }} / ₱50,000</span>
-              </div>
+              <div class="goal-item">
+                <div class="goal-header">
+                  <span class="goal-name">
+                    Sales Target
+                    <ion-icon :icon="createOutline" class="edit-goal-icon" @click="editGoal('sales')"></ion-icon>
+                  </span>
+                  <span class="goal-progress-text">₱{{ monthlyGoals.currentSales.toLocaleString() }} / ₱{{ monthlyGoals.salesTarget.toLocaleString() }}</span>
+                </div>
               <div class="goal-bar">
                 <div 
                   class="goal-fill green" 
-                  :style="{ width: (currentStats.totalSales / 50000 * 100) + '%' }"
+                  :style="{ width: (monthlyGoals.currentSales / monthlyGoals.salesTarget * 100) + '%' }"
                 ></div>
               </div>
-              <p class="goal-status">{{ Math.round(currentStats.totalSales / 50000 * 100) }}% achieved</p>
+              <p class="goal-status">{{ monthlyGoals.salesTarget > 0 ? Math.round(monthlyGoals.currentSales / monthlyGoals.salesTarget * 100) : 0 }}% achieved</p>
             </div>
 
-            <div class="goal-item">
-              <div class="goal-header">
-                <span class="goal-name">Orders Target</span>
-                <span class="goal-progress-text">{{ currentStats.totalOrders }} / 100</span>
-              </div>
+              <div class="goal-item">
+                <div class="goal-header">
+                  <span class="goal-name">
+                    Orders Target
+                    <ion-icon :icon="createOutline" class="edit-goal-icon" @click="editGoal('orders')"></ion-icon>
+                  </span>
+                  <span class="goal-progress-text">{{ monthlyGoals.currentOrders }} / {{ monthlyGoals.ordersTarget }}</span>
+                </div>
               <div class="goal-bar">
                 <div 
                   class="goal-fill blue" 
-                  :style="{ width: (currentStats.totalOrders / 100 * 100) + '%' }"
+                  :style="{ width: (monthlyGoals.currentOrders / monthlyGoals.ordersTarget * 100) + '%' }"
                 ></div>
               </div>
-              <p class="goal-status">{{ Math.round(currentStats.totalOrders / 100 * 100) }}% achieved</p>
+              <p class="goal-status">{{ monthlyGoals.ordersTarget > 0 ? Math.round(monthlyGoals.currentOrders / monthlyGoals.ordersTarget * 100) : 0 }}% achieved</p>
             </div>
 
             <div class="goal-item">
@@ -344,12 +357,39 @@
         </div>
 
       </div>
+
+      <!-- Date Range Modal -->
+      <ion-modal :is-open="showDateModal" @did-dismiss="showDateModal = false">
+        <ion-header>
+          <ion-toolbar color="success">
+            <ion-title>Custom Date Range</ion-title>
+            <ion-buttons slot="end">
+              <ion-button @click="showDateModal = false">Close</ion-button>
+            </ion-buttons>
+          </ion-toolbar>
+        </ion-header>
+        <ion-content>
+          <div class="date-range-modal">
+            <div class="date-field">
+              <label class="date-label">Start Date</label>
+              <input type="date" class="date-input" v-model="startDate" />
+            </div>
+            <div class="date-field">
+              <label class="date-label">End Date</label>
+              <input type="date" class="date-input" v-model="endDate" />
+            </div>
+            <ion-button expand="block" color="success" @click="applyCustomRange" class="apply-btn">
+              Apply Range
+            </ion-button>
+          </div>
+        </ion-content>
+      </ion-modal>
     </ion-content>
   </ion-page>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage,
@@ -363,7 +403,9 @@ import {
   IonIcon,
   actionSheetController,
   alertController,
-  toastController
+  toastController,
+  IonSpinner,
+  IonModal
 } from '@ionic/vue';
 import {
   calendarOutline,
@@ -376,20 +418,85 @@ import {
   checkmarkCircleOutline,
   timeOutline,
   starOutline,
-  peopleOutline
+  peopleOutline,
+  cartOutline,
+  cashOutline,
+  alertCircleOutline,
+  closeCircleOutline,
+  informationCircleOutline,
+  createOutline
 } from 'ionicons/icons';
-import { ANALYTICS_STATS, SALES_CHART_DATA, TOP_PRODUCTS, CATEGORY_SALES, RECENT_ACTIVITY } from '@/mock/analytics';
-
 const router = useRouter();
 
 // State
 const selectedPeriod = ref('week');
+const loading = ref(true);
 
-// Mock Stats Data
-const currentStats = ref(ANALYTICS_STATS);
+const currentStats = ref({
+  totalSales: 0, salesGrowth: 0, totalOrders: 0, ordersGrowth: 0,
+  avgOrderValue: 0, avgOrderValueGrowth: 0, completionRate: 0, avgDeliveryTime: 0, rating: 0, customers: 0,
+});
 
-// Chart Data (7 days)
-const salesData = ref(SALES_CHART_DATA);
+const avgOrderValueGrowth = computed(() => currentStats.value.avgOrderValueGrowth);
+
+const salesData = ref([]);
+const topProducts = ref([]);
+const categories = ref([]);
+const recentActivity = ref([]);
+const monthlyGoals = ref({ salesTarget: 50000, ordersTarget: 100, satisfactionTarget: 5.0, currentSales: 0, currentOrders: 0 });
+
+const showDateModal = ref(false);
+const startDate = ref('');
+const endDate = ref('');
+
+const loadAnalytics = async () => {
+  loading.value = true;
+  const email = localStorage.getItem('userEmail');
+  if (!email) return;
+  try {
+    let url = `http://localhost:8000/api/seller/analytics?email=${encodeURIComponent(email)}`;
+    if (startDate.value && endDate.value) {
+      url += `&start_date=${startDate.value}&end_date=${endDate.value}`;
+    } else {
+      url += `&period=${selectedPeriod.value}`;
+    }
+    const response = await fetch(url, {
+      headers: { 'Accept': 'application/json' },
+    });
+    const data = await response.json();
+    if (response.ok) {
+      currentStats.value = data.stats;
+      salesData.value = data.chartData;
+      topProducts.value = data.topProducts;
+      categories.value = data.categorySales;
+      recentActivity.value = data.recentActivity.map(a => ({
+        ...a,
+        icon: getActivityIcon(a.type),
+      }));
+      monthlyGoals.value = data.monthlyGoals;
+    }
+  } catch {
+    // silent
+  } finally {
+    loading.value = false;
+  }
+};
+
+loadAnalytics();
+
+watch(selectedPeriod, () => {
+  loadAnalytics();
+});
+
+function getActivityIcon(type) {
+  const map = {
+    sale: cartOutline,
+    payment: cashOutline,
+    warning: alertCircleOutline,
+    cancelled: closeCircleOutline,
+  };
+  return map[type] || informationCircleOutline;
+}
 
 // Computed chart points
 const salesChartPoints = computed(() => {
@@ -419,44 +526,11 @@ const salesPoints = computed(() => {
   }));
 });
 
-// Top Products
-const topProducts = ref(TOP_PRODUCTS);
-
-// Categories
-const categories = ref(CATEGORY_SALES);
-
-// Recent Activity
-const recentActivity = ref(RECENT_ACTIVITY);
-
 // Methods
 const showDateFilter = async () => {
   const actionSheet = await actionSheetController.create({
     header: 'Select Period',
     buttons: [
-      {
-        text: 'Today',
-        handler: () => {
-          selectedPeriod.value = 'today';
-        }
-      },
-      {
-        text: 'This Week',
-        handler: () => {
-          selectedPeriod.value = 'week';
-        }
-      },
-      {
-        text: 'This Month',
-        handler: () => {
-          selectedPeriod.value = 'month';
-        }
-      },
-      {
-        text: 'This Year',
-        handler: () => {
-          selectedPeriod.value = 'year';
-        }
-      },
       {
         text: 'Custom Range',
         handler: () => {
@@ -472,11 +546,94 @@ const showDateFilter = async () => {
   await actionSheet.present();
 };
 
-const showCustomDatePicker = async () => {
+const showCustomDatePicker = () => {
+  const today = new Date().toISOString().split('T')[0];
+  const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
+  startDate.value = sevenDaysAgo;
+  endDate.value = today;
+  showDateModal.value = true;
+};
+
+const applyCustomRange = async () => {
+  if (!startDate.value || !endDate.value) {
+    const toast = await toastController.create({
+      message: 'Please select both start and end dates',
+      duration: 2000,
+      color: 'warning',
+      position: 'top'
+    });
+    await toast.present();
+    return;
+  }
+  if (startDate.value > endDate.value) {
+    const toast = await toastController.create({
+      message: 'Start date must be before end date',
+      duration: 2000,
+      color: 'danger',
+      position: 'top'
+    });
+    await toast.present();
+    return;
+  }
+  showDateModal.value = false;
+  await loadAnalytics();
+};
+
+const editGoal = async (type) => {
+  const isSales = type === 'sales';
+  const current = isSales ? monthlyGoals.value.salesTarget : monthlyGoals.value.ordersTarget;
+  const label = isSales ? 'Monthly Sales Target (₱)' : 'Monthly Orders Target';
   const alert = await alertController.create({
-    header: 'Custom Date Range',
-    message: 'Select custom date range for analytics',
-    buttons: ['Cancel', 'Apply']
+    header: `Edit ${label}`,
+    inputs: [
+      {
+        type: 'number',
+        name: 'value',
+        value: current,
+        min: 0,
+        placeholder: isSales ? 'e.g. 50000' : 'e.g. 100',
+      }
+    ],
+    buttons: [
+      { text: 'Cancel', role: 'cancel' },
+      {
+        text: 'Save',
+        handler: async (data) => {
+          const val = parseFloat(data.value);
+          if (isNaN(val) || val < 0) {
+            const toast = await toastController.create({
+              message: 'Please enter a valid number',
+              duration: 2000, color: 'warning', position: 'top'
+            });
+            await toast.present();
+            return false;
+          }
+          const email = localStorage.getItem('userEmail');
+          if (!email) return false;
+          const body = isSales
+            ? { email, monthly_sales_target: val, monthly_orders_target: monthlyGoals.value.ordersTarget }
+            : { email, monthly_sales_target: monthlyGoals.value.salesTarget, monthly_orders_target: val };
+          try {
+            const res = await fetch('http://localhost:8000/api/seller/goals', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              body: JSON.stringify(body),
+            });
+            if (res.ok) {
+              const toast = await toastController.create({
+                message: 'Goals updated successfully!',
+                duration: 2000, color: 'success', position: 'top'
+              });
+              await toast.present();
+              await loadAnalytics();
+            }
+          } catch {
+            // silent
+          }
+          return true;
+        }
+      }
+    ]
   });
   await alert.present();
 };
@@ -1011,6 +1168,20 @@ const exportReport = async () => {
   font-size: 14px;
   font-weight: 600;
   color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.edit-goal-icon {
+  font-size: 16px;
+  color: #999;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.edit-goal-icon:hover {
+  color: #4CAF50;
 }
 
 .goal-progress-text {
@@ -1050,6 +1221,50 @@ const exportReport = async () => {
 }
 
 /* Responsive */
+/* Date Range Modal */
+.date-range-modal {
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.date-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.date-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 16px;
+  font-family: inherit;
+  color: #333;
+  background: #f8f9fa;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.date-input:focus {
+  border-color: #4CAF50;
+}
+
+.apply-btn {
+  margin-top: 8px;
+  --border-radius: 12px;
+  font-weight: 600;
+  height: 48px;
+}
+
 @media (max-width: 360px) {
   .metrics-grid {
     grid-template-columns: 1fr;

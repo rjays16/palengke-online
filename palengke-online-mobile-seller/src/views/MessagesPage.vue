@@ -282,7 +282,12 @@ import {
   informationCircleOutline,
   cubeOutline
 } from 'ionicons/icons';
-import { QUICK_REPLIES } from '@/mock/conversations';
+const QUICK_REPLIES = [
+  'Yes, available po!',
+  'Out of stock po',
+  'On the way!',
+  'Thank you!'
+];
 
 const router = useRouter();
 

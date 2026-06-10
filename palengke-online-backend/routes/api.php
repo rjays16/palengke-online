@@ -23,6 +23,8 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\NoticeController;
 use App\Http\Controllers\Api\SellerNotificationController;
 use App\Http\Controllers\Api\FaqController;
+use App\Http\Controllers\Api\AnalyticsController;
+use App\Http\Controllers\Api\ReviewController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -89,6 +91,12 @@ Route::delete('/seller/conversations/{id}', [MessageController::class, 'destroy'
 
 // Seller app — dashboard stats
 Route::get('/seller/dashboard/stats', [DashboardController::class, 'stats']);
+
+// Seller app — analytics
+Route::get('/seller/analytics', [AnalyticsController::class, 'index']);
+
+// Seller app — update monthly goals
+Route::post('/seller/goals', [AnalyticsController::class, 'updateGoals']);
 
 // Seller app — notifications
 Route::get('/seller/notifications', [SellerNotificationController::class, 'index']);
@@ -178,3 +186,21 @@ Route::get('/notices', [NoticeController::class, 'active']);
 
 // Public — fetch active FAQs for seller app
 Route::get('/faqs', [FaqController::class, 'active']);
+
+// Customer app — submit a review / rating
+Route::post('/reviews', [ReviewController::class, 'store']);
+
+// Customer app — get order info for rating page
+Route::get('/order-info/{id}', function ($id) {
+    $order = \App\Models\Order::with('seller')->find($id);
+    if (!$order) {
+        return response()->json(['message' => 'Order not found.'], 404);
+    }
+    return response()->json([
+        'storeName' => $order->seller->store_name ?? $order->seller->first_name ?? 'Store',
+        'storeImage' => $order->seller->avatar ?? null,
+        'items' => collect($order->items)->pluck('name')->implode(', '),
+        'total' => (float) $order->total,
+        'customer_name' => $order->customer_name,
+    ]);
+});

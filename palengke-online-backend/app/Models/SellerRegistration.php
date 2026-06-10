@@ -17,6 +17,7 @@ class SellerRegistration extends Model
         'id_type', 'id_type_name',
         'id_front_photo', 'id_back_photo', 'selfie_photo',
         'operating_hours', 'description', 'categories', 'avatar',
+        'monthly_sales_target', 'monthly_orders_target',
         'status', 'rejection_reason', 'reviewed_by', 'reviewed_at',
     ];
 
