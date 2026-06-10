@@ -42,6 +42,14 @@ class PaymentMethodSeeder extends Seeder
                 'coming_soon' => false,
                 'sort_order' => 4,
             ],
+            [
+                'name' => 'Palengke Wallet',
+                'description' => 'Pay using your Palengke Wallet balance',
+                'color' => '#059669',
+                'visible' => true,
+                'coming_soon' => false,
+                'sort_order' => 0,
+            ],
         ]);
     }
 }

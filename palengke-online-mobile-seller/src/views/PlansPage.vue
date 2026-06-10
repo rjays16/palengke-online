@@ -78,6 +78,7 @@
               <div class="pm-info">
                 <span class="pm-name">{{ pm.name }}</span>
                 <span class="pm-desc">{{ pm.coming_soon ? 'Coming Soon' : pm.description }}</span>
+                <span class="pm-balance" v-if="pm.name === 'Palengke Wallet'">Balance • ₱{{ walletBalance.toLocaleString() }}</span>
               </div>
               <div class="radio-btn" :class="{ selected: selectedPayment === pm.id }"></div>
               <span class="coming-tag" v-if="pm.coming_soon">Coming Soon</span>
@@ -176,6 +177,36 @@
             <button class="done-btn" @click="goHome">Done</button>
           </div>
         </div>
+
+        <div v-else-if="paymentStep === 'insufficient'">
+          <div class="insufficient-state">
+            <div class="insufficient-icon">
+              <ion-icon :icon="alertCircleOutline"></ion-icon>
+            </div>
+            <h3>Insufficient Balance</h3>
+            <p class="insufficient-sub">Your {{ selectedPM?.name }} balance is not enough to complete this payment.</p>
+            <div class="insufficient-details">
+              <div class="insufficient-row">
+                <span>Wallet Balance</span>
+                <span class="insufficient-amount">₱{{ walletBalance.toLocaleString() }}</span>
+              </div>
+              <div class="insufficient-row">
+                <span>Payment Required</span>
+                <span class="insufficient-amount required">₱{{ selectedPlan?.price.toLocaleString() }}</span>
+              </div>
+              <div class="insufficient-row shortfall-row">
+                <span>Shortfall</span>
+                <span class="insufficient-amount shortfall">-₱{{ (shortfall).toLocaleString() }}</span>
+              </div>
+            </div>
+            <p class="insufficient-hint">Please top up your wallet or choose a different payment method.</p>
+            <button class="change-pm-btn" @click="backToConfirm">
+              <ion-icon :icon="arrowBackOutline"></ion-icon>
+              Choose Another Method
+            </button>
+            <button class="cancel-btn" @click="closePaymentModal">Cancel</button>
+          </div>
+        </div>
       </div>
     </div>
   </ion-page>
@@ -208,9 +239,25 @@ const subscribing = ref(false)
 
 const showPaymentModal = ref(false)
 const paymentStep = ref('confirm')
+const walletBalance = ref(0)
+const shortfall = ref(0)
 
 const selectedPlan = computed(() => plans.find(p => p.id === selected.value))
 const selectedPM = computed(() => paymentMethods.value.find(p => p.id === selectedPayment.value))
+
+async function fetchWalletBalance() {
+  const email = localStorage.getItem('userEmail')
+  if (!email) return
+  try {
+    const res = await fetch(`${API_BASE}/seller/wallet/balance?email=${encodeURIComponent(email)}`, {
+      headers: { 'Accept': 'application/json' },
+    })
+    if (res.ok) {
+      const data = await res.json()
+      walletBalance.value = data.balance || 0
+    }
+  } catch { /* silent */ }
+}
 
 const goBack = () => router.back()
 
@@ -226,16 +273,17 @@ onMounted(async () => {
     })
     if (res.ok) {
       const all = await res.json()
-      // Exclude Cash on Delivery — customer-side only
       paymentMethods.value = all.filter(p => p.name !== 'Cash on Delivery')
       const first = paymentMethods.value.find(p => !p.coming_soon)
       if (first) selectedPayment.value = first.id
     }
   } catch { /* silent */ }
+  fetchWalletBalance()
 })
 
 const pmLogo = (name) => {
   const map = {
+    'Palengke Wallet': '/assets/payment-methods-logo/palengke-wallet.png',
     'GCash': '/assets/payment-methods-logo/gcash.png',
     'PayPal': '/assets/payment-methods-logo/paypal.png',
     'Stripe': '/assets/payment-methods-logo/cards.png',
@@ -249,8 +297,20 @@ const selectPayment = (pm) => {
   selectedPayment.value = pm.id
 }
 
-const openPaymentModal = () => {
+const openPaymentModal = async () => {
   if (!selected.value || !selectedPayment.value) return
+  // Pre-check wallet balance client-side for instant feedback
+  const pm = paymentMethods.value.find(p => p.id === selectedPayment.value)
+  if (pm && pm.name === 'Palengke Wallet') {
+    await fetchWalletBalance()
+    const price = selectedPlan.value?.price || 0
+    if (walletBalance.value < price) {
+      shortfall.value = price - walletBalance.value
+      paymentStep.value = 'insufficient'
+      showPaymentModal.value = true
+      return
+    }
+  }
   paymentStep.value = 'confirm'
   showPaymentModal.value = true
 }
@@ -260,23 +320,33 @@ const closePaymentModal = () => {
   showPaymentModal.value = false
 }
 
+const backToConfirm = () => {
+  paymentStep.value = 'confirm'
+}
+
 const processPayment = async () => {
   paymentStep.value = 'processing'
   subscribing.value = true
   try {
-    // Simulate payment delay
     await new Promise(resolve => setTimeout(resolve, 2000))
     await subscribePlan(selected.value, selectedPayment.value)
     sub.value = await refreshSubscription()
     remaining.value = daysLeft(sub.value)
+    walletBalance.value = sub.value.planId ? 0 : walletBalance.value
     paymentStep.value = 'success'
-  } catch {
-    const toast = await toastController.create({
-      message: 'Payment failed. Please try again.',
-      duration: 2000, color: 'danger', position: 'top',
-    })
-    await toast.present()
-    closePaymentModal()
+  } catch (err) {
+    if (err && err.code === 'insufficient_balance') {
+      shortfall.value = err.shortfall || 0
+      walletBalance.value = err.balance || 0
+      paymentStep.value = 'insufficient'
+    } else {
+      const toast = await toastController.create({
+        message: 'Payment failed. Please try again.',
+        duration: 2000, color: 'danger', position: 'top',
+      })
+      await toast.present()
+      closePaymentModal()
+    }
   } finally {
     subscribing.value = false
   }
@@ -448,6 +518,7 @@ ion-toolbar ion-button { --color: var(--color-text-secondary); }
 .pm-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
 .pm-name { font-size: 15px; font-weight: 700; color: var(--color-text-primary, #1a1a1a); }
 .pm-desc { font-size: 13px; color: var(--color-text-tertiary, #999); }
+.pm-balance { font-size: 12px; color: #059669; font-weight: 600; margin-top: 2px; }
 .radio-btn {
   width: 22px; height: 22px; border-radius: 50%;
   border: 2px solid #e0e0e0; flex-shrink: 0; transition: all 0.2s;
@@ -649,6 +720,74 @@ ion-toolbar ion-button { --color: var(--color-text-secondary); }
   cursor: pointer;
 }
 
+/* Insufficient Balance State */
+.insufficient-state {
+  text-align: center;
+  padding: 10px 0;
+}
+.insufficient-icon ion-icon {
+  font-size: 56px;
+  color: #f59e0b;
+  margin-bottom: 12px;
+}
+.insufficient-state h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 6px;
+}
+.insufficient-sub {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 20px;
+  line-height: 1.4;
+}
+.insufficient-details {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+.insufficient-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  padding: 6px 0;
+  color: #374151;
+}
+.insufficient-row + .insufficient-row { border-top: 1px solid #fde68a; }
+.insufficient-amount { font-weight: 600; color: #1a1a1a; }
+.insufficient-amount.required { color: #dc2626; }
+.shortfall-row { background: #fef2f2; margin: 4px -8px 0; padding: 6px 8px; border-radius: 6px; }
+.insufficient-amount.shortfall { color: #dc2626; font-weight: 700; }
+.insufficient-hint {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0 0 20px;
+  line-height: 1.4;
+}
+.change-pm-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px;
+  background: #f59e0b;
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: background 0.2s;
+}
+.change-pm-btn:hover { background: #d97706; }
+.change-pm-btn:active { transform: scale(0.98); }
+
 /* Logout */
 .logout-section { margin-top: 32px; border-top: 1px solid var(--color-border, #e0e0e0); padding-top: 20px; }
 .logout-btn {
@@ -671,6 +810,7 @@ ion-toolbar ion-button { --color: var(--color-text-secondary); }
   .payment-item { background: #2d2d2d; border-color: #404040; }
   .payment-item.selected { background: rgba(76, 175, 80, 0.1); border-color: #66BB6A; }
   .payment-img { background: #3d3d3d; }
+  .pm-balance { color: #4CAF50; }
   .payment-modal { background: #1e1e1e; }
   .modal-header h3 { color: #e5e5e5; }
   .modal-plan-summary { background: #2d2d2d; }
@@ -683,5 +823,10 @@ ion-toolbar ion-button { --color: var(--color-text-secondary); }
   .success-row { color: #d1d5db; }
   .success-state h3 { color: #e5e5e5; }
   .processing-state h3 { color: #e5e5e5; }
+  .insufficient-state h3 { color: #e5e5e5; }
+  .insufficient-details { background: #2d2d2d; border-color: #f59e0b; }
+  .insufficient-row { color: #d1d5db; }
+  .insufficient-row + .insufficient-row { border-top-color: #404040; }
+  .shortfall-row { background: rgba(220, 38, 38, 0.1); }
 }
 </style>

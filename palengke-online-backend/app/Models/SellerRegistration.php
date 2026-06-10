@@ -20,6 +20,7 @@ class SellerRegistration extends Model
         'monthly_sales_target', 'monthly_orders_target',
         'trial_started_at', 'trial_ends_at', 'subscription_status',
         'plan_id', 'plan_started_at', 'plan_ends_at',
+        'wallet_balance',
         'status', 'rejection_reason', 'reviewed_by', 'reviewed_at',
     ];
 
@@ -31,6 +32,7 @@ class SellerRegistration extends Model
         'trial_ends_at' => 'datetime',
         'plan_started_at' => 'datetime',
         'plan_ends_at' => 'datetime',
+        'wallet_balance' => 'decimal:2',
     ];
 
     public function reviewedBy()

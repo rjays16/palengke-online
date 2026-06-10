@@ -100,6 +100,14 @@ export async function subscribePlan(planId: string, paymentMethodId?: number | n
   })
   if (!res.ok) {
     const data = await res.json()
+    if (data.error === 'insufficient_balance') {
+      const err = new Error(data.message || 'Insufficient balance')
+      ;(err as any).code = 'insufficient_balance'
+      ;(err as any).balance = data.balance
+      ;(err as any).required = data.required
+      ;(err as any).shortfall = data.shortfall
+      throw err
+    }
     throw new Error(data.message || 'Subscription failed')
   }
   return refreshSubscription()

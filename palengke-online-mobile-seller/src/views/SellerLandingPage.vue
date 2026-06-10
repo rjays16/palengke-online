@@ -4,6 +4,10 @@
       <ion-toolbar color="success">
         <ion-title>Seller Dashboard</ion-title>
         <ion-buttons slot="end">
+          <div class="wallet-pill" @click="goToWallet">
+            <ion-icon :icon="walletOutline" class="wallet-pill-icon"></ion-icon>
+            <span class="wallet-pill-balance">₱{{ walletBalance.toLocaleString() }}</span>
+          </div>
           <ion-button @click="showNotifications" class="notification-btn">
             <span v-if="notificationCount > 0" class="notification-badge">{{ notificationCount }}</span>
             <ion-icon :icon="notificationsOutline"></ion-icon>
@@ -295,6 +299,7 @@ import {
 import {
   notificationsOutline,
   settingsOutline,
+  walletOutline,
   timeOutline,
   cartOutline,
   cashOutline,
@@ -326,6 +331,21 @@ const notificationCount = ref(3);
 const selectedCategories = ref([]);
 const availableCategories = ref([]);
 const sub = ref(getSubscription())
+const walletBalance = ref(0)
+
+async function fetchWalletBalance() {
+  const email = localStorage.getItem('userEmail')
+  if (!email) return
+  try {
+    const res = await fetch('http://localhost:8000/api/seller/wallet/balance?email=' + encodeURIComponent(email), {
+      headers: { 'Accept': 'application/json' },
+    })
+    if (res.ok) {
+      const data = await res.json()
+      walletBalance.value = data.balance || 0
+    }
+  } catch { /* silent */ }
+}
 
 async function refreshSub() {
   sub.value = await refreshSubscription()
@@ -413,6 +433,7 @@ onIonViewWillEnter(async () => {
   loadOrders();
   await loadNotices();
   checkNotice();
+  fetchWalletBalance();
 });
 
 const remaining = computed(() => daysLeft(sub.value))
@@ -434,6 +455,7 @@ const remainingText = computed(() => {
 })
 
 const goToPlans = () => router.push('/plans')
+const goToWallet = () => router.push('/plans')
 const canRequestBanner = computed(() => subActive.value && sub.value.planId === '8m')
 
 const showBannerModal = ref(false)
@@ -873,6 +895,26 @@ ion-header ion-toolbar ion-buttons ion-button {
 
 .notification-btn {
   position: relative;
+}
+
+.wallet-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.25);
+  cursor: pointer;
+  margin-right: 4px;
+}
+.wallet-pill-icon {
+  font-size: 14px;
+  color: white;
+}
+.wallet-pill-balance {
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
 }
 
 .notification-badge {

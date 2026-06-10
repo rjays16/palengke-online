@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\AdminPaymentMethodController;
+use App\Http\Controllers\Api\WalletController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -107,6 +108,9 @@ Route::post('/seller/subscription/subscribe', [SubscriptionController::class, 's
 
 // Public — payment methods for seller app
 Route::get('/payment-methods', [PaymentMethodController::class, 'index']);
+
+// Seller app — wallet balance
+Route::get('/seller/wallet/balance', [WalletController::class, 'balance']);
 
 // Seller app — notifications
 Route::get('/seller/notifications', [SellerNotificationController::class, 'index']);

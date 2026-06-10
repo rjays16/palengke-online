@@ -64,6 +64,26 @@ class SubscriptionController extends Controller
         }
 
         $plan = self::PLANS[$validated['plan_id']];
+        $price = $plan['price'];
+
+        // Wallet balance check
+        if (!empty($validated['payment_method_id'])) {
+            $pm = PaymentMethod::find($validated['payment_method_id']);
+            if ($pm && strtolower($pm->name) === 'palengke wallet') {
+                if ((float) $seller->wallet_balance < $price) {
+                    return response()->json([
+                        'message' => 'Insufficient wallet balance.',
+                        'error' => 'insufficient_balance',
+                        'balance' => (float) $seller->wallet_balance,
+                        'required' => $price,
+                        'shortfall' => $price - (float) $seller->wallet_balance,
+                    ], 422);
+                }
+                // Deduct balance
+                $seller->wallet_balance -= $price;
+            }
+        }
+
         $now = now();
 
         $seller->plan_id = $validated['plan_id'];
@@ -100,6 +120,7 @@ class SubscriptionController extends Controller
             'plan_id' => $seller->plan_id,
             'plan_start' => $seller->plan_started_at->toDateString(),
             'plan_end' => $seller->plan_ends_at->toDateString(),
+            'balance' => (float) $seller->wallet_balance,
         ]);
     }
 
