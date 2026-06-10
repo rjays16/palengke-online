@@ -542,36 +542,6 @@ const openSettings = async () => {
         }
       },
       {
-        text: 'Account Settings',
-        icon: personOutline,
-        handler: () => {
-          console.log('Account Settings');
-          // TODO: Navigate to account settings
-        }
-      },
-      {
-        text: 'Notification Settings',
-        icon: notificationsOutline,
-        handler: () => {
-          console.log('Notification Settings');
-          // TODO: Navigate to notification settings
-        }
-      },
-      {
-        text: 'Help & Support',
-        icon: helpCircleOutline,
-        handler: () => {
-          router.push('/help');
-        }
-      },
-      {
-        text: 'About',
-        icon: informationCircleOutline,
-        handler: () => {
-          router.push('/about');
-        }
-      },
-      {
         text: 'Logout',
         icon: logOutOutline,
         role: 'destructive',
