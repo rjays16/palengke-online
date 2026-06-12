@@ -737,8 +737,19 @@ const openChat = () => {
   router.push('/messages');
 };
 
-// ✨ UPDATED: Share shop with loading animations
+const getShopUrl = () => {
+  const slug = sellerName.value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+  return `https://palengke-online.com/shop/${slug}`;
+};
+
+// Share shop with actual sharing
 const shareShop = async () => {
+  const shopUrl = getShopUrl();
+  const shareText = `Check out my shop on Palengke Online — ${sellerName.value}!`;
+
   const actionSheet = await actionSheetController.create({
     header: 'Share Your Shop',
     subHeader: 'Share your shop link with customers via:',
@@ -747,32 +758,57 @@ const shareShop = async () => {
       {
         text: 'Copy Link',
         handler: async () => {
-          // Copy shop URL to clipboard
-          const shopUrl = `https://palengke-online.com/shop/${sellerName.value}`;
-          navigator.clipboard.writeText(shopUrl);
-          await showSuccessModal('Shop link copied!');
+          try {
+            await navigator.clipboard.writeText(shopUrl);
+            await showSuccessModal('Shop link copied!');
+          } catch {
+            // Fallback for older browsers
+            const textarea = document.createElement('textarea');
+            textarea.value = shopUrl;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            await showSuccessModal('Shop link copied!');
+          }
         }
       },
       {
         text: 'Share via Facebook',
         handler: async () => {
-          // Show loading
-          await showLoadingWithLogo('Opening Facebook...');
-          // Share to Facebook
-          setTimeout(() => {
-            window.open('https://www.facebook.com/sharer/sharer.php', '_blank');
-          }, 1500);
+          const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shopUrl)}&quote=${encodeURIComponent(shareText)}`;
+          window.open(fbUrl, '_blank', 'noopener,noreferrer');
         }
       },
       {
         text: 'Share via Messenger',
         handler: async () => {
-          // Show loading
-          await showLoadingWithLogo('Opening Messenger...');
-          // Share to Messenger  
-          setTimeout(() => {
-            window.open('https://www.messenger.com', '_blank');
-          }, 1500);
+          const messengerUrl = `https://www.facebook.com/dialog/send?link=${encodeURIComponent(shopUrl)}&app_id=&redirect_uri=${encodeURIComponent(shopUrl)}`;
+          window.open(messengerUrl, '_blank', 'noopener,noreferrer');
+        }
+      },
+      {
+        text: 'More...',
+        handler: async () => {
+          if (navigator.share) {
+            try {
+              await navigator.share({
+                title: sellerName.value,
+                text: shareText,
+                url: shopUrl,
+              });
+            } catch {
+              // User cancelled or share failed — ignore
+            }
+          } else {
+            // Fallback: copy link
+            try {
+              await navigator.clipboard.writeText(shopUrl);
+              await showSuccessModal('Shop link copied!');
+            } catch {
+              await showToast('Copy the link manually: ' + shopUrl, 'dark');
+            }
+          }
         }
       },
       {
