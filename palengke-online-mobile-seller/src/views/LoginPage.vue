@@ -29,31 +29,11 @@
             >
           </div>
 
-          <div class="input-group">
-            <ion-icon :icon="lockClosedOutline" class="input-icon"></ion-icon>
-            <input 
-              v-model="password" 
-              :type="showPassword ? 'text' : 'password'" 
-              placeholder="Password"
-              class="custom-input"
-              @keyup.enter="handleLogin"
-            >
-            <ion-icon 
-              :icon="showPassword ? eyeOffOutline : eyeOutline" 
-              class="toggle-password"
-              @click="showPassword = !showPassword"
-            ></ion-icon>
-          </div>
-
-          <div class="forgot-password">
-            <a href="#" @click.prevent="handleForgotPassword">Forgot Password?</a>
-          </div>
-
           <ion-button 
             expand="block" 
             class="login-button"
             @click="handleLogin"
-            :disabled="!email || !password"
+            :disabled="!email"
           >
             <span v-if="!isLoading">Sign In</span>
             <ion-spinner v-else name="crescent"></ion-spinner>
@@ -85,18 +65,13 @@ import {
   alertController
 } from '@ionic/vue';
 import { 
-  mailOutline, 
-  lockClosedOutline, 
-  eyeOutline, 
-  eyeOffOutline
+  mailOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
 
 // Form data
 const email = ref('');
-const password = ref('');
-const showPassword = ref(false);
 const isLoading = ref(false);
 
 // ✨ NEW: Loading Modal Function
@@ -187,7 +162,7 @@ const checkAvailability = async () => {
 
 // Login handler
 const handleLogin = async () => {
-  if (!email.value || !password.value) return;
+  if (!email.value) return;
 
   isLoading.value = true;
 
@@ -195,18 +170,42 @@ const handleLogin = async () => {
     const response = await fetch('http://localhost:8000/api/seller/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.value, password: password.value }),
+      body: JSON.stringify({ email: email.value }),
     });
 
     const data = await response.json();
 
     if (!response.ok) {
+      if (response.status === 404) {
+        isLoading.value = false;
+        const alert = await alertController.create({
+          cssClass: 'not-found-alert',
+          header: ' ',
+          message: `No account found with this email. Would you like to sign up instead?`,
+          buttons: [
+            {
+              text: 'Cancel',
+              role: 'cancel',
+              cssClass: 'alert-button-cancel'
+            },
+            {
+              text: 'Sign Up',
+              cssClass: 'alert-button-confirm',
+              handler: () => {
+                router.push('/welcome');
+              }
+            }
+          ]
+        });
+        await alert.present();
+        return;
+      }
       throw new Error(data.message || 'Login failed.');
     }
 
     isLoading.value = false;
 
-    localStorage.setItem('token', data.token);
+    localStorage.setItem('hasPin', data.hasPin ? 'true' : 'false');
     localStorage.setItem('userEmail', email.value);
 
     const availability = await checkAvailability();
@@ -228,7 +227,7 @@ const handleLogin = async () => {
       return;
     }
 
-    // Show OTP confirmation dialog (like GCash)
+    // Show OTP confirmation dialog
     const alert = await alertController.create({
       header: 'Verify Account',
       message: 'Do you want to link this device to your account?',
@@ -257,7 +256,6 @@ const handleLogin = async () => {
             }
 
             localStorage.setItem('pendingAuth', 'true');
-            localStorage.setItem('userEmail', email.value);
 
             await loading.dismiss();
             router.push({
@@ -273,43 +271,13 @@ const handleLogin = async () => {
     
   } catch (error) {
     isLoading.value = false;
-    localStorage.removeItem('token');
     const alert = await alertController.create({
       header: 'Login Failed',
-      message: error.message || 'Invalid email or password. Please try again.',
+      message: error.message || 'Invalid email. Please try again.',
       buttons: ['OK']
     });
     await alert.present();
   }
-};
-
-// Forgot password handler
-const handleForgotPassword = async () => {
-  const alert = await alertController.create({
-    header: 'Reset Password',
-    message: 'Enter your email address to receive a password reset link.',
-    inputs: [
-      {
-        name: 'email',
-        type: 'email',
-        placeholder: 'Email address'
-      }
-    ],
-    buttons: [
-      {
-        text: 'Cancel',
-        role: 'cancel'
-      },
-      {
-        text: 'Send',
-        handler: (data) => {
-          console.log('Reset password for:', data.email);
-          // TODO: Implement password reset logic
-        }
-      }
-    ]
-  });
-  await alert.present();
 };
 
 // Navigate to signup
@@ -454,29 +422,6 @@ onMounted(async () => {
 
 .custom-input::placeholder {
   color: var(--color-input-placeholder);
-}
-
-.toggle-password {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 20px;
-  color: var(--color-icon-tertiary);
-  cursor: pointer;
-  z-index: 2;
-}
-
-.forgot-password {
-  text-align: right;
-  margin-bottom: 24px;
-}
-
-.forgot-password a {
-  color: var(--color-link);
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
 }
 
 .login-button {
@@ -638,6 +583,64 @@ onMounted(async () => {
 
 :deep(.otp-confirm-alert .alert-button-cancel) {
   color: var(--color-text-secondary);
+}
+
+/* Not Found Alert */
+:deep(.not-found-alert .alert-wrapper) {
+  border-radius: 20px;
+  background: var(--color-modal-bg);
+  max-width: 320px;
+  padding: 20px;
+}
+
+:deep(.not-found-alert .alert-head) {
+  display: none;
+}
+
+:deep(.not-found-alert .alert-message) {
+  position: relative;
+  padding-top: 70px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-modal-text);
+  text-align: center;
+  padding-bottom: 8px;
+  line-height: 1.5;
+}
+
+:deep(.not-found-alert .alert-message::before) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: -30px;
+  width: 60px;
+  height: 60px;
+  background: url('/assets/images/checkmark_success.png') no-repeat center center;
+  background-size: contain;
+}
+
+:deep(.not-found-alert .alert-button-group) {
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 0 0;
+}
+
+:deep(.not-found-alert .alert-button) {
+  font-weight: 600;
+  border-radius: 12px;
+  height: 44px;
+  min-width: 100px;
+}
+
+:deep(.not-found-alert .alert-button-cancel) {
+  color: var(--color-text-secondary);
+  background: var(--color-bg-tertiary);
+}
+
+:deep(.not-found-alert .alert-button-confirm) {
+  color: white;
+  background: var(--color-primary);
 }
 
 /* Availability Alert */

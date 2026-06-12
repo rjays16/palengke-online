@@ -20,7 +20,7 @@ class AuthController extends Controller
         ]);
 
         $email = $validated['email'];
-        $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $otp = (string) random_int(100000, 999999);
 
         Cache::put('otp_' . $email, $otp, 300);
 
@@ -35,15 +35,14 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'email' => 'required|email',
-            'password' => 'required|string',
         ]);
 
         $seller = SellerRegistration::where('email', $validated['email'])->first();
 
-        if (!$seller || !Hash::check($validated['password'], $seller->password)) {
+        if (!$seller) {
             return response()->json([
-                'message' => 'Invalid email or password.',
-            ], 401);
+                'message' => 'No account found with this email.',
+            ], 404);
         }
 
         if ($seller->status !== 'approved') {
@@ -52,18 +51,34 @@ class AuthController extends Controller
             ], 403);
         }
 
-        $token = $seller->createToken('seller-token')->plainTextToken;
+        return response()->json([
+            'message' => 'Email verified.',
+            'hasPin' => $seller->pin !== null,
+        ]);
+    }
+
+    public function forgotPin(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $seller = SellerRegistration::where('email', $validated['email'])->first();
+
+        if (!$seller) {
+            return response()->json([
+                'message' => 'No account found with this email.',
+            ], 404);
+        }
+
+        $otp = (string) random_int(100000, 999999);
+
+        Cache::put('otp_' . $validated['email'], $otp, 300);
+
+        Mail::to($validated['email'])->send(new OtpVerificationMail($otp));
 
         return response()->json([
-            'message' => 'Login successful.',
-            'token' => $token,
-            'user' => [
-                'id' => $seller->id,
-                'email' => $seller->email,
-                'firstName' => $seller->first_name,
-                'lastName' => $seller->last_name,
-                'storeName' => $seller->store_name,
-            ],
+            'message' => 'Verification code sent to your email for PIN reset.',
         ]);
     }
 

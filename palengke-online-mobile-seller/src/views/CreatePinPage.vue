@@ -162,6 +162,7 @@ const handleNext = async () => {
     }
 
     localStorage.setItem('hasPin', 'true');
+    localStorage.setItem('isAuthenticated', 'true');
     if (data.token) {
       localStorage.setItem('token', data.token);
     }

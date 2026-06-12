@@ -42,7 +42,10 @@
 
         <div class="options-section">
           <button class="use-password-btn" @click="goToLogin">
-            Use email & password instead
+            Sign in with different account
+          </button>
+          <button class="forgot-pin-btn" @click="handleForgotPin">
+            Forgot PIN?
           </button>
         </div>
 
@@ -185,6 +188,51 @@ const goToLogin = () => {
   localStorage.removeItem('deviceId');
   localStorage.removeItem('userEmail');
   router.push('/login');
+};
+
+const handleForgotPin = async () => {
+  const alert = await alertController.create({
+    header: 'Forgot PIN',
+    message: 'A verification code will be sent to your registered email to reset your PIN.',
+    buttons: [
+      {
+        text: 'Cancel',
+        role: 'cancel',
+      },
+      {
+        text: 'Send Code',
+        handler: async () => {
+          try {
+            const res = await fetch('http://localhost:8000/api/seller/forgot-pin', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: userEmail.value }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+              throw new Error(data.message || 'Failed to send code.');
+            }
+
+            router.push({
+              name: 'OTPVerification',
+              params: { email: userEmail.value },
+              query: { mode: 'forgot-pin' },
+            });
+          } catch (e) {
+            const errAlert = await alertController.create({
+              header: 'Error',
+              message: e.message || 'Failed to send verification code.',
+              buttons: ['OK'],
+            });
+            await errAlert.present();
+          }
+        },
+      },
+    ],
+  });
+  await alert.present();
 };
 
 onMounted(async () => {
@@ -331,6 +379,24 @@ onMounted(async () => {
 }
 
 .use-password-btn:active {
+  transform: scale(0.98);
+}
+
+.forgot-pin-btn {
+  background: none;
+  border: none;
+  color: var(--color-link, #4CAF50);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+  margin-top: 12px;
+  display: block;
+  width: 100%;
+}
+
+.forgot-pin-btn:active {
   transform: scale(0.98);
 }
 

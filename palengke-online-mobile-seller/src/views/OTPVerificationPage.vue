@@ -258,7 +258,6 @@ const verifyCode = async () => {
       throw new Error(data.message || 'Invalid code.');
     }
 
-    localStorage.setItem('isAuthenticated', 'true');
     localStorage.removeItem('pendingAuth');
 
     // Generate device ID if not exists
@@ -269,7 +268,20 @@ const verifyCode = async () => {
 
     await showSuccessModal('Verification successful!');
 
-    router.push('/create-pin');
+    // Check if this is a forgot-pin flow
+    const mode = route.query.mode;
+    if (mode === 'forgot-pin') {
+      router.push('/create-pin');
+      return;
+    }
+
+    // Check if seller already has a PIN
+    const hasPin = localStorage.getItem('hasPin') === 'true';
+    if (hasPin) {
+      router.push('/pin-login');
+    } else {
+      router.push('/create-pin');
+    }
 
   } catch (error) {
     const alert = await alertController.create({
@@ -279,7 +291,7 @@ const verifyCode = async () => {
     });
     await alert.present();
 
-    otpDigits.value = ['', '', '', '', '', ''];
+    otpDigits.value = ['', '', '', '', ''];
     otpRefs.value[0]?.focus();
   } finally {
     isVerifying.value = false;
