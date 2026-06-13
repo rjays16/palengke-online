@@ -210,6 +210,36 @@ class MessageController extends Controller
         return response()->json(['message' => 'Conversation deleted successfully.']);
     }
 
+    public function destroyMessage(Request $request, $id)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $seller = SellerRegistration::where('email', $request->email)->first();
+        if (!$seller) {
+            return response()->json(['message' => 'Seller not found.'], 404);
+        }
+
+        $message = Message::with('conversation')->find($id);
+        if (!$message) {
+            return response()->json(['message' => 'Message not found.'], 404);
+        }
+
+        if ($message->conversation->seller_registration_id !== $seller->id) {
+            return response()->json(['message' => 'Forbidden.'], 403);
+        }
+
+        if ($message->image) {
+            $relative = str_replace(url('storage/'), '', $message->image);
+            if ($relative && Storage::disk('public')->exists($relative)) {
+                Storage::disk('public')->delete($relative);
+            }
+        }
+
+        $message->delete();
+
+        return response()->json(['message' => 'Message deleted successfully.']);
+    }
+
     private function formatConversation($c)
     {
         $time = $c->last_message_at

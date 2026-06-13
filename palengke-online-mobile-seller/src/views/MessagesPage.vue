@@ -158,7 +158,7 @@
             class="message-wrapper"
             :class="{ 'message-sent': message.sent, 'message-received': !message.sent }"
           >
-            <div class="message-bubble" :class="{ sent: message.sent }">
+            <div class="message-bubble" :class="{ sent: message.sent }" @click="confirmDeleteMessage(message)">
               <!-- Image Message -->
               <div v-if="message.image" class="message-image">
                 <img :src="message.image" :alt="message.text || 'Image'">
@@ -738,6 +738,56 @@ const deleteChat = async () => {
     ]
   });
   await alert.present();
+};
+
+const confirmDeleteMessage = async (message) => {
+  if (!selectedChat.value) return;
+  const alert = await alertController.create({
+    header: 'Delete Message',
+    message: 'Delete this message?',
+    buttons: [
+      { text: 'Cancel', role: 'cancel' },
+      {
+        text: 'Delete',
+        role: 'destructive',
+        handler: async () => {
+          await deleteMessage(message);
+        }
+      }
+    ]
+  });
+  await alert.present();
+};
+
+const showDeleteLoading = async () => {
+  const loading = await alertController.create({
+    cssClass: 'loading-modal-simple',
+    message: 'Deleting...',
+    buttons: []
+  });
+  await loading.present();
+  return loading;
+};
+
+const deleteMessage = async (message) => {
+  if (!message.id) return;
+  const loading = await showDeleteLoading();
+  try {
+    await fetch(`${API_BASE}/seller/messages/${message.id}?email=${encodeURIComponent(userEmail)}`, {
+      method: 'DELETE',
+      headers: { 'Accept': 'application/json' }
+    });
+    if (selectedChat.value) {
+      const idx = selectedChat.value.messages.findIndex(m => m.id === message.id);
+      if (idx > -1) {
+        selectedChat.value.messages.splice(idx, 1);
+      }
+    }
+  } catch (e) {
+    console.error('Failed to delete message:', e);
+  } finally {
+    await loading.dismiss();
+  }
 };
 
 onMounted(() => {
@@ -1362,5 +1412,46 @@ onUnmounted(() => {
     width: 48px;
     height: 48px;
   }
+}
+
+/* Loading Modal */
+:deep(.loading-modal-simple .alert-wrapper) {
+  border-radius: 20px;
+  text-align: center;
+  max-width: 280px;
+  padding: 50px 30px;
+  background: white;
+}
+:deep(.loading-modal-simple .alert-head) {
+  display: none;
+}
+:deep(.loading-modal-simple .alert-message) {
+  padding: 0;
+  position: relative;
+  padding-top: 56px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+:deep(.loading-modal-simple .alert-message::before) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: -20px;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4CAF50;
+  border-radius: 50%;
+  animation: loadingSpin 1s linear infinite;
+}
+:deep(.loading-modal-simple .alert-button-group) {
+  display: none;
+}
+
+@keyframes loadingSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>
