@@ -2,7 +2,7 @@
   <ion-page @touchstart="unlockAudio" @click="unlockAudio">
     <!-- Hidden audio elements for notifications -->
     <audio ref="messageAudio" preload="auto" src="/assets/messages/10.mp3" style="display:none"></audio>
-    <audio ref="callAudio" preload="auto" src="/assets/calls/15.mp3" style="display:none"></audio>
+    <audio ref="callAudio" preload="auto" src="/assets/calls/15.mp3" style="display:none" loop></audio>
     <!-- Conversations List View -->
     <div v-if="!selectedChat" class="messages-view">
       <ion-header>
@@ -621,6 +621,10 @@ const makeCall = async () => {
 };
 
 const endCall = () => {
+  if (callAudio.value) {
+    callAudio.value.pause();
+    callAudio.value.currentTime = 0;
+  }
   showCallModal.value = false;
 };
 
