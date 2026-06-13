@@ -1,5 +1,8 @@
 <template>
-  <ion-page>
+  <ion-page @touchstart="unlockAudio" @click="unlockAudio">
+    <!-- Hidden audio elements for notifications -->
+    <audio ref="messageAudio" preload="auto" src="/assets/messages/10.mp3" style="display:none"></audio>
+    <audio ref="callAudio" preload="auto" src="/assets/calls/15.mp3" style="display:none"></audio>
     <!-- Conversations List View -->
     <div v-if="!selectedChat" class="messages-view">
       <ion-header>
@@ -244,7 +247,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage,
@@ -408,11 +411,112 @@ const openChat = async (conversation) => {
   nextTick(() => {
     scrollToBottom();
   });
+
+  startMessagePolling(conversation.id);
 };
 
 const closeChat = () => {
+  stopMessagePolling();
   selectedChat.value = null;
   newMessage.value = '';
+};
+
+// Audio notification
+const messageAudio = ref(null);
+const callAudio = ref(null);
+let audioUnlocked = false;
+
+const unlockAudio = () => {
+  if (audioUnlocked) return;
+  if (messageAudio.value) {
+    messageAudio.value.volume = 0.01;
+    messageAudio.value.play().then(() => {
+      messageAudio.value.pause();
+      messageAudio.value.currentTime = 0;
+      messageAudio.value.volume = 0.7;
+      audioUnlocked = true;
+    }).catch(e => console.warn('Audio unlock failed:', e));
+  }
+};
+
+const playMessageSound = () => {
+  if (!audioUnlocked) return;
+  try {
+    if (messageAudio.value) {
+      messageAudio.value.currentTime = 0;
+      messageAudio.value.play().catch(e => console.warn('Play msg sound:', e));
+    }
+  } catch {}
+};
+
+const playCallSound = () => {
+  if (!audioUnlocked) return;
+  try {
+    if (callAudio.value) {
+      callAudio.value.currentTime = 0;
+      callAudio.value.play().catch(e => console.warn('Play call sound:', e));
+    }
+  } catch {}
+};
+
+// Polling
+let conversationCount = 0;
+let pollTimer = null;
+
+const startPolling = () => {
+  conversationCount = conversations.value.length;
+  pollTimer = setInterval(async () => {
+    if (!userEmail) return;
+    const prev = conversationCount;
+    try {
+      const res = await fetch(`${API_BASE}/seller/conversations?email=${encodeURIComponent(userEmail)}`, {
+        headers: { 'Accept': 'application/json' }
+      });
+      const data = await res.json();
+      const newList = data.conversations || [];
+      if (newList.length > prev && prev > 0) {
+        playMessageSound();
+      }
+      conversations.value = newList;
+      conversationCount = newList.length;
+    } catch {}
+  }, 5000);
+};
+
+const stopPolling = () => {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+};
+
+// Poll for new messages in open chat
+let messagePollTimer = null;
+
+const startMessagePolling = (conversationId) => {
+  stopMessagePolling();
+  messagePollTimer = setInterval(async () => {
+    if (!userEmail || !selectedChat.value) return;
+    try {
+      const res = await fetch(`${API_BASE}/seller/conversations/${conversationId}?email=${encodeURIComponent(userEmail)}`, {
+        headers: { 'Accept': 'application/json' }
+      });
+      const data = await res.json();
+      const serverMessages = data.messages || [];
+      if (serverMessages.length > selectedChat.value.messages.length) {
+        playMessageSound();
+        selectedChat.value.messages = serverMessages;
+        nextTick(() => scrollToBottom());
+      }
+    } catch {}
+  }, 3000);
+};
+
+const stopMessagePolling = () => {
+  if (messagePollTimer) {
+    clearInterval(messagePollTimer);
+    messagePollTimer = null;
+  }
 };
 
 const scrollToBottom = () => {
@@ -505,6 +609,8 @@ const attachImage = async () => {
 const makeCall = async () => {
   if (!selectedChat.value) return;
   
+  playCallSound();
+
   const alert = await alertController.create({
     header: 'Call ' + selectedChat.value.name,
     message: 'This will initiate a phone call',
@@ -598,7 +704,15 @@ const deleteChat = async () => {
 };
 
 onMounted(() => {
-  loadConversations();
+  loadConversations().then(() => {
+    conversationCount = conversations.value.length;
+    startPolling();
+  });
+});
+
+onUnmounted(() => {
+  stopPolling();
+  stopMessagePolling();
 });
 </script>
 
