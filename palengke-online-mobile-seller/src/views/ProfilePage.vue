@@ -3,11 +3,6 @@
     <ion-header>
       <ion-toolbar color="success">
         <ion-title>Profile</ion-title>
-        <ion-buttons slot="end">
-          <ion-button @click="editProfile">
-            <ion-icon :icon="createOutline"></ion-icon>
-          </ion-button>
-        </ion-buttons>
       </ion-toolbar>
     </ion-header>
 
@@ -436,7 +431,6 @@ import {
 } from '@ionic/vue';
 import {
   personOutline,
-  createOutline,
   cameraOutline,
   callOutline,
   mailOutline,
@@ -980,31 +974,6 @@ const showSuccessModal = async (message) => {
 };
 
 // Methods
-const editProfile = async () => {
-  const alert = await alertController.create({
-    header: 'Edit Profile',
-    message: 'Choose what to edit',
-    buttons: [
-      {
-        text: 'Personal Info',
-        handler: () => {
-          console.log('Edit personal info');
-        }
-      },
-      {
-        text: 'Shop Info',
-        handler: () => {
-          console.log('Edit shop info');
-        }
-      },
-      {
-        text: 'Cancel',
-        role: 'cancel'
-      }
-    ]
-  });
-  await alert.present();
-};
 
 const changePhoto = async () => {
   const actionSheet = await actionSheetController.create({
