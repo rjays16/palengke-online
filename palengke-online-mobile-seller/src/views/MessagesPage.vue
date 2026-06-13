@@ -243,6 +243,18 @@
         </ion-toolbar>
       </ion-footer>
     </div>
+
+    <!-- Call Overlay -->
+    <div v-if="showCallModal" class="call-overlay" @click.self="endCall">
+      <div class="call-card">
+        <div class="call-avatar-wrap">
+          <img :src="callAvatar" :alt="callName">
+        </div>
+        <h2 class="call-name-text">{{ callName }}</h2>
+        <p class="call-status-text">Calling...</p>
+        <button class="call-end-btn" @click="endCall">End Call</button>
+      </div>
+    </div>
   </ion-page>
 </template>
 
@@ -250,19 +262,6 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import {
-  IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonContent,
-  IonFooter,
-  IonButtons,
-  IonButton,
-  IonBackButton,
-  IonIcon,
-  IonSearchbar,
-  IonTextarea,
-  IonSpinner,
   actionSheetController,
   alertController,
   toastController
@@ -310,6 +309,11 @@ const sendingMessage = ref(false);
 const loadingMessages = ref(false);
 
 const conversations = ref([]);
+
+// Call Modal
+const showCallModal = ref(false);
+const callName = ref('');
+const callAvatar = ref('');
 
 // Quick Replies
 const quickReplies = ref(QUICK_REPLIES);
@@ -611,21 +615,13 @@ const makeCall = async () => {
 
   playCallSound();
 
-  const name = selectedChat.value.name || 'Contact';
+  callName.value = selectedChat.value.name || 'Contact';
+  callAvatar.value = selectedChat.value.avatar || '/assets/images/default.png';
+  showCallModal.value = true;
+};
 
-  const alert = await alertController.create({
-    header: name,
-    message: 'Calling...',
-    buttons: [
-      {
-        text: 'End Call',
-        role: 'destructive',
-        cssClass: 'end-call-btn',
-        handler: () => {}
-      }
-    ]
-  });
-  await alert.present();
+const endCall = () => {
+  showCallModal.value = false;
 };
 
 const showToast = async (message, color = 'dark') => {
@@ -1252,10 +1248,70 @@ onUnmounted(() => {
   --color: white;
 }
 
-/* End Call button */
-:deep(.end-call-btn) {
-  background: #ff3b30 !important;
-  color: white !important;
+/* Call Overlay */
+.call-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.call-card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 40px 32px 32px;
+  text-align: center;
+  min-width: 280px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+.call-avatar-wrap img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #4CAF50;
+  margin-bottom: 12px;
+}
+
+.call-name-text {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 4px;
+}
+
+.call-status-text {
+  font-size: 15px;
+  color: #4CAF50;
+  font-weight: 600;
+  margin: 0 0 20px;
+  animation: pulse-status 1.5s infinite;
+}
+
+@keyframes pulse-status {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.call-end-btn {
+  background: #ff3b30;
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  height: 48px;
+  min-width: 140px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0 24px;
+}
+
+.call-end-btn:hover {
+  background: #d32f2f;
 }
 
 /* Responsive */
