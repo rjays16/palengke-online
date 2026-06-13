@@ -74,7 +74,7 @@ const router = useRouter();
 const email = ref('');
 const isLoading = ref(false);
 
-// ✨ NEW: Loading Modal Function
+// Loading Modal Function
 const showLoadingModal = async (message = 'Loading...', autoDismiss = true) => {
   const alert = await alertController.create({
     cssClass: 'loading-modal-simple',
@@ -510,7 +510,7 @@ onMounted(async () => {
   }
 }
 
-/* ✨ NEW: Loading Modal Styling */
+/* Loading Modal Styling */
 :deep(.loading-modal-simple .alert-wrapper) {
   border-radius: 20px;
   text-align: center;

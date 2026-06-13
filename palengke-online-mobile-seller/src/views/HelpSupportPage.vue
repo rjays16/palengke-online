@@ -416,7 +416,7 @@ const searchResults = computed(() => {
   return results;
 });
 
-// ✨ NEW: Loading Modal Function
+// Loading Modal Function
 const showLoadingModal = async (message = 'Loading...') => {
   const alert = await alertController.create({
     cssClass: 'loading-modal-simple',
@@ -431,7 +431,7 @@ const showLoadingModal = async (message = 'Loading...') => {
   }, 1500);
 };
 
-// ✨ NEW: Success Modal Function
+// Success Modal Function
 const showSuccessModal = async (message) => {
   const alert = await alertController.create({
     cssClass: 'success-modal',
@@ -1373,7 +1373,7 @@ const viewPrivacy = async () => {
   }
 }
 
-/* ✨ NEW: Success Modal Styling */
+/* Success Modal Styling */
 :deep(.success-modal .alert-wrapper) {
   border-radius: 20px;
   text-align: center;
@@ -1405,7 +1405,7 @@ const viewPrivacy = async () => {
   height: 44px;
 }
 
-/* ✨ NEW: Loading Modal Styling */
+/* Loading Modal Styling */
 :deep(.loading-modal-simple .alert-wrapper) {
   border-radius: 20px;
   text-align: center;

@@ -95,6 +95,7 @@ Route::get('/seller/conversations/{id}', [MessageController::class, 'show']);
 Route::post('/seller/conversations/{id}/messages', [MessageController::class, 'sendMessage']);
 Route::post('/seller/conversations/{id}/upload-image', [MessageController::class, 'uploadImage']);
 Route::post('/seller/conversations/{id}/read', [MessageController::class, 'markRead']);
+Route::post('/seller/conversations/{id}/toggle-mute', [MessageController::class, 'toggleMute']);
 Route::delete('/seller/conversations/{id}', [MessageController::class, 'destroy']);
 
 // Seller app — dashboard stats

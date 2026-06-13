@@ -713,7 +713,7 @@ const showSuccessModal = async (message) => {
   }, 2000);
 };
 
-// ✨ NEW: Show loading with text only (no HTML)
+      // Show loading with text only (no HTML)
 const showLoadingWithLogo = async (message) => {
   const alert = await alertController.create({
     cssClass: 'loading-modal-simple',
@@ -1457,7 +1457,7 @@ ion-header ion-toolbar ion-buttons ion-button {
   height: 44px;
 }
 
-/* ✨ NEW: Loading Modal Styling - Simple Version */
+/* Loading Modal Styling - Simple Version */
 :deep(.loading-modal-simple .alert-wrapper) {
   border-radius: 20px;
   text-align: center;

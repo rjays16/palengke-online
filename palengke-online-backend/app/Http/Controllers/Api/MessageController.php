@@ -156,6 +156,30 @@ class MessageController extends Controller
         return response()->json(['message' => 'Conversation marked as read.']);
     }
 
+    public function toggleMute(Request $request, $id)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $seller = SellerRegistration::where('email', $request->email)->first();
+        if (!$seller) {
+            return response()->json(['message' => 'Seller not found.'], 404);
+        }
+
+        $conversation = Conversation::where('seller_registration_id', $seller->id)
+            ->where('id', $id)->first();
+        if (!$conversation) {
+            return response()->json(['message' => 'Conversation not found.'], 404);
+        }
+
+        $conversation->muted = !$conversation->muted;
+        $conversation->save();
+
+        return response()->json([
+            'message' => $conversation->muted ? 'Conversation muted.' : 'Conversation unmuted.',
+            'muted' => $conversation->muted,
+        ]);
+    }
+
     public function destroy(Request $request, $id)
     {
         $request->validate(['email' => 'required|email']);
@@ -201,6 +225,7 @@ class MessageController extends Controller
             'time' => $time,
             'unread' => $c->unread_count,
             'orderId' => $c->order_id,
+            'muted' => $c->muted,
         ];
     }
 

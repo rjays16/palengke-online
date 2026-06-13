@@ -21,6 +21,7 @@ class Conversation extends Model
     protected $casts = [
         'last_message_at' => 'datetime',
         'unread_count' => 'integer',
+        'muted' => 'boolean',
     ];
 
     public function seller()

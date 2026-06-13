@@ -82,6 +82,7 @@
               <div class="conversation-header">
                 <h3 class="name">{{ conversation.name }}</h3>
                 <span class="time">{{ conversation.time }}</span>
+                <ion-icon v-if="conversation.muted" :icon="volumeMuteOutline" class="mute-icon-list"></ion-icon>
               </div>
               
               <div class="conversation-preview">
@@ -281,6 +282,7 @@ import {
   sendOutline,
   trashOutline,
   volumeMuteOutline,
+  volumeHighOutline,
   cubeOutline
 } from 'ionicons/icons';
 const QUICK_REPLIES = [
@@ -316,6 +318,32 @@ const callAvatar = ref('');
 
 // Quick Replies
 const quickReplies = ref(QUICK_REPLIES);
+
+function isMuted(conversation) {
+  if (!conversation) return false;
+  if (conversation.muted !== undefined) return conversation.muted;
+  const found = conversations.value.find(c => c.id === conversation.id);
+  return found ? found.muted : false;
+}
+
+async function toggleMute(conversation) {
+  if (!conversation) return;
+  try {
+    const res = await fetch(`${API_BASE}/seller/conversations/${conversation.id}/toggle-mute`, {
+      method: 'POST',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: userEmail }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      conversation.muted = data.muted;
+      const found = conversations.value.find(c => c.id === conversation.id);
+      if (found) found.muted = data.muted;
+    }
+  } catch (e) {
+    console.error('Failed to toggle mute:', e);
+  }
+}
 
 // Computed
 const filteredConversations = computed(() => {
@@ -478,7 +506,10 @@ const startPolling = () => {
       const data = await res.json();
       const newList = data.conversations || [];
       if (newList.length > prev && prev > 0) {
-        playMessageSound();
+        const hasUnmutedNew = newList.some(c => !c.muted);
+        if (hasUnmutedNew) {
+          playMessageSound();
+        }
       }
       conversations.value = newList;
       conversationCount = newList.length;
@@ -507,7 +538,9 @@ const startMessagePolling = (conversationId) => {
       const data = await res.json();
       const serverMessages = data.messages || [];
       if (serverMessages.length > selectedChat.value.messages.length) {
-        playMessageSound();
+        if (!selectedChat.value.muted) {
+          playMessageSound();
+        }
         selectedChat.value.messages = serverMessages;
         nextTick(() => scrollToBottom());
       }
@@ -648,14 +681,16 @@ ${selectedChat.value.orderId ? `Order: #${selectedChat.value.orderId}` : ''}`,
 };
 
 const showChatOptions = async () => {
+  if (!selectedChat.value) return;
+  const muted = isMuted(selectedChat.value);
   const actionSheet = await actionSheetController.create({
     header: 'Chat Options',
     buttons: [
       {
-        text: 'Mute Notifications',
-        icon: volumeMuteOutline,
+        text: muted ? 'Unmute Notifications' : 'Mute Notifications',
+        icon: muted ? volumeMuteOutline : volumeHighOutline,
         handler: () => {
-          console.log('Mute');
+          toggleMute(selectedChat.value);
         }
       },
       {
@@ -872,6 +907,13 @@ onUnmounted(() => {
 .time {
   font-size: 12px;
   color: #999;
+}
+
+.mute-icon-list {
+  font-size: 14px;
+  color: #999;
+  margin-left: 4px;
+  vertical-align: middle;
 }
 
 .conversation-preview {

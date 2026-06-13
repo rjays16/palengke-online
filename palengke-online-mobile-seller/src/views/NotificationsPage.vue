@@ -168,7 +168,7 @@ const filteredNotifications = computed(() => {
   return filtered;
 });
 
-// ✨ NEW: Success Modal Function
+// Success Modal Function
 const showSuccessModal = async (message) => {
   const alert = await alertController.create({
     cssClass: 'success-modal',
@@ -225,7 +225,7 @@ const showSuccessModal = async (message) => {
   }, 2000);
 };
 
-// ✨ NEW: Loading Modal Function
+// Loading Modal Function
 const showLoadingModal = async (message = 'Loading...') => {
   const alert = await alertController.create({
     cssClass: 'loading-modal-simple',
@@ -610,7 +610,7 @@ ion-segment-button {
   }
 }
 
-/* ✨ NEW: Success Modal Styling */
+/* Success Modal Styling */
 :deep(.success-modal .alert-wrapper) {
   border-radius: 20px;
   text-align: center;
@@ -642,7 +642,7 @@ ion-segment-button {
   height: 44px;
 }
 
-/* ✨ NEW: Loading Modal Styling */
+/* Loading Modal Styling */
 :deep(.loading-modal-simple .alert-wrapper) {
   border-radius: 20px;
   text-align: center;

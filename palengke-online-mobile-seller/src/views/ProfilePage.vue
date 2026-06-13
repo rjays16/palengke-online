@@ -649,7 +649,7 @@ const saveOperatingHours = async () => {
 
 let loadingModalRef = null;
 
-// ✨ NEW: Loading Modal Function
+// Loading Modal Function
 const showLoadingModal = async (message = 'Loading...', autoDismiss = true) => {
   const alert = await alertController.create({
     cssClass: 'loading-modal-simple',
@@ -2042,7 +2042,7 @@ onMounted(() => {
   height: 44px;
 }
 
-/* ✨ NEW: Loading Modal Styling */
+/* Loading Modal Styling */
 :deep(.loading-modal-simple .alert-wrapper) {
   border-radius: 20px;
   text-align: center;
