@@ -141,7 +141,7 @@
         <!-- Dispute Info -->
         <div class="info-card dispute-card" v-if="dispute">
           <div class="card-header">
-            <h3>⚠️ Customer Dispute</h3>
+            <h3><ion-icon :icon="alertCircleOutline" style="vertical-align: middle; margin-right: 6px;"></ion-icon> Customer Dispute</h3>
             <ion-badge color="danger">OPEN</ion-badge>
           </div>
           <div class="dispute-details">
@@ -278,7 +278,8 @@ import {
   hourglassOutline,
   rocketOutline,
   printOutline,
-  shareOutline
+  shareOutline,
+  alertCircleOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
