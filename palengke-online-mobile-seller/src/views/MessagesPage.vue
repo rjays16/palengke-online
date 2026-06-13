@@ -8,7 +8,9 @@
       <ion-header>
         <ion-toolbar color="success">
           <ion-buttons slot="start">
-            <ion-back-button default-href="/home"></ion-back-button>
+            <ion-button @click="goHome">
+              <ion-icon :icon="arrowBackOutline"></ion-icon>
+            </ion-button>
           </ion-buttons>
           <ion-title>Messages</ion-title>
           <ion-buttons slot="end">
@@ -790,7 +792,12 @@ const deleteMessage = async (message) => {
   }
 };
 
+const goHome = () => {
+  window.location.href = '/home';
+};
+
 onMounted(() => {
+  document.addEventListener('ionBackButton', handleBackButton);
   loadConversations().then(() => {
     conversationCount = conversations.value.length;
     startPolling();
@@ -798,6 +805,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  document.removeEventListener('ionBackButton', handleBackButton);
   stopPolling();
   stopMessagePolling();
 });
