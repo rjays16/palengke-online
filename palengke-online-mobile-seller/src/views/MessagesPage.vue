@@ -608,24 +608,34 @@ const attachImage = async () => {
 
 const makeCall = async () => {
   if (!selectedChat.value) return;
-  
+
   playCallSound();
 
+  const name = selectedChat.value.name || 'Contact';
+
   const alert = await alertController.create({
-    header: 'Call ' + selectedChat.value.name,
-    message: 'This will initiate a phone call',
+    header: name,
+    message: 'Calling...',
     buttons: [
-      { text: 'Cancel', role: 'cancel' },
-      { 
-        text: 'Call', 
-        handler: () => {
-          // TODO: Implement call functionality
-          console.log('Calling:', selectedChat.value.name);
-        }
+      {
+        text: 'End Call',
+        role: 'destructive',
+        cssClass: 'end-call-btn',
+        handler: () => {}
       }
     ]
   });
   await alert.present();
+};
+
+const showToast = async (message, color = 'dark') => {
+  const toast = await toastController.create({
+    message,
+    duration: 2000,
+    color,
+    position: 'top'
+  });
+  await toast.present();
 };
 
 const showChatInfo = async () => {
@@ -1240,6 +1250,12 @@ onUnmounted(() => {
 .send-button.active {
   --background: #4CAF50;
   --color: white;
+}
+
+/* End Call button */
+:deep(.end-call-btn) {
+  background: #ff3b30 !important;
+  color: white !important;
 }
 
 /* Responsive */
