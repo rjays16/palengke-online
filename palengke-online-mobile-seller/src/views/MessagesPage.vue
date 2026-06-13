@@ -281,7 +281,6 @@ import {
   sendOutline,
   trashOutline,
   volumeMuteOutline,
-  informationCircleOutline,
   cubeOutline
 } from 'ionicons/icons';
 const QUICK_REPLIES = [
@@ -652,13 +651,6 @@ const showChatOptions = async () => {
   const actionSheet = await actionSheetController.create({
     header: 'Chat Options',
     buttons: [
-      {
-        text: 'View Profile',
-        icon: informationCircleOutline,
-        handler: () => {
-          console.log('View profile');
-        }
-      },
       {
         text: 'Mute Notifications',
         icon: volumeMuteOutline,
