@@ -220,16 +220,6 @@
 
             <div class="settings-item">
               <div class="settings-icon">
-                <ion-icon :icon="moonOutline"></ion-icon>
-              </div>
-              <div class="settings-content">
-                <p class="settings-label">Dark Mode</p>
-              </div>
-              <ion-toggle v-model="darkMode" @ionChange="toggleDarkMode"></ion-toggle>
-            </div>
-
-            <div class="settings-item">
-              <div class="settings-icon">
                 <ion-icon :icon="languageOutline"></ion-icon>
               </div>
               <div class="settings-content">
@@ -430,7 +420,6 @@ import {
   lockClosedOutline,
   keypadOutline,
   notificationsOutline,
-  moonOutline,
   languageOutline,
   helpCircleOutline,
   chatbubbleEllipsesOutline,
@@ -500,7 +489,6 @@ const loadProfile = async () => {
   }
 };
 
-const darkMode = ref(false);
 const paymentMethodsEnabled = ref(true);
 const showHoursModal = ref(false);
 
@@ -1471,11 +1459,6 @@ const goToDevices = () => {
 
 const notificationSettings = () => {
   router.push('/notifications');
-};
-
-const toggleDarkMode = () => {
-  console.log('Dark mode:', darkMode.value);
-  // TODO: Implement dark mode
 };
 
 const helpCenter = () => {
