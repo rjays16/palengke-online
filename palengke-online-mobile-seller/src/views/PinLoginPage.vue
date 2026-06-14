@@ -81,6 +81,7 @@ import {
   alertController,
 } from '@ionic/vue';
 import { lockClosedOutline } from 'ionicons/icons';
+import { API_BASE } from '@/config/api';
 
 const router = useRouter();
 
@@ -142,7 +143,7 @@ const verifyPin = async () => {
   isVerifying.value = true;
 
   try {
-    const response = await fetch('http://localhost:8000/api/seller/device/verify-pin', {
+    const response = await fetch(`${API_BASE}/seller/device/verify-pin`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -203,7 +204,7 @@ const handleForgotPin = async () => {
         text: 'Send Code',
         handler: async () => {
           try {
-            const res = await fetch('http://localhost:8000/api/seller/forgot-pin', {
+            const res = await fetch(`${API_BASE}/seller/forgot-pin`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ email: userEmail.value }),
@@ -247,7 +248,7 @@ onMounted(async () => {
   }
   // Verify PIN exists on backend
   try {
-    const res = await fetch('http://localhost:8000/api/seller/device/status', {
+    const res = await fetch(`${API_BASE}/seller/device/status`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: userEmail.value, device_id: deviceId.value }),

@@ -67,6 +67,7 @@ import {
 import { 
   mailOutline
 } from 'ionicons/icons';
+import { API_BASE } from '@/config/api';
 
 const router = useRouter();
 
@@ -107,7 +108,7 @@ const checkAvailability = async () => {
 
   try {
     // Fetch enabled countries from backend
-    const response = await fetch('http://localhost:8000/api/countries');
+    const response = await fetch(`${API_BASE}/countries`);
     const data = await response.json();
 
     if (!data.countries || data.countries.length === 0) {
@@ -127,7 +128,7 @@ const checkAvailability = async () => {
 
     // If Philippines, check if city is enabled
     if (userCountry === 'PH') {
-      const locResponse = await fetch('http://localhost:8000/api/locations');
+      const locResponse = await fetch(`${API_BASE}/locations`);
       const locData = await locResponse.json();
 
       if (locData.locations) {
@@ -167,7 +168,7 @@ const handleLogin = async () => {
   isLoading.value = true;
 
   try {
-    const response = await fetch('http://localhost:8000/api/seller/login', {
+    const response = await fetch(`${API_BASE}/seller/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email.value }),
@@ -246,7 +247,7 @@ const handleLogin = async () => {
             const loading = await showLoadingModal('Sending verification code...', false);
 
             try {
-              await fetch('http://localhost:8000/api/send-otp', {
+              await fetch(`${API_BASE}/send-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: email.value }),
@@ -296,7 +297,7 @@ onMounted(async () => {
   const devId = localStorage.getItem('deviceId');
   if (email && devId) {
     try {
-      const res = await fetch('http://localhost:8000/api/seller/device/status', {
+      const res = await fetch(`${API_BASE}/seller/device/status`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, device_id: devId }),

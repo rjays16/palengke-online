@@ -229,6 +229,7 @@
 </template>
 
 <script setup>
+import { API_BASE } from '@/config/api';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import {
@@ -688,7 +689,7 @@ const sendOtp = async () => {
   isSendingOtp.value = true;
 
   try {
-    const response = await fetch('http://localhost:8000/api/send-otp', {
+    const response = await fetch(`${API_BASE}/send-otp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email.value }),
@@ -805,7 +806,7 @@ const verifyOtp = async () => {
   otpError.value = '';
 
   try {
-    const response = await fetch('http://localhost:8000/api/verify-otp', {
+    const response = await fetch(`${API_BASE}/verify-otp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email.value, otp: otpValue.value }),

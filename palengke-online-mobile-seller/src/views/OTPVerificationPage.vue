@@ -96,6 +96,7 @@ import {
   mailOpenOutline,
   shieldCheckmarkOutline
 } from 'ionicons/icons';
+import { API_BASE } from '@/config/api';
 
 const router = useRouter();
 const route = useRoute();
@@ -204,7 +205,7 @@ const startCountdown = () => {
 const resendCode = async () => {
   isVerifying.value = true;
   try {
-    const res = await fetch('http://localhost:8000/api/send-otp', {
+    const res = await fetch(`${API_BASE}/send-otp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: userEmail.value }),
@@ -246,7 +247,7 @@ const verifyCode = async () => {
   isVerifying.value = true;
   
   try {
-    const response = await fetch('http://localhost:8000/api/verify-otp', {
+    const response = await fetch(`${API_BASE}/verify-otp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: userEmail.value, otp: otpCode.value }),

@@ -130,6 +130,7 @@
 </template>
 
 <script setup>
+import { API_BASE } from '@/config/api';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { onIonViewWillEnter } from '@ionic/vue';
@@ -178,7 +179,7 @@ const loadOrders = async () => {
   if (!email) return;
   loading.value = true;
   try {
-    const response = await fetch(`http://localhost:8000/api/seller/orders?email=${encodeURIComponent(email)}`, {
+    const response = await fetch(`${API_BASE}/seller/orders?email=${encodeURIComponent(email)}`, {
       headers: { 'Accept': 'application/json' },
     });
     const data = await response.json();
@@ -335,7 +336,7 @@ const updateOrderStatus = async (orderId, newStatus) => {
   const email = localStorage.getItem('userEmail');
   if (!email) return false;
   try {
-    const response = await fetch(`http://localhost:8000/api/seller/orders/${orderId}/status`, {
+    const response = await fetch(`${API_BASE}/seller/orders/${orderId}/status`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({ email, status: newStatus }),

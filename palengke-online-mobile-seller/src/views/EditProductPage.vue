@@ -304,6 +304,7 @@ import {
   cloudUploadOutline,
   checkmarkCircle
 } from 'ionicons/icons';
+import { API_BASE } from '@/config/api';
 
 const router = useRouter();
 const route = useRoute();
@@ -342,13 +343,13 @@ async function loadProduct() {
   loading.value = true;
   try {
     const [profileRes, prodRes, locRes] = await Promise.all([
-      fetch(`http://localhost:8000/api/seller/profile?email=${encodeURIComponent(userEmail)}`, {
+      fetch(`${API_BASE}/seller/profile?email=${encodeURIComponent(userEmail)}`, {
         headers: { 'Accept': 'application/json' }
       }),
-      fetch(`http://localhost:8000/api/seller/products/${productId}?email=${encodeURIComponent(userEmail)}`, {
+      fetch(`${API_BASE}/seller/products/${productId}?email=${encodeURIComponent(userEmail)}`, {
         headers: { 'Accept': 'application/json' }
       }),
-      fetch('http://localhost:8000/api/locations', {
+      fetch(`${API_BASE}/locations`, {
         headers: { 'Accept': 'application/json' }
       }),
     ]);
@@ -356,7 +357,7 @@ async function loadProduct() {
     const profileData = await profileRes.json();
     let cats = (profileData.user && profileData.user.categories) || [];
     if (!cats.length) {
-      const allRes = await fetch('http://localhost:8000/api/categories', {
+      const allRes = await fetch(`${API_BASE}/categories`, {
         headers: { 'Accept': 'application/json' }
       });
       const allData = await allRes.json();
@@ -433,7 +434,7 @@ const selectImage = () => {
     formData.append('image', file);
     formData.append('email', userEmail);
     try {
-      const res = await fetch('http://localhost:8000/api/seller/products/upload-image', {
+      const res = await fetch(`${API_BASE}/seller/products/upload-image`, {
         method: 'POST',
         headers: { 'Accept': 'application/json' },
         body: formData,
@@ -462,7 +463,7 @@ const updateProduct = async () => {
 
   saving.value = true;
   try {
-    const res = await fetch(`http://localhost:8000/api/seller/products/${productData.value.id}`, {
+    const res = await fetch(`${API_BASE}/seller/products/${productData.value.id}`, {
       method: 'POST',
       headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -573,7 +574,7 @@ const deleteProduct = async () => {
         handler: async () => {
           saving.value = true;
           try {
-            const res = await fetch(`http://localhost:8000/api/seller/products/${productData.value.id}?email=${encodeURIComponent(userEmail)}`, {
+            const res = await fetch(`${API_BASE}/seller/products/${productData.value.id}?email=${encodeURIComponent(userEmail)}`, {
               method: 'DELETE',
               headers: { 'Accept': 'application/json' }
             });

@@ -287,6 +287,7 @@ import {
   volumeHighOutline,
   cubeOutline
 } from 'ionicons/icons';
+import { API_BASE } from '@/config/api';
 const QUICK_REPLIES = [
   'Yes, available po!',
   'Out of stock po',
@@ -296,7 +297,6 @@ const QUICK_REPLIES = [
 
 const router = useRouter();
 
-const API_BASE = 'http://localhost:8000/api';
 const userEmail = localStorage.getItem('userEmail');
 
 // State

@@ -87,6 +87,7 @@
 </template>
 
 <script setup>
+import { API_BASE } from '@/config/api';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import {
@@ -133,7 +134,7 @@ const loadNotifications = async () => {
   const email = localStorage.getItem('userEmail');
   if (!email) return;
   try {
-    const response = await fetch(`http://localhost:8000/api/seller/notifications?email=${encodeURIComponent(email)}`, {
+    const response = await fetch(`${API_BASE}/seller/notifications?email=${encodeURIComponent(email)}`, {
       headers: { 'Accept': 'application/json' },
     });
     const data = await response.json();
@@ -286,7 +287,7 @@ const handleNotificationClick = async (notification) => {
   const email = localStorage.getItem('userEmail');
   if (email) {
     try {
-      await fetch(`http://localhost:8000/api/seller/notifications/${notification.id}/read?email=${encodeURIComponent(email)}`, {
+      await fetch(`${API_BASE}/seller/notifications/${notification.id}/read?email=${encodeURIComponent(email)}`, {
         method: 'POST',
         headers: { 'Accept': 'application/json' },
       });
@@ -321,7 +322,7 @@ const markAllAsRead = async () => {
           const email = localStorage.getItem('userEmail');
           if (email) {
             try {
-              await fetch(`http://localhost:8000/api/seller/notifications/read-all?email=${encodeURIComponent(email)}`, {
+              await fetch(`${API_BASE}/seller/notifications/read-all?email=${encodeURIComponent(email)}`, {
                 method: 'POST',
                 headers: { 'Accept': 'application/json' },
               });
@@ -369,7 +370,7 @@ const showOptions = async () => {
                   const email = localStorage.getItem('userEmail');
                   if (email) {
                     try {
-                      await fetch(`http://localhost:8000/api/seller/notifications?email=${encodeURIComponent(email)}`, {
+                      await fetch(`${API_BASE}/seller/notifications?email=${encodeURIComponent(email)}`, {
                         method: 'DELETE',
                         headers: { 'Accept': 'application/json' },
                       });

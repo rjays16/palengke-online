@@ -130,9 +130,10 @@ import {
 import {
   arrowBackOutline, walletOutline, checkmarkCircle, chevronForwardOutline
 } from 'ionicons/icons'
+import { API_BASE } from '@/config/api'
 
 const router = useRouter()
-const API = 'http://localhost:8000'
+const API = API_BASE.replace('/api', '')
 
 function goToHistory() {
   router.push('/wallet/transactions')

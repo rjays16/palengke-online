@@ -389,6 +389,7 @@
 </template>
 
 <script setup>
+import { API_BASE } from '@/config/api';
 import { ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import {
@@ -454,7 +455,7 @@ const loadAnalytics = async () => {
   const email = localStorage.getItem('userEmail');
   if (!email) return;
   try {
-    let url = `http://localhost:8000/api/seller/analytics?email=${encodeURIComponent(email)}`;
+    let url = `${API_BASE}/seller/analytics?email=${encodeURIComponent(email)}`;
     if (startDate.value && endDate.value) {
       url += `&start_date=${startDate.value}&end_date=${endDate.value}`;
     } else {
@@ -614,7 +615,7 @@ const editGoal = async (type) => {
             ? { email, monthly_sales_target: val, monthly_orders_target: monthlyGoals.value.ordersTarget }
             : { email, monthly_sales_target: monthlyGoals.value.salesTarget, monthly_orders_target: val };
           try {
-            const res = await fetch('http://localhost:8000/api/seller/goals', {
+            const res = await fetch(`${API_BASE}/seller/goals`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
               body: JSON.stringify(body),

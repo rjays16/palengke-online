@@ -245,6 +245,8 @@ import {
   receiptOutline,
   personOutline
 } from 'ionicons/icons';
+import { API_BASE } from '@/config/api';
+
 const router = useRouter();
 
 const userEmail = localStorage.getItem('userEmail');
@@ -262,7 +264,7 @@ async function loadProducts() {
   if (!userEmail) return;
   loading.value = true;
   try {
-    const res = await fetch(`http://localhost:8000/api/seller/products?email=${encodeURIComponent(userEmail)}`, {
+    const res = await fetch(`${API_BASE}/seller/products?email=${encodeURIComponent(userEmail)}`, {
       headers: { 'Accept': 'application/json' }
     });
     const data = await res.json();
@@ -348,7 +350,7 @@ const toggleProductStatus = async (product) => {
         handler: async () => {
           toggling.value = true;
           try {
-            const res = await fetch(`http://localhost:8000/api/seller/products/${product.id}`, {
+            const res = await fetch(`${API_BASE}/seller/products/${product.id}`, {
               method: 'POST',
               headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
               body: JSON.stringify({ email: userEmail, is_active: newIsActive })
@@ -385,7 +387,7 @@ const deleteProduct = async (product) => {
         handler: async () => {
           deleting.value = true;
           try {
-            const res = await fetch(`http://localhost:8000/api/seller/products/${product.id}?email=${encodeURIComponent(userEmail)}`, {
+            const res = await fetch(`${API_BASE}/seller/products/${product.id}?email=${encodeURIComponent(userEmail)}`, {
               method: 'DELETE',
               headers: { 'Accept': 'application/json' }
             });

@@ -64,6 +64,7 @@
 </template>
 
 <script setup>
+import { API_BASE } from '@/config/api';
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
@@ -96,7 +97,7 @@ const currentDeviceId = ref(localStorage.getItem('deviceId') || '');
 const fetchDevices = async () => {
   loading.value = true;
   try {
-    const response = await fetch('http://localhost:8000/api/seller/devices', {
+    const response = await fetch(`${API_BASE}/seller/devices`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -144,7 +145,7 @@ const confirmLogout = async (device) => {
 
 const logoutCurrent = async () => {
   try {
-    await fetch('http://localhost:8000/api/seller/devices/logout-current', {
+    await fetch(`${API_BASE}/seller/devices/logout-current`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: userEmail.value }),
@@ -159,7 +160,7 @@ const logoutCurrent = async () => {
 
 const removeDevice = async (device) => {
   try {
-    const response = await fetch('http://localhost:8000/api/seller/devices/remove', {
+    const response = await fetch(`${API_BASE}/seller/devices/remove`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

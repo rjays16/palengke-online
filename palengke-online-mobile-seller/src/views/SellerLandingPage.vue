@@ -274,6 +274,7 @@
 </template>
 
 <script setup>
+import { API_BASE } from '@/config/api';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { onIonViewWillEnter } from '@ionic/vue';
@@ -337,7 +338,7 @@ async function fetchWalletBalance() {
   const email = localStorage.getItem('userEmail')
   if (!email) return
   try {
-    const res = await fetch('http://localhost:8000/api/seller/wallet/balance?email=' + encodeURIComponent(email), {
+    const res = await fetch(`${API_BASE}/seller/wallet/balance?email=${encodeURIComponent(email)}`, {
       headers: { 'Accept': 'application/json' },
     })
     if (res.ok) {
@@ -355,7 +356,7 @@ const loadProfile = async () => {
   const email = localStorage.getItem('userEmail');
   if (!email) return;
   try {
-    const response = await fetch(`http://localhost:8000/api/seller/profile?email=${encodeURIComponent(email)}`, {
+    const response = await fetch(`${API_BASE}/seller/profile?email=${encodeURIComponent(email)}`, {
       headers: { 'Accept': 'application/json' },
     });
     const data = await response.json();
@@ -371,7 +372,7 @@ const loadProfile = async () => {
 
 const loadCategories = async () => {
   try {
-    const response = await fetch('http://localhost:8000/api/categories', {
+    const response = await fetch(`${API_BASE}/categories`, {
       headers: { 'Accept': 'application/json' },
     });
     const data = await response.json();
@@ -414,7 +415,7 @@ function closeNoticeModal() {
 
 const loadNotices = async () => {
   try {
-    const response = await fetch('http://localhost:8000/api/notices?target=seller', {
+    const response = await fetch(`${API_BASE}/notices?target=seller`, {
       headers: { 'Accept': 'application/json' },
     });
     const data = await response.json();
@@ -512,10 +513,10 @@ const loadOrders = async () => {
   if (!email) return;
   try {
     const [ordersRes, statsRes] = await Promise.all([
-      fetch(`http://localhost:8000/api/seller/orders?email=${encodeURIComponent(email)}`, {
+      fetch(`${API_BASE}/seller/orders?email=${encodeURIComponent(email)}`, {
         headers: { 'Accept': 'application/json' },
       }),
-      fetch(`http://localhost:8000/api/seller/dashboard/stats?email=${encodeURIComponent(email)}`, {
+      fetch(`${API_BASE}/seller/dashboard/stats?email=${encodeURIComponent(email)}`, {
         headers: { 'Accept': 'application/json' },
       }),
     ]);
@@ -880,7 +881,7 @@ const manageCategories = async () => {
           if (!email) return;
 
           try {
-            await fetch('http://localhost:8000/api/seller/profile', {
+            await fetch(`${API_BASE}/seller/profile`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
               body: JSON.stringify({ email, categories: data }),

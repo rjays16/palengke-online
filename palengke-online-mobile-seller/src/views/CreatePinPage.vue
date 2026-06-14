@@ -77,6 +77,7 @@ import {
   alertController,
 } from '@ionic/vue';
 import { keyOutline, shieldCheckmarkOutline } from 'ionicons/icons';
+import { API_BASE } from '@/config/api';
 
 const router = useRouter();
 
@@ -144,7 +145,7 @@ const handleNext = async () => {
   isSaving.value = true;
 
   try {
-    const response = await fetch('http://localhost:8000/api/seller/device/register', {
+    const response = await fetch(`${API_BASE}/seller/device/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

@@ -213,6 +213,7 @@
 </template>
 
 <script setup>
+import { API_BASE } from '@/config/api';
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { Capacitor } from '@capacitor/core';
@@ -472,7 +473,7 @@ const submitVerification = async () => {
     existingData.verificationSubmittedAt = new Date().toISOString();
     localStorage.setItem('registrationData', JSON.stringify(existingData));
 
-    const response = await fetch('http://localhost:8000/api/seller/register', {
+    const response = await fetch(`${API_BASE}/seller/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

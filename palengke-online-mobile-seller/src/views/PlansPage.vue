@@ -225,8 +225,7 @@ import {
   checkmarkCircle
 } from 'ionicons/icons'
 import { PLANS, getSubscription, daysLeft, refreshSubscription, subscribePlan } from '@/services/subscriptionService'
-
-const API_BASE = 'http://localhost:8000/api'
+import { API_BASE } from '@/config/api'
 
 const router = useRouter()
 const sub = ref(getSubscription())

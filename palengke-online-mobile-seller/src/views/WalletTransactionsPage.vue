@@ -89,9 +89,10 @@ import {
   arrowBackOutline, walletOutline,
   addCircleOutline, removeCircleOutline, receiptOutline
 } from 'ionicons/icons'
+import { API_BASE } from '@/config/api'
 
 const router = useRouter()
-const API = 'http://localhost:8000'
+const API = API_BASE.replace('/api', '')
 
 const balance = ref(0)
 const transactions = ref([])

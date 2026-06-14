@@ -464,6 +464,7 @@ import {
   businessOutline,
   checkmarkCircleOutline
 } from 'ionicons/icons';
+import { API_BASE } from '@/config/api';
 
 const router = useRouter();
 
@@ -490,7 +491,7 @@ const loadProfile = async () => {
   if (!email) return;
 
   try {
-    const response = await fetch(`http://localhost:8000/api/seller/profile?email=${encodeURIComponent(email)}`);
+    const response = await fetch(`${API_BASE}/seller/profile?email=${encodeURIComponent(email)}`);
     const data = await response.json();
     if (response.ok && data.user) {
       const u = data.user;
@@ -614,7 +615,7 @@ const saveOperatingHours = async () => {
   await showLoadingModal('Saving operating hours...', false);
 
   try {
-    const response = await fetch('http://localhost:8000/api/seller/profile', {
+    const response = await fetch(`${API_BASE}/seller/profile`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, operating_hours: hoursString }),
@@ -674,7 +675,7 @@ const paymentMethods = ref([]);
 
 const loadSettings = async () => {
   try {
-    const response = await fetch('http://localhost:8000/api/settings');
+    const response = await fetch(`${API_BASE}/settings`);
     const data = await response.json();
     if (response.ok) {
       const val = data.enable_seller_payment_methods;
@@ -692,7 +693,7 @@ const loadPaymentMethods = async () => {
   if (!email) return;
 
   try {
-    const response = await fetch(`http://localhost:8000/api/seller/payment-methods?email=${encodeURIComponent(email)}`);
+    const response = await fetch(`${API_BASE}/seller/payment-methods?email=${encodeURIComponent(email)}`);
     const data = await response.json();
     if (response.ok) {
       paymentMethods.value = data.payment_methods || [];
@@ -837,7 +838,7 @@ const showPaymentDetailsForm = async (selectedType) => {
           await showLoadingModal('Adding payment method...', false);
 
           try {
-            const response = await fetch('http://localhost:8000/api/seller/payment-methods', {
+            const response = await fetch(`${API_BASE}/seller/payment-methods`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -888,7 +889,7 @@ const deletePaymentMethod = async (id) => {
           await showLoadingModal('Removing...', false);
 
           try {
-            const response = await fetch(`http://localhost:8000/api/seller/payment-methods/${id}`, {
+            const response = await fetch(`${API_BASE}/seller/payment-methods/${id}`, {
               method: 'DELETE',
             });
 
@@ -1069,7 +1070,7 @@ const changePhoto = async () => {
           await showLoadingModal('Removing photo...', false);
 
           try {
-            const response = await fetch('http://localhost:8000/api/seller/profile', {
+            const response = await fetch(`${API_BASE}/seller/profile`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
               body: JSON.stringify({ email, remove_avatar: true }),
@@ -1128,7 +1129,7 @@ const uploadAvatar = async (dataUrl) => {
   await showLoadingModal('Uploading photo...', false);
 
   try {
-    const response = await fetch('http://localhost:8000/api/seller/profile', {
+    const response = await fetch(`${API_BASE}/seller/profile`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({ email, avatar: dataUrl }),
@@ -1213,7 +1214,7 @@ const editField = async (field) => {
               if (field === 'phone') body.phone = data.value;
               if (field === 'email') body.new_email = data.value;
 
-              const response = await fetch('http://localhost:8000/api/seller/profile', {
+              const response = await fetch(`${API_BASE}/seller/profile`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
                 body: JSON.stringify(body),
@@ -1313,7 +1314,7 @@ const changePassword = async () => {
           await showLoadingModal('Updating password...', false);
 
           try {
-            const response = await fetch('http://localhost:8000/api/seller/change-password', {
+            const response = await fetch(`${API_BASE}/seller/change-password`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -1426,7 +1427,7 @@ const changePin = async () => {
           await showLoadingModal('Updating PIN...', false);
 
           try {
-            const response = await fetch('http://localhost:8000/api/seller/device/change-pin', {
+            const response = await fetch(`${API_BASE}/seller/device/change-pin`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -1558,7 +1559,7 @@ const handleLogout = async () => {
           const deviceId = localStorage.getItem('deviceId');
           const hasPin = localStorage.getItem('hasPin');
           try {
-            await fetch('http://localhost:8000/api/seller/devices/logout-current', {
+            await fetch(`${API_BASE}/seller/devices/logout-current`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ email }),

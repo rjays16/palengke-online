@@ -308,6 +308,7 @@ import {
   checkmarkCircleOutline,
   checkmarkOutline
 } from 'ionicons/icons';
+import { API_BASE } from '@/config/api';
 
 const router = useRouter();
 
@@ -360,7 +361,7 @@ const selectImage = () => {
     formData.append('image', file);
     formData.append('email', userEmail);
     try {
-      const res = await fetch('http://localhost:8000/api/seller/products/upload-image', {
+      const res = await fetch(`${API_BASE}/seller/products/upload-image`, {
         method: 'POST',
         headers: { 'Accept': 'application/json' },
         body: formData,
@@ -389,7 +390,7 @@ const saveWithStatus = async (status) => {
 
   saving.value = true;
   try {
-    const res = await fetch('http://localhost:8000/api/seller/products', {
+    const res = await fetch(`${API_BASE}/seller/products`, {
       method: 'POST',
       headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -495,10 +496,10 @@ onMounted(async () => {
   if (!userEmail) { pageLoading.value = false; return; }
   try {
     const [profileRes, locRes] = await Promise.all([
-      fetch(`http://localhost:8000/api/seller/profile?email=${encodeURIComponent(userEmail)}`, {
+      fetch(`${API_BASE}/seller/profile?email=${encodeURIComponent(userEmail)}`, {
         headers: { 'Accept': 'application/json' }
       }),
-      fetch('http://localhost:8000/api/locations', {
+      fetch(`${API_BASE}/locations`, {
         headers: { 'Accept': 'application/json' }
       }),
     ]);
@@ -506,7 +507,7 @@ onMounted(async () => {
     const profileData = await profileRes.json();
     let cats = (profileData.user && profileData.user.categories) || [];
     if (!cats.length) {
-      const allRes = await fetch('http://localhost:8000/api/categories', {
+      const allRes = await fetch(`${API_BASE}/categories`, {
         headers: { 'Accept': 'application/json' }
       });
       const allData = await allRes.json();

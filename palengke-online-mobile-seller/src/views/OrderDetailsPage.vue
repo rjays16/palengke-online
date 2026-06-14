@@ -238,6 +238,7 @@
 </template>
 
 <script setup>
+import { API_BASE } from '@/config/api';
 import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { getDisputeByOrderId } from '../services/disputeService';
@@ -302,7 +303,7 @@ const loadOrderDetails = async () => {
   if (!email) return;
 
   try {
-    const response = await fetch(`http://localhost:8000/api/seller/orders/${orderId}?email=${encodeURIComponent(email)}`, {
+    const response = await fetch(`${API_BASE}/seller/orders/${orderId}?email=${encodeURIComponent(email)}`, {
       headers: { 'Accept': 'application/json' },
     });
     const data = await response.json();
@@ -542,7 +543,7 @@ const updateOrderStatus = async (newStatus) => {
   const email = localStorage.getItem('userEmail');
   if (!email) return false;
   try {
-    const response = await fetch(`http://localhost:8000/api/seller/orders/${order.value.id}/status`, {
+    const response = await fetch(`${API_BASE}/seller/orders/${order.value.id}/status`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify({ email, status: newStatus }),
