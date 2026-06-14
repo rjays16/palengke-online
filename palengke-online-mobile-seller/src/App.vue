@@ -14,7 +14,7 @@ export default {
   components: {
     IonApp,
     IonRouterOutlet,
-    SplashScreen
-  }
+    SplashScreen,
+  },
 };
 </script>

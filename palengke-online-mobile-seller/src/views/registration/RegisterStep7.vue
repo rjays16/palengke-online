@@ -2,7 +2,6 @@
   <ion-page>
     <ion-content :fullscreen="true" class="step-content">
       <div class="step-container">
-        
         <!-- Back Button -->
         <div class="back-button" @click="goBack">
           <ion-icon :icon="arrowBackOutline"></ion-icon>
@@ -77,9 +76,7 @@
             </div>
           </div>
           <div class="camera-controls">
-            <ion-button fill="clear" class="cancel-camera-btn" @click="cancelCamera">
-              Cancel
-            </ion-button>
+            <ion-button fill="clear" class="cancel-camera-btn" @click="cancelCamera"> Cancel </ion-button>
             <div class="capture-circle" @click="capturePhoto">
               <div class="capture-inner"></div>
             </div>
@@ -99,14 +96,9 @@
 
             <!-- When photo is taken -->
             <div v-else class="photo-preview">
-              <img :src="selfiePhoto" alt="Selfie with ID">
+              <img :src="selfiePhoto" alt="Selfie with ID" />
               <div class="photo-overlay">
-                <ion-button 
-                  size="small" 
-                  fill="clear" 
-                  class="retake-btn"
-                  @click="retakePhoto"
-                >
+                <ion-button size="small" fill="clear" class="retake-btn" @click="retakePhoto">
                   <ion-icon slot="icon-only" :icon="refreshOutline"></ion-icon>
                 </ion-button>
               </div>
@@ -120,28 +112,22 @@
 
           <!-- Hidden canvas and file inputs -->
           <canvas ref="canvasRef" style="display: none"></canvas>
-          <input 
-            ref="fileInput" 
-            type="file" 
-            accept="image/*" 
+          <input
+            ref="fileInput"
+            type="file"
+            accept="image/*"
             capture="user"
             style="display: none"
             @change="handleFileInput"
-          >
-          <input 
-            ref="uploadInput" 
-            type="file" 
-            accept="image/*"
-            style="display: none"
-            @change="handleFileInput"
-          >
+          />
+          <input ref="uploadInput" type="file" accept="image/*" style="display: none" @change="handleFileInput" />
         </div>
 
         <!-- Tips (hidden during camera preview) -->
         <div v-if="!showCamera" class="tips-box">
           <ion-icon :icon="bulbOutline"></ion-icon>
           <div class="tips-text">
-            <strong>Important:</strong><br>
+            <strong>Important:</strong><br />
             This is the final step! Make sure both your face and your ID are clearly visible in the same photo.
           </div>
         </div>
@@ -150,20 +136,12 @@
         <div v-if="!showCamera" class="button-group">
           <!-- Show "Take Selfie" and "Upload Photo" when no photo -->
           <template v-if="selfiePhoto === null">
-            <ion-button 
-              expand="block" 
-              class="capture-button"
-              @click="openCamera"
-            >
+            <ion-button expand="block" class="capture-button" @click="openCamera">
               <ion-icon slot="start" :icon="cameraOutline"></ion-icon>
               Take Selfie
             </ion-button>
 
-            <ion-button 
-              expand="block" 
-              class="upload-button"
-              @click="openUpload"
-            >
+            <ion-button expand="block" class="upload-button" @click="openUpload">
               <ion-icon slot="start" :icon="cloudUploadOutline"></ion-icon>
               Upload Photo
             </ion-button>
@@ -171,22 +149,12 @@
 
           <!-- Show "Retake" and "Submit" when photo taken -->
           <template v-else>
-            <ion-button 
-              expand="block" 
-              fill="outline"
-              color="medium"
-              class="retake-button"
-              @click="retakePhoto"
-            >
+            <ion-button expand="block" fill="outline" color="medium" class="retake-button" @click="retakePhoto">
               <ion-icon slot="start" :icon="refreshOutline"></ion-icon>
               Retake Photo
             </ion-button>
 
-            <ion-button 
-              expand="block" 
-              class="submit-button"
-              @click="handleSubmit"
-            >
+            <ion-button expand="block" class="submit-button" @click="handleSubmit">
               <ion-icon slot="start" :icon="checkmarkCircleOutline"></ion-icon>
               Submit Verification
             </ion-button>
@@ -195,18 +163,11 @@
 
         <!-- Back Button (bottom) -->
         <div v-if="!showCamera && selfiePhoto === null" class="back-nav">
-          <ion-button 
-            expand="block" 
-            fill="outline"
-            color="medium"
-            class="back-btn"
-            @click="goBack"
-          >
+          <ion-button expand="block" fill="outline" color="medium" class="back-btn" @click="goBack">
             <ion-icon slot="start" :icon="arrowBackOutline"></ion-icon>
             Back to ID Photos
           </ion-button>
         </div>
-
       </div>
     </ion-content>
   </ion-page>
@@ -225,7 +186,7 @@ import {
   IonIcon,
   toastController,
   alertController,
-  loadingController
+  loadingController,
 } from '@ionic/vue';
 import {
   arrowBackOutline,
@@ -237,7 +198,7 @@ import {
   refreshOutline,
   informationCircleOutline,
   bulbOutline,
-  cloudUploadOutline
+  cloudUploadOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -256,7 +217,7 @@ onMounted(() => {
   const savedData = localStorage.getItem('registrationData');
   if (savedData) {
     const data = JSON.parse(savedData);
-    
+
     // Load previously taken selfie if going back
     if (data.selfiePhoto) {
       selfiePhoto.value = data.selfiePhoto;
@@ -317,7 +278,9 @@ const startCamera = async () => {
     });
     cameraStream.value = stream;
     showCamera.value = true;
-    await new Promise(resolve => { setTimeout(resolve, 100); });
+    await new Promise((resolve) => {
+      setTimeout(resolve, 100);
+    });
     if (videoRef.value) {
       videoRef.value.srcObject = stream;
     }
@@ -329,7 +292,7 @@ const startCamera = async () => {
 // Stop camera stream
 const stopCamera = () => {
   if (cameraStream.value) {
-    cameraStream.value.getTracks().forEach(track => track.stop());
+    cameraStream.value.getTracks().forEach((track) => track.stop());
     cameraStream.value = null;
   }
   showCamera.value = false;
@@ -398,7 +361,7 @@ const showToast = async (message, color = 'primary') => {
     message,
     duration: 2500,
     color,
-    position: 'top'
+    position: 'top',
   });
   await toast.present();
 };
@@ -413,16 +376,16 @@ const goBack = async () => {
       buttons: [
         {
           text: 'Cancel',
-          role: 'cancel'
+          role: 'cancel',
         },
         {
           text: 'Discard',
           role: 'destructive',
           handler: () => {
             router.push('/register/step6');
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
     await alert.present();
   } else {
@@ -444,15 +407,15 @@ const handleSubmit = async () => {
     buttons: [
       {
         text: 'Review Photos',
-        role: 'cancel'
+        role: 'cancel',
       },
       {
         text: 'Submit',
         handler: async () => {
           await submitVerification();
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -462,7 +425,7 @@ const submitVerification = async () => {
   // Show loading
   const loading = await loadingController.create({
     message: 'Submitting verification...',
-    spinner: 'crescent'
+    spinner: 'crescent',
   });
   await loading.present();
 
@@ -516,7 +479,7 @@ const submitVerification = async () => {
     // Show success message
     const successAlert = await alertController.create({
       header: 'Verification Submitted!',
-      message: 'Your verification has been submitted successfully. You will be notified once it\'s reviewed.',
+      message: "Your verification has been submitted successfully. You will be notified once it's reviewed.",
       cssClass: 'success-alert',
       buttons: [
         {
@@ -524,19 +487,18 @@ const submitVerification = async () => {
           handler: () => {
             // Navigate to Success page (verified)
             router.push('/register/success');
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
     await successAlert.present();
-
   } catch (error) {
     await loading.dismiss();
-    
+
     const errorAlert = await alertController.create({
       header: 'Submission Failed',
       message: 'Something went wrong. Please try again.',
-      buttons: ['OK']
+      buttons: ['OK'],
     });
     await errorAlert.present();
   }
@@ -605,8 +567,12 @@ const submitVerification = async () => {
 }
 
 @keyframes fillComplete {
-  0% { width: 85.68%; }
-  100% { width: 100%; }
+  0% {
+    width: 85.68%;
+  }
+  100% {
+    width: 100%;
+  }
 }
 
 .progress-text {

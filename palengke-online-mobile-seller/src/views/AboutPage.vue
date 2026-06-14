@@ -11,11 +11,10 @@
 
     <ion-content :fullscreen="true">
       <div class="about-container">
-
         <!-- App Header -->
         <div class="app-header">
           <div class="app-logo">
-            <img src="/assets/images/logo-without-circle.png" alt="Palengke Online">
+            <img src="/assets/images/logo-without-circle.png" alt="Palengke Online" />
           </div>
           <h1 class="app-name">Palengke Online</h1>
           <p class="app-tagline">Empowering Filipino Sellers</p>
@@ -28,9 +27,9 @@
           <h2 class="section-title">Our Mission</h2>
           <div class="content-card">
             <p>
-              Palengke Online is dedicated to empowering Filipino sellers by bringing the traditional 
-              palengke experience into the digital age. We connect local vendors with customers, 
-              making fresh produce and quality goods accessible to everyone.
+              Palengke Online is dedicated to empowering Filipino sellers by bringing the traditional palengke
+              experience into the digital age. We connect local vendors with customers, making fresh produce and quality
+              goods accessible to everyone.
             </p>
           </div>
         </div>
@@ -38,7 +37,7 @@
         <!-- Features Section -->
         <div class="section">
           <h2 class="section-title">What We Offer</h2>
-          
+
           <div class="feature-list">
             <div class="feature-item">
               <div class="feature-icon">
@@ -105,7 +104,7 @@
         <!-- Stats Section -->
         <div class="section">
           <h2 class="section-title">Our Impact</h2>
-          
+
           <div class="stats-grid">
             <div class="stat-card">
               <div class="stat-icon"><font-awesome-icon icon="store" /></div>
@@ -138,13 +137,12 @@
           <h2 class="section-title">About Chui Tech Solution Inc.</h2>
           <div class="content-card">
             <p>
-              <strong>Chui Tech Solution Inc.</strong> is a Filipino technology company dedicated to 
-              creating innovative digital solutions that empower local businesses and communities.
+              <strong>Chui Tech Solution Inc.</strong> is a Filipino technology company dedicated to creating innovative
+              digital solutions that empower local businesses and communities.
             </p>
             <p>
-              We specialize in developing mobile and web applications that bridge the gap between 
-              traditional commerce and modern technology, helping Filipino entrepreneurs thrive in 
-              the digital economy.
+              We specialize in developing mobile and web applications that bridge the gap between traditional commerce
+              and modern technology, helping Filipino entrepreneurs thrive in the digital economy.
             </p>
           </div>
         </div>
@@ -152,7 +150,7 @@
         <!-- Team Section -->
         <div class="section">
           <h2 class="section-title">Our Values</h2>
-          
+
           <div class="values-list">
             <div class="value-item">
               <ion-icon :icon="heartOutline"></ion-icon>
@@ -191,7 +189,7 @@
         <!-- Contact Section -->
         <div class="section">
           <h2 class="section-title">Get in Touch</h2>
-          
+
           <div class="contact-list">
             <div class="contact-item" @click="openWebsite">
               <ion-icon :icon="globeOutline"></ion-icon>
@@ -234,7 +232,7 @@
         <!-- Social Media Section -->
         <div class="section">
           <h2 class="section-title">Follow Us</h2>
-          
+
           <div class="social-buttons">
             <div class="social-button facebook" @click="openFacebook">
               <ion-icon :icon="logoFacebook"></ion-icon>
@@ -261,7 +259,7 @@
         <!-- Legal Section -->
         <div class="section">
           <h2 class="section-title">Legal</h2>
-          
+
           <div class="legal-list">
             <div class="legal-item" @click="viewTerms">
               <ion-icon :icon="documentTextOutline"></ion-icon>
@@ -286,11 +284,11 @@
         <!-- Credits Section -->
         <div class="section">
           <h2 class="section-title">Credits</h2>
-          
+
           <div class="content-card credits-card">
-            <p><strong>Developed by:</strong><br>Chui Tech Solution Inc.</p>
-            <p><strong>Powered by:</strong><br>Ionic Framework, Vue.js, Capacitor</p>
-            <p><strong>Special Thanks:</strong><br>Our amazing community of sellers and customers</p>
+            <p><strong>Developed by:</strong><br />Chui Tech Solution Inc.</p>
+            <p><strong>Powered by:</strong><br />Ionic Framework, Vue.js, Capacitor</p>
+            <p><strong>Special Thanks:</strong><br />Our amazing community of sellers and customers</p>
           </div>
         </div>
 
@@ -327,7 +325,6 @@
             Rate This App
           </ion-button>
         </div>
-
       </div>
     </ion-content>
   </ion-page>
@@ -346,7 +343,7 @@ import {
   IonButton,
   IonIcon,
   alertController,
-  toastController
+  toastController,
 } from '@ionic/vue';
 import {
   storefrontOutline,
@@ -370,7 +367,7 @@ import {
   logoYoutube,
   documentTextOutline,
   documentOutline,
-  starOutline
+  starOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -413,19 +410,20 @@ const viewTerms = async () => {
   const alert = await alertController.create({
     header: 'Terms & Conditions',
     cssClass: 'terms-modal',
-    message: 'By using this app, you agree to provide accurate product information, deliver quality products to customers, maintain professional conduct, and follow local business regulations. © 2024-2026 Chui Tech Solution Inc. All rights reserved.',
+    message:
+      'By using this app, you agree to provide accurate product information, deliver quality products to customers, maintain professional conduct, and follow local business regulations. © 2024-2026 Chui Tech Solution Inc. All rights reserved.',
     buttons: [
       {
         text: 'View Full Terms',
         handler: () => {
           window.open('https://chuitech.com/terms', '_blank');
-        }
+        },
       },
       {
         text: 'Close',
-        role: 'cancel'
-      }
-    ]
+        role: 'cancel',
+      },
+    ],
   });
   await alert.present();
 };
@@ -434,19 +432,20 @@ const viewPrivacy = async () => {
   const alert = await alertController.create({
     header: 'Privacy Policy',
     cssClass: 'privacy-modal',
-    message: 'We protect your data by encrypting all transactions, never sharing personal information, securing payment details, and following data privacy laws. © 2024-2026 Chui Tech Solution Inc.',
+    message:
+      'We protect your data by encrypting all transactions, never sharing personal information, securing payment details, and following data privacy laws. © 2024-2026 Chui Tech Solution Inc.',
     buttons: [
       {
         text: 'View Full Policy',
         handler: () => {
           window.open('https://chuitech.com/privacy', '_blank');
-        }
+        },
       },
       {
         text: 'Close',
-        role: 'cancel'
-      }
-    ]
+        role: 'cancel',
+      },
+    ],
   });
   await alert.present();
 };
@@ -455,19 +454,20 @@ const viewLicenses = async () => {
   const alert = await alertController.create({
     header: 'Open Source Licenses',
     cssClass: 'licenses-modal',
-    message: 'This app is built with: Ionic Framework (MIT), Vue.js (MIT), Capacitor (MIT), and Ionicons (MIT). Thank you to the open source community!',
+    message:
+      'This app is built with: Ionic Framework (MIT), Vue.js (MIT), Capacitor (MIT), and Ionicons (MIT). Thank you to the open source community!',
     buttons: [
       {
         text: 'View All Licenses',
         handler: () => {
           showToast('Full license list coming soon');
-        }
+        },
       },
       {
         text: 'Close',
-        role: 'cancel'
-      }
-    ]
+        role: 'cancel',
+      },
+    ],
   });
   await alert.present();
 };
@@ -479,7 +479,7 @@ const rateApp = async () => {
     buttons: [
       {
         text: 'Later',
-        role: 'cancel'
+        role: 'cancel',
       },
       {
         text: 'Rate Now',
@@ -488,12 +488,12 @@ const rateApp = async () => {
             message: '<font-awesome-icon icon="star" /> Opening app store...',
             duration: 2000,
             color: 'success',
-            position: 'top'
+            position: 'top',
           });
           await toast.present();
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -503,7 +503,7 @@ const showToast = async (message) => {
     message,
     duration: 2000,
     color: 'dark',
-    position: 'top'
+    position: 'top',
   });
   await toast.present();
 };
@@ -518,7 +518,7 @@ const showToast = async (message) => {
 
 /* App Header */
 .app-header {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
   padding: 40px 20px;
   text-align: center;
   color: white;
@@ -615,8 +615,8 @@ const showToast = async (message) => {
   width: 56px;
   height: 56px;
   border-radius: 16px;
-  background: #E8F5E9;
-  color: #4CAF50;
+  background: #e8f5e9;
+  color: #4caf50;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -661,7 +661,7 @@ const showToast = async (message) => {
 .stat-value {
   font-size: 28px;
   font-weight: 700;
-  color: #4CAF50;
+  color: #4caf50;
   margin-bottom: 4px;
 }
 
@@ -692,7 +692,7 @@ const showToast = async (message) => {
 
 .value-item > ion-icon {
   font-size: 32px;
-  color: #4CAF50;
+  color: #4caf50;
   flex-shrink: 0;
 }
 
@@ -735,7 +735,7 @@ const showToast = async (message) => {
 
 .contact-item > ion-icon:first-child {
   font-size: 28px;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .contact-item div {
@@ -795,19 +795,19 @@ const showToast = async (message) => {
 }
 
 .social-button.facebook ion-icon {
-  color: #1877F2;
+  color: #1877f2;
 }
 
 .social-button.instagram ion-icon {
-  color: #E4405F;
+  color: #e4405f;
 }
 
 .social-button.twitter ion-icon {
-  color: #1DA1F2;
+  color: #1da1f2;
 }
 
 .social-button.youtube ion-icon {
-  color: #FF0000;
+  color: #ff0000;
 }
 
 /* Legal List */
@@ -835,7 +835,7 @@ const showToast = async (message) => {
 
 .legal-item > ion-icon:first-child {
   font-size: 24px;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .legal-item span {
@@ -904,7 +904,7 @@ const showToast = async (message) => {
 .made-in {
   font-size: 14px;
   font-weight: 600;
-  color: #4CAF50;
+  color: #4caf50;
   margin-top: 12px;
 }
 
@@ -926,7 +926,7 @@ const showToast = async (message) => {
   .stats-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .social-buttons {
     grid-template-columns: 1fr;
   }

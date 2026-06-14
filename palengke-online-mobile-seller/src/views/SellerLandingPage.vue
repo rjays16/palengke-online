@@ -21,7 +21,6 @@
 
     <ion-content :fullscreen="true" class="dashboard-content">
       <div class="dashboard-container">
-
         <!-- Welcome Section -->
         <div class="welcome-section">
           <div class="welcome-header">
@@ -29,16 +28,28 @@
               <h1 class="welcome-title">Welcome back!</h1>
               <p class="seller-name">{{ sellerName }}</p>
             </div>
-            <img src="/assets/images/palengke-seller-boy.png" alt="Seller" class="welcome-avatar">
+            <img src="/assets/images/palengke-seller-boy.png" alt="Seller" class="welcome-avatar" />
           </div>
-          
+
           <!-- Trial / Subscription Badge -->
-          <div class="trial-badge" :class="{ expired, active: subActive && !subLow }" v-if="isTrialActive || subActive || expired" :style="{ cursor: (isTrialActive || expired || subLow) ? 'pointer' : 'default' }" @click="(isTrialActive || expired || subLow) ? goToPlans() : null">
-            <ion-icon :icon="expired ? alertCircleOutline : subActive ? checkmarkCircleOutline : timeOutline"></ion-icon>
+          <div
+            class="trial-badge"
+            :class="{ expired, active: subActive && !subLow }"
+            v-if="isTrialActive || subActive || expired"
+            :style="{ cursor: isTrialActive || expired || subLow ? 'pointer' : 'default' }"
+            @click="isTrialActive || expired || subLow ? goToPlans() : null"
+          >
+            <ion-icon
+              :icon="expired ? alertCircleOutline : subActive ? checkmarkCircleOutline : timeOutline"
+            ></ion-icon>
             <span v-if="expired">Trial expired — tap to subscribe</span>
             <span v-else-if="subActive">Plan Active: {{ remainingText }}</span>
             <span v-else>{{ remainingText }} in free trial</span>
-            <ion-icon :icon="chevronForwardOutline" class="badge-arrow" v-if="isTrialActive || expired || subLow"></ion-icon>
+            <ion-icon
+              :icon="chevronForwardOutline"
+              class="badge-arrow"
+              v-if="isTrialActive || expired || subLow"
+            ></ion-icon>
           </div>
         </div>
 
@@ -88,7 +99,7 @@
         <!-- Quick Actions -->
         <div class="actions-section">
           <h2 class="section-title">Quick Actions</h2>
-          
+
           <div class="actions-grid">
             <div class="action-card" @click="addProduct">
               <div class="action-icon add">
@@ -130,9 +141,7 @@
         <div class="orders-section">
           <div class="section-header">
             <h2 class="section-title">Recent Orders</h2>
-            <ion-button fill="clear" size="small" @click="viewAllOrders">
-              View All
-            </ion-button>
+            <ion-button fill="clear" size="small" @click="viewAllOrders"> View All </ion-button>
           </div>
 
           <div class="order-card" v-for="order in recentOrders" :key="order.id" @click="viewOrderDetails(order.id)">
@@ -163,7 +172,7 @@
         <!-- Categories Section -->
         <div class="categories-section">
           <h2 class="section-title">Your Categories</h2>
-          
+
           <div class="categories-chips">
             <div class="category-chip" v-for="category in selectedCategories" :key="category">
               {{ category }}
@@ -173,7 +182,6 @@
             </div>
           </div>
         </div>
-
       </div>
     </ion-content>
 
@@ -295,7 +303,7 @@ import {
   IonItem,
   alertController,
   actionSheetController,
-  toastController
+  toastController,
 } from '@ionic/vue';
 import {
   notificationsOutline,
@@ -321,7 +329,7 @@ import {
   alertCircleOutline,
   checkmarkCircleOutline,
   chevronForwardOutline,
-  megaphoneOutline
+  megaphoneOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -331,25 +339,27 @@ const sellerName = ref('Loading...');
 const notificationCount = ref(3);
 const selectedCategories = ref([]);
 const availableCategories = ref([]);
-const sub = ref(getSubscription())
-const walletBalance = ref(0)
+const sub = ref(getSubscription());
+const walletBalance = ref(0);
 
 async function fetchWalletBalance() {
-  const email = localStorage.getItem('userEmail')
-  if (!email) return
+  const email = localStorage.getItem('userEmail');
+  if (!email) return;
   try {
     const res = await fetch(`${API_BASE}/seller/wallet/balance?email=${encodeURIComponent(email)}`, {
-      headers: { 'Accept': 'application/json' },
-    })
+      headers: { Accept: 'application/json' },
+    });
     if (res.ok) {
-      const data = await res.json()
-      walletBalance.value = data.balance || 0
+      const data = await res.json();
+      walletBalance.value = data.balance || 0;
     }
-  } catch { /* silent */ }
+  } catch {
+    /* silent */
+  }
 }
 
 async function refreshSub() {
-  sub.value = await refreshSubscription()
+  sub.value = await refreshSubscription();
 }
 
 const loadProfile = async () => {
@@ -357,7 +367,7 @@ const loadProfile = async () => {
   if (!email) return;
   try {
     const response = await fetch(`${API_BASE}/seller/profile?email=${encodeURIComponent(email)}`, {
-      headers: { 'Accept': 'application/json' },
+      headers: { Accept: 'application/json' },
     });
     const data = await response.json();
     if (response.ok && data.user) {
@@ -373,7 +383,7 @@ const loadProfile = async () => {
 const loadCategories = async () => {
   try {
     const response = await fetch(`${API_BASE}/categories`, {
-      headers: { 'Accept': 'application/json' },
+      headers: { Accept: 'application/json' },
     });
     const data = await response.json();
     if (response.ok) {
@@ -385,38 +395,38 @@ const loadCategories = async () => {
 };
 
 // Notice banner
-const DISMISS_KEY = 'palengke_seller_dismissed_notices'
-const dismissedNotices = ref(JSON.parse(localStorage.getItem(DISMISS_KEY) || '[]'))
-const allNotices = ref([])
-const showNoticeModal = ref(false)
+const DISMISS_KEY = 'palengke_seller_dismissed_notices';
+const dismissedNotices = ref(JSON.parse(localStorage.getItem(DISMISS_KEY) || '[]'));
+const allNotices = ref([]);
+const showNoticeModal = ref(false);
 
 const activeNotice = computed(() => {
-  return allNotices.value.find(n => n.active && (n.target === 'all' || n.target === 'seller')) || null
-})
+  return allNotices.value.find((n) => n.active && (n.target === 'all' || n.target === 'seller')) || null;
+});
 
 function dismissNotice(id) {
   if (!dismissedNotices.value.includes(id)) {
-    dismissedNotices.value.push(id)
-    localStorage.setItem(DISMISS_KEY, JSON.stringify(dismissedNotices.value))
+    dismissedNotices.value.push(id);
+    localStorage.setItem(DISMISS_KEY, JSON.stringify(dismissedNotices.value));
   }
 }
 
 function checkNotice() {
-  const val = activeNotice.value
+  const val = activeNotice.value;
   if (val && !dismissedNotices.value.includes(val.id)) {
-    showNoticeModal.value = true
+    showNoticeModal.value = true;
   }
 }
 
 function closeNoticeModal() {
-  if (activeNotice.value) dismissNotice(activeNotice.value.id)
-  showNoticeModal.value = false
+  if (activeNotice.value) dismissNotice(activeNotice.value.id);
+  showNoticeModal.value = false;
 }
 
 const loadNotices = async () => {
   try {
     const response = await fetch(`${API_BASE}/notices?target=seller`, {
-      headers: { 'Accept': 'application/json' },
+      headers: { Accept: 'application/json' },
     });
     const data = await response.json();
     if (response.ok && data.notices) {
@@ -437,34 +447,34 @@ onIonViewWillEnter(async () => {
   fetchWalletBalance();
 });
 
-const remaining = computed(() => daysLeft(sub.value))
-const expired = computed(() => isExpired(sub.value))
-const subActive = computed(() => sub.value.status === 'active' && !expired.value)
-const subLow = computed(() => subActive.value && remaining.value <= 15)
-const isTrialActive = computed(() => sub.value.status === 'trial' && !expired.value)
-const trialDaysLeft = computed(() => remaining.value)
+const remaining = computed(() => daysLeft(sub.value));
+const expired = computed(() => isExpired(sub.value));
+const subActive = computed(() => sub.value.status === 'active' && !expired.value);
+const subLow = computed(() => subActive.value && remaining.value <= 15);
+const isTrialActive = computed(() => sub.value.status === 'trial' && !expired.value);
+const trialDaysLeft = computed(() => remaining.value);
 
 const remainingText = computed(() => {
-  const days = remaining.value
-  const months = Math.floor(days / 30)
-  const d = days % 30
-  let text = ''
-  if (months > 0) text += `${months} month${months > 1 ? 's' : ''}`
-  if (months > 0 && d > 0) text += ' and '
-  if (d > 0 || months === 0) text += `${d} day${d !== 1 ? 's' : ''}`
-  return text + ' left'
-})
+  const days = remaining.value;
+  const months = Math.floor(days / 30);
+  const d = days % 30;
+  let text = '';
+  if (months > 0) text += `${months} month${months > 1 ? 's' : ''}`;
+  if (months > 0 && d > 0) text += ' and ';
+  if (d > 0 || months === 0) text += `${d} day${d !== 1 ? 's' : ''}`;
+  return text + ' left';
+});
 
-const goToPlans = () => router.push('/plans')
-const goToWallet = () => router.push('/wallet')
-const canRequestBanner = computed(() => subActive.value && sub.value.planId === '8m')
+const goToPlans = () => router.push('/plans');
+const goToWallet = () => router.push('/wallet');
+const canRequestBanner = computed(() => subActive.value && sub.value.planId === '8m');
 
-const showBannerModal = ref(false)
-const bannerForm = ref({ title: '', subtitle: '', link: '', image: '' })
+const showBannerModal = ref(false);
+const bannerForm = ref({ title: '', subtitle: '', link: '', image: '' });
 
 function openBannerRequest() {
-  bannerForm.value = { title: '', subtitle: '', link: '', image: '' }
-  showBannerModal.value = true
+  bannerForm.value = { title: '', subtitle: '', link: '', image: '' };
+  showBannerModal.value = true;
 }
 
 async function submitBannerRequest() {
@@ -474,29 +484,29 @@ async function submitBannerRequest() {
       duration: 2000,
       color: 'warning',
       position: 'top',
-    })
-    return toast.present()
+    });
+    return toast.present();
   }
 
-  const requests = JSON.parse(localStorage.getItem('palengke_banner_requests') || '[]')
+  const requests = JSON.parse(localStorage.getItem('palengke_banner_requests') || '[]');
   requests.push({
     id: Date.now(),
     seller: sellerName.value,
     ...bannerForm.value,
     status: 'pending',
     submittedAt: new Date().toISOString().slice(0, 10),
-  })
-  localStorage.setItem('palengke_banner_requests', JSON.stringify(requests))
+  });
+  localStorage.setItem('palengke_banner_requests', JSON.stringify(requests));
 
-  showBannerModal.value = false
+  showBannerModal.value = false;
 
   const toast = await toastController.create({
     message: 'Banner request submitted! An admin will review it.',
     duration: 3000,
     color: 'success',
     position: 'top',
-  })
-  toast.present()
+  });
+  toast.present();
 }
 
 // Stats
@@ -514,16 +524,16 @@ const loadOrders = async () => {
   try {
     const [ordersRes, statsRes] = await Promise.all([
       fetch(`${API_BASE}/seller/orders?email=${encodeURIComponent(email)}`, {
-        headers: { 'Accept': 'application/json' },
+        headers: { Accept: 'application/json' },
       }),
       fetch(`${API_BASE}/seller/dashboard/stats?email=${encodeURIComponent(email)}`, {
-        headers: { 'Accept': 'application/json' },
+        headers: { Accept: 'application/json' },
       }),
     ]);
 
     const ordersData = await ordersRes.json();
     if (ordersRes.ok && ordersData.orders) {
-      recentOrders.value = ordersData.orders.map(o => ({
+      recentOrders.value = ordersData.orders.map((o) => ({
         id: o.id,
         customer: o.customer_name,
         items: o.item_count,
@@ -562,7 +572,7 @@ const openSettings = async () => {
         icon: statsChartOutline,
         handler: () => {
           router.push('/analytics');
-        }
+        },
       },
       {
         text: 'Logout',
@@ -570,11 +580,11 @@ const openSettings = async () => {
         role: 'destructive',
         handler: () => {
           handleLogout();
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
-  
+
   await actionSheet.present();
 };
 
@@ -585,7 +595,7 @@ const handleLogout = async () => {
     buttons: [
       {
         text: 'Cancel',
-        role: 'cancel'
+        role: 'cancel',
       },
       {
         text: 'Logout',
@@ -596,9 +606,9 @@ const handleLogout = async () => {
           setTimeout(() => {
             router.push('/login');
           }, 1500);
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -608,11 +618,11 @@ const showSuccessLogout = async () => {
     cssClass: 'success-modal',
     header: ' ',
     message: 'Logged out successfully',
-    buttons: ['OK']
+    buttons: ['OK'],
   });
-  
+
   await alert.present();
-  
+
   // Add the image after modal is presented
   setTimeout(() => {
     const alertElement = document.querySelector('.success-modal .alert-message');
@@ -620,14 +630,14 @@ const showSuccessLogout = async () => {
       // Clear the text content
       const textContent = alertElement.textContent;
       alertElement.innerHTML = '';
-      
+
       // Create wrapper for centering
       const wrapper = document.createElement('div');
       wrapper.style.display = 'flex';
       wrapper.style.flexDirection = 'column';
       wrapper.style.alignItems = 'center';
       wrapper.style.textAlign = 'center';
-      
+
       // Create and add the image
       const img = document.createElement('img');
       img.src = '/assets/images/checkmark_success.png';
@@ -635,7 +645,7 @@ const showSuccessLogout = async () => {
       img.style.height = '80px';
       img.style.margin = '0 auto 16px auto';
       img.style.display = 'block';
-      
+
       // Create and add the text
       const textDiv = document.createElement('div');
       textDiv.textContent = textContent;
@@ -643,16 +653,16 @@ const showSuccessLogout = async () => {
       textDiv.style.fontWeight = '600';
       textDiv.style.color = '#1a1a1a';
       textDiv.style.textAlign = 'center';
-      
+
       // Append to wrapper
       wrapper.appendChild(img);
       wrapper.appendChild(textDiv);
-      
+
       // Append wrapper to alert
       alertElement.appendChild(wrapper);
     }
   }, 50);
-  
+
   setTimeout(() => {
     alert.dismiss();
   }, 1500);
@@ -663,11 +673,11 @@ const showSuccessModal = async (message) => {
     cssClass: 'success-modal',
     header: ' ',
     message: message,
-    buttons: ['OK']
+    buttons: ['OK'],
   });
-  
+
   await alert.present();
-  
+
   // Add the image after modal is presented
   setTimeout(() => {
     const alertElement = document.querySelector('.success-modal .alert-message');
@@ -675,14 +685,14 @@ const showSuccessModal = async (message) => {
       // Clear the text content
       const textContent = alertElement.textContent;
       alertElement.innerHTML = '';
-      
+
       // Create wrapper for centering
       const wrapper = document.createElement('div');
       wrapper.style.display = 'flex';
       wrapper.style.flexDirection = 'column';
       wrapper.style.alignItems = 'center';
       wrapper.style.textAlign = 'center';
-      
+
       // Create and add the image
       const img = document.createElement('img');
       img.src = '/assets/images/checkmark_success.png';
@@ -690,7 +700,7 @@ const showSuccessModal = async (message) => {
       img.style.height = '80px';
       img.style.margin = '0 auto 16px auto';
       img.style.display = 'block';
-      
+
       // Create and add the text
       const textDiv = document.createElement('div');
       textDiv.textContent = textContent;
@@ -698,32 +708,32 @@ const showSuccessModal = async (message) => {
       textDiv.style.fontWeight = '600';
       textDiv.style.color = '#1a1a1a';
       textDiv.style.textAlign = 'center';
-      
+
       // Append to wrapper
       wrapper.appendChild(img);
       wrapper.appendChild(textDiv);
-      
+
       // Append wrapper to alert
       alertElement.appendChild(wrapper);
     }
   }, 50);
-  
+
   // Auto dismiss after 2 seconds
   setTimeout(() => {
     alert.dismiss();
   }, 2000);
 };
 
-      // Show loading with text only (no HTML)
+// Show loading with text only (no HTML)
 const showLoadingWithLogo = async (message) => {
   const alert = await alertController.create({
     cssClass: 'loading-modal-simple',
     message: message,
-    buttons: []
+    buttons: [],
   });
-  
+
   await alert.present();
-  
+
   // Auto dismiss after 1.5 seconds
   setTimeout(() => {
     alert.dismiss();
@@ -772,21 +782,21 @@ const shareShop = async () => {
             document.body.removeChild(textarea);
             await showSuccessModal('Shop link copied!');
           }
-        }
+        },
       },
       {
         text: 'Share via Facebook',
         handler: async () => {
           const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shopUrl)}&quote=${encodeURIComponent(shareText)}`;
           window.open(fbUrl, '_blank', 'noopener,noreferrer');
-        }
+        },
       },
       {
         text: 'Share via Messenger',
         handler: async () => {
           const messengerUrl = `https://www.facebook.com/dialog/send?link=${encodeURIComponent(shopUrl)}&app_id=&redirect_uri=${encodeURIComponent(shopUrl)}`;
           window.open(messengerUrl, '_blank', 'noopener,noreferrer');
-        }
+        },
       },
       {
         text: 'More...',
@@ -810,13 +820,13 @@ const shareShop = async () => {
               await showToast('Copy the link manually: ' + shopUrl, 'dark');
             }
           }
-        }
+        },
       },
       {
         text: 'Cancel',
-        role: 'cancel'
-      }
-    ]
+        role: 'cancel',
+      },
+    ],
   });
   await actionSheet.present();
 };
@@ -826,7 +836,7 @@ const showToast = async (message, color = 'dark') => {
     message,
     duration: 2000,
     color,
-    position: 'top'
+    position: 'top',
   });
   await toast.present();
 };
@@ -844,7 +854,7 @@ const viewOrderDetails = (orderId) => {
 };
 
 const manageCategories = async () => {
-  const inputs = availableCategories.value.map(c => ({
+  const inputs = availableCategories.value.map((c) => ({
     type: 'checkbox',
     label: c.name,
     value: c.name,
@@ -883,15 +893,15 @@ const manageCategories = async () => {
           try {
             await fetch(`${API_BASE}/seller/profile`, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
               body: JSON.stringify({ email, categories: data }),
             });
           } catch {
             // silent
           }
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -940,7 +950,7 @@ ion-header ion-toolbar ion-buttons ion-button {
   gap: 4px;
   padding: 6px 12px;
   border-radius: 20px;
-  background: rgba(255,255,255,0.25);
+  background: rgba(255, 255, 255, 0.25);
   cursor: pointer;
   margin-right: 4px;
 }
@@ -971,7 +981,7 @@ ion-header ion-toolbar ion-buttons ion-button {
   padding: 0px;
   z-index: 10;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  border: 1px solid #4CAF50;
+  border: 1px solid #4caf50;
 }
 
 .dashboard-container {
@@ -980,7 +990,7 @@ ion-header ion-toolbar ion-buttons ion-button {
 
 /* Welcome Section */
 .welcome-section {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
   padding: 24px 20px;
   color: white;
 }
@@ -1021,7 +1031,9 @@ ion-header ion-toolbar ion-buttons ion-button {
   cursor: pointer;
   transition: opacity 0.2s;
 }
-.trial-badge:active { opacity: 0.8; }
+.trial-badge:active {
+  opacity: 0.8;
+}
 
 .trial-badge.expired {
   background: rgba(244, 67, 54, 0.2);
@@ -1066,23 +1078,23 @@ ion-header ion-toolbar ion-buttons ion-button {
 }
 
 .stat-card.green .stat-icon {
-  background: #E8F5E9;
-  color: #4CAF50;
+  background: #e8f5e9;
+  color: #4caf50;
 }
 
 .stat-card.blue .stat-icon {
-  background: #E3F2FD;
-  color: #2196F3;
+  background: #e3f2fd;
+  color: #2196f3;
 }
 
 .stat-card.orange .stat-icon {
-  background: #FFF3E0;
-  color: #FF9800;
+  background: #fff3e0;
+  color: #ff9800;
 }
 
 .stat-card.purple .stat-icon {
-  background: #F3E5F5;
-  color: #9C27B0;
+  background: #f3e5f5;
+  color: #9c27b0;
 }
 
 .stat-content {
@@ -1112,7 +1124,7 @@ ion-header ion-toolbar ion-buttons ion-button {
 }
 .notice-modal-icon {
   font-size: 48px;
-  color: #F57F17;
+  color: #f57f17;
   margin-bottom: 8px;
 }
 .notice-modal-title {
@@ -1131,7 +1143,7 @@ ion-header ion-toolbar ion-buttons ion-button {
   --border-radius: 12px;
   height: 48px;
   font-weight: 600;
-  --background: #F57F17;
+  --background: #f57f17;
 }
 
 /* Actions Section */
@@ -1152,23 +1164,42 @@ ion-header ion-toolbar ion-buttons ion-button {
   gap: 12px;
 }
 
-.banner-request-row { margin-top: 12px; }
+.banner-request-row {
+  margin-top: 12px;
+}
 .banner-request-card {
   display: flex;
   align-items: center;
   gap: 14px;
-  background: #F3E5F5;
-  border: 2px dashed #CE93D8;
+  background: #f3e5f5;
+  border: 2px dashed #ce93d8;
   border-radius: 14px;
   padding: 14px 16px;
   cursor: pointer;
   transition: opacity 0.2s;
 }
-.banner-request-card:active { opacity: 0.8; }
-.banner-request-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-.banner-request-title { font-size: 14px; font-weight: 700; color: #7B1FA2; }
-.banner-request-sub { font-size: 12px; color: #9C27B0; opacity: 0.8; }
-.banner-request-row .badge-arrow { color: #7B1FA2; }
+.banner-request-card:active {
+  opacity: 0.8;
+}
+.banner-request-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.banner-request-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #7b1fa2;
+}
+.banner-request-sub {
+  font-size: 12px;
+  color: #9c27b0;
+  opacity: 0.8;
+}
+.banner-request-row .badge-arrow {
+  color: #7b1fa2;
+}
 
 .action-card {
   text-align: center;
@@ -1192,23 +1223,23 @@ ion-header ion-toolbar ion-buttons ion-button {
 }
 
 .action-icon.add {
-  background: #E8F5E9;
-  color: #4CAF50;
+  background: #e8f5e9;
+  color: #4caf50;
 }
 
 .action-icon.chat {
-  background: #FFF3E0;
-  color: #FF9800;
+  background: #fff3e0;
+  color: #ff9800;
 }
 
 .action-icon.share {
-  background: #E3F2FD;
-  color: #2196F3;
+  background: #e3f2fd;
+  color: #2196f3;
 }
 
 .action-icon.banner {
-  background: #F3E5F5;
-  color: #9C27B0;
+  background: #f3e5f5;
+  color: #9c27b0;
 }
 
 .action-text {
@@ -1265,18 +1296,18 @@ ion-header ion-toolbar ion-buttons ion-button {
 }
 
 .order-status.pending {
-  background: #FFF3E0;
-  color: #FF9800;
+  background: #fff3e0;
+  color: #ff9800;
 }
 
 .order-status.processing {
-  background: #E3F2FD;
-  color: #2196F3;
+  background: #e3f2fd;
+  color: #2196f3;
 }
 
 .order-status.completed {
-  background: #E8F5E9;
-  color: #4CAF50;
+  background: #e8f5e9;
+  color: #4caf50;
 }
 
 .order-details {
@@ -1309,7 +1340,7 @@ ion-header ion-toolbar ion-buttons ion-button {
 .order-amount {
   font-size: 16px;
   font-weight: 700;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .empty-state {
@@ -1350,9 +1381,9 @@ ion-header ion-toolbar ion-buttons ion-button {
 }
 
 .category-chip.add {
-  background: #E8F5E9;
-  border-color: #4CAF50;
-  color: #4CAF50;
+  background: #e8f5e9;
+  border-color: #4caf50;
+  color: #4caf50;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1360,15 +1391,50 @@ ion-header ion-toolbar ion-buttons ion-button {
 }
 
 /* Banner Request Modal */
-.banner-form { padding-top: 8px; }
-.banner-form ion-item { --padding-start: 0; margin-bottom: 8px; }
-.banner-form ion-label { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
-.banner-preview-box { margin: 20px 0; }
-.preview-label { font-size: 12px; color: #999; margin-bottom: 8px; }
-.preview-banner { background: linear-gradient(135deg, #4CAF50, #2E7D32); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 4px; }
-.preview-title { font-size: 16px; font-weight: 700; color: #fff; }
-.preview-sub { font-size: 12px; color: rgba(255,255,255,0.8); }
-.submit-banner-btn { --border-radius: 12px; height: 48px; font-weight: 600; margin-top: 12px; --background: #9C27B0; }
+.banner-form {
+  padding-top: 8px;
+}
+.banner-form ion-item {
+  --padding-start: 0;
+  margin-bottom: 8px;
+}
+.banner-form ion-label {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+.banner-preview-box {
+  margin: 20px 0;
+}
+.preview-label {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 8px;
+}
+.preview-banner {
+  background: linear-gradient(135deg, #4caf50, #2e7d32);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.preview-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+.preview-sub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+}
+.submit-banner-btn {
+  --border-radius: 12px;
+  height: 48px;
+  font-weight: 600;
+  margin-top: 12px;
+  --background: #9c27b0;
+}
 
 /* Bottom Navigation */
 .bottom-nav {
@@ -1398,7 +1464,7 @@ ion-header ion-toolbar ion-buttons ion-button {
 }
 
 .nav-item.active {
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .nav-item:active {
@@ -1410,15 +1476,15 @@ ion-header ion-toolbar ion-buttons ion-button {
   .stats-section {
     gap: 8px;
   }
-  
+
   .stat-value {
     font-size: 18px;
   }
-  
+
   .actions-grid {
     gap: 8px;
   }
-  
+
   .action-icon {
     width: 50px;
     height: 50px;
@@ -1451,7 +1517,7 @@ ion-header ion-toolbar ion-buttons ion-button {
 }
 
 :deep(.success-modal button) {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   font-weight: 600;
   border-radius: 12px;
@@ -1489,14 +1555,18 @@ ion-header ion-toolbar ion-buttons ion-button {
   width: 50px;
   height: 50px;
   border: 5px solid #f3f3f3;
-  border-top: 5px solid #1877F2;
+  border-top: 5px solid #1877f2;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 :deep(.loading-modal-simple .alert-button-group) {
@@ -1526,12 +1596,12 @@ ion-header ion-toolbar ion-buttons ion-button {
   padding: 16px;
 }
 
-:deep(.settings-action-sheet button[role="destructive"]) {
+:deep(.settings-action-sheet button[role='destructive']) {
   color: #f44336;
   font-weight: 600;
 }
 
-:deep(.settings-action-sheet button[role="cancel"]) {
+:deep(.settings-action-sheet button[role='cancel']) {
   display: none;
 }
 

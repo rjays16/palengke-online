@@ -13,7 +13,6 @@
 
     <ion-content class="ion-padding">
       <div class="wallet-container" v-if="!topUpSuccess">
-
         <!-- Balance Card -->
         <div class="balance-card">
           <div class="balance-icon">
@@ -38,13 +37,7 @@
             <label class="input-label">Amount</label>
             <div class="amount-input-wrap">
               <span class="currency-symbol">₱</span>
-              <input
-                type="number"
-                v-model.number="amount"
-                min="1"
-                class="amount-input"
-                placeholder="0"
-              />
+              <input type="number" v-model.number="amount" min="1" class="amount-input" placeholder="0" />
             </div>
             <div class="quick-amounts">
               <button
@@ -69,12 +62,7 @@
               :class="{ selected: selectedPM === pm.id }"
               @click="selectedPM = pm.id"
             >
-              <img
-                v-if="pmLogo(pm.name)"
-                :src="pmLogo(pm.name)"
-                :alt="pm.name"
-                class="pm-img"
-              >
+              <img v-if="pmLogo(pm.name)" :src="pmLogo(pm.name)" :alt="pm.name" class="pm-img" />
               <div v-else class="pm-dot" :style="{ background: pm.color }"></div>
               <span class="pm-name">{{ pm.name }}</span>
               <div class="pm-radio" :class="{ selected: selectedPM === pm.id }"></div>
@@ -85,12 +73,7 @@
           <div class="error-box" v-if="error">{{ error }}</div>
 
           <!-- Top Up Button -->
-          <ion-button
-            expand="block"
-            class="topup-btn"
-            :disabled="!canSubmit"
-            @click="processTopUp"
-          >
+          <ion-button expand="block" class="topup-btn" :disabled="!canSubmit" @click="processTopUp">
             <ion-icon :icon="walletOutline" slot="start"></ion-icon>
             Add ₱{{ amount.toLocaleString() }}
           </ion-button>
@@ -112,140 +95,133 @@
         <h3>Funds Added!</h3>
         <p class="success-sub">₱{{ topUpAmount }} added via {{ topUpMethod }}</p>
         <div class="success-balance">New Balance: ₱{{ newBalance.toLocaleString() }}</div>
-        <ion-button expand="block" class="done-btn" @click="goBack">
-          Done
-        </ion-button>
+        <ion-button expand="block" class="done-btn" @click="goBack"> Done </ion-button>
       </div>
     </ion-content>
   </ion-page>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import {
-  IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
-  IonButton, IonButtons, IonIcon
-} from '@ionic/vue'
-import {
-  arrowBackOutline, walletOutline, checkmarkCircle, chevronForwardOutline
-} from 'ionicons/icons'
-import { API_BASE } from '@/config/api'
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonButtons, IonIcon } from '@ionic/vue';
+import { arrowBackOutline, walletOutline, checkmarkCircle, chevronForwardOutline } from 'ionicons/icons';
+import { API_BASE } from '@/config/api';
 
-const router = useRouter()
-const API = API_BASE.replace('/api', '')
+const router = useRouter();
+const API = API_BASE.replace('/api', '');
 
 function goToHistory() {
-  router.push('/wallet/transactions')
+  router.push('/wallet/transactions');
 }
 
-const balance = ref(0)
-const amount = ref(100)
-const selectedPM = ref(null)
-const paymentMethods = ref([])
-const processing = ref(false)
-const topUpSuccess = ref(false)
-const topUpAmount = ref(0)
-const topUpMethod = ref('')
-const newBalance = ref(0)
-const error = ref(null)
+const balance = ref(0);
+const amount = ref(100);
+const selectedPM = ref(null);
+const paymentMethods = ref([]);
+const processing = ref(false);
+const topUpSuccess = ref(false);
+const topUpAmount = ref(0);
+const topUpMethod = ref('');
+const newBalance = ref(0);
+const error = ref(null);
 
-const quickAmounts = [100, 200, 500, 1000]
+const quickAmounts = [100, 200, 500, 1000];
 
-const canSubmit = computed(() => amount.value > 0 && selectedPM.value)
+const canSubmit = computed(() => amount.value > 0 && selectedPM.value);
 
 function getEmail() {
-  return localStorage.getItem('userEmail')
+  return localStorage.getItem('userEmail');
 }
 
 function pmLogo(name) {
   const logos = {
-    'GCash': '/assets/payment-methods-logo/gcash.png',
-    'PayPal': '/assets/payment-methods-logo/paypal.png',
-    'Stripe': '/assets/payment-methods-logo/cards.png',
-  }
-  return logos[name] || null
+    GCash: '/assets/payment-methods-logo/gcash.png',
+    PayPal: '/assets/payment-methods-logo/paypal.png',
+    Stripe: '/assets/payment-methods-logo/cards.png',
+  };
+  return logos[name] || null;
 }
 
 async function fetchBalance() {
-  const email = getEmail()
-  if (!email) return
+  const email = getEmail();
+  if (!email) return;
   try {
     const res = await fetch(`${API}/api/seller/wallet/balance?email=${encodeURIComponent(email)}`, {
-      headers: { 'Accept': 'application/json' }
-    })
+      headers: { Accept: 'application/json' },
+    });
     if (res.ok) {
-      const data = await res.json()
-      balance.value = data.balance || 0
+      const data = await res.json();
+      balance.value = data.balance || 0;
     }
-  } catch { /* silent */ }
+  } catch {
+    /* silent */
+  }
 }
 
 async function fetchPaymentMethods() {
   try {
     const res = await fetch(`${API}/api/payment-methods`, {
-      headers: { 'Accept': 'application/json' }
-    })
+      headers: { Accept: 'application/json' },
+    });
     if (res.ok) {
-      const json = await res.json()
-      const methods = Array.isArray(json) ? json : (json.methods || [])
-      const exclude = ['cash on delivery', 'cod', 'palengke wallet']
-      paymentMethods.value = methods.filter(
-        m => !exclude.includes(m.name.toLowerCase())
-      )
+      const json = await res.json();
+      const methods = Array.isArray(json) ? json : json.methods || [];
+      const exclude = ['cash on delivery', 'cod', 'palengke wallet'];
+      paymentMethods.value = methods.filter((m) => !exclude.includes(m.name.toLowerCase()));
     }
   } catch {
     paymentMethods.value = [
       { id: 1, name: 'GCash', color: '#059669' },
       { id: 2, name: 'PayPal', color: '#2563eb' },
       { id: 3, name: 'Stripe', color: '#7c3aed' },
-    ]
+    ];
   }
 }
 
 async function processTopUp() {
-  const email = getEmail()
-  if (!email || !canSubmit.value) return
+  const email = getEmail();
+  if (!email || !canSubmit.value) return;
 
-  processing.value = true
-  error.value = null
+  processing.value = true;
+  error.value = null;
 
   try {
     const res = await fetch(`${API}/api/seller/wallet/top-up`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({
         email,
         amount: amount.value,
         payment_method_id: selectedPM.value,
-      })
-    })
-    const json = await res.json()
+      }),
+    });
+    const json = await res.json();
     if (!res.ok) {
-      error.value = json.message || 'Top up failed.'
-      processing.value = false
-      return
+      error.value = json.message || 'Top up failed.';
+      processing.value = false;
+      return;
     }
-    topUpAmount.value = json.amount_added
-    topUpMethod.value = json.payment_method
-    newBalance.value = json.balance
-    balance.value = json.balance
-    topUpSuccess.value = true
-    processing.value = false
+    topUpAmount.value = json.amount_added;
+    topUpMethod.value = json.payment_method;
+    newBalance.value = json.balance;
+    balance.value = json.balance;
+    topUpSuccess.value = true;
+    processing.value = false;
   } catch (e) {
-    error.value = e.message || 'Network error.'
-    processing.value = false
+    error.value = e.message || 'Network error.';
+    processing.value = false;
   }
 }
 
 function goBack() {
-  router.back()
+  router.back();
 }
 
 onMounted(() => {
-  fetchBalance()
-  fetchPaymentMethods()
-})
+  fetchBalance();
+  fetchPaymentMethods();
+});
 </script>
 
 <style scoped>
@@ -483,6 +459,8 @@ onMounted(() => {
   animation: spin 0.7s linear infinite;
 }
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

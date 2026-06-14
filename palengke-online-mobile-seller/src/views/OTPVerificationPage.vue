@@ -11,7 +11,6 @@
 
     <ion-content :fullscreen="true" class="otp-content">
       <div class="otp-container">
-
         <!-- Icon/Illustration -->
         <div class="icon-section">
           <div class="otp-icon">
@@ -22,13 +21,9 @@
         <!-- Title & Message -->
         <div class="text-section">
           <h2 class="otp-title">Verify with Email</h2>
-          <p class="otp-message">
-            We sent a 6-digit authentication code to your registered email address
-          </p>
+          <p class="otp-message">We sent a 6-digit authentication code to your registered email address</p>
           <p class="email-address">{{ maskedEmail }}</p>
-          <p class="helper-text">
-            Please enter the authentication code
-          </p>
+          <p class="helper-text">Please enter the authentication code</p>
         </div>
 
         <!-- OTP Input Boxes -->
@@ -36,7 +31,7 @@
           <input
             v-for="(digit, index) in otpDigits"
             :key="index"
-            :ref="el => otpRefs[index] = el"
+            :ref="(el) => (otpRefs[index] = el)"
             v-model="otpDigits[index]"
             type="tel"
             maxlength="1"
@@ -50,9 +45,7 @@
 
         <!-- Resend Code -->
         <div class="resend-section">
-          <p v-if="countdown > 0" class="countdown-text">
-            Resend code in {{ countdown }}s
-          </p>
+          <p v-if="countdown > 0" class="countdown-text">Resend code in {{ countdown }}s</p>
           <button v-else class="resend-button" @click="resendCode" :disabled="isVerifying">
             <span v-if="!isVerifying">Didn't get the code? <strong>Resend code</strong></span>
             <span v-else><ion-spinner name="crescent" color="success"></ion-spinner> Sending...</span>
@@ -60,16 +53,10 @@
         </div>
 
         <!-- Verify Button -->
-        <ion-button
-          expand="block"
-          class="verify-button"
-          :disabled="!isCodeComplete || isVerifying"
-          @click="verifyCode"
-        >
+        <ion-button expand="block" class="verify-button" :disabled="!isCodeComplete || isVerifying" @click="verifyCode">
           <span v-if="!isVerifying">Verify</span>
           <ion-spinner v-else name="crescent"></ion-spinner>
         </ion-button>
-
       </div>
     </ion-content>
   </ion-page>
@@ -90,12 +77,9 @@ import {
   IonIcon,
   IonSpinner,
   alertController,
-  toastController
+  toastController,
 } from '@ionic/vue';
-import {
-  mailOpenOutline,
-  shieldCheckmarkOutline
-} from 'ionicons/icons';
+import { mailOpenOutline, shieldCheckmarkOutline } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
 
 const router = useRouter();
@@ -107,22 +91,22 @@ const userEmail = ref(route.params.email || localStorage.getItem('userEmail') ||
 // Computed to mask email for display
 const maskedEmail = computed(() => {
   if (!userEmail.value || userEmail.value === 'your email') return userEmail.value;
-  
+
   const email = userEmail.value;
   const atIndex = email.indexOf('@');
-  
+
   if (atIndex === -1) return email;
-  
+
   const localPart = email.substring(0, atIndex);
   const domain = email.substring(atIndex);
-  
+
   // Mask local part: show first 2 chars + *** + last char
   if (localPart.length > 3) {
     return localPart.substring(0, 2) + '***' + localPart.substring(localPart.length - 1) + domain;
   } else if (localPart.length > 1) {
     return localPart.substring(0, 1) + '***' + domain;
   }
-  
+
   return '***' + domain;
 });
 
@@ -135,7 +119,7 @@ let countdownInterval = null;
 
 // Computed
 const isCodeComplete = computed(() => {
-  return otpDigits.value.every(digit => digit !== '');
+  return otpDigits.value.every((digit) => digit !== '');
 });
 
 const otpCode = computed(() => {
@@ -145,13 +129,13 @@ const otpCode = computed(() => {
 // Methods
 const handleInput = (index, event) => {
   const value = event.target.value;
-  
+
   // Only allow numbers
   if (!/^\d*$/.test(value)) {
     otpDigits.value[index] = '';
     return;
   }
-  
+
   // Move to next input if digit entered
   if (value && index < 5) {
     otpRefs.value[index + 1]?.focus();
@@ -163,7 +147,7 @@ const handleKeydown = (index, event) => {
   if (event.key === 'Backspace' && !otpDigits.value[index] && index > 0) {
     otpRefs.value[index - 1]?.focus();
   }
-  
+
   // Handle arrow keys
   if (event.key === 'ArrowLeft' && index > 0) {
     otpRefs.value[index - 1]?.focus();
@@ -176,16 +160,16 @@ const handleKeydown = (index, event) => {
 const handlePaste = (event) => {
   event.preventDefault();
   const pastedData = event.clipboardData.getData('text').slice(0, 6);
-  
+
   if (!/^\d+$/.test(pastedData)) return;
-  
+
   const digits = pastedData.split('');
   digits.forEach((digit, index) => {
     if (index < 6) {
       otpDigits.value[index] = digit;
     }
   });
-  
+
   // Focus last filled or first empty box
   const nextEmpty = digits.length < 6 ? digits.length : 5;
   otpRefs.value[nextEmpty]?.focus();
@@ -220,7 +204,7 @@ const resendCode = async () => {
       message: 'Verification code sent!',
       duration: 2000,
       color: 'success',
-      position: 'top'
+      position: 'top',
     });
     await toast.present();
 
@@ -233,7 +217,7 @@ const resendCode = async () => {
       message: e.message || 'Failed to resend code',
       duration: 2000,
       color: 'danger',
-      position: 'top'
+      position: 'top',
     });
     await toast.present();
   } finally {
@@ -243,9 +227,9 @@ const resendCode = async () => {
 
 const verifyCode = async () => {
   if (!isCodeComplete.value) return;
-  
+
   isVerifying.value = true;
-  
+
   try {
     const response = await fetch(`${API_BASE}/verify-otp`, {
       method: 'POST',
@@ -283,12 +267,11 @@ const verifyCode = async () => {
     } else {
       router.push('/create-pin');
     }
-
   } catch (error) {
     const alert = await alertController.create({
       header: 'Verification Failed',
       message: error.message || 'Invalid code. Please try again.',
-      buttons: ['OK']
+      buttons: ['OK'],
     });
     await alert.present();
 
@@ -304,11 +287,11 @@ const showSuccessModal = async (message) => {
     cssClass: 'success-modal',
     header: ' ',
     message: message,
-    buttons: ['OK']
+    buttons: ['OK'],
   });
-  
+
   await alert.present();
-  
+
   // Add the image after modal is presented
   setTimeout(() => {
     const alertElement = document.querySelector('.success-modal .alert-message');
@@ -316,7 +299,7 @@ const showSuccessModal = async (message) => {
       // Clear the text content
       const textContent = alertElement.textContent;
       alertElement.innerHTML = '';
-      
+
       // Create and add the image
       const img = document.createElement('img');
       img.src = '/assets/images/checkmark_success.png';
@@ -324,20 +307,20 @@ const showSuccessModal = async (message) => {
       img.style.height = '80px';
       img.style.margin = '0 auto 16px auto';
       img.style.display = 'block';
-      
+
       // Create and add the text
       const textDiv = document.createElement('div');
       textDiv.textContent = textContent;
       textDiv.style.fontSize = '18px';
       textDiv.style.fontWeight = '600';
       textDiv.style.color = '#1a1a1a';
-      
+
       // Append both
       alertElement.appendChild(img);
       alertElement.appendChild(textDiv);
     }
   }, 50);
-  
+
   // Wait for modal to close
   await alert.onDidDismiss();
 };
@@ -348,7 +331,7 @@ onMounted(() => {
   setTimeout(() => {
     otpRefs.value[0]?.focus();
   }, 300);
-  
+
   // Start countdown
   startCountdown();
 });
@@ -381,7 +364,7 @@ onUnmounted(() => {
 .otp-icon {
   width: 100px;
   height: 100px;
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
@@ -417,7 +400,7 @@ onUnmounted(() => {
 .email-address {
   font-size: 18px;
   font-weight: 700;
-  color: #4CAF50;
+  color: #4caf50;
   margin: 0 0 16px 0;
 }
 
@@ -451,13 +434,13 @@ onUnmounted(() => {
 
 .otp-box:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: #4caf50;
   box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
 }
 
 .otp-box.filled {
-  border-color: #4CAF50;
-  background: #E8F5E9;
+  border-color: #4caf50;
+  background: #e8f5e9;
 }
 
 /* Resend Section */
@@ -484,7 +467,7 @@ onUnmounted(() => {
 }
 
 .resend-button strong {
-  color: #4CAF50;
+  color: #4caf50;
   font-weight: 600;
 }
 
@@ -494,7 +477,7 @@ onUnmounted(() => {
 
 /* Verify Button */
 .verify-button {
-  --background: #4CAF50;
+  --background: #4caf50;
   --background-hover: #45a049;
   --border-radius: 12px;
   height: 56px;
@@ -535,7 +518,7 @@ onUnmounted(() => {
 }
 
 :deep(.success-modal button) {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   font-weight: 600;
   border-radius: 12px;
@@ -547,20 +530,20 @@ onUnmounted(() => {
   .otp-container {
     padding: 32px 20px;
   }
-  
+
   .otp-icon {
     width: 80px;
     height: 80px;
   }
-  
+
   .otp-icon ion-icon {
     font-size: 40px;
   }
-  
+
   .otp-title {
     font-size: 20px;
   }
-  
+
   .otp-box {
     width: 42px;
     height: 50px;
@@ -572,7 +555,7 @@ onUnmounted(() => {
   .otp-inputs {
     gap: 6px;
   }
-  
+
   .otp-box {
     width: 38px;
     height: 46px;

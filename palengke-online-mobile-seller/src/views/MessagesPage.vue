@@ -1,8 +1,8 @@
 <template>
   <ion-page @touchstart="unlockAudio" @click="unlockAudio">
     <!-- Hidden audio elements for notifications -->
-    <audio ref="messageAudio" preload="auto" src="/assets/messages/10.mp3" style="display:none"></audio>
-    <audio ref="callAudio" preload="auto" src="/assets/calls/15.mp3" style="display:none" loop></audio>
+    <audio ref="messageAudio" preload="auto" src="/assets/messages/10.mp3" style="display: none"></audio>
+    <audio ref="callAudio" preload="auto" src="/assets/calls/15.mp3" style="display: none" loop></audio>
     <!-- Conversations List View -->
     <div v-if="!selectedChat" class="messages-view">
       <ion-header>
@@ -19,11 +19,11 @@
             </ion-button>
           </ion-buttons>
         </ion-toolbar>
-        
+
         <!-- Search Bar -->
         <ion-toolbar v-if="showSearch">
-          <ion-searchbar 
-            v-model="searchQuery" 
+          <ion-searchbar
+            v-model="searchQuery"
             placeholder="Search conversations..."
             animated
             @ionInput="filterConversations"
@@ -34,27 +34,15 @@
       <ion-content :fullscreen="true">
         <!-- Filter Tabs -->
         <div class="filter-tabs">
-          <div 
-            class="tab" 
-            :class="{ active: activeFilter === 'all' }"
-            @click="activeFilter = 'all'"
-          >
+          <div class="tab" :class="{ active: activeFilter === 'all' }" @click="activeFilter = 'all'">
             All
             <span class="count">{{ conversations.length }}</span>
           </div>
-          <div 
-            class="tab" 
-            :class="{ active: activeFilter === 'customers' }"
-            @click="activeFilter = 'customers'"
-          >
+          <div class="tab" :class="{ active: activeFilter === 'customers' }" @click="activeFilter = 'customers'">
             Customers
             <span class="count">{{ customerCount }}</span>
           </div>
-          <div 
-            class="tab" 
-            :class="{ active: activeFilter === 'drivers' }"
-            @click="activeFilter = 'drivers'"
-          >
+          <div class="tab" :class="{ active: activeFilter === 'drivers' }" @click="activeFilter = 'drivers'">
             Drivers
             <span class="count">{{ driverCount }}</span>
           </div>
@@ -68,25 +56,25 @@
 
         <!-- Conversations List -->
         <div class="conversations-list" v-else>
-          <div 
-            v-for="conversation in filteredConversations" 
+          <div
+            v-for="conversation in filteredConversations"
             :key="conversation.id"
             class="conversation-item"
             :class="{ unread: conversation.unread }"
             @click="openChat(conversation)"
           >
             <div class="avatar" :class="conversation.type">
-              <img v-if="conversation.avatar" :src="conversation.avatar" :alt="conversation.name">
+              <img v-if="conversation.avatar" :src="conversation.avatar" :alt="conversation.name" />
               <ion-icon v-else :icon="conversation.type === 'customer' ? personOutline : carOutline"></ion-icon>
             </div>
-            
+
             <div class="conversation-content">
               <div class="conversation-header">
                 <h3 class="name">{{ conversation.name }}</h3>
                 <span class="time">{{ conversation.time }}</span>
                 <ion-icon v-if="conversation.muted" :icon="volumeMuteOutline" class="mute-icon-list"></ion-icon>
               </div>
-              
+
               <div class="conversation-preview">
                 <p class="last-message">{{ conversation.lastMessage }}</p>
                 <div class="meta">
@@ -116,10 +104,10 @@
               <ion-icon :icon="arrowBackOutline"></ion-icon>
             </ion-button>
           </ion-buttons>
-          
+
           <div class="chat-header-info" @click="showChatInfo">
             <div class="avatar-small" :class="selectedChat.type">
-              <img v-if="selectedChat.avatar" :src="selectedChat.avatar" :alt="selectedChat.name">
+              <img v-if="selectedChat.avatar" :src="selectedChat.avatar" :alt="selectedChat.name" />
               <ion-icon v-else :icon="selectedChat.type === 'customer' ? personOutline : carOutline"></ion-icon>
             </div>
             <div>
@@ -127,7 +115,7 @@
               <p class="chat-subtitle">{{ selectedChat.type === 'customer' ? 'Customer' : 'Driver' }}</p>
             </div>
           </div>
-          
+
           <ion-buttons slot="end">
             <ion-button @click="makeCall">
               <ion-icon :icon="callOutline"></ion-icon>
@@ -147,51 +135,56 @@
         </div>
 
         <template v-else>
-        <!-- Date Divider -->
-        <div class="date-divider">
-          <span>{{ chatDate }}</span>
-        </div>
+          <!-- Date Divider -->
+          <div class="date-divider">
+            <span>{{ chatDate }}</span>
+          </div>
 
-        <!-- Messages -->
-        <div class="messages-container">
-          <div 
-            v-for="(message, index) in selectedChat.messages" 
-            :key="index"
-            class="message-wrapper"
-            :class="{ 'message-sent': message.sent, 'message-received': !message.sent }"
-          >
-            <div class="message-bubble" :class="{ sent: message.sent }" @click="confirmDeleteMessage(message)">
-              <!-- Image Message -->
-              <div v-if="message.image" class="message-image">
-                <img :src="message.image" :alt="message.text || 'Image'">
+          <!-- Messages -->
+          <div class="messages-container">
+            <div
+              v-for="(message, index) in selectedChat.messages"
+              :key="index"
+              class="message-wrapper"
+              :class="{ 'message-sent': message.sent, 'message-received': !message.sent }"
+            >
+              <div class="message-bubble" :class="{ sent: message.sent }" @click="confirmDeleteMessage(message)">
+                <!-- Image Message -->
+                <div v-if="message.image" class="message-image">
+                  <img :src="message.image" :alt="message.text || 'Image'" />
+                </div>
+
+                <!-- Text Message -->
+                <p v-if="message.text" class="message-text">{{ message.text }}</p>
+
+                <!-- Order Info -->
+                <div v-if="message.orderInfo" class="order-info-card">
+                  <div class="order-header">
+                    <ion-icon :icon="receiptOutline"></ion-icon>
+                    <span>Order #{{ message.orderInfo.id }}</span>
+                  </div>
+                  <div class="order-items">
+                    <p v-for="(item, i) in message.orderInfo.items" :key="i">
+                      {{ item.name }} - {{ item.qty }}{{ item.unit }}
+                    </p>
+                  </div>
+                  <div class="order-total">Total: ₱{{ message.orderInfo.total.toLocaleString() }}</div>
+                </div>
+
+                <span class="message-time">{{ message.time }}</span>
+                <ion-icon
+                  v-if="message.sent && message.status === 'read'"
+                  :icon="checkmarkDoneOutline"
+                  class="read-status"
+                ></ion-icon>
+                <ion-icon
+                  v-else-if="message.sent && message.status === 'delivered'"
+                  :icon="checkmarkOutline"
+                  class="delivered-status"
+                ></ion-icon>
               </div>
-              
-              <!-- Text Message -->
-              <p v-if="message.text" class="message-text">{{ message.text }}</p>
-              
-              <!-- Order Info -->
-              <div v-if="message.orderInfo" class="order-info-card">
-                <div class="order-header">
-                  <ion-icon :icon="receiptOutline"></ion-icon>
-                  <span>Order #{{ message.orderInfo.id }}</span>
-                </div>
-                <div class="order-items">
-                  <p v-for="(item, i) in message.orderInfo.items" :key="i">
-                    {{ item.name }} - {{ item.qty }}{{ item.unit }}
-                  </p>
-                </div>
-                <div class="order-total">
-                  Total: ₱{{ message.orderInfo.total.toLocaleString() }}
-                </div>
-              </div>
-              
-              <span class="message-time">{{ message.time }}</span>
-              <ion-icon v-if="message.sent && message.status === 'read'" :icon="checkmarkDoneOutline" class="read-status"></ion-icon>
-              <ion-icon v-else-if="message.sent && message.status === 'delivered'" :icon="checkmarkOutline" class="delivered-status"></ion-icon>
             </div>
           </div>
-        </div>
-
         </template>
 
         <!-- Typing Indicator -->
@@ -206,8 +199,8 @@
 
       <!-- Quick Replies (if available) -->
       <div v-if="quickReplies.length > 0" class="quick-replies">
-        <div 
-          v-for="(reply, index) in quickReplies" 
+        <div
+          v-for="(reply, index) in quickReplies"
           :key="index"
           class="quick-reply-chip"
           @click="sendQuickReply(reply)"
@@ -223,7 +216,7 @@
             <ion-button fill="clear" @click="attachImage">
               <ion-icon :icon="imageOutline" color="medium"></ion-icon>
             </ion-button>
-            
+
             <ion-textarea
               v-model="newMessage"
               placeholder="Type a message..."
@@ -232,9 +225,9 @@
               @keyup.enter="sendMessage"
               class="message-input"
             ></ion-textarea>
-            
-            <ion-button 
-              :disabled="!newMessage.trim() || sendingMessage" 
+
+            <ion-button
+              :disabled="!newMessage.trim() || sendingMessage"
               @click="sendMessage"
               class="send-button"
               :class="{ active: newMessage.trim() && !sendingMessage }"
@@ -251,7 +244,7 @@
     <div v-if="showCallModal" class="call-overlay" @click.self="endCall">
       <div class="call-card">
         <div class="call-avatar-wrap">
-          <img :src="callAvatar" :alt="callName">
+          <img :src="callAvatar" :alt="callName" />
         </div>
         <h2 class="call-name-text">{{ callName }}</h2>
         <p class="call-status-text">Calling...</p>
@@ -264,11 +257,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
-import {
-  actionSheetController,
-  alertController,
-  toastController
-} from '@ionic/vue';
+import { actionSheetController, alertController, toastController } from '@ionic/vue';
 import {
   searchOutline,
   personOutline,
@@ -285,15 +274,10 @@ import {
   trashOutline,
   volumeMuteOutline,
   volumeHighOutline,
-  cubeOutline
+  cubeOutline,
 } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
-const QUICK_REPLIES = [
-  'Yes, available po!',
-  'Out of stock po',
-  'On the way!',
-  'Thank you!'
-];
+const QUICK_REPLIES = ['Yes, available po!', 'Out of stock po', 'On the way!', 'Thank you!'];
 
 const router = useRouter();
 
@@ -324,7 +308,7 @@ const quickReplies = ref(QUICK_REPLIES);
 function isMuted(conversation) {
   if (!conversation) return false;
   if (conversation.muted !== undefined) return conversation.muted;
-  const found = conversations.value.find(c => c.id === conversation.id);
+  const found = conversations.value.find((c) => c.id === conversation.id);
   return found ? found.muted : false;
 }
 
@@ -333,13 +317,13 @@ async function toggleMute(conversation) {
   try {
     const res = await fetch(`${API_BASE}/seller/conversations/${conversation.id}/toggle-mute`, {
       method: 'POST',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: userEmail }),
     });
     const data = await res.json();
     if (res.ok) {
       conversation.muted = data.muted;
-      const found = conversations.value.find(c => c.id === conversation.id);
+      const found = conversations.value.find((c) => c.id === conversation.id);
       if (found) found.muted = data.muted;
     }
   } catch (e) {
@@ -350,31 +334,32 @@ async function toggleMute(conversation) {
 // Computed
 const filteredConversations = computed(() => {
   let filtered = conversations.value;
-  
+
   // Filter by type
   if (activeFilter.value === 'customers') {
-    filtered = filtered.filter(c => c.type === 'customer');
+    filtered = filtered.filter((c) => c.type === 'customer');
   } else if (activeFilter.value === 'drivers') {
-    filtered = filtered.filter(c => c.type === 'driver');
+    filtered = filtered.filter((c) => c.type === 'driver');
   }
-  
+
   // Filter by search
   if (searchQuery.value) {
-    filtered = filtered.filter(c => 
-      c.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      c.lastMessage.toLowerCase().includes(searchQuery.value.toLowerCase())
+    filtered = filtered.filter(
+      (c) =>
+        c.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        c.lastMessage.toLowerCase().includes(searchQuery.value.toLowerCase()),
     );
   }
-  
+
   return filtered;
 });
 
 const customerCount = computed(() => {
-  return conversations.value.filter(c => c.type === 'customer').length;
+  return conversations.value.filter((c) => c.type === 'customer').length;
 });
 
 const driverCount = computed(() => {
-  return conversations.value.filter(c => c.type === 'driver').length;
+  return conversations.value.filter((c) => c.type === 'driver').length;
 });
 
 const chatDate = computed(() => {
@@ -387,7 +372,7 @@ async function loadConversations() {
   loading.value = true;
   try {
     const res = await fetch(`${API_BASE}/seller/conversations?email=${encodeURIComponent(userEmail)}`, {
-      headers: { 'Accept': 'application/json' }
+      headers: { Accept: 'application/json' },
     });
     const data = await res.json();
     conversations.value = data.conversations || [];
@@ -402,9 +387,12 @@ async function loadMessages(conversationId) {
   if (!userEmail) return;
   loadingMessages.value = true;
   try {
-    const res = await fetch(`${API_BASE}/seller/conversations/${conversationId}?email=${encodeURIComponent(userEmail)}`, {
-      headers: { 'Accept': 'application/json' }
-    });
+    const res = await fetch(
+      `${API_BASE}/seller/conversations/${conversationId}?email=${encodeURIComponent(userEmail)}`,
+      {
+        headers: { Accept: 'application/json' },
+      },
+    );
     const data = await res.json();
     return data.messages || [];
   } catch (e) {
@@ -434,7 +422,7 @@ const openChat = async (conversation) => {
   try {
     await fetch(`${API_BASE}/seller/conversations/${conversation.id}/read`, {
       method: 'POST',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: userEmail }),
     });
   } catch (e) {
@@ -463,12 +451,15 @@ const unlockAudio = () => {
   if (audioUnlocked) return;
   if (messageAudio.value) {
     messageAudio.value.volume = 0.01;
-    messageAudio.value.play().then(() => {
-      messageAudio.value.pause();
-      messageAudio.value.currentTime = 0;
-      messageAudio.value.volume = 0.7;
-      audioUnlocked = true;
-    }).catch(e => console.warn('Audio unlock failed:', e));
+    messageAudio.value
+      .play()
+      .then(() => {
+        messageAudio.value.pause();
+        messageAudio.value.currentTime = 0;
+        messageAudio.value.volume = 0.7;
+        audioUnlocked = true;
+      })
+      .catch((e) => console.warn('Audio unlock failed:', e));
   }
 };
 
@@ -477,7 +468,7 @@ const playMessageSound = () => {
   try {
     if (messageAudio.value) {
       messageAudio.value.currentTime = 0;
-      messageAudio.value.play().catch(e => console.warn('Play msg sound:', e));
+      messageAudio.value.play().catch((e) => console.warn('Play msg sound:', e));
     }
   } catch {}
 };
@@ -487,7 +478,7 @@ const playCallSound = () => {
   try {
     if (callAudio.value) {
       callAudio.value.currentTime = 0;
-      callAudio.value.play().catch(e => console.warn('Play call sound:', e));
+      callAudio.value.play().catch((e) => console.warn('Play call sound:', e));
     }
   } catch {}
 };
@@ -503,12 +494,12 @@ const startPolling = () => {
     const prev = conversationCount;
     try {
       const res = await fetch(`${API_BASE}/seller/conversations?email=${encodeURIComponent(userEmail)}`, {
-        headers: { 'Accept': 'application/json' }
+        headers: { Accept: 'application/json' },
       });
       const data = await res.json();
       const newList = data.conversations || [];
       if (newList.length > prev && prev > 0) {
-        const hasUnmutedNew = newList.some(c => !c.muted);
+        const hasUnmutedNew = newList.some((c) => !c.muted);
         if (hasUnmutedNew) {
           playMessageSound();
         }
@@ -534,9 +525,12 @@ const startMessagePolling = (conversationId) => {
   messagePollTimer = setInterval(async () => {
     if (!userEmail || !selectedChat.value) return;
     try {
-      const res = await fetch(`${API_BASE}/seller/conversations/${conversationId}?email=${encodeURIComponent(userEmail)}`, {
-        headers: { 'Accept': 'application/json' }
-      });
+      const res = await fetch(
+        `${API_BASE}/seller/conversations/${conversationId}?email=${encodeURIComponent(userEmail)}`,
+        {
+          headers: { Accept: 'application/json' },
+        },
+      );
       const data = await res.json();
       const serverMessages = data.messages || [];
       if (serverMessages.length > selectedChat.value.messages.length) {
@@ -574,20 +568,22 @@ const sendMessage = async () => {
     text,
     sent: true,
     time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-    status: 'delivered'
+    status: 'delivered',
   };
 
   selectedChat.value.messages.push(tempMessage);
   selectedChat.value.lastMessage = text;
   selectedChat.value.time = 'Just now';
 
-  nextTick(() => { scrollToBottom(); });
+  nextTick(() => {
+    scrollToBottom();
+  });
 
   sendingMessage.value = true;
   try {
     const res = await fetch(`${API_BASE}/seller/conversations/${selectedChat.value.id}/messages`, {
       method: 'POST',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: userEmail, message: text }),
     });
     const data = await res.json();
@@ -625,7 +621,7 @@ const attachImage = async () => {
     try {
       const res = await fetch(`${API_BASE}/seller/conversations/${selectedChat.value.id}/upload-image`, {
         method: 'POST',
-        headers: { 'Accept': 'application/json' },
+        headers: { Accept: 'application/json' },
         body: formData,
       });
       const data = await res.json();
@@ -633,7 +629,9 @@ const attachImage = async () => {
         selectedChat.value.messages.push(data.data);
         selectedChat.value.lastMessage = 'Sent an image';
         selectedChat.value.time = 'Just now';
-        nextTick(() => { scrollToBottom(); });
+        nextTick(() => {
+          scrollToBottom();
+        });
       }
     } catch (e) {
       console.error('Failed to upload image:', e);
@@ -667,7 +665,7 @@ const showToast = async (message, color = 'dark') => {
     message,
     duration: 2000,
     color,
-    position: 'top'
+    position: 'top',
   });
   await toast.present();
 };
@@ -677,7 +675,7 @@ const showChatInfo = async () => {
     header: selectedChat.value.name,
     message: `Type: ${selectedChat.value.type === 'customer' ? 'Customer' : 'Driver'}
 ${selectedChat.value.orderId ? `Order: #${selectedChat.value.orderId}` : ''}`,
-    buttons: ['OK']
+    buttons: ['OK'],
   });
   await alert.present();
 };
@@ -693,7 +691,7 @@ const showChatOptions = async () => {
         icon: muted ? volumeMuteOutline : volumeHighOutline,
         handler: () => {
           toggleMute(selectedChat.value);
-        }
+        },
       },
       {
         text: 'Delete Chat',
@@ -701,13 +699,13 @@ const showChatOptions = async () => {
         role: 'destructive',
         handler: () => {
           deleteChat();
-        }
+        },
       },
       {
         text: 'Cancel',
-        role: 'cancel'
-      }
-    ]
+        role: 'cancel',
+      },
+    ],
   });
   await actionSheet.present();
 };
@@ -723,21 +721,24 @@ const deleteChat = async () => {
         role: 'destructive',
         handler: async () => {
           try {
-            await fetch(`${API_BASE}/seller/conversations/${selectedChat.value.id}?email=${encodeURIComponent(userEmail)}`, {
-              method: 'DELETE',
-              headers: { 'Accept': 'application/json' }
-            });
+            await fetch(
+              `${API_BASE}/seller/conversations/${selectedChat.value.id}?email=${encodeURIComponent(userEmail)}`,
+              {
+                method: 'DELETE',
+                headers: { Accept: 'application/json' },
+              },
+            );
           } catch (e) {
             console.error('Failed to delete conversation:', e);
           }
-          const index = conversations.value.findIndex(c => c.id === selectedChat.value.id);
+          const index = conversations.value.findIndex((c) => c.id === selectedChat.value.id);
           if (index > -1) {
             conversations.value.splice(index, 1);
           }
           closeChat();
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -754,9 +755,9 @@ const confirmDeleteMessage = async (message) => {
         role: 'destructive',
         handler: async () => {
           await deleteMessage(message);
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -765,7 +766,7 @@ const showDeleteLoading = async () => {
   const loading = await alertController.create({
     cssClass: 'loading-modal-simple',
     message: 'Deleting...',
-    buttons: []
+    buttons: [],
   });
   await loading.present();
   return loading;
@@ -777,10 +778,10 @@ const deleteMessage = async (message) => {
   try {
     await fetch(`${API_BASE}/seller/messages/${message.id}?email=${encodeURIComponent(userEmail)}`, {
       method: 'DELETE',
-      headers: { 'Accept': 'application/json' }
+      headers: { Accept: 'application/json' },
     });
     if (selectedChat.value) {
-      const idx = selectedChat.value.messages.findIndex(m => m.id === message.id);
+      const idx = selectedChat.value.messages.findIndex((m) => m.id === message.id);
       if (idx > -1) {
         selectedChat.value.messages.splice(idx, 1);
       }
@@ -825,14 +826,21 @@ onUnmounted(() => {
 
 .loading-icon {
   font-size: 60px;
-  color: #4CAF50;
+  color: #4caf50;
   margin-bottom: 16px;
   animation: pulse 1.5s ease-in-out infinite;
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.1); }
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
 }
 
 .loading-state p {
@@ -873,8 +881,8 @@ onUnmounted(() => {
 }
 
 .tab.active {
-  color: #4CAF50;
-  border-bottom-color: #4CAF50;
+  color: #4caf50;
+  border-bottom-color: #4caf50;
 }
 
 .tab .count {
@@ -886,8 +894,8 @@ onUnmounted(() => {
 }
 
 .tab.active .count {
-  background: #E8F5E9;
-  color: #4CAF50;
+  background: #e8f5e9;
+  color: #4caf50;
 }
 
 /* Conversations List */
@@ -927,13 +935,13 @@ onUnmounted(() => {
 }
 
 .avatar.customer {
-  background: #E8F5E9;
-  color: #4CAF50;
+  background: #e8f5e9;
+  color: #4caf50;
 }
 
 .avatar.driver {
-  background: #E3F2FD;
-  color: #2196F3;
+  background: #e3f2fd;
+  color: #2196f3;
 }
 
 .avatar img {
@@ -1003,8 +1011,8 @@ onUnmounted(() => {
 }
 
 .order-badge {
-  background: #E3F2FD;
-  color: #2196F3;
+  background: #e3f2fd;
+  color: #2196f3;
   padding: 2px 8px;
   border-radius: 10px;
   font-size: 11px;
@@ -1012,7 +1020,7 @@ onUnmounted(() => {
 }
 
 .unread-badge {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   width: 20px;
   height: 20px;
@@ -1140,7 +1148,7 @@ onUnmounted(() => {
 }
 
 .message-bubble.sent {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   border-bottom-right-radius: 4px;
 }
@@ -1262,7 +1270,9 @@ onUnmounted(() => {
 }
 
 @keyframes typing {
-  0%, 60%, 100% {
+  0%,
+  60%,
+  100% {
     opacity: 0.3;
     transform: translateY(0);
   }
@@ -1306,7 +1316,7 @@ onUnmounted(() => {
 }
 
 .quick-reply-chip:active {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
 }
 
@@ -1340,15 +1350,18 @@ onUnmounted(() => {
 }
 
 .send-button.active {
-  --background: #4CAF50;
+  --background: #4caf50;
   --color: white;
 }
 
 /* Call Overlay */
 .call-overlay {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.5);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1361,7 +1374,7 @@ onUnmounted(() => {
   padding: 40px 32px 32px;
   text-align: center;
   min-width: 280px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .call-avatar-wrap img {
@@ -1369,7 +1382,7 @@ onUnmounted(() => {
   height: 80px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid #4CAF50;
+  border: 3px solid #4caf50;
   margin-bottom: 12px;
 }
 
@@ -1382,15 +1395,20 @@ onUnmounted(() => {
 
 .call-status-text {
   font-size: 15px;
-  color: #4CAF50;
+  color: #4caf50;
   font-weight: 600;
   margin: 0 0 20px;
   animation: pulse-status 1.5s infinite;
 }
 
 @keyframes pulse-status {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .call-end-btn {
@@ -1415,7 +1433,7 @@ onUnmounted(() => {
   .message-bubble {
     max-width: 85%;
   }
-  
+
   .avatar {
     width: 48px;
     height: 48px;
@@ -1450,7 +1468,7 @@ onUnmounted(() => {
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #4CAF50;
+  border-top: 4px solid #4caf50;
   border-radius: 50%;
   animation: loadingSpin 1s linear infinite;
 }
@@ -1459,7 +1477,11 @@ onUnmounted(() => {
 }
 
 @keyframes loadingSpin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

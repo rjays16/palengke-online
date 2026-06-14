@@ -20,19 +20,15 @@
         <div class="text-section">
           <h2 class="pin-title" v-if="step === 'create'">Create Your PIN</h2>
           <h2 class="pin-title" v-else>Confirm Your PIN</h2>
-          <p class="pin-message" v-if="step === 'create'">
-            Set a 5-digit PIN for quick access on this device
-          </p>
-          <p class="pin-message" v-else>
-            Re-enter your PIN to confirm
-          </p>
+          <p class="pin-message" v-if="step === 'create'">Set a 5-digit PIN for quick access on this device</p>
+          <p class="pin-message" v-else>Re-enter your PIN to confirm</p>
         </div>
 
         <div class="pin-inputs">
           <input
             v-for="(digit, index) in pinDigits"
             :key="index"
-            :ref="el => pinRefs[index] = el"
+            :ref="(el) => (pinRefs[index] = el)"
             v-model="pinDigits[index]"
             type="tel"
             maxlength="1"
@@ -45,16 +41,10 @@
 
         <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
 
-        <ion-button
-          expand="block"
-          class="verify-button"
-          :disabled="!isCodeComplete || isSaving"
-          @click="handleNext"
-        >
+        <ion-button expand="block" class="verify-button" :disabled="!isCodeComplete || isSaving" @click="handleNext">
           <span v-if="!isSaving">{{ step === 'create' ? 'Next' : 'Confirm' }}</span>
           <ion-spinner v-else name="crescent"></ion-spinner>
         </ion-button>
-
       </div>
     </ion-content>
   </ion-page>
@@ -92,7 +82,7 @@ const userEmail = ref(localStorage.getItem('userEmail') || '');
 const deviceId = ref(localStorage.getItem('deviceId') || '');
 
 const isCodeComplete = computed(() => {
-  return pinDigits.value.every(digit => digit !== '');
+  return pinDigits.value.every((digit) => digit !== '');
 });
 
 const pinCode = computed(() => {
@@ -225,7 +215,7 @@ onMounted(() => {
 .pin-icon {
   width: 100px;
   height: 100px;
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
@@ -280,13 +270,13 @@ onMounted(() => {
 
 .pin-box:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: #4caf50;
   box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
 }
 
 .pin-box.filled {
-  border-color: #4CAF50;
-  background: #E8F5E9;
+  border-color: #4caf50;
+  background: #e8f5e9;
 }
 
 .error-text {
@@ -297,7 +287,7 @@ onMounted(() => {
 }
 
 .verify-button {
-  --background: #4CAF50;
+  --background: #4caf50;
   --background-hover: #45a049;
   --border-radius: 12px;
   height: 56px;
@@ -337,7 +327,7 @@ onMounted(() => {
 }
 
 :deep(.success-modal button) {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   font-weight: 600;
   border-radius: 12px;

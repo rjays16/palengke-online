@@ -11,7 +11,6 @@
 
     <ion-content :fullscreen="true" class="add-product-content">
       <div class="add-product-container">
-
         <!-- Loading State -->
         <div class="loading-state" v-if="pageLoading">
           <ion-icon :icon="cubeOutline" class="loading-icon"></ion-icon>
@@ -19,249 +18,211 @@
         </div>
 
         <template v-else>
-        <!-- Product Images Section -->
-        <div class="section">
-          <h2 class="section-title">
-            <ion-icon :icon="imagesOutline"></ion-icon>
-            Product Images
-          </h2>
-          
-          <div class="image-upload-area" @click="selectImage">
-            <div class="uploaded-image" v-if="productImage">
-              <img :src="productImage" alt="Product">
-              <div class="remove-image" @click.stop="productImage = ''">
-                <ion-icon :icon="closeCircle"></ion-icon>
+          <!-- Product Images Section -->
+          <div class="section">
+            <h2 class="section-title">
+              <ion-icon :icon="imagesOutline"></ion-icon>
+              Product Images
+            </h2>
+
+            <div class="image-upload-area" @click="selectImage">
+              <div class="uploaded-image" v-if="productImage">
+                <img :src="productImage" alt="Product" />
+                <div class="remove-image" @click.stop="productImage = ''">
+                  <ion-icon :icon="closeCircle"></ion-icon>
+                </div>
               </div>
-            </div>
-            <div class="upload-placeholder" v-else>
-              <ion-icon :icon="cloudUploadOutline" class="upload-icon"></ion-icon>
-              <p>Click to upload product image</p>
-              <span>PNG, JPG, WEBP (Max 5MB)</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Basic Information -->
-        <div class="section">
-          <h2 class="section-title">
-            <ion-icon :icon="informationCircleOutline"></ion-icon>
-            Basic Information
-          </h2>
-
-          <div class="form-group">
-            <label>Product Name *</label>
-            <input 
-              v-model="productName" 
-              type="text" 
-              placeholder="e.g., Fresh Tilapia, Pork Belly, Tomatoes"
-              class="form-input"
-            >
-          </div>
-
-          <div class="form-group">
-            <label>Category *</label>
-            <select v-model="category" class="form-select">
-              <option value="">Select a category</option>
-              <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Description *</label>
-            <textarea 
-              v-model="description" 
-              placeholder="Describe your product (freshness, quality, origin, etc.)"
-              class="form-textarea"
-              rows="4"
-            ></textarea>
-          </div>
-        </div>
-
-        <!-- Pricing Section -->
-        <div class="section">
-          <h2 class="section-title">
-            <ion-icon :icon="pricetagOutline"></ion-icon>
-            Pricing
-          </h2>
-
-          <div class="form-group">
-            <label>Selling Unit *</label>
-            <div class="unit-selector">
-              <div 
-                class="unit-option" 
-                :class="{ active: sellingUnit === 'kilo' }"
-                @click="sellingUnit = 'kilo'"
-              >
-                <ion-icon :icon="scaleOutline"></ion-icon>
-                <span>Per Kilo</span>
-              </div>
-              <div 
-                class="unit-option" 
-                :class="{ active: sellingUnit === 'piece' }"
-                @click="sellingUnit = 'piece'"
-              >
-                <ion-icon :icon="cubeOutline"></ion-icon>
-                <span>Per Piece</span>
-              </div>
-              <div 
-                class="unit-option" 
-                :class="{ active: sellingUnit === 'pack' }"
-                @click="sellingUnit = 'pack'"
-              >
-                <ion-icon :icon="gridOutline"></ion-icon>
-                <span>Per Pack</span>
+              <div class="upload-placeholder" v-else>
+                <ion-icon :icon="cloudUploadOutline" class="upload-icon"></ion-icon>
+                <p>Click to upload product image</p>
+                <span>PNG, JPG, WEBP (Max 5MB)</span>
               </div>
             </div>
           </div>
 
-          <div class="form-row">
+          <!-- Basic Information -->
+          <div class="section">
+            <h2 class="section-title">
+              <ion-icon :icon="informationCircleOutline"></ion-icon>
+              Basic Information
+            </h2>
+
             <div class="form-group">
-              <label>Price (₱) *</label>
+              <label>Product Name *</label>
+              <input
+                v-model="productName"
+                type="text"
+                placeholder="e.g., Fresh Tilapia, Pork Belly, Tomatoes"
+                class="form-input"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Category *</label>
+              <select v-model="category" class="form-select">
+                <option value="">Select a category</option>
+                <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Description *</label>
+              <textarea
+                v-model="description"
+                placeholder="Describe your product (freshness, quality, origin, etc.)"
+                class="form-textarea"
+                rows="4"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Pricing Section -->
+          <div class="section">
+            <h2 class="section-title">
+              <ion-icon :icon="pricetagOutline"></ion-icon>
+              Pricing
+            </h2>
+
+            <div class="form-group">
+              <label>Selling Unit *</label>
+              <div class="unit-selector">
+                <div class="unit-option" :class="{ active: sellingUnit === 'kilo' }" @click="sellingUnit = 'kilo'">
+                  <ion-icon :icon="scaleOutline"></ion-icon>
+                  <span>Per Kilo</span>
+                </div>
+                <div class="unit-option" :class="{ active: sellingUnit === 'piece' }" @click="sellingUnit = 'piece'">
+                  <ion-icon :icon="cubeOutline"></ion-icon>
+                  <span>Per Piece</span>
+                </div>
+                <div class="unit-option" :class="{ active: sellingUnit === 'pack' }" @click="sellingUnit = 'pack'">
+                  <ion-icon :icon="gridOutline"></ion-icon>
+                  <span>Per Pack</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Price (₱) *</label>
+                <div class="input-with-prefix">
+                  <span class="prefix">₱</span>
+                  <input v-model="price" type="number" placeholder="0.00" class="form-input with-prefix" step="0.01" />
+                </div>
+                <small class="helper-text">Price per {{ sellingUnit }}</small>
+              </div>
+
+              <div class="form-group" v-if="sellingUnit === 'kilo'">
+                <label>Minimum Order (kg)</label>
+                <input v-model="minimumOrder" type="number" placeholder="0.5" class="form-input" step="0.1" />
+                <small class="helper-text">Optional</small>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" v-model="hasDiscount" />
+                <span> Add discount price</span>
+              </label>
+            </div>
+
+            <div class="form-group" v-if="hasDiscount">
+              <label>Discount Price (₱)</label>
               <div class="input-with-prefix">
                 <span class="prefix">₱</span>
-                <input 
-                  v-model="price" 
-                  type="number" 
+                <input
+                  v-model="discountPrice"
+                  type="number"
                   placeholder="0.00"
                   class="form-input with-prefix"
                   step="0.01"
-                >
+                />
               </div>
-              <small class="helper-text">Price per {{ sellingUnit }}</small>
+              <div class="discount-badge" v-if="discountPercentage > 0">
+                <ion-icon :icon="pricetagOutline"></ion-icon>
+                {{ discountPercentage }}% OFF
+              </div>
             </div>
+          </div>
 
-            <div class="form-group" v-if="sellingUnit === 'kilo'">
-              <label>Minimum Order (kg)</label>
-              <input 
-                v-model="minimumOrder" 
-                type="number" 
-                placeholder="0.5"
+          <!-- Inventory Section -->
+          <div class="section">
+            <h2 class="section-title">
+              <ion-icon :icon="cubeOutline"></ion-icon>
+              Inventory
+            </h2>
+
+            <div class="form-group">
+              <label>Stock Quantity *</label>
+              <input
+                v-model="stockQuantity"
+                type="number"
+                :placeholder="sellingUnit === 'kilo' ? 'e.g., 50 (kilos)' : 'e.g., 100 (pieces)'"
                 class="form-input"
-                step="0.1"
-              >
-              <small class="helper-text">Optional</small>
+              />
+              <small class="helper-text">Available {{ sellingUnit }}s in stock</small>
+            </div>
+
+            <div class="form-group">
+              <label>SKU (Stock Keeping Unit)</label>
+              <input v-model="sku" type="text" placeholder="e.g., FISH-001" class="form-input" />
+              <small class="helper-text">Optional - for your reference</small>
             </div>
           </div>
 
-          <div class="form-group">
-            <label class="checkbox-label">
-              <input type="checkbox" v-model="hasDiscount">
-              <span> Add discount price</span>
-            </label>
-          </div>
+          <!-- Additional Details -->
+          <div class="section">
+            <h2 class="section-title">
+              <ion-icon :icon="listOutline"></ion-icon>
+              Additional Details
+            </h2>
 
-          <div class="form-group" v-if="hasDiscount">
-            <label>Discount Price (₱)</label>
-            <div class="input-with-prefix">
-              <span class="prefix">₱</span>
-              <input 
-                v-model="discountPrice" 
-                type="number" 
-                placeholder="0.00"
-                class="form-input with-prefix"
-                step="0.01"
-              >
+            <div class="form-group">
+              <label>Origin/Source</label>
+              <select v-model="origin" class="form-select">
+                <option value="">Select origin</option>
+                <option v-for="loc in locations" :key="loc" :value="loc">{{ loc }}</option>
+              </select>
             </div>
-            <div class="discount-badge" v-if="discountPercentage > 0">
-              <ion-icon :icon="pricetagOutline"></ion-icon>
-              {{ discountPercentage }}% OFF
+
+            <div class="form-group">
+              <label>Brand (if applicable)</label>
+              <input v-model="brand" type="text" placeholder="e.g., Nestle, Magnolia, etc." class="form-input" />
+            </div>
+
+            <div class="form-group" v-if="canFeature">
+              <label class="checkbox-label">
+                <input type="checkbox" v-model="isFeatured" />
+                <span> Feature this product (show first)</span>
+              </label>
             </div>
           </div>
-        </div>
 
-        <!-- Inventory Section -->
-        <div class="section">
-          <h2 class="section-title">
-            <ion-icon :icon="cubeOutline"></ion-icon>
-            Inventory
-          </h2>
+          <!-- Product Status -->
+          <div class="section">
+            <h2 class="section-title">
+              <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
+              Product Status
+            </h2>
 
-          <div class="form-group">
-            <label>Stock Quantity *</label>
-            <input 
-              v-model="stockQuantity" 
-              type="number" 
-              :placeholder="sellingUnit === 'kilo' ? 'e.g., 50 (kilos)' : 'e.g., 100 (pieces)'"
-              class="form-input"
-            >
-            <small class="helper-text">Available {{ sellingUnit }}s in stock</small>
+            <div class="status-toggle">
+              <span>Product is {{ isActive ? 'Active' : 'Inactive' }}</span>
+              <ion-toggle v-model="isActive" color="success"></ion-toggle>
+            </div>
+            <small class="helper-text">
+              {{ isActive ? 'Customers can see and buy this product' : 'Product is hidden from customers' }}
+            </small>
           </div>
 
-          <div class="form-group">
-            <label>SKU (Stock Keeping Unit)</label>
-            <input 
-              v-model="sku" 
-              type="text" 
-              placeholder="e.g., FISH-001"
-              class="form-input"
-            >
-            <small class="helper-text">Optional - for your reference</small>
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+            <ion-button expand="block" size="large" class="save-button" @click="saveProduct">
+              <ion-icon :icon="checkmarkOutline" slot="start"></ion-icon>
+              Save Product
+            </ion-button>
+
+            <ion-button expand="block" fill="outline" size="large" @click="saveDraft"> Save as Draft </ion-button>
           </div>
-
-        </div>
-
-        <!-- Additional Details -->
-        <div class="section">
-          <h2 class="section-title">
-            <ion-icon :icon="listOutline"></ion-icon>
-            Additional Details
-          </h2>
-
-          <div class="form-group">
-            <label>Origin/Source</label>
-            <select v-model="origin" class="form-select">
-              <option value="">Select origin</option>
-              <option v-for="loc in locations" :key="loc" :value="loc">{{ loc }}</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Brand (if applicable)</label>
-            <input 
-              v-model="brand" 
-              type="text" 
-              placeholder="e.g., Nestle, Magnolia, etc."
-              class="form-input"
-            >
-          </div>
-
-          <div class="form-group" v-if="canFeature">
-            <label class="checkbox-label">
-              <input type="checkbox" v-model="isFeatured">
-              <span> Feature this product (show first)</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Product Status -->
-        <div class="section">
-          <h2 class="section-title">
-            <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
-            Product Status
-          </h2>
-
-          <div class="status-toggle">
-            <span>Product is {{ isActive ? 'Active' : 'Inactive' }}</span>
-            <ion-toggle v-model="isActive" color="success"></ion-toggle>
-          </div>
-          <small class="helper-text">
-            {{ isActive ? 'Customers can see and buy this product' : 'Product is hidden from customers' }}
-          </small>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="action-buttons">
-          <ion-button expand="block" size="large" class="save-button" @click="saveProduct">
-            <ion-icon :icon="checkmarkOutline" slot="start"></ion-icon>
-            Save Product
-          </ion-button>
-          
-          <ion-button expand="block" fill="outline" size="large" @click="saveDraft">
-            Save as Draft
-          </ion-button>
-        </div>
-
-      </template>
+        </template>
       </div>
 
       <!-- Saving Overlay -->
@@ -292,7 +253,7 @@ import {
   IonToggle,
   IonSpinner,
   alertController,
-  toastController
+  toastController,
 } from '@ionic/vue';
 import {
   imagesOutline,
@@ -306,7 +267,7 @@ import {
   gridOutline,
   listOutline,
   checkmarkCircleOutline,
-  checkmarkOutline
+  checkmarkOutline,
 } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
 
@@ -363,7 +324,7 @@ const selectImage = () => {
     try {
       const res = await fetch(`${API_BASE}/seller/products/upload-image`, {
         method: 'POST',
-        headers: { 'Accept': 'application/json' },
+        headers: { Accept: 'application/json' },
         body: formData,
       });
       const data = await res.json();
@@ -382,7 +343,7 @@ const saveWithStatus = async (status) => {
     const alert = await alertController.create({
       header: 'Missing Information',
       message: 'Please fill in all required fields (*)',
-      buttons: ['OK']
+      buttons: ['OK'],
     });
     await alert.present();
     return;
@@ -392,7 +353,7 @@ const saveWithStatus = async (status) => {
   try {
     const res = await fetch(`${API_BASE}/seller/products`, {
       method: 'POST',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: userEmail,
         name: productName.value,
@@ -426,7 +387,7 @@ const saveWithStatus = async (status) => {
     const alert = await alertController.create({
       header: 'Error',
       message: e.message || 'Failed to save product. Please try again.',
-      buttons: ['OK']
+      buttons: ['OK'],
     });
     await alert.present();
   } finally {
@@ -441,11 +402,11 @@ const showSuccessModal = async (message) => {
     cssClass: 'success-modal',
     header: ' ',
     message: message,
-    buttons: ['OK']
+    buttons: ['OK'],
   });
-  
+
   await alert.present();
-  
+
   // Add the image after modal is presented
   setTimeout(() => {
     const alertElement = document.querySelector('.success-modal .alert-message');
@@ -453,14 +414,14 @@ const showSuccessModal = async (message) => {
       // Clear the text content
       const textContent = alertElement.textContent;
       alertElement.innerHTML = '';
-      
+
       // Create wrapper for centering
       const wrapper = document.createElement('div');
       wrapper.style.display = 'flex';
       wrapper.style.flexDirection = 'column';
       wrapper.style.alignItems = 'center';
       wrapper.style.textAlign = 'center';
-      
+
       // Create and add the image
       const img = document.createElement('img');
       img.src = '/assets/images/checkmark_success.png';
@@ -468,7 +429,7 @@ const showSuccessModal = async (message) => {
       img.style.height = '80px';
       img.style.margin = '0 auto 16px auto';
       img.style.display = 'block';
-      
+
       // Create and add the text
       const textDiv = document.createElement('div');
       textDiv.textContent = textContent;
@@ -476,16 +437,16 @@ const showSuccessModal = async (message) => {
       textDiv.style.fontWeight = '600';
       textDiv.style.color = '#1a1a1a';
       textDiv.style.textAlign = 'center';
-      
+
       // Append to wrapper
       wrapper.appendChild(img);
       wrapper.appendChild(textDiv);
-      
+
       // Append wrapper to alert
       alertElement.appendChild(wrapper);
     }
   }, 50);
-  
+
   // Wait for modal to close
   await alert.onDidDismiss();
 };
@@ -493,14 +454,17 @@ const showSuccessModal = async (message) => {
 const saveDraft = () => saveWithStatus('draft');
 
 onMounted(async () => {
-  if (!userEmail) { pageLoading.value = false; return; }
+  if (!userEmail) {
+    pageLoading.value = false;
+    return;
+  }
   try {
     const [profileRes, locRes] = await Promise.all([
       fetch(`${API_BASE}/seller/profile?email=${encodeURIComponent(userEmail)}`, {
-        headers: { 'Accept': 'application/json' }
+        headers: { Accept: 'application/json' },
       }),
       fetch(`${API_BASE}/locations`, {
-        headers: { 'Accept': 'application/json' }
+        headers: { Accept: 'application/json' },
       }),
     ]);
 
@@ -508,18 +472,18 @@ onMounted(async () => {
     let cats = (profileData.user && profileData.user.categories) || [];
     if (!cats.length) {
       const allRes = await fetch(`${API_BASE}/categories`, {
-        headers: { 'Accept': 'application/json' }
+        headers: { Accept: 'application/json' },
       });
       const allData = await allRes.json();
-      cats = (Array.isArray(allData) ? allData : (allData.categories || [])).map(c => c.name);
+      cats = (Array.isArray(allData) ? allData : allData.categories || []).map((c) => c.name);
     }
     categories.value = cats;
 
     const locData = await locRes.json();
     const locs = locData.locations || [];
     const cityNames = [];
-    locs.forEach(region => {
-      (region.cities || []).forEach(city => {
+    locs.forEach((region) => {
+      (region.cities || []).forEach((city) => {
         cityNames.push(city.name);
       });
     });
@@ -550,14 +514,21 @@ onMounted(async () => {
 
 .loading-icon {
   font-size: 60px;
-  color: #4CAF50;
+  color: #4caf50;
   margin-bottom: 16px;
   animation: pulse 1.5s ease-in-out infinite;
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.1); }
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
 }
 
 .loading-state p {
@@ -587,7 +558,7 @@ onMounted(async () => {
 
 .section-title ion-icon {
   font-size: 24px;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 /* Image Upload */
@@ -600,7 +571,7 @@ onMounted(async () => {
 }
 
 .image-upload-area:hover {
-  border-color: #4CAF50;
+  border-color: #4caf50;
 }
 
 .upload-placeholder {
@@ -690,7 +661,7 @@ onMounted(async () => {
 .form-select:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: #4caf50;
 }
 
 .form-textarea {
@@ -764,13 +735,13 @@ onMounted(async () => {
 }
 
 .unit-option.active {
-  border-color: #4CAF50;
-  background: #E8F5E9;
+  border-color: #4caf50;
+  background: #e8f5e9;
 }
 
 .unit-option.active ion-icon,
 .unit-option.active span {
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 /* Checkbox */
@@ -780,13 +751,13 @@ onMounted(async () => {
   color: #333;
 }
 
-.checkbox-label input[type="checkbox"] {
+.checkbox-label input[type='checkbox'] {
   width: 16px;
   height: 16px;
   min-width: 16px;
   margin: 0;
   cursor: pointer;
-  accent-color: #4CAF50;
+  accent-color: #4caf50;
 }
 
 .checkbox-label span {
@@ -800,8 +771,8 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #FFE8E8;
-  color: #FF4444;
+  background: #ffe8e8;
+  color: #ff4444;
   padding: 8px 16px;
   border-radius: 20px;
   font-size: 14px;
@@ -840,7 +811,7 @@ onMounted(async () => {
 }
 
 .save-button {
-  --background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  --background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
   --border-radius: 12px;
   height: 52px;
   font-weight: 700;
@@ -878,7 +849,7 @@ onMounted(async () => {
 }
 
 :deep(.success-modal button) {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   font-weight: 600;
   border-radius: 12px;
@@ -890,7 +861,7 @@ onMounted(async () => {
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .unit-selector {
     grid-template-columns: 1fr;
   }

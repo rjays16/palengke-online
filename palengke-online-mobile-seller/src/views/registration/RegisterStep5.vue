@@ -2,7 +2,6 @@
   <ion-page>
     <ion-content :fullscreen="true" class="step-content">
       <div class="step-container">
-        
         <!-- Back Button -->
         <div class="back-button" @click="goBack">
           <ion-icon :icon="arrowBackOutline"></ion-icon>
@@ -24,14 +23,13 @@
 
         <!-- Form Section -->
         <div class="form-section">
-
           <!-- ID Type Selection -->
           <div class="input-group">
             <label class="input-label">Valid Government-Issued ID *</label>
             <div class="input-wrapper" :class="{ error: errors.idType }">
               <ion-icon :icon="cardOutline" class="input-icon"></ion-icon>
-              <select 
-                v-model="formData.idType" 
+              <select
+                v-model="formData.idType"
                 class="custom-select with-icon"
                 @change="onIdTypeChange"
                 @blur="validateField('idType')"
@@ -72,7 +70,7 @@
               <ion-icon :icon="informationCircleOutline"></ion-icon>
               <h3>Requirements for {{ getIdName(formData.idType) }}</h3>
             </div>
-            
+
             <div class="requirements-list">
               <div class="requirement-item">
                 <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
@@ -141,36 +139,25 @@
           <div class="privacy-notice">
             <ion-icon :icon="lockClosedOutline"></ion-icon>
             <div class="privacy-text">
-              <strong>Your Privacy is Protected</strong><br>
-              All ID photos will be encrypted and used only for verification. We comply with the Data Privacy Act of 2012 (RA 10173) and will never share your information without consent.
+              <strong>Your Privacy is Protected</strong><br />
+              All ID photos will be encrypted and used only for verification. We comply with the Data Privacy Act of
+              2012 (RA 10173) and will never share your information without consent.
             </div>
           </div>
 
           <!-- Navigation Buttons -->
           <div class="button-group">
-            <ion-button 
-              expand="block" 
-              fill="outline"
-              color="medium"
-              class="back-btn"
-              @click="goBack"
-            >
+            <ion-button expand="block" fill="outline" color="medium" class="back-btn" @click="goBack">
               <ion-icon slot="start" :icon="arrowBackOutline"></ion-icon>
               Back
             </ion-button>
 
-            <ion-button 
-              expand="block" 
-              class="next-button"
-              @click="handleNext"
-              :disabled="!formData.idType"
-            >
+            <ion-button expand="block" class="next-button" @click="handleNext" :disabled="!formData.idType">
               Start ID Capture
               <ion-icon slot="end" :icon="cameraOutline"></ion-icon>
             </ion-button>
           </div>
         </div>
-
       </div>
     </ion-content>
   </ion-page>
@@ -179,13 +166,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import {
-  IonPage,
-  IonContent,
-  IonButton,
-  IonIcon,
-  alertController
-} from '@ionic/vue';
+import { IonPage, IonContent, IonButton, IonIcon, alertController } from '@ionic/vue';
 import {
   arrowBackOutline,
   cardOutline,
@@ -194,40 +175,40 @@ import {
   closeCircleOutline,
   cameraOutline,
   personOutline,
-  lockClosedOutline
+  lockClosedOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
 
 // Form data
 const formData = ref({
-  idType: ''
+  idType: '',
 });
 
 // Error states
 const errors = ref({
-  idType: ''
+  idType: '',
 });
 
 // ID Type names mapping
 const idTypeNames = {
-  'passport': 'Philippine Passport',
-  'drivers_license': "Driver's License",
-  'umid': 'UMID (Unified Multi-Purpose ID)',
-  'sss': 'SSS ID',
-  'philhealth': 'PhilHealth ID',
-  'pagibig': 'Pag-IBIG ID',
-  'postal': 'Postal ID',
-  'voters': "Voter's ID",
-  'tin': 'TIN ID',
-  'national_id': 'National ID (PhilSys)',
-  'senior_citizen': 'Senior Citizen ID',
-  'pwd': 'PWD ID',
-  'owwa': 'OWWA ID',
-  'seaman': "Seaman's Book",
-  'prc': 'PRC ID',
-  'company': 'Company ID',
-  'student': 'School ID'
+  passport: 'Philippine Passport',
+  drivers_license: "Driver's License",
+  umid: 'UMID (Unified Multi-Purpose ID)',
+  sss: 'SSS ID',
+  philhealth: 'PhilHealth ID',
+  pagibig: 'Pag-IBIG ID',
+  postal: 'Postal ID',
+  voters: "Voter's ID",
+  tin: 'TIN ID',
+  national_id: 'National ID (PhilSys)',
+  senior_citizen: 'Senior Citizen ID',
+  pwd: 'PWD ID',
+  owwa: 'OWWA ID',
+  seaman: "Seaman's Book",
+  prc: 'PRC ID',
+  company: 'Company ID',
+  student: 'School ID',
 };
 
 // Load data
@@ -273,16 +254,17 @@ const handleNext = async () => {
   // Show final warning before camera
   const alert = await alertController.create({
     header: 'Ready to Capture ID',
-    message: 'Make sure you have good lighting and a clear background. You will need to take photos of the front and back of your ID, then a selfie holding your ID.',
+    message:
+      'Make sure you have good lighting and a clear background. You will need to take photos of the front and back of your ID, then a selfie holding your ID.',
     cssClass: 'camera-warning-modal',
     buttons: [
       {
         text: 'Not Ready',
         role: 'cancel',
-        cssClass: 'alert-button-cancel'
+        cssClass: 'alert-button-cancel',
       },
       {
-        text: 'I\'m Ready',
+        text: "I'm Ready",
         cssClass: 'alert-button-confirm',
         handler: () => {
           // Save ID type
@@ -290,12 +272,12 @@ const handleNext = async () => {
           existingData.idType = formData.value.idType;
           existingData.idTypeName = getIdName(formData.value.idType);
           localStorage.setItem('registrationData', JSON.stringify(existingData));
-          
+
           // Navigate to Step 6 (ID Photo Capture)
           router.push('/register/step6');
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };

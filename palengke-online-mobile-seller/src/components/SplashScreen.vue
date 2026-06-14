@@ -1,30 +1,23 @@
 <template>
   <div v-if="showSplash" class="splash-container">
     <div class="logo-wrapper">
-      <img src="/assets/images/logo-without-circle.png" alt="Palengke Online" class="logo-image">
+      <img src="/assets/images/logo-without-circle.png" alt="Palengke Online" class="logo-image" />
       <svg class="loading-circle" viewBox="0 0 200 200">
-        <circle 
-          cx="100" 
-          cy="100" 
-          r="85" 
-          fill="none" 
-          stroke="#e0e0e0" 
-          stroke-width="6"
-        />
-        
-        <circle 
-          class="animated-stroke-spin" 
-          cx="100" 
-          cy="100" 
-          r="85" 
-          fill="none" 
-          stroke="#2c2c2c" 
+        <circle cx="100" cy="100" r="85" fill="none" stroke="#e0e0e0" stroke-width="6" />
+
+        <circle
+          class="animated-stroke-spin"
+          cx="100"
+          cy="100"
+          r="85"
+          fill="none"
+          stroke="#2c2c2c"
           stroke-width="6"
           stroke-linecap="round"
         />
       </svg>
     </div>
-    
+
     <!-- Loading text -->
     <div class="loading-text">Loading...</div>
   </div>
@@ -45,9 +38,9 @@ export default {
     });
 
     return {
-      showSplash
+      showSplash,
     };
-  }
+  },
 };
 </script>
 
@@ -96,7 +89,7 @@ export default {
 }
 
 .animated-stroke-spin {
-  stroke-dasharray: 400, 534; 
+  stroke-dasharray: 400, 534;
   stroke-dashoffset: 0;
 }
 
@@ -131,7 +124,8 @@ export default {
 }
 
 @keyframes textPulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.3;
   }
   50% {
@@ -154,11 +148,11 @@ export default {
     width: 180px;
     height: 180px;
   }
-  
+
   .logo-image {
     width: 150px;
   }
-  
+
   .loading-text {
     font-size: 12px;
     margin-top: 30px;

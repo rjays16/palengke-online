@@ -2,7 +2,6 @@
   <ion-page>
     <ion-content :fullscreen="true" class="signup-content">
       <div class="signup-container">
-        
         <!-- Back Button -->
         <div class="back-button" @click="goBack">
           <ion-icon :icon="arrowBackOutline"></ion-icon>
@@ -11,9 +10,9 @@
         <!-- Logo Section - Both logos, seller is bigger -->
         <div class="logo-section">
           <div class="logos-wrapper">
-            <img src="/assets/images/logo.png" alt="Palengke Online" class="logo-main">
+            <img src="/assets/images/logo.png" alt="Palengke Online" class="logo-main" />
             <div class="plus-sign">+</div>
-            <img src="/assets/images/palengke-seller-boy.png" alt="Seller" class="logo-seller">
+            <img src="/assets/images/palengke-seller-boy.png" alt="Seller" class="logo-seller" />
           </div>
         </div>
 
@@ -25,54 +24,34 @@
         <div class="form-section">
           <div class="input-group">
             <ion-icon :icon="personOutline" class="input-icon"></ion-icon>
-            <input 
-              v-model="fullName" 
-              type="text" 
-              placeholder="Full name"
-              class="custom-input"
-            >
+            <input v-model="fullName" type="text" placeholder="Full name" class="custom-input" />
           </div>
 
           <div class="input-group">
             <ion-icon :icon="mailOutline" class="input-icon"></ion-icon>
-            <input 
-              v-model="email" 
-              type="email" 
-              placeholder="Email address"
-              class="custom-input"
-            >
+            <input v-model="email" type="email" placeholder="Email address" class="custom-input" />
           </div>
 
           <div class="input-group">
             <ion-icon :icon="callOutline" class="input-icon"></ion-icon>
-            <input 
-              v-model="phone" 
-              type="tel" 
-              placeholder="Phone number"
-              class="custom-input"
-            >
+            <input v-model="phone" type="tel" placeholder="Phone number" class="custom-input" />
           </div>
 
           <div class="input-group">
             <ion-icon :icon="storefrontOutline" class="input-icon"></ion-icon>
-            <input 
-              v-model="storeName" 
-              type="text" 
-              placeholder="Store name"
-              class="custom-input"
-            >
+            <input v-model="storeName" type="text" placeholder="Store name" class="custom-input" />
           </div>
 
           <div class="input-group">
             <ion-icon :icon="lockClosedOutline" class="input-icon"></ion-icon>
-            <input 
-              v-model="password" 
-              :type="showPassword ? 'text' : 'password'" 
+            <input
+              v-model="password"
+              :type="showPassword ? 'text' : 'password'"
               placeholder="Password"
               class="custom-input"
-            >
-            <ion-icon 
-              :icon="showPassword ? eyeOffOutline : eyeOutline" 
+            />
+            <ion-icon
+              :icon="showPassword ? eyeOffOutline : eyeOutline"
               class="toggle-password"
               @click="showPassword = !showPassword"
             ></ion-icon>
@@ -80,14 +59,14 @@
 
           <div class="input-group">
             <ion-icon :icon="lockClosedOutline" class="input-icon"></ion-icon>
-            <input 
-              v-model="confirmPassword" 
-              :type="showConfirmPassword ? 'text' : 'password'" 
+            <input
+              v-model="confirmPassword"
+              :type="showConfirmPassword ? 'text' : 'password'"
               placeholder="Confirm password"
               class="custom-input"
-            >
-            <ion-icon 
-              :icon="showConfirmPassword ? eyeOffOutline : eyeOutline" 
+            />
+            <ion-icon
+              :icon="showConfirmPassword ? eyeOffOutline : eyeOutline"
               class="toggle-password"
               @click="showConfirmPassword = !showConfirmPassword"
             ></ion-icon>
@@ -95,24 +74,14 @@
 
           <!-- Terms & Conditions -->
           <div class="terms-checkbox">
-            <input 
-              type="checkbox" 
-              id="terms" 
-              v-model="acceptedTerms"
-              class="checkbox-input"
-            >
+            <input type="checkbox" id="terms" v-model="acceptedTerms" class="checkbox-input" />
             <label for="terms">
-              I agree to the 
+              I agree to the
               <a href="#" @click.prevent="showTerms">Terms & Conditions</a>
             </label>
           </div>
 
-          <ion-button 
-            expand="block" 
-            class="signup-button"
-            @click="handleSignup"
-            :disabled="!isFormValid"
-          >
+          <ion-button expand="block" class="signup-button" @click="handleSignup" :disabled="!isFormValid">
             <span v-if="!isLoading">Create Account</span>
             <ion-spinner v-else name="crescent"></ion-spinner>
           </ion-button>
@@ -138,11 +107,10 @@
         <!-- Login Link -->
         <div class="login-section">
           <p class="login-text">
-            Already have an account? 
+            Already have an account?
             <a href="#" @click.prevent="goToLogin">Sign In</a>
           </p>
         </div>
-
       </div>
     </ion-content>
   </ion-page>
@@ -151,25 +119,18 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { 
-  IonPage, 
-  IonContent, 
-  IonButton, 
-  IonIcon, 
-  IonSpinner,
-  alertController 
-} from '@ionic/vue';
-import { 
+import { IonPage, IonContent, IonButton, IonIcon, IonSpinner, alertController } from '@ionic/vue';
+import {
   arrowBackOutline,
   personOutline,
   mailOutline,
   callOutline,
   storefrontOutline,
-  lockClosedOutline, 
-  eyeOutline, 
+  lockClosedOutline,
+  eyeOutline,
   eyeOffOutline,
   logoGoogle,
-  logoFacebook
+  logoFacebook,
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -188,50 +149,52 @@ const isLoading = ref(false);
 
 // Form validation
 const isFormValid = computed(() => {
-  return fullName.value && 
-         email.value && 
-         phone.value && 
-         storeName.value &&
-         password.value && 
-         confirmPassword.value &&
-         password.value === confirmPassword.value &&
-         acceptedTerms.value;
+  return (
+    fullName.value &&
+    email.value &&
+    phone.value &&
+    storeName.value &&
+    password.value &&
+    confirmPassword.value &&
+    password.value === confirmPassword.value &&
+    acceptedTerms.value
+  );
 });
 
 // Signup handler
 const handleSignup = async () => {
   if (!isFormValid.value) return;
-  
+
   isLoading.value = true;
-  
+
   try {
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
     // TODO: Replace with actual signup logic
-    console.log('Signup:', { 
-      fullName: fullName.value, 
+    console.log('Signup:', {
+      fullName: fullName.value,
       email: email.value,
       phone: phone.value,
       storeName: storeName.value,
-      password: password.value 
+      password: password.value,
     });
-    
+
     // Show success message
     const alert = await alertController.create({
       header: 'Success!',
       message: 'Your seller account has been created successfully.',
-      buttons: ['OK']
+      buttons: ['OK'],
     });
     await alert.present();
-    
+
     // Navigate to login page
     router.push('/login');
   } catch (error) {
     const alert = await alertController.create({
       header: 'Signup Failed',
       message: 'Something went wrong. Please try again.',
-      buttons: ['OK']
+      buttons: ['OK'],
     });
     await alert.present();
   } finally {
@@ -244,7 +207,7 @@ const showTerms = async () => {
   const alert = await alertController.create({
     header: 'Terms & Conditions',
     message: 'By using Palengke Online Seller, you agree to our terms of service and privacy policy.',
-    buttons: ['Close']
+    buttons: ['Close'],
   });
   await alert.present();
 };
@@ -342,7 +305,7 @@ const goToLogin = () => {
 }
 
 .logo-seller {
-  width: 140px;  /* 100px + 40% = 140px (BIGGER!) */
+  width: 140px; /* 100px + 40% = 140px (BIGGER!) */
   height: 140px;
   object-fit: contain;
 }
@@ -381,7 +344,7 @@ const goToLogin = () => {
   top: 50%;
   transform: translateY(-50%);
   font-size: 20px;
-  color: #4CAF50;
+  color: #4caf50;
   z-index: 2;
 }
 
@@ -398,7 +361,7 @@ const goToLogin = () => {
 
 .custom-input:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: #4caf50;
 }
 
 .custom-input::placeholder {
@@ -431,7 +394,7 @@ const goToLogin = () => {
   height: 18px;
   margin-top: 2px;
   cursor: pointer;
-  accent-color: #4CAF50;
+  accent-color: #4caf50;
 }
 
 .terms-checkbox label {
@@ -440,13 +403,13 @@ const goToLogin = () => {
 }
 
 .terms-checkbox a {
-  color: #4CAF50;
+  color: #4caf50;
   text-decoration: none;
   font-weight: 600;
 }
 
 .signup-button {
-  --background: #4CAF50;
+  --background: #4caf50;
   --background-hover: #45a049;
   --border-radius: 12px;
   height: 52px;
@@ -510,20 +473,20 @@ const goToLogin = () => {
 }
 
 .social-btn.google {
-  color: #DB4437;
+  color: #db4437;
 }
 
 .social-btn.google:hover {
-  border-color: #DB4437;
+  border-color: #db4437;
   background: #fff5f5;
 }
 
 .social-btn.facebook {
-  color: #4267B2;
+  color: #4267b2;
 }
 
 .social-btn.facebook:hover {
-  border-color: #4267B2;
+  border-color: #4267b2;
   background: #f0f5ff;
 }
 
@@ -541,7 +504,7 @@ const goToLogin = () => {
 }
 
 .login-text a {
-  color: #4CAF50;
+  color: #4caf50;
   text-decoration: none;
   font-weight: 600;
   margin-left: 4px;
@@ -552,22 +515,22 @@ const goToLogin = () => {
   .logos-wrapper {
     gap: 5px;
   }
-  
+
   .logo-main {
     width: 80px;
     height: 80px;
   }
-  
+
   .plus-sign {
     font-size: 24px;
     margin: 0 1px;
   }
-  
+
   .logo-seller {
-    width: 112px;  /* 80px + 40% */
+    width: 112px; /* 80px + 40% */
     height: 112px;
   }
-  
+
   .title {
     font-size: 24px;
   }
@@ -577,26 +540,26 @@ const goToLogin = () => {
   .signup-container {
     padding: 20px 16px;
   }
-  
+
   .logos-wrapper {
     gap: 4px;
   }
-  
+
   .logo-main {
     width: 65px;
     height: 65px;
   }
-  
+
   .plus-sign {
     font-size: 20px;
     margin: 0 1px;
   }
-  
+
   .logo-seller {
-    width: 91px;  /* 65px + 40% */
+    width: 91px; /* 65px + 40% */
     height: 91px;
   }
-  
+
   .title {
     font-size: 22px;
   }

@@ -45,16 +45,9 @@
       </div>
 
       <div v-else class="txn-list">
-        <div
-          v-for="txn in filteredTransactions"
-          :key="txn.id"
-          class="txn-item"
-        >
+        <div v-for="txn in filteredTransactions" :key="txn.id" class="txn-item">
           <div class="txn-left">
-            <div
-              class="txn-icon"
-              :class="txn.type === 'top_up' ? 'icon-green' : 'icon-red'"
-            >
+            <div class="txn-icon" :class="txn.type === 'top_up' ? 'icon-green' : 'icon-red'">
               <ion-icon :icon="txnIcon(txn.type)"></ion-icon>
             </div>
             <div class="txn-info">
@@ -66,10 +59,7 @@
               <span class="txn-notes" v-if="txn.notes">{{ txn.notes }}</span>
             </div>
           </div>
-          <span
-            class="txn-amount"
-            :class="txn.type === 'top_up' ? 'text-green' : 'text-red'"
-          >
+          <span class="txn-amount" :class="txn.type === 'top_up' ? 'text-green' : 'text-red'">
             {{ txn.type === 'subscription_payment' ? '-' : '+' }}₱{{ txn.amount.toLocaleString() }}
           </span>
         </div>
@@ -79,84 +69,81 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import {
-  IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
-  IonButton, IonButtons, IonIcon
-} from '@ionic/vue'
-import {
-  arrowBackOutline, walletOutline,
-  addCircleOutline, removeCircleOutline, receiptOutline
-} from 'ionicons/icons'
-import { API_BASE } from '@/config/api'
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonButtons, IonIcon } from '@ionic/vue';
+import { arrowBackOutline, walletOutline, addCircleOutline, removeCircleOutline, receiptOutline } from 'ionicons/icons';
+import { API_BASE } from '@/config/api';
 
-const router = useRouter()
-const API = API_BASE.replace('/api', '')
+const router = useRouter();
+const API = API_BASE.replace('/api', '');
 
-const balance = ref(0)
-const transactions = ref([])
-const loading = ref(true)
-const activeFilter = ref('all')
+const balance = ref(0);
+const transactions = ref([]);
+const loading = ref(true);
+const activeFilter = ref('all');
 
 const filters = [
   { label: 'All', value: 'all' },
   { label: 'Top-Up', value: 'top_up' },
   { label: 'Subscription', value: 'subscription_payment' },
-]
+];
 
 const filteredTransactions = computed(() => {
-  if (activeFilter.value === 'all') return transactions.value
-  return transactions.value.filter(t => t.type === activeFilter.value)
-})
+  if (activeFilter.value === 'all') return transactions.value;
+  return transactions.value.filter((t) => t.type === activeFilter.value);
+});
 
 function getEmail() {
-  return localStorage.getItem('userEmail')
+  return localStorage.getItem('userEmail');
 }
 
 function txnIcon(type) {
-  if (type === 'top_up') return addCircleOutline
-  return removeCircleOutline
+  if (type === 'top_up') return addCircleOutline;
+  return removeCircleOutline;
 }
 
 function txnLabel(txn) {
   switch (txn.type) {
-    case 'top_up': return 'Wallet Top-Up'
-    case 'subscription_payment': return 'Subscription Payment'
-    default: return txn.type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+    case 'top_up':
+      return 'Wallet Top-Up';
+    case 'subscription_payment':
+      return 'Subscription Payment';
+    default:
+      return txn.type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
   }
 }
 
 function formatDate(dateStr) {
-  const d = new Date(dateStr)
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 async function fetchTransactions() {
-  const email = getEmail()
-  if (!email) return
-  loading.value = true
+  const email = getEmail();
+  if (!email) return;
+  loading.value = true;
   try {
     const res = await fetch(`${API}/api/seller/wallet/transactions?email=${encodeURIComponent(email)}`, {
-      headers: { 'Accept': 'application/json' }
-    })
+      headers: { Accept: 'application/json' },
+    });
     if (res.ok) {
-      const data = await res.json()
-      transactions.value = data.transactions || []
-      balance.value = data.balance || 0
+      const data = await res.json();
+      transactions.value = data.transactions || [];
+      balance.value = data.balance || 0;
     }
   } catch {
-    transactions.value = []
+    transactions.value = [];
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
 function goBack() {
-  router.back()
+  router.back();
 }
 
-onMounted(fetchTransactions)
+onMounted(fetchTransactions);
 </script>
 
 <style scoped>
@@ -315,6 +302,8 @@ onMounted(fetchTransactions)
   margin-bottom: 12px;
 }
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

@@ -30,11 +30,7 @@
         </div>
 
         <div v-else class="devices-list">
-          <div
-            v-for="device in devices"
-            :key="device.id"
-            class="device-card"
-          >
+          <div v-for="device in devices" :key="device.id" class="device-card">
             <div class="device-icon">
               <ion-icon :icon="device.is_current ? phonePortraitOutline : laptopOutline"></ion-icon>
             </div>
@@ -48,12 +44,7 @@
               </p>
               <p class="device-meta">Added {{ device.created_at }}</p>
             </div>
-            <ion-button
-              color="danger"
-              fill="clear"
-              class="logout-btn"
-              @click="confirmLogout(device)"
-            >
+            <ion-button color="danger" fill="clear" class="logout-btn" @click="confirmLogout(device)">
               <ion-icon :icon="logOutOutline"></ion-icon>
             </ion-button>
           </div>
@@ -80,11 +71,7 @@ import {
   IonSpinner,
   alertController,
 } from '@ionic/vue';
-import {
-  phonePortraitOutline,
-  laptopOutline,
-  logOutOutline,
-} from 'ionicons/icons';
+import { phonePortraitOutline, laptopOutline, logOutOutline } from 'ionicons/icons';
 
 const router = useRouter();
 
@@ -154,7 +141,7 @@ const logoutCurrent = async () => {
     // silent
   }
 
-  ['isAuthenticated', 'token', 'pendingAuth'].forEach(k => localStorage.removeItem(k));
+  ['isAuthenticated', 'token', 'pendingAuth'].forEach((k) => localStorage.removeItem(k));
   router.replace('/login');
 };
 
@@ -170,7 +157,7 @@ const removeDevice = async (device) => {
     });
 
     if (response.ok) {
-      devices.value = devices.value.filter(d => d.id !== device.id);
+      devices.value = devices.value.filter((d) => d.id !== device.id);
       const toast = await alertController.create({
         header: 'Removed',
         message: 'Device logged out successfully.',
@@ -204,7 +191,7 @@ onMounted(() => {
   width: 80px;
   height: 80px;
   margin: 0 auto 16px;
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -277,7 +264,7 @@ onMounted(() => {
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: #E8F5E9;
+  background: #e8f5e9;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -286,7 +273,7 @@ onMounted(() => {
 
 .device-icon ion-icon {
   font-size: 24px;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .device-info {
@@ -307,8 +294,8 @@ onMounted(() => {
 .current-badge {
   font-size: 11px;
   font-weight: 600;
-  background: #E8F5E9;
-  color: #4CAF50;
+  background: #e8f5e9;
+  color: #4caf50;
   padding: 2px 8px;
   border-radius: 10px;
 }

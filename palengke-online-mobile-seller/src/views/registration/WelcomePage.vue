@@ -2,13 +2,12 @@
   <ion-page>
     <ion-content :fullscreen="true" class="welcome-content">
       <div class="welcome-container">
-        
         <!-- Logo Section -->
         <div class="logo-section">
           <div class="logos-wrapper">
-            <img src="/assets/images/logo.png" alt="Palengke Online" class="logo-main">
+            <img src="/assets/images/logo.png" alt="Palengke Online" class="logo-main" />
             <div class="plus-sign">+</div>
-            <img src="/assets/images/palengke-seller-boy.png" alt="Seller" class="logo-seller">
+            <img src="/assets/images/palengke-seller-boy.png" alt="Seller" class="logo-seller" />
           </div>
           <h1 class="portal-title">Seller Portal</h1>
           <p class="portal-subtitle">Empowering Filipino Sellers</p>
@@ -55,22 +54,11 @@
 
         <!-- Action Buttons -->
         <div class="action-buttons">
-          <ion-button 
-            expand="block" 
-            color="success"
-            class="primary-button"
-            @click="goToRegister"
-          >
+          <ion-button expand="block" color="success" class="primary-button" @click="goToRegister">
             Create Account
           </ion-button>
 
-          <ion-button 
-            expand="block" 
-            fill="outline"
-            color="success"
-            class="secondary-button"
-            @click="goToLogin"
-          >
+          <ion-button expand="block" fill="outline" color="success" class="secondary-button" @click="goToLogin">
             Sign In
           </ion-button>
         </div>
@@ -79,7 +67,6 @@
         <div class="help-section">
           <p>Need help? <a href="#" @click.prevent="contactSupport">Contact Support</a></p>
         </div>
-
       </div>
     </ion-content>
   </ion-page>
@@ -87,18 +74,8 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import {
-  IonPage,
-  IonContent,
-  IonButton,
-  IonIcon,
-  toastController
-} from '@ionic/vue';
-import {
-  storefrontOutline,
-  cashOutline,
-  peopleOutline
-} from 'ionicons/icons';
+import { IonPage, IonContent, IonButton, IonIcon, toastController } from '@ionic/vue';
+import { storefrontOutline, cashOutline, peopleOutline } from 'ionicons/icons';
 
 const router = useRouter();
 
@@ -115,7 +92,7 @@ const contactSupport = async () => {
     message: '<font-awesome-icon icon="phone" /> Contact: support@palengke-online.com',
     duration: 3000,
     color: 'dark',
-    position: 'top'
+    position: 'top',
   });
   await toast.present();
 };
@@ -123,7 +100,7 @@ const contactSupport = async () => {
 
 <style scoped>
 .welcome-content {
-  --background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  --background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
 }
 
 .welcome-container {
@@ -149,21 +126,21 @@ const contactSupport = async () => {
 }
 
 .logo-main {
-  width: 130px;  /* Increased from 100px */
+  width: 130px; /* Increased from 100px */
   height: 130px;
   object-fit: contain;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
 }
 
 .plus-sign {
-  font-size: 40px;  /* Increased from 32px */
+  font-size: 40px; /* Increased from 32px */
   font-weight: 700;
   color: white;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .logo-seller {
-  width: 182px;  /* Increased from 140px (130px + 40%) */
+  width: 182px; /* Increased from 140px (130px + 40%) */
   height: 182px;
   object-fit: contain;
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
@@ -238,7 +215,7 @@ const contactSupport = async () => {
 
 .feature-icon ion-icon {
   font-size: 28px;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .feature-text {
@@ -307,12 +284,12 @@ const contactSupport = async () => {
 /* Responsive */
 @media (max-width: 480px) {
   .logo-main {
-    width: 110px;  /* Increased from 80px */
+    width: 110px; /* Increased from 80px */
     height: 110px;
   }
 
   .logo-seller {
-    width: 154px;  /* Increased from 112px (110px + 40%) */
+    width: 154px; /* Increased from 112px (110px + 40%) */
     height: 154px;
   }
 
@@ -321,7 +298,7 @@ const contactSupport = async () => {
   }
 
   .plus-sign {
-    font-size: 34px;  /* Increased from 24px */
+    font-size: 34px; /* Increased from 24px */
   }
 }
 </style>

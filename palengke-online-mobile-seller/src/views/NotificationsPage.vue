@@ -38,7 +38,7 @@
     <ion-content :fullscreen="true">
       <!-- Loading State -->
       <div v-if="loading" class="empty-state">
-        <ion-spinner name="crescent" color="success" style="width: 48px; height: 48px;"></ion-spinner>
+        <ion-spinner name="crescent" color="success" style="width: 48px; height: 48px"></ion-spinner>
         <h3>Loading...</h3>
       </div>
 
@@ -107,7 +107,7 @@ import {
   IonSpinner,
   actionSheetController,
   alertController,
-  toastController
+  toastController,
 } from '@ionic/vue';
 import {
   notificationsOffOutline,
@@ -120,7 +120,7 @@ import {
   informationCircleOutline,
   checkmarkCircleOutline,
   warningOutline,
-  closeCircleOutline
+  closeCircleOutline,
 } from 'ionicons/icons';
 const router = useRouter();
 
@@ -135,7 +135,7 @@ const loadNotifications = async () => {
   if (!email) return;
   try {
     const response = await fetch(`${API_BASE}/seller/notifications?email=${encodeURIComponent(email)}`, {
-      headers: { 'Accept': 'application/json' },
+      headers: { Accept: 'application/json' },
     });
     const data = await response.json();
     if (response.ok && data.notifications) {
@@ -152,18 +152,18 @@ loadNotifications();
 
 // Computed
 const unreadCount = computed(() => {
-  return notifications.value.filter(n => !n.read).length;
+  return notifications.value.filter((n) => !n.read).length;
 });
 
 const filteredNotifications = computed(() => {
   let filtered = notifications.value;
 
   if (selectedFilter.value === 'unread') {
-    filtered = filtered.filter(n => !n.read);
+    filtered = filtered.filter((n) => !n.read);
   } else if (selectedFilter.value === 'orders') {
-    filtered = filtered.filter(n => n.type === 'order');
+    filtered = filtered.filter((n) => n.type === 'order');
   } else if (selectedFilter.value === 'messages') {
-    filtered = filtered.filter(n => n.type === 'message');
+    filtered = filtered.filter((n) => n.type === 'message');
   }
 
   return filtered;
@@ -175,11 +175,11 @@ const showSuccessModal = async (message) => {
     cssClass: 'success-modal',
     header: ' ',
     message: message,
-    buttons: ['OK']
+    buttons: ['OK'],
   });
-  
+
   await alert.present();
-  
+
   // Add the image after modal is presented
   setTimeout(() => {
     const alertElement = document.querySelector('.success-modal .alert-message');
@@ -187,14 +187,14 @@ const showSuccessModal = async (message) => {
       // Clear the text content
       const textContent = alertElement.textContent;
       alertElement.innerHTML = '';
-      
+
       // Create wrapper for centering
       const wrapper = document.createElement('div');
       wrapper.style.display = 'flex';
       wrapper.style.flexDirection = 'column';
       wrapper.style.alignItems = 'center';
       wrapper.style.textAlign = 'center';
-      
+
       // Create and add the image
       const img = document.createElement('img');
       img.src = '/assets/images/checkmark_success.png';
@@ -202,7 +202,7 @@ const showSuccessModal = async (message) => {
       img.style.height = '80px';
       img.style.margin = '0 auto 16px auto';
       img.style.display = 'block';
-      
+
       // Create and add the text
       const textDiv = document.createElement('div');
       textDiv.textContent = textContent;
@@ -210,16 +210,16 @@ const showSuccessModal = async (message) => {
       textDiv.style.fontWeight = '600';
       textDiv.style.color = '#1a1a1a';
       textDiv.style.textAlign = 'center';
-      
+
       // Append to wrapper
       wrapper.appendChild(img);
       wrapper.appendChild(textDiv);
-      
+
       // Append wrapper to alert
       alertElement.appendChild(wrapper);
     }
   }, 50);
-  
+
   // Auto dismiss after 2 seconds
   setTimeout(() => {
     alert.dismiss();
@@ -231,11 +231,11 @@ const showLoadingModal = async (message = 'Loading...') => {
   const alert = await alertController.create({
     cssClass: 'loading-modal-simple',
     message: message,
-    buttons: []
+    buttons: [],
   });
-  
+
   await alert.present();
-  
+
   // Auto dismiss after 1.5 seconds
   setTimeout(() => {
     alert.dismiss();
@@ -255,7 +255,7 @@ const getNotificationIcon = (type) => {
     warning: warningOutline,
     info: informationCircleOutline,
     success: checkmarkCircleOutline,
-    error: closeCircleOutline
+    error: closeCircleOutline,
   };
   return icons[type] || informationCircleOutline;
 };
@@ -289,7 +289,7 @@ const handleNotificationClick = async (notification) => {
     try {
       await fetch(`${API_BASE}/seller/notifications/${notification.id}/read?email=${encodeURIComponent(email)}`, {
         method: 'POST',
-        headers: { 'Accept': 'application/json' },
+        headers: { Accept: 'application/json' },
       });
     } catch {
       // silent
@@ -314,7 +314,7 @@ const markAllAsRead = async () => {
     buttons: [
       {
         text: 'Cancel',
-        role: 'cancel'
+        role: 'cancel',
       },
       {
         text: 'Mark All',
@@ -324,17 +324,17 @@ const markAllAsRead = async () => {
             try {
               await fetch(`${API_BASE}/seller/notifications/read-all?email=${encodeURIComponent(email)}`, {
                 method: 'POST',
-                headers: { 'Accept': 'application/json' },
+                headers: { Accept: 'application/json' },
               });
             } catch {
               // silent
             }
           }
-          notifications.value.forEach(n => n.read = true);
+          notifications.value.forEach((n) => (n.read = true));
           await showSuccessModal('All notifications marked as read');
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -348,7 +348,7 @@ const showOptions = async () => {
         icon: checkmarkDoneOutline,
         handler: () => {
           markAllAsRead();
-        }
+        },
       },
       {
         text: 'Clear All Notifications',
@@ -361,7 +361,7 @@ const showOptions = async () => {
             buttons: [
               {
                 text: 'Cancel',
-                role: 'cancel'
+                role: 'cancel',
               },
               {
                 text: 'Clear',
@@ -372,7 +372,7 @@ const showOptions = async () => {
                     try {
                       await fetch(`${API_BASE}/seller/notifications?email=${encodeURIComponent(email)}`, {
                         method: 'DELETE',
-                        headers: { 'Accept': 'application/json' },
+                        headers: { Accept: 'application/json' },
                       });
                     } catch {
                       // silent
@@ -380,25 +380,25 @@ const showOptions = async () => {
                   }
                   notifications.value = [];
                   await showSuccessModal('All notifications cleared');
-                }
-              }
-            ]
+                },
+              },
+            ],
           });
           await confirmAlert.present();
-        }
+        },
       },
       {
         text: 'Notification Settings',
         icon: alertCircleOutline,
         handler: async () => {
           await showLoadingModal('Opening settings...');
-        }
+        },
       },
       {
         text: 'Cancel',
-        role: 'cancel'
-      }
-    ]
+        role: 'cancel',
+      },
+    ],
   });
   await actionSheet.present();
 };
@@ -412,8 +412,8 @@ ion-segment {
 
 ion-segment-button {
   --color: #666;
-  --color-checked: #4CAF50;
-  --indicator-color: #4CAF50;
+  --color-checked: #4caf50;
+  --indicator-color: #4caf50;
   font-size: 12px;
   font-weight: 600;
   min-height: 36px;
@@ -434,7 +434,9 @@ ion-segment-button {
   align-items: flex-start;
   gap: 12px;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
   position: relative;
 }
 
@@ -444,8 +446,8 @@ ion-segment-button {
 }
 
 .notification-card.unread {
-  background: #F0F9F0;
-  border-left: 4px solid #4CAF50;
+  background: #f0f9f0;
+  border-left: 4px solid #4caf50;
 }
 
 /* Notification Icon */
@@ -461,37 +463,37 @@ ion-segment-button {
 }
 
 .notification-icon.order {
-  background: #E8F5E9;
-  color: #4CAF50;
+  background: #e8f5e9;
+  color: #4caf50;
 }
 
 .notification-icon.message {
-  background: #E3F2FD;
-  color: #2196F3;
+  background: #e3f2fd;
+  color: #2196f3;
 }
 
 .notification-icon.payment {
-  background: #FFF3E0;
-  color: #FF9800;
+  background: #fff3e0;
+  color: #ff9800;
 }
 
 .notification-icon.warning {
-  background: #FFF3E0;
-  color: #FF9800;
+  background: #fff3e0;
+  color: #ff9800;
 }
 
 .notification-icon.info {
-  background: #F3E5F5;
-  color: #9C27B0;
+  background: #f3e5f5;
+  color: #9c27b0;
 }
 
 .notification-icon.success {
-  background: #E8F5E9;
-  color: #4CAF50;
+  background: #e8f5e9;
+  color: #4caf50;
 }
 
 .notification-icon.error {
-  background: #FFEBEE;
+  background: #ffebee;
   color: #f44336;
 }
 
@@ -541,7 +543,7 @@ ion-segment-button {
 .unread-dot {
   width: 10px;
   height: 10px;
-  background: #4CAF50;
+  background: #4caf50;
   border-radius: 50%;
   position: absolute;
   top: 16px;
@@ -636,7 +638,7 @@ ion-segment-button {
 }
 
 :deep(.success-modal button) {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   font-weight: 600;
   border-radius: 12px;
@@ -674,14 +676,18 @@ ion-segment-button {
   width: 50px;
   height: 50px;
   border: 5px solid #f3f3f3;
-  border-top: 5px solid #1877F2;
+  border-top: 5px solid #1877f2;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 :deep(.loading-modal-simple .alert-button-group) {

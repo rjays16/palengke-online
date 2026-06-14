@@ -2,7 +2,6 @@
   <ion-page>
     <ion-content :fullscreen="true" class="step-content">
       <div class="step-container">
-        
         <!-- Back Button -->
         <div class="back-button" @click="goBack">
           <ion-icon :icon="arrowBackOutline"></ion-icon>
@@ -24,26 +23,24 @@
 
         <!-- Form -->
         <div class="form-section">
-          
           <!-- Email Input -->
           <div class="input-group">
             <label class="input-label">Email Address *</label>
-            <div class="input-wrapper" :class="{ error: errors.email, success: isEmailValid && !isEmailVerified, verified: isEmailVerified }">
+            <div
+              class="input-wrapper"
+              :class="{ error: errors.email, success: isEmailValid && !isEmailVerified, verified: isEmailVerified }"
+            >
               <ion-icon :icon="mailOutline" class="input-icon"></ion-icon>
-              <input 
-                v-model="email" 
-                type="email" 
+              <input
+                v-model="email"
+                type="email"
                 placeholder="driver@example.com"
                 class="custom-input with-icon"
                 :disabled="isEmailVerified"
                 @input="onEmailInput"
                 @blur="validateField('email')"
-              >
-              <ion-icon 
-                v-if="isEmailVerified" 
-                :icon="checkmarkCircleOutline" 
-                class="verified-icon"
-              ></ion-icon>
+              />
+              <ion-icon v-if="isEmailVerified" :icon="checkmarkCircleOutline" class="verified-icon"></ion-icon>
             </div>
             <span v-if="errors.email" class="error-message">{{ errors.email }}</span>
             <span v-else-if="isEmailVerified" class="verified-text">Email verified</span>
@@ -58,29 +55,28 @@
               <div class="country-code-wrapper">
                 <select v-model="countryCode" class="country-code-select">
                   <option v-for="c in countryCodes" :key="c.code" :value="c.code">
-                    {{ c.code }} {{ c.abbr || c.country.substring(0,2).toUpperCase() }}
+                    {{ c.code }} {{ c.abbr || c.country.substring(0, 2).toUpperCase() }}
                   </option>
                 </select>
               </div>
               <!-- Phone Number Input -->
-              <div class="phone-number-wrapper" :class="{ 
-                error: errors.phone, 
-                success: isPhoneValid
-              }">
-                <input 
-                  v-model="phone" 
-                  type="tel" 
+              <div
+                class="phone-number-wrapper"
+                :class="{
+                  error: errors.phone,
+                  success: isPhoneValid,
+                }"
+              >
+                <input
+                  v-model="phone"
+                  type="tel"
                   :placeholder="phonePlaceholder"
                   class="phone-input"
                   :maxlength="maxPhoneLength"
                   @input="onPhoneInput"
                   @blur="validateField('phone')"
-                >
-                <ion-icon 
-                  v-if="isPhoneValid" 
-                  :icon="checkmarkCircleOutline" 
-                  class="success-icon"
-                ></ion-icon>
+                />
+                <ion-icon v-if="isPhoneValid" :icon="checkmarkCircleOutline" class="success-icon"></ion-icon>
               </div>
             </div>
             <span v-if="errors.phone" class="error-message">{{ errors.phone }}</span>
@@ -92,16 +88,16 @@
             <label class="input-label">Password *</label>
             <div class="input-wrapper" :class="{ error: errors.password, success: isPasswordValid }">
               <ion-icon :icon="lockClosedOutline" class="input-icon"></ion-icon>
-              <input 
-                v-model="password" 
-                :type="showPassword ? 'text' : 'password'" 
+              <input
+                v-model="password"
+                :type="showPassword ? 'text' : 'password'"
                 placeholder="Create a password"
                 class="custom-input with-icon with-toggle"
                 @input="onPasswordInput"
                 @blur="validateField('password')"
-              >
-              <ion-icon 
-                :icon="showPassword ? eyeOffOutline : eyeOutline" 
+              />
+              <ion-icon
+                :icon="showPassword ? eyeOffOutline : eyeOutline"
                 class="password-toggle"
                 @click="showPassword = !showPassword"
               ></ion-icon>
@@ -115,16 +111,16 @@
             <label class="input-label">Confirm Password *</label>
             <div class="input-wrapper" :class="{ error: errors.confirmPassword, success: isConfirmPasswordValid }">
               <ion-icon :icon="lockClosedOutline" class="input-icon"></ion-icon>
-              <input 
-                v-model="confirmPassword" 
-                :type="showConfirmPassword ? 'text' : 'password'" 
+              <input
+                v-model="confirmPassword"
+                :type="showConfirmPassword ? 'text' : 'password'"
                 placeholder="Confirm your password"
                 class="custom-input with-icon with-toggle"
                 @input="onConfirmPasswordInput"
                 @blur="validateField('confirmPassword')"
-              >
-              <ion-icon 
-                :icon="showConfirmPassword ? eyeOffOutline : eyeOutline" 
+              />
+              <ion-icon
+                :icon="showConfirmPassword ? eyeOffOutline : eyeOutline"
                 class="password-toggle"
                 @click="showConfirmPassword = !showConfirmPassword"
               ></ion-icon>
@@ -135,9 +131,9 @@
           </div>
 
           <!-- Send OTP Button (shows when email is valid but OTP not sent) -->
-          <ion-button 
+          <ion-button
             v-if="isEmailValid && !showOtpSection && !isEmailVerified && isPasswordValid && isConfirmPasswordValid"
-            expand="block" 
+            expand="block"
             class="send-otp-button"
             :disabled="isSendingOtp"
             @click="sendOtp"
@@ -153,15 +149,17 @@
               <ion-icon :icon="shieldCheckmarkOutline"></ion-icon>
               <div class="otp-text">
                 <h3>Verify Email Address</h3>
-                <p>Enter the 6-digit code sent to <strong>{{ maskedEmail }}</strong></p>
+                <p>
+                  Enter the 6-digit code sent to <strong>{{ maskedEmail }}</strong>
+                </p>
               </div>
             </div>
 
             <div class="otp-inputs">
-              <input 
-                v-for="(digit, index) in otpDigits" 
+              <input
+                v-for="(digit, index) in otpDigits"
                 :key="index"
-                :ref="el => otpInputs[index] = el"
+                :ref="(el) => (otpInputs[index] = el)"
                 v-model="otpDigits[index]"
                 type="tel"
                 maxlength="1"
@@ -170,7 +168,7 @@
                 @input="onOtpInput(index)"
                 @keydown="onOtpKeydown($event, index)"
                 @paste="onOtpPaste"
-              >
+              />
             </div>
 
             <div v-if="otpError" class="otp-error">
@@ -179,20 +177,14 @@
             </div>
 
             <div class="otp-actions">
-              <button 
-                class="resend-button" 
-                :disabled="resendTimer > 0"
-                @click="resendOtp"
-              >
+              <button class="resend-button" :disabled="resendTimer > 0" @click="resendOtp">
                 {{ resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend Code' }}
               </button>
-              <button class="change-number-button" @click="changeEmail">
-                Change Email
-              </button>
+              <button class="change-number-button" @click="changeEmail">Change Email</button>
             </div>
 
-            <ion-button 
-              expand="block" 
+            <ion-button
+              expand="block"
               class="verify-button"
               :disabled="otpValue.length !== 6 || isVerifyingOtp"
               @click="verifyOtp"
@@ -206,23 +198,17 @@
           <div class="info-box">
             <ion-icon :icon="informationCircleOutline"></ion-icon>
             <div class="info-text">
-              <strong>Why we need this:</strong><br>
+              <strong>Why we need this:</strong><br />
               Your email address will be verified with a one-time code to ensure account security.
             </div>
           </div>
 
           <!-- Next Button (only enabled when email is verified) -->
-          <ion-button 
-            expand="block" 
-            class="next-button"
-            @click="handleNext"
-            :disabled="!isFormValid"
-          >
+          <ion-button expand="block" class="next-button" @click="handleNext" :disabled="!isFormValid">
             Next
             <ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon>
           </ion-button>
         </div>
-
       </div>
     </ion-content>
   </ion-page>
@@ -232,14 +218,7 @@
 import { API_BASE } from '@/config/api';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import {
-  IonPage,
-  IonContent,
-  IonButton,
-  IonIcon,
-  IonSpinner,
-  toastController
-} from '@ionic/vue';
+import { IonPage, IonContent, IonButton, IonIcon, IonSpinner, toastController } from '@ionic/vue';
 import {
   arrowBackOutline,
   arrowForwardOutline,
@@ -252,7 +231,7 @@ import {
   shieldCheckmarkOutline,
   paperPlaneOutline,
   informationCircleOutline,
-  alertCircleOutline
+  alertCircleOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -525,7 +504,7 @@ const errors = ref({
   email: '',
   phone: '',
   password: '',
-  confirmPassword: ''
+  confirmPassword: '',
 });
 
 // Validation
@@ -569,7 +548,14 @@ const otpValue = computed(() => {
 });
 
 const isFormValid = computed(() => {
-  return isEmailValid.value && isEmailVerified.value && isPhoneValid.value && phone.value.length === currentCountry.value.digits && isPasswordValid.value && isConfirmPasswordValid.value;
+  return (
+    isEmailValid.value &&
+    isEmailVerified.value &&
+    isPhoneValid.value &&
+    phone.value.length === currentCountry.value.digits &&
+    isPasswordValid.value &&
+    isConfirmPasswordValid.value
+  );
 });
 
 // Email input handler
@@ -612,7 +598,7 @@ const validateField = (field) => {
     errors.value.email = '';
     return true;
   }
-  
+
   if (field === 'phone') {
     if (!phone.value) {
       errors.value.phone = 'Phone number is required';
@@ -666,19 +652,19 @@ const formatPhone = (phoneNum) => {
 // Mask email for display
 const maskedEmail = computed(() => {
   if (!email.value) return '';
-  
+
   const atIndex = email.value.indexOf('@');
   if (atIndex === -1) return email.value;
-  
+
   const localPart = email.value.substring(0, atIndex);
   const domain = email.value.substring(atIndex);
-  
+
   if (localPart.length > 3) {
     return localPart.substring(0, 2) + '***' + localPart.substring(localPart.length - 1) + domain;
   } else if (localPart.length > 1) {
     return localPart.substring(0, 1) + '***' + domain;
   }
-  
+
   return '***' + domain;
 });
 
@@ -705,7 +691,7 @@ const sendOtp = async () => {
       message: `Verification code sent to ${maskedEmail.value}`,
       duration: 3000,
       color: 'success',
-      position: 'top'
+      position: 'top',
     });
     await toast.present();
 
@@ -717,13 +703,12 @@ const sendOtp = async () => {
         otpInputs.value[0].focus();
       }
     }, 300);
-
   } catch (error) {
     const toast = await toastController.create({
       message: error.message || 'Failed to send code. Please try again.',
       duration: 3000,
       color: 'danger',
-      position: 'top'
+      position: 'top',
     });
     await toast.present();
   } finally {
@@ -734,11 +719,11 @@ const sendOtp = async () => {
 // Resend OTP
 const resendOtp = async () => {
   if (resendTimer.value > 0) return;
-  
+
   // Clear OTP inputs
   otpDigits.value = ['', '', '', '', '', ''];
   otpError.value = '';
-  
+
   // Resend
   await sendOtp();
 };
@@ -767,10 +752,10 @@ const changeEmail = () => {
 const onOtpInput = (index) => {
   // Only allow numbers
   otpDigits.value[index] = otpDigits.value[index].replace(/\D/g, '');
-  
+
   // Clear error
   otpError.value = '';
-  
+
   // Auto-focus next input
   if (otpDigits.value[index] && index < 5) {
     otpInputs.value[index + 1]?.focus();
@@ -789,7 +774,7 @@ const onOtpKeydown = (event, index) => {
 const onOtpPaste = (event) => {
   event.preventDefault();
   const pastedData = event.clipboardData.getData('text').replace(/\D/g, '');
-  
+
   if (pastedData.length === 6) {
     for (let i = 0; i < 6; i++) {
       otpDigits.value[i] = pastedData[i] || '';
@@ -826,10 +811,9 @@ const verifyOtp = async () => {
       message: 'Email verified successfully!',
       duration: 2500,
       color: 'success',
-      position: 'top'
+      position: 'top',
     });
     await toast.present();
-
   } catch (error) {
     otpError.value = 'Verification failed. Please try again.';
   } finally {
@@ -852,7 +836,7 @@ const handleNext = () => {
     phone: phone.value,
     fullPhone: `${countryCode.value}${phone.value}`,
     emailVerified: isEmailVerified.value,
-    password: password.value
+    password: password.value,
   };
   localStorage.setItem('registrationData', JSON.stringify(registrationData));
 
@@ -1123,9 +1107,15 @@ const handleNext = () => {
 }
 
 @keyframes scaleIn {
-  0% { transform: translateY(-50%) scale(0); }
-  50% { transform: translateY(-50%) scale(1.2); }
-  100% { transform: translateY(-50%) scale(1); }
+  0% {
+    transform: translateY(-50%) scale(0);
+  }
+  50% {
+    transform: translateY(-50%) scale(1.2);
+  }
+  100% {
+    transform: translateY(-50%) scale(1);
+  }
 }
 
 /* Input States */

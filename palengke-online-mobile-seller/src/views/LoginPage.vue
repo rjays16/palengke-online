@@ -2,13 +2,12 @@
   <ion-page>
     <ion-content :fullscreen="true" class="login-content">
       <div class="login-container">
-        
         <!-- Logo Section - Both logos, seller is bigger -->
         <div class="logo-section">
           <div class="logos-wrapper">
-            <img src="/assets/images/logo.png" alt="Palengke Online" class="logo-main">
+            <img src="/assets/images/logo.png" alt="Palengke Online" class="logo-main" />
             <div class="plus-sign">+</div>
-            <img src="/assets/images/palengke-seller-boy.png" alt="Seller" class="logo-seller">
+            <img src="/assets/images/palengke-seller-boy.png" alt="Seller" class="logo-seller" />
           </div>
         </div>
 
@@ -20,21 +19,16 @@
         <div class="form-section">
           <div class="input-group">
             <ion-icon :icon="mailOutline" class="input-icon"></ion-icon>
-            <input 
-              v-model="email" 
-              type="email" 
+            <input
+              v-model="email"
+              type="email"
               placeholder="Email address"
               class="custom-input"
               @keyup.enter="handleLogin"
-            >
+            />
           </div>
 
-          <ion-button 
-            expand="block" 
-            class="login-button"
-            @click="handleLogin"
-            :disabled="!email"
-          >
+          <ion-button expand="block" class="login-button" @click="handleLogin" :disabled="!email">
             <span v-if="!isLoading">Sign In</span>
             <ion-spinner v-else name="crescent"></ion-spinner>
           </ion-button>
@@ -43,11 +37,10 @@
         <!-- Sign Up Link -->
         <div class="signup-section">
           <p class="signup-text">
-            Don't have an account? 
+            Don't have an account?
             <a href="#" @click.prevent="goToSignup">Sign Up</a>
           </p>
         </div>
-
       </div>
     </ion-content>
   </ion-page>
@@ -56,17 +49,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { 
-  IonPage, 
-  IonContent, 
-  IonButton, 
-  IonIcon, 
-  IonSpinner,
-  alertController
-} from '@ionic/vue';
-import { 
-  mailOutline
-} from 'ionicons/icons';
+import { IonPage, IonContent, IonButton, IonIcon, IonSpinner, alertController } from '@ionic/vue';
+import { mailOutline } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
 
 const router = useRouter();
@@ -80,9 +64,9 @@ const showLoadingModal = async (message = 'Loading...', autoDismiss = true) => {
   const alert = await alertController.create({
     cssClass: 'loading-modal-simple',
     message: message,
-    buttons: []
+    buttons: [],
   });
-  
+
   await alert.present();
 
   if (autoDismiss) {
@@ -90,7 +74,7 @@ const showLoadingModal = async (message = 'Loading...', autoDismiss = true) => {
       alert.dismiss();
     }, 1500);
   }
-  
+
   return alert;
 };
 
@@ -187,16 +171,16 @@ const handleLogin = async () => {
             {
               text: 'Cancel',
               role: 'cancel',
-              cssClass: 'alert-button-cancel'
+              cssClass: 'alert-button-cancel',
             },
             {
               text: 'Sign Up',
               cssClass: 'alert-button-confirm',
               handler: () => {
                 router.push('/welcome');
-              }
-            }
-          ]
+              },
+            },
+          ],
         });
         await alert.present();
         return;
@@ -232,13 +216,14 @@ const handleLogin = async () => {
     const alert = await alertController.create({
       header: 'Verify Account',
       message: 'Do you want to link this device to your account?',
-      subHeader: 'We need to do a quick authentication before linking your device. A 6-digit verification code will be sent to your registered email address.',
+      subHeader:
+        'We need to do a quick authentication before linking your device. A 6-digit verification code will be sent to your registered email address.',
       cssClass: 'otp-confirm-alert',
       buttons: [
         {
           text: 'Cancel',
           role: 'cancel',
-          cssClass: 'alert-button-cancel'
+          cssClass: 'alert-button-cancel',
         },
         {
           text: 'Send Code',
@@ -261,21 +246,20 @@ const handleLogin = async () => {
             await loading.dismiss();
             router.push({
               name: 'OTPVerification',
-              params: { email: email.value }
+              params: { email: email.value },
             });
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
-    
+
     await alert.present();
-    
   } catch (error) {
     isLoading.value = false;
     const alert = await alertController.create({
       header: 'Login Failed',
       message: error.message || 'Invalid email. Please try again.',
-      buttons: ['OK']
+      buttons: ['OK'],
     });
     await alert.present();
   }
@@ -362,7 +346,7 @@ onMounted(async () => {
 }
 
 .logo-seller {
-  width: 154px;  /* 110px + 40% = 154px (BIGGER!) */
+  width: 154px; /* 110px + 40% = 154px (BIGGER!) */
   height: 154px;
   object-fit: contain;
 }
@@ -462,22 +446,22 @@ onMounted(async () => {
   .logos-wrapper {
     gap: 6px;
   }
-  
+
   .logo-main {
     width: 90px;
     height: 90px;
   }
-  
+
   .plus-sign {
     font-size: 28px;
     margin: 0 1px;
   }
-  
+
   .logo-seller {
-    width: 126px;  /* 90px + 40% */
+    width: 126px; /* 90px + 40% */
     height: 126px;
   }
-  
+
   .title {
     font-size: 28px;
   }
@@ -487,26 +471,26 @@ onMounted(async () => {
   .login-container {
     padding: 32px 20px;
   }
-  
+
   .logos-wrapper {
     gap: 5px;
   }
-  
+
   .logo-main {
     width: 75px;
     height: 75px;
   }
-  
+
   .plus-sign {
     font-size: 24px;
     margin: 0 1px;
   }
-  
+
   .logo-seller {
-    width: 105px;  /* 75px + 40% */
+    width: 105px; /* 75px + 40% */
     height: 105px;
   }
-  
+
   .title {
     font-size: 24px;
   }
@@ -549,8 +533,12 @@ onMounted(async () => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 :deep(.loading-modal-simple .alert-button-group) {

@@ -13,50 +13,35 @@
 
     <ion-content :fullscreen="true" class="products-content">
       <div class="products-container">
-
         <!-- Search & Filter Section -->
         <div class="search-section">
           <div class="search-bar">
             <ion-icon :icon="searchOutline" class="search-icon"></ion-icon>
-            <input 
-              v-model="searchQuery" 
-              type="text" 
-              placeholder="Search products..."
-              class="search-input"
-            >
-            <ion-icon 
-              v-if="searchQuery" 
-              :icon="closeCircle" 
-              class="clear-icon"
-              @click="searchQuery = ''"
-            ></ion-icon>
+            <input v-model="searchQuery" type="text" placeholder="Search products..." class="search-input" />
+            <ion-icon v-if="searchQuery" :icon="closeCircle" class="clear-icon" @click="searchQuery = ''"></ion-icon>
           </div>
 
           <!-- Category Filter -->
           <div class="filter-chips">
-            <div 
-              class="filter-chip" 
-              :class="{ active: selectedFilter === 'all' }"
-              @click="selectedFilter = 'all'"
-            >
+            <div class="filter-chip" :class="{ active: selectedFilter === 'all' }" @click="selectedFilter = 'all'">
               All ({{ products.length }})
             </div>
-            <div 
-              class="filter-chip" 
+            <div
+              class="filter-chip"
               :class="{ active: selectedFilter === 'active' }"
               @click="selectedFilter = 'active'"
             >
               Active ({{ activeProducts }})
             </div>
-            <div 
-              class="filter-chip" 
+            <div
+              class="filter-chip"
               :class="{ active: selectedFilter === 'inactive' }"
               @click="selectedFilter = 'inactive'"
             >
               Inactive ({{ inactiveProducts }})
             </div>
-            <div 
-              class="filter-chip" 
+            <div
+              class="filter-chip"
               :class="{ active: selectedFilter === 'low-stock' }"
               @click="selectedFilter = 'low-stock'"
             >
@@ -73,14 +58,14 @@
 
         <!-- Products List -->
         <div class="products-list" v-else>
-          <div 
-            class="product-card" 
-            v-for="product in filteredProducts" 
-            :key="product.id"
-          >
+          <div class="product-card" v-for="product in filteredProducts" :key="product.id">
             <!-- Product Image -->
             <div class="product-image">
-              <img :src="product.image" :alt="product.name" @error="$event.target.src = '/assets/images/product-placeholder.svg'">
+              <img
+                :src="product.image"
+                :alt="product.name"
+                @error="$event.target.src = '/assets/images/product-placeholder.svg'"
+              />
               <div class="product-badge" :class="product.status">
                 {{ product.status }}
               </div>
@@ -124,31 +109,19 @@
 
             <!-- Product Actions -->
             <div class="product-actions">
-              <ion-button 
-                fill="clear" 
-                size="small" 
-                @click="toggleProductStatus(product)"
-              >
-                <ion-icon 
-                  slot="icon-only" 
+              <ion-button fill="clear" size="small" @click="toggleProductStatus(product)">
+                <ion-icon
+                  slot="icon-only"
                   :icon="product.status === 'active' ? eyeOffOutline : eyeOutline"
                   :class="product.status === 'active' ? 'text-warning' : 'text-success'"
                 ></ion-icon>
               </ion-button>
-              
-              <ion-button 
-                fill="clear" 
-                size="small" 
-                @click="editProduct(product)"
-              >
+
+              <ion-button fill="clear" size="small" @click="editProduct(product)">
                 <ion-icon slot="icon-only" :icon="createOutline" class="text-primary"></ion-icon>
               </ion-button>
-              
-              <ion-button 
-                fill="clear" 
-                size="small" 
-                @click="deleteProduct(product)"
-              >
+
+              <ion-button fill="clear" size="small" @click="deleteProduct(product)">
                 <ion-icon slot="icon-only" :icon="trashOutline" class="text-danger"></ion-icon>
               </ion-button>
             </div>
@@ -167,7 +140,6 @@
             </ion-button>
           </div>
         </div>
-
       </div>
 
       <!-- Deleting Overlay -->
@@ -229,7 +201,7 @@ import {
   IonSpinner,
   onIonViewWillEnter,
   alertController,
-  toastController
+  toastController,
 } from '@ionic/vue';
 import {
   addOutline,
@@ -243,7 +215,7 @@ import {
   cartOutline,
   homeOutline,
   receiptOutline,
-  personOutline
+  personOutline,
 } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
 
@@ -265,10 +237,10 @@ async function loadProducts() {
   loading.value = true;
   try {
     const res = await fetch(`${API_BASE}/seller/products?email=${encodeURIComponent(userEmail)}`, {
-      headers: { 'Accept': 'application/json' }
+      headers: { Accept: 'application/json' },
     });
     const data = await res.json();
-    products.value = (data.products || []).map(p => ({
+    products.value = (data.products || []).map((p) => ({
       ...p,
       image: p.images?.[0] || '/assets/images/product-placeholder.svg',
       unit: p.selling_unit,
@@ -294,36 +266,27 @@ const filteredProducts = computed(() => {
 
   // Filter by status
   if (selectedFilter.value === 'active') {
-    filtered = filtered.filter(p => p.status === 'active');
+    filtered = filtered.filter((p) => p.status === 'active');
   } else if (selectedFilter.value === 'inactive') {
-    filtered = filtered.filter(p => p.status === 'inactive');
+    filtered = filtered.filter((p) => p.status === 'inactive');
   } else if (selectedFilter.value === 'low-stock') {
-    filtered = filtered.filter(p => p.stock < 10);
+    filtered = filtered.filter((p) => p.stock < 10);
   }
 
   // Filter by search query
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase();
-    filtered = filtered.filter(p => 
-      p.name.toLowerCase().includes(query) ||
-      p.category.toLowerCase().includes(query)
-    );
+    filtered = filtered.filter((p) => p.name.toLowerCase().includes(query) || p.category.toLowerCase().includes(query));
   }
 
   return filtered;
 });
 
-const activeProducts = computed(() => 
-  products.value.filter(p => p.status === 'active').length
-);
+const activeProducts = computed(() => products.value.filter((p) => p.status === 'active').length);
 
-const inactiveProducts = computed(() => 
-  products.value.filter(p => p.status === 'inactive').length
-);
+const inactiveProducts = computed(() => products.value.filter((p) => p.status === 'inactive').length);
 
-const lowStockProducts = computed(() => 
-  products.value.filter(p => p.stock < 10).length
-);
+const lowStockProducts = computed(() => products.value.filter((p) => p.stock < 10).length);
 
 // Methods
 const goToAddProduct = () => {
@@ -339,7 +302,7 @@ const editProduct = (product) => {
 const toggleProductStatus = async (product) => {
   const newIsActive = !product.is_active;
   const statusText = newIsActive ? 'activate' : 'deactivate';
-  
+
   const alert = await alertController.create({
     header: 'Change Status',
     message: `Do you want to ${statusText} "${product.name}"?`,
@@ -352,8 +315,8 @@ const toggleProductStatus = async (product) => {
           try {
             const res = await fetch(`${API_BASE}/seller/products/${product.id}`, {
               method: 'POST',
-              headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email: userEmail, is_active: newIsActive })
+              headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: userEmail, is_active: newIsActive }),
             });
             if (res.ok) {
               product.is_active = newIsActive;
@@ -367,11 +330,11 @@ const toggleProductStatus = async (product) => {
           } finally {
             toggling.value = false;
           }
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
-  
+
   await alert.present();
 };
 
@@ -387,12 +350,15 @@ const deleteProduct = async (product) => {
         handler: async () => {
           deleting.value = true;
           try {
-            const res = await fetch(`${API_BASE}/seller/products/${product.id}?email=${encodeURIComponent(userEmail)}`, {
-              method: 'DELETE',
-              headers: { 'Accept': 'application/json' }
-            });
+            const res = await fetch(
+              `${API_BASE}/seller/products/${product.id}?email=${encodeURIComponent(userEmail)}`,
+              {
+                method: 'DELETE',
+                headers: { Accept: 'application/json' },
+              },
+            );
             if (res.ok) {
-              const index = products.value.findIndex(p => p.id === product.id);
+              const index = products.value.findIndex((p) => p.id === product.id);
               if (index > -1) products.value.splice(index, 1);
               await showSuccessModal('Product successfully deleted');
             } else {
@@ -403,11 +369,11 @@ const deleteProduct = async (product) => {
           } finally {
             deleting.value = false;
           }
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
-  
+
   await alert.present();
 };
 
@@ -416,7 +382,7 @@ const showToast = async (message, color = 'success') => {
     message,
     duration: 2000,
     color,
-    position: 'top'
+    position: 'top',
   });
   await toast.present();
 };
@@ -426,11 +392,11 @@ const showSuccessModal = async (message) => {
     cssClass: 'success-modal',
     header: ' ',
     message: message,
-    buttons: ['OK']
+    buttons: ['OK'],
   });
-  
+
   await alert.present();
-  
+
   // Add the image after modal is presented
   setTimeout(() => {
     const alertElement = document.querySelector('.success-modal .alert-message');
@@ -438,7 +404,7 @@ const showSuccessModal = async (message) => {
       // Clear the text content
       const textContent = alertElement.textContent;
       alertElement.innerHTML = '';
-      
+
       // Create and add the image
       const img = document.createElement('img');
       img.src = '/assets/images/checkmark_success.png';
@@ -446,20 +412,20 @@ const showSuccessModal = async (message) => {
       img.style.height = '80px';
       img.style.margin = '0 auto 16px auto';
       img.style.display = 'block';
-      
+
       // Create and add the text
       const textDiv = document.createElement('div');
       textDiv.textContent = textContent;
       textDiv.style.fontSize = '18px';
       textDiv.style.fontWeight = '600';
       textDiv.style.color = '#1a1a1a';
-      
+
       // Append both
       alertElement.appendChild(img);
       alertElement.appendChild(textDiv);
     }
   }, 50);
-  
+
   // Auto dismiss after 2 seconds
   setTimeout(() => {
     alert.dismiss();
@@ -526,7 +492,7 @@ const goToProfile = () => {
 
 .search-input:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: #4caf50;
 }
 
 .clear-icon {
@@ -565,9 +531,9 @@ const goToProfile = () => {
 }
 
 .filter-chip.active {
-  background: #E8F5E9;
-  border-color: #4CAF50;
-  color: #4CAF50;
+  background: #e8f5e9;
+  border-color: #4caf50;
+  color: #4caf50;
 }
 
 /* Products List */
@@ -615,7 +581,7 @@ const goToProfile = () => {
 }
 
 .product-badge.active {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
 }
 
@@ -645,8 +611,8 @@ const goToProfile = () => {
 
 .product-category {
   font-size: 11px;
-  color: #4CAF50;
-  background: #E8F5E9;
+  color: #4caf50;
+  background: #e8f5e9;
   padding: 4px 8px;
   border-radius: 6px;
   font-weight: 600;
@@ -666,7 +632,7 @@ const goToProfile = () => {
 .current-price {
   font-size: 18px;
   font-weight: 700;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .original-price {
@@ -693,7 +659,7 @@ const goToProfile = () => {
 }
 
 .low-stock {
-  color: #FF9800;
+  color: #ff9800;
   font-weight: 600;
 }
 
@@ -722,15 +688,15 @@ const goToProfile = () => {
 }
 
 .text-success {
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .text-warning {
-  color: #FF9800;
+  color: #ff9800;
 }
 
 .text-primary {
-  color: #2196F3;
+  color: #2196f3;
 }
 
 .text-danger {
@@ -745,14 +711,21 @@ const goToProfile = () => {
 
 .loading-icon {
   font-size: 60px;
-  color: #4CAF50;
+  color: #4caf50;
   margin-bottom: 16px;
   animation: pulse 1.5s ease-in-out infinite;
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.1); }
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
 }
 
 .loading-state p {
@@ -814,7 +787,7 @@ const goToProfile = () => {
 }
 
 .nav-item.active {
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .nav-item:active {
@@ -827,16 +800,16 @@ const goToProfile = () => {
     grid-template-columns: 80px 1fr auto;
     gap: 12px;
   }
-  
+
   .product-image {
     width: 80px;
     height: 80px;
   }
-  
+
   .product-name {
     font-size: 14px;
   }
-  
+
   .current-price {
     font-size: 16px;
   }
@@ -867,7 +840,7 @@ const goToProfile = () => {
 }
 
 :deep(.success-modal button) {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   font-weight: 600;
   border-radius: 12px;

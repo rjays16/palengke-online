@@ -2,7 +2,6 @@
   <ion-page>
     <ion-content :fullscreen="true" class="success-content">
       <div class="success-container">
-
         <!-- Success Animation/Icon -->
         <div class="success-icon">
           <div class="icon-circle" :class="{ verified: isVerified, basic: !isVerified }">
@@ -13,7 +12,9 @@
         <!-- Title -->
         <div class="title-section">
           <h1 class="title">{{ isVerified ? 'Account Verified!' : 'Account Created!' }}</h1>
-          <p class="subtitle">{{ isVerified ? 'Welcome to Palengke Online Seller' : 'You\'re almost ready to start selling' }}</p>
+          <p class="subtitle">
+            {{ isVerified ? 'Welcome to Palengke Online Seller' : "You're almost ready to start selling" }}
+          </p>
         </div>
 
         <!-- Verification Status Badge -->
@@ -107,7 +108,7 @@
           <div class="verify-cta">
             <ion-icon :icon="informationCircleOutline"></ion-icon>
             <div class="cta-text">
-              <strong>You can verify anytime!</strong><br>
+              <strong>You can verify anytime!</strong><br />
               Go to Settings → Account Verification to complete your verification and unlock all features.
             </div>
           </div>
@@ -145,22 +146,12 @@
         <div class="action-buttons">
           <!-- NOT VERIFIED: Show both buttons -->
           <template v-if="!isVerified">
-            <ion-button 
-              expand="block" 
-              fill="outline"
-              color="primary"
-              class="verify-button"
-              @click="goToVerification"
-            >
+            <ion-button expand="block" fill="outline" color="primary" class="verify-button" @click="goToVerification">
               <ion-icon slot="start" :icon="shieldCheckmarkOutline"></ion-icon>
               Verify Now
             </ion-button>
 
-            <ion-button 
-              expand="block" 
-              class="login-button"
-              @click="goToLogin"
-            >
+            <ion-button expand="block" class="login-button" @click="goToLogin">
               Continue to Login
               <ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon>
             </ion-button>
@@ -168,11 +159,7 @@
 
           <!-- VERIFIED: Show single button -->
           <template v-else>
-            <ion-button 
-              expand="block" 
-              class="dashboard-button"
-              @click="goToLogin"
-            >
+            <ion-button expand="block" class="dashboard-button" @click="goToLogin">
               Go to Dashboard
               <ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon>
             </ion-button>
@@ -183,7 +170,6 @@
         <div class="support-link">
           <p>Need help? <a href="#" @click.prevent="contactSupport">Contact Support</a></p>
         </div>
-
       </div>
     </ion-content>
   </ion-page>
@@ -192,20 +178,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import {
-  IonPage,
-  IonContent,
-  IonButton,
-  IonIcon,
-  toastController
-} from '@ionic/vue';
+import { IonPage, IonContent, IonButton, IonIcon, toastController } from '@ionic/vue';
 import {
   checkmarkCircleOutline,
   alertCircleOutline,
   shieldCheckmarkOutline,
   informationCircleOutline,
   lockClosedOutline,
-  arrowForwardOutline
+  arrowForwardOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -216,7 +196,7 @@ const accountData = ref({
   email: '',
   phone: '',
   storeName: '',
-  verificationStatus: 'not_verified'
+  verificationStatus: 'not_verified',
 });
 
 // Computed: Is account verified?
@@ -229,11 +209,11 @@ onMounted(() => {
   const savedData = localStorage.getItem('registrationData');
   if (savedData) {
     const data = JSON.parse(savedData);
-    
+
     // Build full name
     const middle = data.middleName ? ` ${data.middleName} ` : ' ';
     accountData.value.fullName = `${data.firstName}${middle}${data.lastName}`;
-    
+
     accountData.value.email = data.email || '';
     accountData.value.phone = data.phone || '';
     accountData.value.storeName = data.storeName || '';
@@ -250,10 +230,10 @@ const goToVerification = () => {
 const goToLogin = () => {
   // Clear registration data
   localStorage.removeItem('registrationData');
-  
+
   // Show success toast
   showSuccessToast();
-  
+
   // Navigate to login
   setTimeout(() => {
     router.push('/login');
@@ -262,12 +242,12 @@ const goToLogin = () => {
 
 const showSuccessToast = async () => {
   const toast = await toastController.create({
-    message: isVerified.value 
-      ? 'Account verified successfully! Please login to continue.' 
+    message: isVerified.value
+      ? 'Account verified successfully! Please login to continue.'
       : 'Account created! Please login to continue.',
     duration: 3000,
     color: 'success',
-    position: 'top'
+    position: 'top',
   });
   await toast.present();
 };
@@ -277,7 +257,7 @@ const contactSupport = async () => {
     message: 'Support: support@palengke-online.com',
     duration: 3000,
     color: 'primary',
-    position: 'bottom'
+    position: 'bottom',
   });
   await toast.present();
 };

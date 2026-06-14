@@ -11,23 +11,12 @@
 
     <ion-content :fullscreen="true">
       <div class="help-container">
-
         <!-- Search Bar -->
         <div class="search-section">
           <div class="search-bar">
             <ion-icon :icon="searchOutline" class="search-icon"></ion-icon>
-            <input 
-              v-model="searchQuery" 
-              type="text" 
-              placeholder="Search for help..."
-              class="search-input"
-            >
-            <ion-icon 
-              v-if="searchQuery" 
-              :icon="closeCircle" 
-              class="clear-icon"
-              @click="searchQuery = ''"
-            ></ion-icon>
+            <input v-model="searchQuery" type="text" placeholder="Search for help..." class="search-input" />
+            <ion-icon v-if="searchQuery" :icon="closeCircle" class="clear-icon" @click="searchQuery = ''"></ion-icon>
           </div>
         </div>
 
@@ -46,7 +35,17 @@
               @click="handleSearchResult(result)"
             >
               <div class="result-icon" :class="result.type">
-                <ion-icon :icon="result.type === 'faq' ? chatbubbleEllipsesOutline : result.type === 'topic' ? rocketOutline : result.type === 'quick_action' ? warningOutline : chatbubbleEllipsesOutline"></ion-icon>
+                <ion-icon
+                  :icon="
+                    result.type === 'faq'
+                      ? chatbubbleEllipsesOutline
+                      : result.type === 'topic'
+                        ? rocketOutline
+                        : result.type === 'quick_action'
+                          ? warningOutline
+                          : chatbubbleEllipsesOutline
+                  "
+                ></ion-icon>
               </div>
               <div class="result-content">
                 <h3>{{ result.title }}</h3>
@@ -61,219 +60,210 @@
         <template v-if="!hasSearchQuery">
           <!-- Contact Support Cards -->
           <div class="contact-section">
-          <h2 class="section-title">Contact Support</h2>
-          
-          <div v-if="loadingContacts" class="loading-state">Loading support options...</div>
-          <div v-else class="contact-cards">
-            <div
-              v-for="contact in contactSupports"
-              :key="contact.key"
-              class="contact-card"
-              @click="handleContactAction(contact)"
-            >
-              <div class="contact-icon" :class="getIconClass(contact.type)">
-                <ion-icon :icon="getIconForType(contact.type)"></ion-icon>
-              </div>
-              <div class="contact-content">
-                <h3>{{ contact.title }}</h3>
-                <p>{{ contact.subtitle }}</p>
-              </div>
-              <ion-icon :icon="chevronForwardOutline" class="arrow"></ion-icon>
-            </div>
-          </div>
-        </div>
+            <h2 class="section-title">Contact Support</h2>
 
-        <!-- Quick Actions -->
-        <div class="quick-actions-section">
-          <h2 class="section-title">Quick Actions</h2>
-          
-          <div class="quick-actions">
-            <div class="quick-action-card" @click="reportProblem">
-              <ion-icon :icon="warningOutline"></ion-icon>
-              <span>Report Problem</span>
-            </div>
-            <div class="quick-action-card" @click="giveFeedback">
-              <ion-icon :icon="chatboxOutline"></ion-icon>
-              <span>Send Feedback</span>
-            </div>
-            <div class="quick-action-card" @click="requestFeature">
-              <ion-icon :icon="bulbOutline"></ion-icon>
-              <span>Request Feature</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- My Reports -->
-        <div class="my-reports-section">
-          <h2 class="section-title">My Reports</h2>
-          
-          <div v-if="loadingReports" class="loading-state">Loading your reports...</div>
-          <div v-else-if="myReports.length === 0" class="no-reports">
-            <p>You haven't submitted any reports yet.</p>
-          </div>
-          <div v-else class="reports-list">
-            <div v-for="report in myReports" :key="report.id" class="report-card">
-              <div class="report-info">
-                <h3>{{ report.subject }}</h3>
-                <p class="report-date">{{ formatDate(report.created_at) }}</p>
-              </div>
-              <span class="report-status" :class="report.status">
-                {{ statusLabel(report.status) }}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <!-- FAQs -->
-        <div class="faqs-section">
-          <h2 class="section-title">Frequently Asked Questions</h2>
-          
-          <div class="faq-list">
-            <div 
-              v-for="(faq, index) in faqs" 
-              :key="index" 
-              class="faq-item"
-              @click="toggleFaq(index)"
-            >
-              <div class="faq-question">
-                <h3>{{ faq.question }}</h3>
-                <ion-icon 
-                  :icon="expandedFaq === index ? chevronUpOutline : chevronDownOutline"
-                ></ion-icon>
-              </div>
-              <div class="faq-answer" v-show="expandedFaq === index">
-                <p>{{ faq.answer }}</p>
+            <div v-if="loadingContacts" class="loading-state">Loading support options...</div>
+            <div v-else class="contact-cards">
+              <div
+                v-for="contact in contactSupports"
+                :key="contact.key"
+                class="contact-card"
+                @click="handleContactAction(contact)"
+              >
+                <div class="contact-icon" :class="getIconClass(contact.type)">
+                  <ion-icon :icon="getIconForType(contact.type)"></ion-icon>
+                </div>
+                <div class="contact-content">
+                  <h3>{{ contact.title }}</h3>
+                  <p>{{ contact.subtitle }}</p>
+                </div>
+                <ion-icon :icon="chevronForwardOutline" class="arrow"></ion-icon>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Help Topics -->
-        <div class="topics-section">
-          <h2 class="section-title">Browse Help Topics</h2>
-          
-          <div class="topics-grid">
-            <div class="topic-card" @click="showTopic('getting-started')">
-              <div class="topic-icon">
-                <ion-icon :icon="rocketOutline"></ion-icon>
-              </div>
-              <h3>Getting Started</h3>
-              <p>Learn the basics</p>
-            </div>
+          <!-- Quick Actions -->
+          <div class="quick-actions-section">
+            <h2 class="section-title">Quick Actions</h2>
 
-            <div class="topic-card" @click="showTopic('orders')">
-              <div class="topic-icon">
-                <ion-icon :icon="cartOutline"></ion-icon>
+            <div class="quick-actions">
+              <div class="quick-action-card" @click="reportProblem">
+                <ion-icon :icon="warningOutline"></ion-icon>
+                <span>Report Problem</span>
               </div>
-              <h3>Managing Orders</h3>
-              <p>Order workflows</p>
-            </div>
-
-            <div class="topic-card" @click="showTopic('products')">
-              <div class="topic-icon">
-                <ion-icon :icon="cubeOutline"></ion-icon>
+              <div class="quick-action-card" @click="giveFeedback">
+                <ion-icon :icon="chatboxOutline"></ion-icon>
+                <span>Send Feedback</span>
               </div>
-              <h3>Products</h3>
-              <p>Add & manage products</p>
-            </div>
-
-            <div class="topic-card" @click="showTopic('payments')">
-              <div class="topic-icon">
-                <ion-icon :icon="cashOutline"></ion-icon>
-              </div>
-              <h3>Payments</h3>
-              <p>Payment methods</p>
-            </div>
-
-            <div class="topic-card" @click="showTopic('account')">
-              <div class="topic-icon">
-                <ion-icon :icon="personOutline"></ion-icon>
-              </div>
-              <h3>Account Settings</h3>
-              <p>Manage your account</p>
-            </div>
-
-            <div class="topic-card" @click="showTopic('troubleshooting')">
-              <div class="topic-icon">
-                <ion-icon :icon="constructOutline"></ion-icon>
-              </div>
-              <h3>Troubleshooting</h3>
-              <p>Fix common issues</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Video Tutorials -->
-        <div class="tutorials-section">
-          <h2 class="section-title">Video Tutorials</h2>
-          
-          <div class="tutorial-list">
-            <div class="tutorial-card" @click="playVideo('onboarding')">
-              <div class="tutorial-thumbnail">
-                <ion-icon :icon="playCircleOutline"></ion-icon>
-                <span class="duration">2:30</span>
-              </div>
-              <div class="tutorial-info">
-                <h3>Getting Started with Palengke Online</h3>
-                <p>Learn how to set up your seller account</p>
-              </div>
-            </div>
-
-            <div class="tutorial-card" @click="playVideo('products')">
-              <div class="tutorial-thumbnail">
-                <ion-icon :icon="playCircleOutline"></ion-icon>
-                <span class="duration">3:15</span>
-              </div>
-              <div class="tutorial-info">
-                <h3>How to Add Products</h3>
-                <p>Step-by-step guide to adding your products</p>
-              </div>
-            </div>
-
-            <div class="tutorial-card" @click="playVideo('orders')">
-              <div class="tutorial-thumbnail">
-                <ion-icon :icon="playCircleOutline"></ion-icon>
-                <span class="duration">4:00</span>
-              </div>
-              <div class="tutorial-info">
-                <h3>Managing Your Orders</h3>
-                <p>Accept, process, and complete orders</p>
+              <div class="quick-action-card" @click="requestFeature">
+                <ion-icon :icon="bulbOutline"></ion-icon>
+                <span>Request Feature</span>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- App Info -->
-        <div class="info-section">
-          <div class="info-card">
-            <ion-icon :icon="informationCircleOutline"></ion-icon>
-            <div class="info-content">
-              <h3>App Version</h3>
-              <p>1.0.0 (Build 100)</p>
+          <!-- My Reports -->
+          <div class="my-reports-section">
+            <h2 class="section-title">My Reports</h2>
+
+            <div v-if="loadingReports" class="loading-state">Loading your reports...</div>
+            <div v-else-if="myReports.length === 0" class="no-reports">
+              <p>You haven't submitted any reports yet.</p>
+            </div>
+            <div v-else class="reports-list">
+              <div v-for="report in myReports" :key="report.id" class="report-card">
+                <div class="report-info">
+                  <h3>{{ report.subject }}</h3>
+                  <p class="report-date">{{ formatDate(report.created_at) }}</p>
+                </div>
+                <span class="report-status" :class="report.status">
+                  {{ statusLabel(report.status) }}
+                </span>
+              </div>
             </div>
           </div>
 
-          <div class="info-card" @click="viewTerms">
-            <ion-icon :icon="documentTextOutline"></ion-icon>
-            <div class="info-content">
-              <h3>Terms & Conditions</h3>
-              <p>Read our terms of service</p>
+          <!-- FAQs -->
+          <div class="faqs-section">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+
+            <div class="faq-list">
+              <div v-for="(faq, index) in faqs" :key="index" class="faq-item" @click="toggleFaq(index)">
+                <div class="faq-question">
+                  <h3>{{ faq.question }}</h3>
+                  <ion-icon :icon="expandedFaq === index ? chevronUpOutline : chevronDownOutline"></ion-icon>
+                </div>
+                <div class="faq-answer" v-show="expandedFaq === index">
+                  <p>{{ faq.answer }}</p>
+                </div>
+              </div>
             </div>
-            <ion-icon :icon="chevronForwardOutline"></ion-icon>
           </div>
 
-          <div class="info-card" @click="viewPrivacy">
-            <ion-icon :icon="shieldCheckmarkOutline"></ion-icon>
-            <div class="info-content">
-              <h3>Privacy Policy</h3>
-              <p>How we protect your data</p>
-            </div>
-            <ion-icon :icon="chevronForwardOutline"></ion-icon>
-          </div>
-        </div>
+          <!-- Help Topics -->
+          <div class="topics-section">
+            <h2 class="section-title">Browse Help Topics</h2>
 
+            <div class="topics-grid">
+              <div class="topic-card" @click="showTopic('getting-started')">
+                <div class="topic-icon">
+                  <ion-icon :icon="rocketOutline"></ion-icon>
+                </div>
+                <h3>Getting Started</h3>
+                <p>Learn the basics</p>
+              </div>
+
+              <div class="topic-card" @click="showTopic('orders')">
+                <div class="topic-icon">
+                  <ion-icon :icon="cartOutline"></ion-icon>
+                </div>
+                <h3>Managing Orders</h3>
+                <p>Order workflows</p>
+              </div>
+
+              <div class="topic-card" @click="showTopic('products')">
+                <div class="topic-icon">
+                  <ion-icon :icon="cubeOutline"></ion-icon>
+                </div>
+                <h3>Products</h3>
+                <p>Add & manage products</p>
+              </div>
+
+              <div class="topic-card" @click="showTopic('payments')">
+                <div class="topic-icon">
+                  <ion-icon :icon="cashOutline"></ion-icon>
+                </div>
+                <h3>Payments</h3>
+                <p>Payment methods</p>
+              </div>
+
+              <div class="topic-card" @click="showTopic('account')">
+                <div class="topic-icon">
+                  <ion-icon :icon="personOutline"></ion-icon>
+                </div>
+                <h3>Account Settings</h3>
+                <p>Manage your account</p>
+              </div>
+
+              <div class="topic-card" @click="showTopic('troubleshooting')">
+                <div class="topic-icon">
+                  <ion-icon :icon="constructOutline"></ion-icon>
+                </div>
+                <h3>Troubleshooting</h3>
+                <p>Fix common issues</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Video Tutorials -->
+          <div class="tutorials-section">
+            <h2 class="section-title">Video Tutorials</h2>
+
+            <div class="tutorial-list">
+              <div class="tutorial-card" @click="playVideo('onboarding')">
+                <div class="tutorial-thumbnail">
+                  <ion-icon :icon="playCircleOutline"></ion-icon>
+                  <span class="duration">2:30</span>
+                </div>
+                <div class="tutorial-info">
+                  <h3>Getting Started with Palengke Online</h3>
+                  <p>Learn how to set up your seller account</p>
+                </div>
+              </div>
+
+              <div class="tutorial-card" @click="playVideo('products')">
+                <div class="tutorial-thumbnail">
+                  <ion-icon :icon="playCircleOutline"></ion-icon>
+                  <span class="duration">3:15</span>
+                </div>
+                <div class="tutorial-info">
+                  <h3>How to Add Products</h3>
+                  <p>Step-by-step guide to adding your products</p>
+                </div>
+              </div>
+
+              <div class="tutorial-card" @click="playVideo('orders')">
+                <div class="tutorial-thumbnail">
+                  <ion-icon :icon="playCircleOutline"></ion-icon>
+                  <span class="duration">4:00</span>
+                </div>
+                <div class="tutorial-info">
+                  <h3>Managing Your Orders</h3>
+                  <p>Accept, process, and complete orders</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- App Info -->
+          <div class="info-section">
+            <div class="info-card">
+              <ion-icon :icon="informationCircleOutline"></ion-icon>
+              <div class="info-content">
+                <h3>App Version</h3>
+                <p>1.0.0 (Build 100)</p>
+              </div>
+            </div>
+
+            <div class="info-card" @click="viewTerms">
+              <ion-icon :icon="documentTextOutline"></ion-icon>
+              <div class="info-content">
+                <h3>Terms & Conditions</h3>
+                <p>Read our terms of service</p>
+              </div>
+              <ion-icon :icon="chevronForwardOutline"></ion-icon>
+            </div>
+
+            <div class="info-card" @click="viewPrivacy">
+              <ion-icon :icon="shieldCheckmarkOutline"></ion-icon>
+              <div class="info-content">
+                <h3>Privacy Policy</h3>
+                <p>How we protect your data</p>
+              </div>
+              <ion-icon :icon="chevronForwardOutline"></ion-icon>
+            </div>
+          </div>
         </template>
-
       </div>
     </ion-content>
   </ion-page>
@@ -292,7 +282,7 @@ import {
   IonBackButton,
   IonIcon,
   alertController,
-  toastController
+  toastController,
 } from '@ionic/vue';
 import {
   searchOutline,
@@ -316,7 +306,7 @@ import {
   playCircleOutline,
   informationCircleOutline,
   documentTextOutline,
-  shieldCheckmarkOutline
+  shieldCheckmarkOutline,
 } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
 
@@ -366,7 +356,7 @@ const loadFaqs = async () => {
   loadingFaqs.value = true;
   try {
     const response = await fetch(`${API_BASE}/faqs`, {
-      headers: { 'Accept': 'application/json' },
+      headers: { Accept: 'application/json' },
     });
     const data = await response.json();
     if (response.ok && data.faqs) {
@@ -421,11 +411,11 @@ const showLoadingModal = async (message = 'Loading...') => {
   const alert = await alertController.create({
     cssClass: 'loading-modal-simple',
     message: message,
-    buttons: []
+    buttons: [],
   });
-  
+
   await alert.present();
-  
+
   setTimeout(() => {
     alert.dismiss();
   }, 1500);
@@ -437,44 +427,44 @@ const showSuccessModal = async (message) => {
     cssClass: 'success-modal',
     header: ' ',
     message: message,
-    buttons: ['OK']
+    buttons: ['OK'],
   });
-  
+
   await alert.present();
-  
+
   // Add the image after modal is presented
   setTimeout(() => {
     const alertElement = document.querySelector('.success-modal .alert-message');
     if (alertElement) {
       const textContent = alertElement.textContent;
       alertElement.innerHTML = '';
-      
+
       const wrapper = document.createElement('div');
       wrapper.style.display = 'flex';
       wrapper.style.flexDirection = 'column';
       wrapper.style.alignItems = 'center';
       wrapper.style.textAlign = 'center';
-      
+
       const img = document.createElement('img');
       img.src = '/assets/images/checkmark_success.png';
       img.style.width = '80px';
       img.style.height = '80px';
       img.style.margin = '0 auto 16px auto';
       img.style.display = 'block';
-      
+
       const textDiv = document.createElement('div');
       textDiv.textContent = textContent;
       textDiv.style.fontSize = '18px';
       textDiv.style.fontWeight = '600';
       textDiv.style.color = '#1a1a1a';
       textDiv.style.textAlign = 'center';
-      
+
       wrapper.appendChild(img);
       wrapper.appendChild(textDiv);
       alertElement.appendChild(wrapper);
     }
   }, 50);
-  
+
   setTimeout(() => {
     alert.dismiss();
   }, 2000);
@@ -499,10 +489,38 @@ async function fetchContactSupports() {
 
 function getDefaultContacts() {
   return [
-    { key: 'live_chat', title: 'Live Chat', subtitle: 'Chat with our support team', type: 'chat', value: null, enabled: true },
-    { key: 'call', title: 'Call Us', subtitle: '+63 912 345 6789', type: 'phone', value: '+639123456789', enabled: true },
-    { key: 'email', title: 'Email Support', subtitle: 'support@palengke-online.com', type: 'email', value: 'support@palengke-online.com', enabled: true },
-    { key: 'facebook', title: 'Facebook', subtitle: 'Message us on Facebook', type: 'facebook', value: 'https://facebook.com/PalengkeOnlinePH', enabled: true },
+    {
+      key: 'live_chat',
+      title: 'Live Chat',
+      subtitle: 'Chat with our support team',
+      type: 'chat',
+      value: null,
+      enabled: true,
+    },
+    {
+      key: 'call',
+      title: 'Call Us',
+      subtitle: '+63 912 345 6789',
+      type: 'phone',
+      value: '+639123456789',
+      enabled: true,
+    },
+    {
+      key: 'email',
+      title: 'Email Support',
+      subtitle: 'support@palengke-online.com',
+      type: 'email',
+      value: 'support@palengke-online.com',
+      enabled: true,
+    },
+    {
+      key: 'facebook',
+      title: 'Facebook',
+      subtitle: 'Message us on Facebook',
+      type: 'facebook',
+      value: 'https://facebook.com/PalengkeOnlinePH',
+      enabled: true,
+    },
   ];
 }
 
@@ -592,18 +610,18 @@ const reportProblem = async () => {
       {
         name: 'subject',
         type: 'text',
-        placeholder: 'Subject (e.g., App bug, account issue)'
+        placeholder: 'Subject (e.g., App bug, account issue)',
       },
       {
         name: 'description',
         type: 'textarea',
-        placeholder: 'Describe the problem in detail...'
-      }
+        placeholder: 'Describe the problem in detail...',
+      },
     ],
     buttons: [
       {
         text: 'Cancel',
-        role: 'cancel'
+        role: 'cancel',
       },
       {
         text: 'Submit',
@@ -632,9 +650,9 @@ const reportProblem = async () => {
               await failAlert.present();
             }
           }
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -642,18 +660,18 @@ const reportProblem = async () => {
 const giveFeedback = async () => {
   const alert = await alertController.create({
     header: 'Send Feedback',
-    message: 'We\'d love to hear from you!',
+    message: "We'd love to hear from you!",
     inputs: [
       {
         name: 'feedback',
         type: 'textarea',
-        placeholder: 'Your feedback...'
-      }
+        placeholder: 'Your feedback...',
+      },
     ],
     buttons: [
       {
         text: 'Cancel',
-        role: 'cancel'
+        role: 'cancel',
       },
       {
         text: 'Submit',
@@ -687,9 +705,9 @@ const giveFeedback = async () => {
               await failAlert.present();
             }
           }
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -702,13 +720,13 @@ const requestFeature = async () => {
       {
         name: 'feature',
         type: 'textarea',
-        placeholder: 'Describe the feature...'
-      }
+        placeholder: 'Describe the feature...',
+      },
     ],
     buttons: [
       {
         text: 'Cancel',
-        role: 'cancel'
+        role: 'cancel',
       },
       {
         text: 'Submit',
@@ -743,9 +761,9 @@ const requestFeature = async () => {
               await failAlert.present();
             }
           }
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -753,13 +771,13 @@ const requestFeature = async () => {
 const showTopic = async (topic) => {
   const topics = {
     'getting-started': 'Getting Started Guide',
-    'orders': 'Order Management Help',
-    'products': 'Product Management Help',
-    'payments': 'Payment Information',
-    'account': 'Account Settings Help',
-    'troubleshooting': 'Troubleshooting Guide'
+    orders: 'Order Management Help',
+    products: 'Product Management Help',
+    payments: 'Payment Information',
+    account: 'Account Settings Help',
+    troubleshooting: 'Troubleshooting Guide',
   };
-  
+
   await showLoadingModal(`Opening ${topics[topic]}...`);
 };
 
@@ -771,7 +789,7 @@ const viewTerms = async () => {
   const alert = await alertController.create({
     header: 'Terms & Conditions',
     message: 'Full terms and conditions document will be displayed here.',
-    buttons: ['Close']
+    buttons: ['Close'],
   });
   await alert.present();
 };
@@ -780,7 +798,7 @@ const viewPrivacy = async () => {
   const alert = await alertController.create({
     header: 'Privacy Policy',
     message: 'Full privacy policy document will be displayed here.',
-    buttons: ['Close']
+    buttons: ['Close'],
   });
   await alert.present();
 };
@@ -825,7 +843,7 @@ const viewPrivacy = async () => {
 
 .search-input:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: #4caf50;
 }
 
 .clear-icon {
@@ -880,16 +898,16 @@ const viewPrivacy = async () => {
   flex-shrink: 0;
 }
 .result-icon.faq {
-  background: #E8F5E9;
-  color: #4CAF50;
+  background: #e8f5e9;
+  color: #4caf50;
 }
 .result-icon.topic {
-  background: #E3F2FD;
-  color: #2196F3;
+  background: #e3f2fd;
+  color: #2196f3;
 }
 .result-icon.contact {
-  background: #FFF3E0;
-  color: #FF9800;
+  background: #fff3e0;
+  color: #ff9800;
 }
 .result-icon.quick_action {
   background: #fce4ec;
@@ -963,23 +981,23 @@ const viewPrivacy = async () => {
 }
 
 .contact-icon.chat {
-  background: #E8F5E9;
-  color: #4CAF50;
+  background: #e8f5e9;
+  color: #4caf50;
 }
 
 .contact-icon.phone {
-  background: #E3F2FD;
-  color: #2196F3;
+  background: #e3f2fd;
+  color: #2196f3;
 }
 
 .contact-icon.email {
-  background: #FFF3E0;
-  color: #FF9800;
+  background: #fff3e0;
+  color: #ff9800;
 }
 
 .contact-icon.facebook {
-  background: #E3F2FD;
-  color: #1877F2;
+  background: #e3f2fd;
+  color: #1877f2;
 }
 
 .contact-content {
@@ -1008,7 +1026,7 @@ const viewPrivacy = async () => {
 }
 
 .contact-status.online {
-  color: #4CAF50;
+  color: #4caf50;
   font-weight: 600;
 }
 
@@ -1044,7 +1062,7 @@ const viewPrivacy = async () => {
 
 .quick-action-card ion-icon {
   font-size: 32px;
-  color: #4CAF50;
+  color: #4caf50;
   margin-bottom: 8px;
 }
 
@@ -1162,7 +1180,7 @@ const viewPrivacy = async () => {
 
 .faq-question ion-icon {
   font-size: 20px;
-  color: #4CAF50;
+  color: #4caf50;
   flex-shrink: 0;
 }
 
@@ -1225,8 +1243,8 @@ const viewPrivacy = async () => {
   width: 56px;
   height: 56px;
   border-radius: 16px;
-  background: #E8F5E9;
-  color: #4CAF50;
+  background: #e8f5e9;
+  color: #4caf50;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1278,7 +1296,7 @@ const viewPrivacy = async () => {
   width: 120px;
   height: 80px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1342,7 +1360,7 @@ const viewPrivacy = async () => {
 
 .info-card ion-icon {
   font-size: 24px;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .info-content {
@@ -1367,7 +1385,7 @@ const viewPrivacy = async () => {
   .topics-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .quick-actions {
     grid-template-columns: 1fr;
   }
@@ -1398,7 +1416,7 @@ const viewPrivacy = async () => {
 }
 
 :deep(.success-modal button) {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   font-weight: 600;
   border-radius: 12px;
@@ -1436,14 +1454,18 @@ const viewPrivacy = async () => {
   width: 50px;
   height: 50px;
   border: 5px solid #f3f3f3;
-  border-top: 5px solid #1877F2;
+  border-top: 5px solid #1877f2;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 :deep(.loading-modal-simple .alert-button-group) {

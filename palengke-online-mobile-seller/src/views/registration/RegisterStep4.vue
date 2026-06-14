@@ -2,7 +2,6 @@
   <ion-page>
     <ion-content :fullscreen="true" class="step-content">
       <div class="step-container">
-        
         <!-- Back Button -->
         <div class="back-button" @click="goBack">
           <ion-icon :icon="arrowBackOutline"></ion-icon>
@@ -24,7 +23,6 @@
 
         <!-- Verification Section -->
         <div class="verification-section">
-
           <!-- Info Message -->
           <div class="info-message">
             <ion-icon :icon="shieldCheckmarkOutline"></ion-icon>
@@ -45,10 +43,8 @@
                 <span class="badge recommended">Recommended</span>
               </div>
             </div>
-            
-            <p class="option-description">
-              Get your account fully verified by providing a valid government-issued ID.
-            </p>
+
+            <p class="option-description">Get your account fully verified by providing a valid government-issued ID.</p>
 
             <div class="benefits-list">
               <div class="benefit-item">
@@ -93,7 +89,7 @@
                 <h2>Skip for Now</h2>
               </div>
             </div>
-            
+
             <p class="option-description">
               Create your account without verification. You can verify anytime later in Settings.
             </p>
@@ -122,13 +118,12 @@
           <div class="security-note">
             <ion-icon :icon="lockClosedOutline"></ion-icon>
             <div class="security-text">
-              <strong>Your Privacy Matters</strong><br>
-              All verification documents are encrypted and securely stored. Your information will only be used for identity verification and will never be shared with third parties.
+              <strong>Your Privacy Matters</strong><br />
+              All verification documents are encrypted and securely stored. Your information will only be used for
+              identity verification and will never be shared with third parties.
             </div>
           </div>
-
         </div>
-
       </div>
     </ion-content>
   </ion-page>
@@ -136,12 +131,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import {
-  IonPage,
-  IonContent,
-  IonIcon,
-  alertController
-} from '@ionic/vue';
+import { IonPage, IonContent, IonIcon, alertController } from '@ionic/vue';
 import {
   arrowBackOutline,
   shieldCheckmarkOutline,
@@ -151,7 +141,7 @@ import {
   removeCircleOutline,
   informationCircleOutline,
   timeOutline,
-  lockClosedOutline
+  lockClosedOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -166,7 +156,8 @@ const selectOption = async (option) => {
     // Show warning before proceeding to ID verification
     const alert = await alertController.create({
       header: 'Important Information',
-      message: 'Before proceeding, please prepare: Valid Government-Issued ID, Good Lighting, and Clear Background. Your information will be encrypted and secured, used only for verification, not shared with third parties, and handled by designated recipients only. This is for your account security and to comply with Know Your Customer (KYC) regulations.',
+      message:
+        'Before proceeding, please prepare: Valid Government-Issued ID, Good Lighting, and Clear Background. Your information will be encrypted and secured, used only for verification, not shared with third parties, and handled by designated recipients only. This is for your account security and to comply with Know Your Customer (KYC) regulations.',
       cssClass: 'verification-warning-modal',
       buttons: [
         {
@@ -175,7 +166,7 @@ const selectOption = async (option) => {
           cssClass: 'alert-button-cancel',
           handler: () => {
             // User cancelled, stay on this page
-          }
+          },
         },
         {
           text: 'I Understand, Continue',
@@ -185,15 +176,14 @@ const selectOption = async (option) => {
             const existingData = JSON.parse(localStorage.getItem('registrationData') || '{}');
             existingData.verificationChoice = 'verify';
             localStorage.setItem('registrationData', JSON.stringify(existingData));
-            
+
             // Navigate to Step 5 (Select ID Type)
             router.push('/register/step5');
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
     await alert.present();
-    
   } else if (option === 'skip') {
     // Show confirmation for skipping
     const alert = await alertController.create({
@@ -204,7 +194,7 @@ const selectOption = async (option) => {
         {
           text: 'Go Back',
           role: 'cancel',
-          cssClass: 'alert-button-cancel'
+          cssClass: 'alert-button-cancel',
         },
         {
           text: 'Skip & Continue',
@@ -215,12 +205,12 @@ const selectOption = async (option) => {
             existingData.verificationChoice = 'skip';
             existingData.verificationStatus = 'not_verified';
             localStorage.setItem('registrationData', JSON.stringify(existingData));
-            
+
             // Navigate to Success page (not verified)
             router.push('/register/success');
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
     await alert.present();
   }

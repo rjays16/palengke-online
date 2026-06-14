@@ -1,14 +1,14 @@
 /* Ionic Theme Variables for Light/Dark Mode Support */
 :root {
   /* Brand Colors */
-  --color-primary: #4CAF50;
+  --color-primary: #4caf50;
   --color-primary-hover: #45a049;
-  --color-secondary: #2196F3;
-  --color-secondary-hover: #1976D2;
-  --color-success: #4CAF50;
-  --color-warning: #FF9800;
+  --color-secondary: #2196f3;
+  --color-secondary-hover: #1976d2;
+  --color-success: #4caf50;
+  --color-warning: #ff9800;
   --color-error: #f44336;
-  --color-info: #2196F3;
+  --color-info: #2196f3;
 
   /* Background Colors */
   --color-bg-primary: #ffffff;
@@ -30,7 +30,7 @@
 
   /* Border Colors */
   --color-border: #e0e0e0;
-  --color-border-focus: #4CAF50;
+  --color-border-focus: #4caf50;
 
   /* Input Colors */
   --color-input-bg: #ffffff;
@@ -38,34 +38,34 @@
   --color-input-disabled-bg: #f5f5f5;
 
   /* Icon Colors */
-  --color-icon-primary: #4CAF50;
+  --color-icon-primary: #4caf50;
   --color-icon-secondary: #666666;
   --color-icon-tertiary: #999999;
 
   /* Info Box Colors */
-  --color-info-bg: #E3F2FD;
-  --color-info-border: #2196F3;
-  --color-info-text: #1565C0;
+  --color-info-bg: #e3f2fd;
+  --color-info-border: #2196f3;
+  --color-info-text: #1565c0;
 
   /* Success Box Colors */
-  --color-success-bg: #E8F5E9;
-  --color-success-border: #4CAF50;
-  --color-success-text: #2E7D32;
+  --color-success-bg: #e8f5e9;
+  --color-success-border: #4caf50;
+  --color-success-text: #2e7d32;
 
   /* Warning Box Colors */
-  --color-warning-bg: #FFF3E0;
-  --color-warning-border: #FF9800;
-  --color-warning-text: #E65100;
+  --color-warning-bg: #fff3e0;
+  --color-warning-border: #ff9800;
+  --color-warning-text: #e65100;
 
   /* Error Box Colors */
-  --color-error-bg: #FFEBEE;
+  --color-error-bg: #ffebee;
   --color-error-border: #f44336;
   --color-error-text: #c62828;
 
   /* OTP Section Colors */
-  --color-otp-bg: #E3F2FD;
-  --color-otp-border: #2196F3;
-  --color-otp-text: #1565C0;
+  --color-otp-bg: #e3f2fd;
+  --color-otp-border: #2196f3;
+  --color-otp-text: #1565c0;
 
   /* Modal/Alert Colors */
   --color-modal-bg: #ffffff;
@@ -73,11 +73,11 @@
   --color-modal-backdrop: rgba(0, 0, 0, 0.5);
 
   /* Status Badge Colors */
-  --color-verified-bg: #4CAF50;
-  --color-unverified-bg: #FF9800;
+  --color-verified-bg: #4caf50;
+  --color-unverified-bg: #ff9800;
 
   /* Link Colors */
-  --color-link: #4CAF50;
+  --color-link: #4caf50;
 }
 
 /* Ionic Alert/Modal base styles (works for both light and dark mode) */
@@ -133,14 +133,14 @@
 /* Dark Mode Styles */
 @media (prefers-color-scheme: dark) {
   /* Brand Colors (slightly adjusted for dark mode visibility) */
-  --color-primary: #66BB6A;
-  --color-primary-hover: #4CAF50;
-  --color-secondary: #42A5F5;
-  --color-secondary-hover: #2196F3;
-  --color-success: #66BB6A;
-  --color-warning: #FFB74D;
-  --color-error: #EF5350;
-  --color-info: #42A5F5;
+  --color-primary: #66bb6a;
+  --color-primary-hover: #4caf50;
+  --color-secondary: #42a5f5;
+  --color-secondary-hover: #2196f3;
+  --color-success: #66bb6a;
+  --color-warning: #ffb74d;
+  --color-error: #ef5350;
+  --color-info: #42a5f5;
 
   /* Background Colors */
   --color-bg-primary: #1a1a1a;
@@ -162,7 +162,7 @@
 
   /* Border Colors */
   --color-border: #404040;
-  --color-border-focus: #66BB6A;
+  --color-border-focus: #66bb6a;
 
   /* Input Colors */
   --color-input-bg: #2d2d2d;
@@ -170,34 +170,34 @@
   --color-input-disabled-bg: #3d3d3d;
 
   /* Icon Colors */
-  --color-icon-primary: #66BB6A;
+  --color-icon-primary: #66bb6a;
   --color-icon-secondary: #b0b0b0;
   --color-icon-tertiary: #808080;
 
   /* Info Box Colors */
   --color-info-bg: #1a2a3a;
-  --color-info-border: #42A5F5;
-  --color-info-text: #90CAF9;
+  --color-info-border: #42a5f5;
+  --color-info-text: #90caf9;
 
   /* Success Box Colors */
   --color-success-bg: #1a2e1a;
-  --color-success-border: #66BB6A;
-  --color-success-text: #A5D6A7;
+  --color-success-border: #66bb6a;
+  --color-success-text: #a5d6a7;
 
   /* Warning Box Colors */
   --color-warning-bg: #2e2a1a;
-  --color-warning-border: #FFB74D;
-  --color-warning-text: #FFCC80;
+  --color-warning-border: #ffb74d;
+  --color-warning-text: #ffcc80;
 
   /* Error Box Colors */
   --color-error-bg: #2e1a1a;
-  --color-error-border: #EF5350;
-  --color-error-text: #EF9A9A;
+  --color-error-border: #ef5350;
+  --color-error-text: #ef9a9a;
 
   /* OTP Section Colors */
   --color-otp-bg: #1a2a3a;
-  --color-otp-border: #42A5F5;
-  --color-otp-text: #90CAF9;
+  --color-otp-border: #42a5f5;
+  --color-otp-text: #90caf9;
 
   /* Modal/Alert Colors */
   --color-modal-bg: #2d2d2d;
@@ -205,11 +205,11 @@
   --color-modal-backdrop: rgba(0, 0, 0, 0.7);
 
   /* Status Badge Colors */
-  --color-verified-bg: #66BB6A;
-  --color-unverified-bg: #FFB74D;
+  --color-verified-bg: #66bb6a;
+  --color-unverified-bg: #ffb74d;
 
   /* Link Colors */
-  --color-link: #66BB6A;
+  --color-link: #66bb6a;
 }
 
 /* Global Dark Mode Styles for Ionic Components */
@@ -225,7 +225,8 @@
   }
 
   /* Ionic Input styling for dark mode */
-  ion-input, ion-textarea {
+  ion-input,
+  ion-textarea {
     --background: var(--color-input-bg);
     --color: var(--color-text-primary);
     --placeholder-color: var(--color-input-placeholder);

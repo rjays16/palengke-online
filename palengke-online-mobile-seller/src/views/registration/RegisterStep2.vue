@@ -2,7 +2,6 @@
   <ion-page>
     <ion-content :fullscreen="true" class="step-content">
       <div class="step-container">
-        
         <!-- Back Button -->
         <div class="back-button" @click="goBack">
           <ion-icon :icon="arrowBackOutline"></ion-icon>
@@ -24,7 +23,6 @@
 
         <!-- Form -->
         <div class="form-section">
-          
           <!-- Personal Information Section -->
           <div class="section-header">
             <ion-icon :icon="personOutline"></ion-icon>
@@ -35,14 +33,14 @@
           <div class="input-group">
             <label class="input-label">First Name *</label>
             <div class="input-wrapper" :class="{ error: errors.firstName }">
-              <input 
-                v-model="formData.firstName" 
-                type="text" 
+              <input
+                v-model="formData.firstName"
+                type="text"
                 placeholder="Juan"
                 class="custom-input"
                 @blur="validateField('firstName')"
                 @input="errors.firstName = ''"
-              >
+              />
             </div>
             <span v-if="errors.firstName" class="error-message">{{ errors.firstName }}</span>
           </div>
@@ -51,12 +49,7 @@
           <div class="input-group">
             <label class="input-label">Middle Name <span class="optional">(Optional)</span></label>
             <div class="input-wrapper">
-              <input 
-                v-model="formData.middleName" 
-                type="text" 
-                placeholder="Santos"
-                class="custom-input"
-              >
+              <input v-model="formData.middleName" type="text" placeholder="Santos" class="custom-input" />
             </div>
           </div>
 
@@ -64,14 +57,14 @@
           <div class="input-group">
             <label class="input-label">Last Name *</label>
             <div class="input-wrapper" :class="{ error: errors.lastName }">
-              <input 
-                v-model="formData.lastName" 
-                type="text" 
+              <input
+                v-model="formData.lastName"
+                type="text"
                 placeholder="Dela Cruz"
                 class="custom-input"
                 @blur="validateField('lastName')"
                 @input="errors.lastName = ''"
-              >
+              />
             </div>
             <span v-if="errors.lastName" class="error-message">{{ errors.lastName }}</span>
           </div>
@@ -81,8 +74,8 @@
             <label class="input-label">Country *</label>
             <div class="input-wrapper" :class="{ error: errors.country }">
               <ion-icon :icon="globeOutline" class="input-icon"></ion-icon>
-              <select 
-                v-model="formData.country" 
+              <select
+                v-model="formData.country"
                 class="custom-input with-icon custom-select"
                 @blur="validateField('country')"
                 @change="errors.country = ''"
@@ -101,14 +94,14 @@
             <label class="input-label">Birthdate *</label>
             <div class="input-wrapper" :class="{ error: errors.birthdate }">
               <ion-icon :icon="calendarOutline" class="input-icon"></ion-icon>
-              <input 
-                v-model="formData.birthdate" 
-                type="date" 
+              <input
+                v-model="formData.birthdate"
+                type="date"
                 class="custom-input with-icon"
                 :max="maxDate"
                 @blur="validateField('birthdate')"
                 @input="errors.birthdate = ''"
-              >
+              />
             </div>
             <span v-if="errors.birthdate" class="error-message">{{ errors.birthdate }}</span>
             <span v-else class="helper-text">You must be 18 years or older</span>
@@ -119,37 +112,35 @@
             <label class="input-label">Birthplace *</label>
             <div class="input-wrapper" :class="{ error: errors.birthplace }">
               <ion-icon :icon="locationOutline" class="input-icon"></ion-icon>
-              <input 
-                v-model="formData.birthplace" 
-                type="text" 
+              <input
+                v-model="formData.birthplace"
+                type="text"
                 placeholder="Cagayan de Oro City"
                 class="custom-input with-icon"
                 @blur="validateField('birthplace')"
                 @input="errors.birthplace = ''"
-              >
+              />
             </div>
             <span v-if="errors.birthplace" class="error-message">{{ errors.birthplace }}</span>
             <span v-else class="helper-text">City or municipality of birth</span>
           </div>
 
           <!-- Address Section Header -->
-          <div class="section-header" style="margin-top: 32px;">
+          <div class="section-header" style="margin-top: 32px">
             <ion-icon :icon="homeOutline"></ion-icon>
             <h2>Current Address</h2>
           </div>
 
           <!-- Checkbox: Same as Birthplace -->
           <div class="checkbox-group">
-            <input 
-              type="checkbox" 
-              id="sameAsBirthplace" 
+            <input
+              type="checkbox"
+              id="sameAsBirthplace"
               v-model="sameAsBirthplace"
               @change="onSameAsBirthplaceChange"
               class="checkbox-input"
-            >
-            <label for="sameAsBirthplace">
-              Current address is the same as birthplace
-            </label>
+            />
+            <label for="sameAsBirthplace"> Current address is the same as birthplace </label>
           </div>
 
           <!-- Current Address -->
@@ -157,8 +148,8 @@
             <label class="input-label">Current Address *</label>
             <div class="input-wrapper" :class="{ error: errors.currentAddress }">
               <ion-icon :icon="homeOutline" class="input-icon"></ion-icon>
-              <textarea 
-                v-model="formData.currentAddress" 
+              <textarea
+                v-model="formData.currentAddress"
                 placeholder="123 Main Street, Barangay Carmen, Cagayan de Oro City"
                 class="custom-textarea with-icon"
                 rows="3"
@@ -175,36 +166,24 @@
           <div class="info-box">
             <ion-icon :icon="shieldCheckmarkOutline"></ion-icon>
             <div class="info-text">
-              <strong>Your information is secure</strong><br>
+              <strong>Your information is secure</strong><br />
               All personal data is encrypted and will only be used for account verification.
             </div>
           </div>
 
           <!-- Navigation Buttons -->
           <div class="button-group">
-            <ion-button 
-              expand="block" 
-              fill="outline"
-              color="medium"
-              class="back-btn"
-              @click="goBack"
-            >
+            <ion-button expand="block" fill="outline" color="medium" class="back-btn" @click="goBack">
               <ion-icon slot="start" :icon="arrowBackOutline"></ion-icon>
               Back
             </ion-button>
 
-            <ion-button 
-              expand="block" 
-              class="next-button"
-              @click="handleNext"
-              :disabled="!isFormValid"
-            >
+            <ion-button expand="block" class="next-button" @click="handleNext" :disabled="!isFormValid">
               Next
               <ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon>
             </ion-button>
           </div>
         </div>
-
       </div>
     </ion-content>
   </ion-page>
@@ -213,12 +192,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import {
-  IonPage,
-  IonContent,
-  IonButton,
-  IonIcon
-} from '@ionic/vue';
+import { IonPage, IonContent, IonButton, IonIcon } from '@ionic/vue';
 import {
   arrowBackOutline,
   arrowForwardOutline,
@@ -227,7 +201,7 @@ import {
   locationOutline,
   homeOutline,
   shieldCheckmarkOutline,
-  globeOutline
+  globeOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -483,7 +457,7 @@ const formData = ref({
   country: '',
   birthdate: '',
   birthplace: '',
-  currentAddress: ''
+  currentAddress: '',
 });
 
 // Checkbox state
@@ -496,7 +470,7 @@ const errors = ref({
   country: '',
   birthdate: '',
   birthplace: '',
-  currentAddress: ''
+  currentAddress: '',
 });
 
 // Max date for birthdate (must be 18 years old)
@@ -564,22 +538,22 @@ const validateField = (fieldName) => {
         errors.value.birthdate = 'Birthdate is required';
         return false;
       }
-      
+
       // Check if 18 years old
       const birthDate = new Date(formData.value.birthdate);
       const today = new Date();
       let age = today.getFullYear() - birthDate.getFullYear();
       const monthDiff = today.getMonth() - birthDate.getMonth();
-      
+
       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
         age--;
       }
-      
+
       if (age < 18) {
         errors.value.birthdate = 'You must be at least 18 years old';
         return false;
       }
-      
+
       errors.value.birthdate = '';
       return true;
 
@@ -626,12 +600,14 @@ const onSameAsBirthplaceChange = () => {
 
 // Form validation
 const isFormValid = computed(() => {
-  return formData.value.firstName.trim() && 
-         formData.value.lastName.trim() && 
-         formData.value.country &&
-         formData.value.birthdate &&
-         formData.value.birthplace.trim() &&
-         formData.value.currentAddress.trim();
+  return (
+    formData.value.firstName.trim() &&
+    formData.value.lastName.trim() &&
+    formData.value.country &&
+    formData.value.birthdate &&
+    formData.value.birthplace.trim() &&
+    formData.value.currentAddress.trim()
+  );
 });
 
 // Navigation
@@ -651,7 +627,7 @@ const saveData = () => {
     birthdate: formData.value.birthdate,
     birthplace: formData.value.birthplace,
     currentAddress: formData.value.currentAddress,
-    sameAsBirthplace: sameAsBirthplace.value
+    sameAsBirthplace: sameAsBirthplace.value,
   };
   localStorage.setItem('registrationData', JSON.stringify(updatedData));
 };
@@ -663,9 +639,15 @@ const handleNext = () => {
   const isBirthdateValid = validateField('birthdate');
   const isBirthplaceValid = validateField('birthplace');
   const isAddressValid = validateField('currentAddress');
-  
-  if (isFirstNameValid && isLastNameValid && isCountryValid && isBirthdateValid && 
-      isBirthplaceValid && isAddressValid) {
+
+  if (
+    isFirstNameValid &&
+    isLastNameValid &&
+    isCountryValid &&
+    isBirthdateValid &&
+    isBirthplaceValid &&
+    isAddressValid
+  ) {
     saveData();
     router.push('/register/step3');
   }

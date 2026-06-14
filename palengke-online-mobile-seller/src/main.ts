@@ -1,5 +1,5 @@
-import { createApp } from 'vue'
-import App from './App.vue'
+import { createApp } from 'vue';
+import App from './App.vue';
 import router from './router';
 
 import { IonicVue } from '@ionic/vue';
@@ -38,16 +38,16 @@ import '@fortawesome/fontawesome-svg-core/styles.css';
 import './theme/variables.css';
 
 /* Font Awesome Configuration */
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { 
-  faFish, 
-  faPiggyBank, 
-  faCrow, 
-  faCarrot, 
-  faAppleAlt, 
-  faWineBottle, 
-  faCow, 
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import {
+  faFish,
+  faPiggyBank,
+  faCrow,
+  faCarrot,
+  faAppleAlt,
+  faWineBottle,
+  faCow,
   faSeedling,
   faGlassCheers,
   faTruck,
@@ -68,17 +68,17 @@ import {
   faTimes,
   faCheckCircle,
   faTimesCircle,
-  faStar
-} from '@fortawesome/free-solid-svg-icons'
+  faStar,
+} from '@fortawesome/free-solid-svg-icons';
 
 library.add(
-  faFish, 
-  faPiggyBank, 
-  faCrow, 
-  faCarrot, 
-  faAppleAlt, 
-  faWineBottle, 
-  faCow, 
+  faFish,
+  faPiggyBank,
+  faCrow,
+  faCarrot,
+  faAppleAlt,
+  faWineBottle,
+  faCow,
   faSeedling,
   faGlassCheers,
   faTruck,
@@ -99,12 +99,10 @@ library.add(
   faTimes,
   faCheckCircle,
   faTimesCircle,
-  faStar
-)
+  faStar,
+);
 
-const app = createApp(App)
-  .use(IonicVue)
-  .use(router);
+const app = createApp(App).use(IonicVue).use(router);
 
 app.component('font-awesome-icon', FontAwesomeIcon);
 

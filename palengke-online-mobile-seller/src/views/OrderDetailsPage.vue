@@ -16,7 +16,6 @@
 
     <ion-content :fullscreen="true">
       <div v-if="order" class="order-details-container">
-        
         <!-- Order Status Card -->
         <div class="status-card" :class="`status-${order.status}`">
           <div class="status-icon">
@@ -141,7 +140,10 @@
         <!-- Dispute Info -->
         <div class="info-card dispute-card" v-if="dispute">
           <div class="card-header">
-            <h3><ion-icon :icon="alertCircleOutline" style="vertical-align: middle; margin-right: 6px;"></ion-icon> Customer Dispute</h3>
+            <h3>
+              <ion-icon :icon="alertCircleOutline" style="vertical-align: middle; margin-right: 6px"></ion-icon>
+              Customer Dispute
+            </h3>
             <ion-badge color="danger">OPEN</ion-badge>
           </div>
           <div class="dispute-details">
@@ -176,23 +178,13 @@
             <ion-icon :icon="closeCircleOutline" slot="start"></ion-icon>
             Decline Order
           </ion-button>
-          
-          <ion-button
-            v-if="order.status === 'pending'"
-            expand="block"
-            color="success"
-            @click="acceptOrder"
-          >
+
+          <ion-button v-if="order.status === 'pending'" expand="block" color="success" @click="acceptOrder">
             <ion-icon :icon="checkmarkCircleOutline" slot="start"></ion-icon>
             Accept Order
           </ion-button>
 
-          <ion-button
-            v-if="order.status === 'processing'"
-            expand="block"
-            color="success"
-            @click="completeOrder"
-          >
+          <ion-button v-if="order.status === 'processing'" expand="block" color="success" @click="completeOrder">
             <ion-icon :icon="checkmarkCircleOutline" slot="start"></ion-icon>
             Mark as Completed
           </ion-button>
@@ -203,29 +195,21 @@
           <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
           <p>This order has been completed</p>
         </div>
-
       </div>
 
       <!-- Loading State -->
       <div v-else class="loading-container">
         <div class="logo-wrapper">
-          <img src="/assets/images/logo-without-circle.png" alt="Palengke Online" class="logo-image">
+          <img src="/assets/images/logo-without-circle.png" alt="Palengke Online" class="logo-image" />
           <svg class="loading-circle" viewBox="0 0 200 200">
-            <circle 
-              cx="100" 
-              cy="100" 
-              r="85" 
-              fill="none" 
-              stroke="#e0e0e0" 
-              stroke-width="6"
-            />
-            <circle 
-              class="animated-stroke-spin" 
-              cx="100" 
-              cy="100" 
-              r="85" 
-              fill="none" 
-              stroke="#2c2c2c" 
+            <circle cx="100" cy="100" r="85" fill="none" stroke="#e0e0e0" stroke-width="6" />
+            <circle
+              class="animated-stroke-spin"
+              cx="100"
+              cy="100"
+              r="85"
+              fill="none"
+              stroke="#2c2c2c"
               stroke-width="6"
               stroke-linecap="round"
             />
@@ -265,7 +249,7 @@ import {
   IonSpinner,
   alertController,
   actionSheetController,
-  toastController
+  toastController,
 } from '@ionic/vue';
 import {
   ellipsisVerticalOutline,
@@ -280,7 +264,7 @@ import {
   rocketOutline,
   printOutline,
   shareOutline,
-  alertCircleOutline
+  alertCircleOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -289,9 +273,9 @@ const route = useRoute();
 const order = ref(null);
 
 const dispute = computed(() => {
-  if (!order.value) return null
-  return getDisputeByOrderId(order.value.id)
-})
+  if (!order.value) return null;
+  return getDisputeByOrderId(order.value.id);
+});
 
 onMounted(() => {
   loadOrderDetails();
@@ -304,7 +288,7 @@ const loadOrderDetails = async () => {
 
   try {
     const response = await fetch(`${API_BASE}/seller/orders/${orderId}?email=${encodeURIComponent(email)}`, {
-      headers: { 'Accept': 'application/json' },
+      headers: { Accept: 'application/json' },
     });
     const data = await response.json();
 
@@ -360,7 +344,8 @@ const initMap = () => {
     attribution: '&copy; OpenStreetMap contributors',
   }).addTo(mapInstance);
 
-  L.marker([custLat, custLng]).addTo(mapInstance)
+  L.marker([custLat, custLng])
+    .addTo(mapInstance)
     .bindPopup('<b>Customer</b><br>' + order.value.deliveryAddress);
 
   navigator.geolocation.getCurrentPosition(
@@ -375,13 +360,21 @@ const initMap = () => {
           iconSize: [16, 16],
           iconAnchor: [8, 8],
         }),
-      }).addTo(mapInstance).bindPopup('<b>You (Seller)</b>');
+      })
+        .addTo(mapInstance)
+        .bindPopup('<b>You (Seller)</b>');
 
-      L.polyline([[sellerLat, sellerLng], [custLat, custLng]], {
-        color: '#4CAF50',
-        weight: 3,
-        dashArray: '8, 8',
-      }).addTo(mapInstance);
+      L.polyline(
+        [
+          [sellerLat, sellerLng],
+          [custLat, custLng],
+        ],
+        {
+          color: '#4CAF50',
+          weight: 3,
+          dashArray: '8, 8',
+        },
+      ).addTo(mapInstance);
 
       const distMeters = mapInstance.distance([sellerLat, sellerLng], [custLat, custLng]);
       const distKm = distMeters / 1000;
@@ -391,7 +384,13 @@ const initMap = () => {
       const minutes = Math.round((distKm / avgSpeedKmh) * 60);
       mapDuration.value = minutes < 1 ? 'Less than 1 min' : `${minutes} min${minutes > 1 ? 's' : ''}`;
 
-      mapInstance.fitBounds([[sellerLat, sellerLng], [custLat, custLng]], { padding: [40, 40] });
+      mapInstance.fitBounds(
+        [
+          [sellerLat, sellerLng],
+          [custLat, custLng],
+        ],
+        { padding: [40, 40] },
+      );
     },
     () => {
       mapInstance.setView([custLat, custLng], 16);
@@ -403,18 +402,20 @@ const initMap = () => {
 };
 
 const showOrderNotFound = (orderId) => {
-  alertController.create({
-    header: 'Order Not Found',
-    message: `Order #${orderId} does not exist.`,
-    buttons: [
-      {
-        text: 'OK',
-        handler: () => {
-          router.push('/orders');
-        }
-      }
-    ]
-  }).then(alert => alert.present());
+  alertController
+    .create({
+      header: 'Order Not Found',
+      message: `Order #${orderId} does not exist.`,
+      buttons: [
+        {
+          text: 'OK',
+          handler: () => {
+            router.push('/orders');
+          },
+        },
+      ],
+    })
+    .then((alert) => alert.present());
 };
 
 const formatPrice = (price) => {
@@ -429,7 +430,7 @@ const formatFullDate = (dateString) => {
     year: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
-    hour12: true
+    hour12: true,
   });
 };
 
@@ -438,7 +439,7 @@ const getStatusColor = (status) => {
     pending: 'warning',
     processing: 'primary',
     completed: 'success',
-    cancelled: 'danger'
+    cancelled: 'danger',
   };
   return colors[status] || 'medium';
 };
@@ -448,7 +449,7 @@ const getStatusIcon = (status) => {
     pending: hourglassOutline,
     processing: rocketOutline,
     completed: checkmarkCircleOutline,
-    cancelled: closeCircleOutline
+    cancelled: closeCircleOutline,
   };
   return icons[status] || timeOutline;
 };
@@ -458,7 +459,7 @@ const getStatusTitle = (status) => {
     pending: 'Order Received',
     processing: 'Order is Being Prepared',
     completed: 'Order Completed',
-    cancelled: 'Order Cancelled'
+    cancelled: 'Order Cancelled',
   };
   return titles[status] || 'Unknown Status';
 };
@@ -468,7 +469,7 @@ const getStatusMessage = (status) => {
     pending: 'Waiting for your confirmation',
     processing: 'Preparing the order for delivery',
     completed: 'Order has been delivered successfully',
-    cancelled: 'This order was cancelled'
+    cancelled: 'This order was cancelled',
   };
   return messages[status] || '';
 };
@@ -488,11 +489,11 @@ const showSuccessModal = async (message) => {
     cssClass: 'success-modal',
     header: ' ',
     message: message,
-    buttons: ['OK']
+    buttons: ['OK'],
   });
-  
+
   await alert.present();
-  
+
   // Add the image after modal is presented
   setTimeout(() => {
     const alertElement = document.querySelector('.success-modal .alert-message');
@@ -500,14 +501,14 @@ const showSuccessModal = async (message) => {
       // Clear the text content
       const textContent = alertElement.textContent;
       alertElement.innerHTML = '';
-      
+
       // Create wrapper for centering
       const wrapper = document.createElement('div');
       wrapper.style.display = 'flex';
       wrapper.style.flexDirection = 'column';
       wrapper.style.alignItems = 'center';
       wrapper.style.textAlign = 'center';
-      
+
       // Create and add the image
       const img = document.createElement('img');
       img.src = '/assets/images/checkmark_success.png';
@@ -515,7 +516,7 @@ const showSuccessModal = async (message) => {
       img.style.height = '80px';
       img.style.margin = '0 auto 16px auto';
       img.style.display = 'block';
-      
+
       // Create and add the text
       const textDiv = document.createElement('div');
       textDiv.textContent = textContent;
@@ -523,16 +524,16 @@ const showSuccessModal = async (message) => {
       textDiv.style.fontWeight = '600';
       textDiv.style.color = '#1a1a1a';
       textDiv.style.textAlign = 'center';
-      
+
       // Append to wrapper
       wrapper.appendChild(img);
       wrapper.appendChild(textDiv);
-      
+
       // Append wrapper to alert
       alertElement.appendChild(wrapper);
     }
   }, 50);
-  
+
   // Auto dismiss after 2 seconds
   setTimeout(() => {
     alert.dismiss();
@@ -545,7 +546,7 @@ const updateOrderStatus = async (newStatus) => {
   try {
     const response = await fetch(`${API_BASE}/seller/orders/${order.value.id}/status`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ email, status: newStatus }),
     });
     return response.ok;
@@ -561,7 +562,7 @@ const acceptOrder = async () => {
     buttons: [
       {
         text: 'Cancel',
-        role: 'cancel'
+        role: 'cancel',
       },
       {
         text: 'Accept',
@@ -575,9 +576,9 @@ const acceptOrder = async () => {
           } else {
             showToast('Failed to accept order', 'danger');
           }
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -589,7 +590,7 @@ const completeOrder = async () => {
     buttons: [
       {
         text: 'Cancel',
-        role: 'cancel'
+        role: 'cancel',
       },
       {
         text: 'Complete',
@@ -603,9 +604,9 @@ const completeOrder = async () => {
           } else {
             showToast('Failed to complete order', 'danger');
           }
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -618,13 +619,13 @@ const cancelOrder = async () => {
       {
         name: 'reason',
         type: 'textarea',
-        placeholder: 'Reason for declining (optional)'
-      }
+        placeholder: 'Reason for declining (optional)',
+      },
     ],
     buttons: [
       {
         text: 'Cancel',
-        role: 'cancel'
+        role: 'cancel',
       },
       {
         text: 'Decline',
@@ -639,16 +640,16 @@ const cancelOrder = async () => {
               cssClass: 'decline-modal',
               header: ' ',
               message: 'Order declined',
-              buttons: ['OK']
+              buttons: ['OK'],
             });
             await declineAlert.present();
             setTimeout(() => declineAlert.dismiss(), 2000);
           } else {
             showToast('Failed to decline order', 'danger');
           }
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -656,8 +657,6 @@ const cancelOrder = async () => {
 const callCustomer = () => {
   window.location.href = `tel:${order.value.customerPhone}`;
 };
-
-
 
 const showMoreOptions = async () => {
   const actionSheet = await actionSheetController.create({
@@ -668,27 +667,27 @@ const showMoreOptions = async () => {
         icon: printOutline,
         handler: () => {
           showToast('Print feature coming soon');
-        }
+        },
       },
       {
         text: 'Share Order',
         icon: shareOutline,
         handler: () => {
           showToast('Share feature coming soon');
-        }
+        },
       },
       {
         text: 'Call Customer',
         icon: callOutline,
         handler: () => {
           callCustomer();
-        }
+        },
       },
       {
         text: 'Cancel',
-        role: 'cancel'
-      }
-    ]
+        role: 'cancel',
+      },
+    ],
   });
   await actionSheet.present();
 };
@@ -698,7 +697,7 @@ const showToast = async (message, color = 'dark') => {
     message,
     duration: 2000,
     color,
-    position: 'top'
+    position: 'top',
   });
   await toast.present();
 };
@@ -723,19 +722,19 @@ const showToast = async (message, color = 'dark') => {
 }
 
 .status-card.status-pending {
-  background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
 }
 
 .status-card.status-processing {
-  background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
 }
 
 .status-card.status-completed {
-  background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
 }
 
 .status-card.status-cancelled {
-  background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%);
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
 }
 
 .status-icon {
@@ -751,15 +750,15 @@ const showToast = async (message, color = 'dark') => {
 
 .status-icon ion-icon {
   font-size: 32px;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .status-card.status-pending .status-icon ion-icon {
-  color: #FF9800;
+  color: #ff9800;
 }
 
 .status-card.status-processing .status-icon ion-icon {
-  color: #2196F3;
+  color: #2196f3;
 }
 
 .status-card.status-cancelled .status-icon ion-icon {
@@ -842,7 +841,7 @@ const showToast = async (message, color = 'dark') => {
 
 .customer-row > ion-icon {
   font-size: 24px;
-  color: #4CAF50;
+  color: #4caf50;
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -904,7 +903,7 @@ const showToast = async (message, color = 'dark') => {
 .item-price {
   font-size: 14px;
   font-weight: 700;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 /* Order Summary */
@@ -937,7 +936,7 @@ const showToast = async (message, color = 'dark') => {
 }
 
 .summary-row.total span:last-child {
-  color: #4CAF50;
+  color: #4caf50;
   font-size: 20px;
 }
 
@@ -958,9 +957,20 @@ const showToast = async (message, color = 'dark') => {
 }
 
 /* Dispute Card */
-.dispute-card { border: 1.5px solid #fecaca; background: #fef2f2; }
-.dispute-details { margin-top: 8px; }
-.dispute-photo { width: 100%; max-height: 140px; object-fit: cover; border-radius: 8px; margin-top: 8px; }
+.dispute-card {
+  border: 1.5px solid #fecaca;
+  background: #fef2f2;
+}
+.dispute-details {
+  margin-top: 8px;
+}
+.dispute-photo {
+  width: 100%;
+  max-height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-top: 8px;
+}
 
 /* Completed Message */
 .completed-message {
@@ -974,7 +984,7 @@ const showToast = async (message, color = 'dark') => {
 
 .completed-message ion-icon {
   font-size: 64px;
-  color: #4CAF50;
+  color: #4caf50;
   margin-bottom: 16px;
 }
 
@@ -1047,7 +1057,8 @@ const showToast = async (message, color = 'dark') => {
 }
 
 @keyframes textPulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.3;
   }
   50% {
@@ -1076,7 +1087,7 @@ const showToast = async (message, color = 'dark') => {
 }
 
 :deep(.success-modal button) {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   font-weight: 600;
   border-radius: 12px;
@@ -1111,7 +1122,7 @@ const showToast = async (message, color = 'dark') => {
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #4CAF50;
+  border-top: 4px solid #4caf50;
   border-radius: 50%;
   animation: loadingSpin 1s linear infinite;
 }
@@ -1120,8 +1131,12 @@ const showToast = async (message, color = 'dark') => {
 }
 
 @keyframes loadingSpin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Decline Modal */
@@ -1168,10 +1183,10 @@ const showToast = async (message, color = 'dark') => {
 :deep(.seller-dot) {
   width: 16px;
   height: 16px;
-  background: #2196F3;
+  background: #2196f3;
   border: 3px solid white;
   border-radius: 50%;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
 .map-info-bar {
@@ -1181,7 +1196,7 @@ const showToast = async (message, color = 'dark') => {
   padding: 10px 16px;
   border-radius: 12px;
   margin-bottom: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   font-size: 14px;
   font-weight: 600;
   color: #1a1a1a;
@@ -1189,7 +1204,7 @@ const showToast = async (message, color = 'dark') => {
 .map-info-bar ion-icon {
   vertical-align: middle;
   margin-right: 4px;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 /* Responsive */

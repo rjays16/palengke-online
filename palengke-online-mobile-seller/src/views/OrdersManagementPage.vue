@@ -56,12 +56,7 @@
 
       <!-- Orders List -->
       <div v-else class="orders-list">
-        <div
-          v-for="order in filteredOrders"
-          :key="order.id"
-          class="order-card"
-          @click="viewOrderDetails(order.id)"
-        >
+        <div v-for="order in filteredOrders" :key="order.id" class="order-card" @click="viewOrderDetails(order.id)">
           <!-- Order Header -->
           <div class="order-header">
             <div class="order-info">
@@ -91,11 +86,7 @@
               <span class="label">Total:</span>
               <span class="amount">₱{{ formatPrice(order.total) }}</span>
             </div>
-            <ion-button
-              size="small"
-              :color="getActionColor(order.status)"
-              @click.stop="quickAction(order)"
-            >
+            <ion-button size="small" :color="getActionColor(order.status)" @click.stop="quickAction(order)">
               {{ getActionText(order.status) }}
             </ion-button>
           </div>
@@ -151,7 +142,7 @@ import {
   IonBadge,
   actionSheetController,
   alertController,
-  toastController
+  toastController,
 } from '@ionic/vue';
 import {
   filterOutline,
@@ -162,7 +153,7 @@ import {
   timeOutline,
   closeCircleOutline,
   homeOutline,
-  cubeOutline
+  cubeOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -180,11 +171,11 @@ const loadOrders = async () => {
   loading.value = true;
   try {
     const response = await fetch(`${API_BASE}/seller/orders?email=${encodeURIComponent(email)}`, {
-      headers: { 'Accept': 'application/json' },
+      headers: { Accept: 'application/json' },
     });
     const data = await response.json();
     if (response.ok && data.orders) {
-      orders.value = data.orders.map(o => ({
+      orders.value = data.orders.map((o) => ({
         id: o.id,
         customerName: o.customer_name,
         customerPhone: o.customer_phone,
@@ -211,9 +202,9 @@ onIonViewWillEnter(() => {
 const orderStats = computed(() => {
   return {
     all: orders.value.length,
-    pending: orders.value.filter(o => o.status === 'pending').length,
-    processing: orders.value.filter(o => o.status === 'processing').length,
-    completed: orders.value.filter(o => o.status === 'completed').length
+    pending: orders.value.filter((o) => o.status === 'pending').length,
+    processing: orders.value.filter((o) => o.status === 'processing').length,
+    completed: orders.value.filter((o) => o.status === 'completed').length,
   };
 });
 
@@ -222,15 +213,14 @@ const filteredOrders = computed(() => {
 
   // Filter by tab
   if (selectedTab.value !== 'all') {
-    filtered = filtered.filter(order => order.status === selectedTab.value);
+    filtered = filtered.filter((order) => order.status === selectedTab.value);
   }
 
   // Filter by search
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase();
-    filtered = filtered.filter(order =>
-      String(order.id).toLowerCase().includes(query) ||
-      order.customerName.toLowerCase().includes(query)
+    filtered = filtered.filter(
+      (order) => String(order.id).toLowerCase().includes(query) || order.customerName.toLowerCase().includes(query),
     );
   }
 
@@ -290,7 +280,7 @@ const getStatusColor = (status) => {
     pending: 'warning',
     processing: 'primary',
     completed: 'success',
-    cancelled: 'danger'
+    cancelled: 'danger',
   };
   return colors[status] || 'medium';
 };
@@ -338,7 +328,7 @@ const updateOrderStatus = async (orderId, newStatus) => {
   try {
     const response = await fetch(`${API_BASE}/seller/orders/${orderId}/status`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ email, status: newStatus }),
     });
     return response.ok;
@@ -352,11 +342,11 @@ const showSuccessModal = async (message) => {
     cssClass: 'success-modal',
     header: ' ',
     message: message,
-    buttons: ['OK']
+    buttons: ['OK'],
   });
-  
+
   await alert.present();
-  
+
   // Add the image after modal is presented
   setTimeout(() => {
     const alertElement = document.querySelector('.success-modal .alert-message');
@@ -364,14 +354,14 @@ const showSuccessModal = async (message) => {
       // Clear the text content
       const textContent = alertElement.textContent;
       alertElement.innerHTML = '';
-      
+
       // Create wrapper for centering
       const wrapper = document.createElement('div');
       wrapper.style.display = 'flex';
       wrapper.style.flexDirection = 'column';
       wrapper.style.alignItems = 'center';
       wrapper.style.textAlign = 'center';
-      
+
       // Create and add the image
       const img = document.createElement('img');
       img.src = '/assets/images/checkmark_success.png';
@@ -379,7 +369,7 @@ const showSuccessModal = async (message) => {
       img.style.height = '80px';
       img.style.margin = '0 auto 16px auto';
       img.style.display = 'block';
-      
+
       // Create and add the text
       const textDiv = document.createElement('div');
       textDiv.textContent = textContent;
@@ -387,16 +377,16 @@ const showSuccessModal = async (message) => {
       textDiv.style.fontWeight = '600';
       textDiv.style.color = '#1a1a1a';
       textDiv.style.textAlign = 'center';
-      
+
       // Append to wrapper
       wrapper.appendChild(img);
       wrapper.appendChild(textDiv);
-      
+
       // Append wrapper to alert
       alertElement.appendChild(wrapper);
     }
   }, 50);
-  
+
   // Auto dismiss after 2 seconds
   setTimeout(() => {
     alert.dismiss();
@@ -410,7 +400,7 @@ const acceptOrder = async (order) => {
     buttons: [
       {
         text: 'Cancel',
-        role: 'cancel'
+        role: 'cancel',
       },
       {
         text: 'Accept',
@@ -424,9 +414,9 @@ const acceptOrder = async (order) => {
           } else {
             showToast('Failed to accept order', 'danger');
           }
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -438,7 +428,7 @@ const completeOrder = async (order) => {
     buttons: [
       {
         text: 'Cancel',
-        role: 'cancel'
+        role: 'cancel',
       },
       {
         text: 'Complete',
@@ -452,9 +442,9 @@ const completeOrder = async (order) => {
           } else {
             showToast('Failed to complete order', 'danger');
           }
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -469,7 +459,7 @@ const showFilterOptions = async () => {
         handler: () => {
           orders.value.sort((a, b) => new Date(b.date) - new Date(a.date));
           showToast('Sorted by newest first');
-        }
+        },
       },
       {
         text: 'Oldest First',
@@ -477,7 +467,7 @@ const showFilterOptions = async () => {
         handler: () => {
           orders.value.sort((a, b) => new Date(a.date) - new Date(b.date));
           showToast('Sorted by oldest first');
-        }
+        },
       },
       {
         text: 'Highest Amount',
@@ -485,7 +475,7 @@ const showFilterOptions = async () => {
         handler: () => {
           orders.value.sort((a, b) => b.total - a.total);
           showToast('Sorted by highest amount');
-        }
+        },
       },
       {
         text: 'Lowest Amount',
@@ -493,13 +483,13 @@ const showFilterOptions = async () => {
         handler: () => {
           orders.value.sort((a, b) => a.total - b.total);
           showToast('Sorted by lowest amount');
-        }
+        },
       },
       {
         text: 'Cancel',
-        role: 'cancel'
-      }
-    ]
+        role: 'cancel',
+      },
+    ],
   });
   await actionSheet.present();
 };
@@ -509,7 +499,7 @@ const showToast = async (message, color = 'dark') => {
     message,
     duration: 2000,
     color,
-    position: 'top'
+    position: 'top',
   });
   await toast.present();
 };
@@ -550,14 +540,21 @@ ion-segment {
 
 .loading-icon {
   font-size: 60px;
-  color: #4CAF50;
+  color: #4caf50;
   margin-bottom: 16px;
   animation: pulse 1.5s ease-in-out infinite;
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.1); }
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
 }
 
 .loading-state p {
@@ -568,8 +565,8 @@ ion-segment {
 
 ion-segment-button {
   --color: #666;
-  --color-checked: #4CAF50;
-  --indicator-color: #4CAF50;
+  --color-checked: #4caf50;
+  --indicator-color: #4caf50;
   font-size: 13px;
   font-weight: 600;
   min-height: 36px;
@@ -587,7 +584,9 @@ ion-segment-button {
   margin-bottom: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .order-card:active {
@@ -643,7 +642,7 @@ ion-segment-button {
 .customer-info ion-icon,
 .order-items ion-icon {
   font-size: 18px;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 /* Order Footer */
@@ -670,7 +669,7 @@ ion-segment-button {
 .order-total .amount {
   font-size: 18px;
   font-weight: 700;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .order-footer ion-button {
@@ -770,7 +769,7 @@ ion-segment-button {
 }
 
 .nav-item.active {
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .nav-item:active {
@@ -802,7 +801,7 @@ ion-segment-button {
 }
 
 :deep(.success-modal button) {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   font-weight: 600;
   border-radius: 12px;
@@ -837,7 +836,7 @@ ion-segment-button {
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #4CAF50;
+  border-top: 4px solid #4caf50;
   border-radius: 50%;
   animation: loadingSpin 1s linear infinite;
 }
@@ -846,8 +845,12 @@ ion-segment-button {
 }
 
 @keyframes loadingSpin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Decline Modal Styling */

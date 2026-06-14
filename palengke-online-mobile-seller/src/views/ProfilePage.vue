@@ -8,22 +8,21 @@
 
     <ion-content :fullscreen="true">
       <div class="profile-container">
-
         <!-- Profile Header -->
         <div class="profile-header">
           <div class="profile-avatar-container">
             <div class="profile-avatar">
-              <img v-if="profileData.avatar" :src="profileData.avatar" alt="Profile">
+              <img v-if="profileData.avatar" :src="profileData.avatar" alt="Profile" />
               <ion-icon v-else :icon="personOutline"></ion-icon>
             </div>
             <ion-button class="change-photo-btn" fill="clear" size="small" @click="changePhoto">
               <ion-icon :icon="cameraOutline"></ion-icon>
             </ion-button>
           </div>
-          
+
           <h2 class="profile-name">{{ profileData.name }}</h2>
           <p class="profile-type">{{ profileData.businessType }}</p>
-          
+
           <div class="profile-stats">
             <div class="stat-item">
               <div class="stat-value">{{ profileData.totalOrders }}</div>
@@ -45,7 +44,7 @@
         <!-- Personal Information -->
         <div class="section">
           <h3 class="section-title">Personal Information</h3>
-          
+
           <div class="info-list">
             <div class="info-item disabled">
               <div class="info-icon">
@@ -95,7 +94,7 @@
         <!-- Shop Information -->
         <div class="section">
           <h3 class="section-title">Shop Information</h3>
-          
+
           <div class="info-list">
             <div class="info-item" @click="editField('shopName')">
               <div class="info-icon">
@@ -146,13 +145,9 @@
         <!-- Payment Information -->
         <div class="section" v-if="paymentMethodsEnabled">
           <h3 class="section-title">Payment Information</h3>
-          
+
           <div class="info-list" v-if="paymentMethods.length > 0">
-            <div
-              class="info-item"
-              v-for="method in paymentMethods"
-              :key="method.id"
-            >
+            <div class="info-item" v-for="method in paymentMethods" :key="method.id">
               <div class="info-icon" :class="method.type">
                 <ion-icon :icon="paymentIcon(method.type)"></ion-icon>
               </div>
@@ -180,7 +175,7 @@
         <!-- Account Settings -->
         <div class="section">
           <h3 class="section-title">Account Settings</h3>
-          
+
           <div class="settings-list">
             <div class="settings-item" @click="changePassword">
               <div class="settings-icon">
@@ -249,7 +244,7 @@
         <!-- Support & Legal -->
         <div class="section">
           <h3 class="section-title">Support & Legal</h3>
-          
+
           <div class="settings-list">
             <div class="settings-item" @click="helpCenter">
               <div class="settings-icon">
@@ -306,12 +301,7 @@
 
         <!-- Logout Button -->
         <div class="logout-section">
-          <ion-button 
-            expand="block" 
-            color="danger" 
-            @click="handleLogout"
-            class="logout-button"
-          >
+          <ion-button expand="block" color="danger" @click="handleLogout" class="logout-button">
             <ion-icon :icon="logOutOutline" slot="start"></ion-icon>
             Logout
           </ion-button>
@@ -322,18 +312,11 @@
           <p>Palengke Online Seller</p>
           <p>Version 1.0.0 (Build 100)</p>
         </div>
-
       </div>
     </ion-content>
 
     <!-- Hidden file input for web fallback -->
-    <input
-      type="file"
-      accept="image/*"
-      ref="fileInputRef"
-      @change="handleFileInput"
-      style="display:none"
-    />
+    <input type="file" accept="image/*" ref="fileInputRef" @change="handleFileInput" style="display: none" />
 
     <!-- Operating Hours Modal -->
     <div class="hours-overlay" v-if="showHoursModal" @click.self="showHoursModal = false">
@@ -351,25 +334,27 @@
             </label>
             <div class="hours-time-group" v-if="!hoursData[day].closed">
               <select v-model="hoursData[day].openHour">
-                <option v-for="h in 12" :key="'oh'+h" :value="h">{{ h }}</option>
+                <option v-for="h in 12" :key="'oh' + h" :value="h">{{ h }}</option>
               </select>
               <span class="hours-sep">:</span>
               <select v-model="hoursData[day].openMin">
-                <option v-for="m in ['00','15','30','45']" :key="'om'+m" :value="m">{{ m }}</option>
+                <option v-for="m in ['00', '15', '30', '45']" :key="'om' + m" :value="m">{{ m }}</option>
               </select>
               <select v-model="hoursData[day].openAmPm">
-                <option value="AM">AM</option><option value="PM">PM</option>
+                <option value="AM">AM</option>
+                <option value="PM">PM</option>
               </select>
               <span class="hours-to">to</span>
               <select v-model="hoursData[day].closeHour">
-                <option v-for="h in 12" :key="'ch'+h" :value="h">{{ h }}</option>
+                <option v-for="h in 12" :key="'ch' + h" :value="h">{{ h }}</option>
               </select>
               <span class="hours-sep">:</span>
               <select v-model="hoursData[day].closeMin">
-                <option v-for="m in ['00','15','30','45']" :key="'cm'+m" :value="m">{{ m }}</option>
+                <option v-for="m in ['00', '15', '30', '45']" :key="'cm' + m" :value="m">{{ m }}</option>
               </select>
               <select v-model="hoursData[day].closeAmPm">
-                <option value="AM">AM</option><option value="PM">PM</option>
+                <option value="AM">AM</option>
+                <option value="PM">PM</option>
               </select>
             </div>
             <div class="hours-closed-text" v-else>Closed</div>
@@ -427,7 +412,7 @@ import {
   IonToggle,
   alertController,
   actionSheetController,
-  toastController
+  toastController,
 } from '@ionic/vue';
 import {
   personOutline,
@@ -462,7 +447,7 @@ import {
   phonePortraitOutline,
   cashOutline,
   businessOutline,
-  checkmarkCircleOutline
+  checkmarkCircleOutline,
 } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
 
@@ -483,7 +468,7 @@ const profileData = ref({
   avatar: null,
   totalOrders: 0,
   rating: 0,
-  joinedDays: 0
+  joinedDays: 0,
 });
 
 const loadProfile = async () => {
@@ -520,20 +505,33 @@ const paymentMethodsEnabled = ref(true);
 const showHoursModal = ref(false);
 
 const fileInputRef = ref(null);
-let cameraCaptureMode = ref('camera');
+const cameraCaptureMode = ref('camera');
 
 const dayKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 const dayLabels = {
-  monday: 'Monday', tuesday: 'Tuesday', wednesday: 'Wednesday',
-  thursday: 'Thursday', friday: 'Friday', saturday: 'Saturday', sunday: 'Sunday'
+  monday: 'Monday',
+  tuesday: 'Tuesday',
+  wednesday: 'Wednesday',
+  thursday: 'Thursday',
+  friday: 'Friday',
+  saturday: 'Saturday',
+  sunday: 'Sunday',
 };
 
-const defaultDayHours = { openHour: 7, openMin: '00', openAmPm: 'AM', closeHour: 5, closeMin: '00', closeAmPm: 'PM', closed: false };
+const defaultDayHours = {
+  openHour: 7,
+  openMin: '00',
+  openAmPm: 'AM',
+  closeHour: 5,
+  closeMin: '00',
+  closeAmPm: 'PM',
+  closed: false,
+};
 const hoursData = ref({});
 
 function initDefaultHours() {
   const h = {};
-  dayKeys.forEach(day => {
+  dayKeys.forEach((day) => {
     h[day] = { ...defaultDayHours };
   });
   h.saturday = { ...defaultDayHours, openHour: 8, closeHour: 12 };
@@ -546,7 +544,7 @@ function parseHoursFromString(str) {
   try {
     const parsed = JSON.parse(str);
     const h = initDefaultHours();
-    dayKeys.forEach(day => {
+    dayKeys.forEach((day) => {
       if (parsed[day]) {
         h[day] = { ...h[day], ...parsed[day] };
       }
@@ -564,7 +562,7 @@ function formatOpenClose(day) {
 }
 
 function formatOperatingHours(hoursObj) {
-  const lines = dayKeys.map(day => {
+  const lines = dayKeys.map((day) => {
     const d = hoursObj[day];
     if (!d || d.closed) return `${dayLabels[day]}: Closed`;
     return `${dayLabels[day]}: ${d.openHour}:${d.openMin} ${d.openAmPm} - ${d.closeHour}:${d.closeMin} ${d.closeAmPm}`;
@@ -576,17 +574,18 @@ function getHoursSummary(str) {
   if (!str) return 'Set operating hours';
   try {
     const parsed = JSON.parse(str);
-    const openDays = dayKeys.filter(d => parsed[d] && !parsed[d].closed);
+    const openDays = dayKeys.filter((d) => parsed[d] && !parsed[d].closed);
     if (openDays.length === 0) return 'Closed all week';
     if (openDays.length === 7) return 'Open daily';
     const first = parsed[openDays[0]];
-    const allSame = openDays.every(d =>
-      parsed[d].openHour === first.openHour &&
-      parsed[d].openMin === first.openMin &&
-      parsed[d].openAmPm === first.openAmPm &&
-      parsed[d].closeHour === first.closeHour &&
-      parsed[d].closeMin === first.closeMin &&
-      parsed[d].closeAmPm === first.closeAmPm
+    const allSame = openDays.every(
+      (d) =>
+        parsed[d].openHour === first.openHour &&
+        parsed[d].openMin === first.openMin &&
+        parsed[d].openAmPm === first.openAmPm &&
+        parsed[d].closeHour === first.closeHour &&
+        parsed[d].closeMin === first.closeMin &&
+        parsed[d].closeAmPm === first.closeAmPm,
     );
     if (allSame) {
       if (openDays.length === 5 && openDays[0] === 'monday' && openDays[4] === 'friday')
@@ -649,7 +648,7 @@ const showLoadingModal = async (message = 'Loading...', autoDismiss = true) => {
   const alert = await alertController.create({
     cssClass: 'loading-modal-simple',
     message: message,
-    buttons: []
+    buttons: [],
   });
 
   await alert.present();
@@ -746,9 +745,9 @@ const showPaymentAgreement = async () => {
         text: 'I Agree',
         handler: () => {
           showAddPaymentForm();
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 
@@ -796,9 +795,9 @@ const showAddPaymentForm = async () => {
             return false;
           }
           showPaymentDetailsForm(selectedType);
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await typeAlert.present();
 };
@@ -810,13 +809,13 @@ const showPaymentDetailsForm = async (selectedType) => {
       {
         name: 'account_name',
         type: 'text',
-        placeholder: 'Account Name'
+        placeholder: 'Account Name',
       },
       {
         name: 'account_number',
         type: 'text',
-        placeholder: 'Account Number'
-      }
+        placeholder: 'Account Number',
+      },
     ],
     buttons: [
       { text: 'Back', role: 'cancel' },
@@ -828,7 +827,7 @@ const showPaymentDetailsForm = async (selectedType) => {
               message: 'All fields are required',
               duration: 2000,
               color: 'danger',
-              position: 'top'
+              position: 'top',
             });
             await toast.present();
             return false;
@@ -865,13 +864,13 @@ const showPaymentDetailsForm = async (selectedType) => {
               message: error.message || 'Failed to add payment method',
               duration: 2000,
               color: 'danger',
-              position: 'top'
+              position: 'top',
             });
             await toast.present();
           }
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -906,13 +905,13 @@ const deletePaymentMethod = async (id) => {
               message: error.message || 'Failed to remove payment method',
               duration: 2000,
               color: 'danger',
-              position: 'top'
+              position: 'top',
             });
             await toast.present();
           }
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -923,11 +922,11 @@ const showSuccessModal = async (message) => {
     cssClass: 'success-modal',
     header: ' ',
     message: message,
-    buttons: ['OK']
+    buttons: ['OK'],
   });
-  
+
   await alert.present();
-  
+
   // Add the image after modal is presented
   setTimeout(() => {
     const alertElement = document.querySelector('.success-modal .alert-message');
@@ -935,14 +934,14 @@ const showSuccessModal = async (message) => {
       // Clear the text content
       const textContent = alertElement.textContent;
       alertElement.innerHTML = '';
-      
+
       // Create wrapper for centering
       const wrapper = document.createElement('div');
       wrapper.style.display = 'flex';
       wrapper.style.flexDirection = 'column';
       wrapper.style.alignItems = 'center';
       wrapper.style.textAlign = 'center';
-      
+
       // Create and add the image
       const img = document.createElement('img');
       img.src = '/assets/images/checkmark_success.png';
@@ -950,7 +949,7 @@ const showSuccessModal = async (message) => {
       img.style.height = '80px';
       img.style.margin = '0 auto 16px auto';
       img.style.display = 'block';
-      
+
       // Create and add the text
       const textDiv = document.createElement('div');
       textDiv.textContent = textContent;
@@ -958,16 +957,16 @@ const showSuccessModal = async (message) => {
       textDiv.style.fontWeight = '600';
       textDiv.style.color = '#1a1a1a';
       textDiv.style.textAlign = 'center';
-      
+
       // Append to wrapper
       wrapper.appendChild(img);
       wrapper.appendChild(textDiv);
-      
+
       // Append wrapper to alert
       alertElement.appendChild(wrapper);
     }
   }, 50);
-  
+
   // Auto dismiss after 2 seconds
   setTimeout(() => {
     alert.dismiss();
@@ -1016,7 +1015,7 @@ const changePhoto = async () => {
               input.click();
             }
           }
-        }
+        },
       },
       {
         text: 'Choose from Gallery',
@@ -1054,7 +1053,7 @@ const changePhoto = async () => {
               input.click();
             }
           }
-        }
+        },
       },
       {
         text: 'Remove Photo',
@@ -1072,7 +1071,7 @@ const changePhoto = async () => {
           try {
             const response = await fetch(`${API_BASE}/seller/profile`, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+              headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
               body: JSON.stringify({ email, remove_avatar: true }),
             });
 
@@ -1095,14 +1094,14 @@ const changePhoto = async () => {
             });
             await toast.present();
           }
-        }
+        },
       },
       {
         text: 'Cancel',
         icon: closeOutline,
-        role: 'cancel'
-      }
-    ]
+        role: 'cancel',
+      },
+    ],
   });
   await actionSheet.present();
 };
@@ -1131,7 +1130,7 @@ const uploadAvatar = async (dataUrl) => {
   try {
     const response = await fetch(`${API_BASE}/seller/profile`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ email, avatar: dataUrl }),
     });
 
@@ -1168,7 +1167,7 @@ const editField = async (field) => {
     shopHours: 'Operating Hours',
     description: 'Shop Description',
     gcash: 'GCash Number',
-    bank: 'Bank Account'
+    bank: 'Bank Account',
   };
 
   const alert = await alertController.create({
@@ -1178,13 +1177,13 @@ const editField = async (field) => {
         name: 'value',
         type: field === 'email' ? 'email' : field === 'phone' ? 'tel' : 'text',
         placeholder: `Enter ${fieldNames[field]}`,
-        value: profileData.value[field]
-      }
+        value: profileData.value[field],
+      },
     ],
     buttons: [
       {
         text: 'Cancel',
-        role: 'cancel'
+        role: 'cancel',
       },
       {
         text: 'Save',
@@ -1216,7 +1215,7 @@ const editField = async (field) => {
 
               const response = await fetch(`${API_BASE}/seller/profile`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
                 body: JSON.stringify(body),
               });
 
@@ -1236,7 +1235,7 @@ const editField = async (field) => {
                 message: error.message || 'Failed to save',
                 duration: 2000,
                 color: 'danger',
-                position: 'top'
+                position: 'top',
               });
               await toast.present();
               return;
@@ -1244,13 +1243,12 @@ const editField = async (field) => {
           }
 
           await showSuccessModal('Updated successfully!');
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
-
 
 const changePassword = async () => {
   const alert = await alertController.create({
@@ -1259,18 +1257,18 @@ const changePassword = async () => {
       {
         name: 'currentPassword',
         type: 'password',
-        placeholder: 'Current Password'
+        placeholder: 'Current Password',
       },
       {
         name: 'newPassword',
         type: 'password',
-        placeholder: 'New Password'
+        placeholder: 'New Password',
       },
       {
         name: 'confirmPassword',
         type: 'password',
-        placeholder: 'Confirm New Password'
-      }
+        placeholder: 'Confirm New Password',
+      },
     ],
     buttons: [
       { text: 'Cancel', role: 'cancel' },
@@ -1282,7 +1280,7 @@ const changePassword = async () => {
               message: 'All fields are required',
               duration: 2000,
               color: 'danger',
-              position: 'top'
+              position: 'top',
             });
             await toast.present();
             return false;
@@ -1293,7 +1291,7 @@ const changePassword = async () => {
               message: 'Passwords do not match',
               duration: 2000,
               color: 'danger',
-              position: 'top'
+              position: 'top',
             });
             await toast.present();
             return false;
@@ -1304,7 +1302,7 @@ const changePassword = async () => {
               message: 'Password must be at least 6 characters',
               duration: 2000,
               color: 'danger',
-              position: 'top'
+              position: 'top',
             });
             await toast.present();
             return false;
@@ -1338,14 +1336,14 @@ const changePassword = async () => {
               message: error.message || 'Failed to change password',
               duration: 2000,
               color: 'danger',
-              position: 'top'
+              position: 'top',
             });
             await toast.present();
             changePassword();
           }
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -1362,7 +1360,7 @@ const changePin = async () => {
           inputmode: 'numeric',
           maxlength: 5,
           pattern: '[0-9]*',
-        }
+        },
       },
       {
         name: 'newPin',
@@ -1372,7 +1370,7 @@ const changePin = async () => {
           inputmode: 'numeric',
           maxlength: 5,
           pattern: '[0-9]*',
-        }
+        },
       },
       {
         name: 'confirmPin',
@@ -1382,8 +1380,8 @@ const changePin = async () => {
           inputmode: 'numeric',
           maxlength: 5,
           pattern: '[0-9]*',
-        }
-      }
+        },
+      },
     ],
     buttons: [
       { text: 'Cancel', role: 'cancel' },
@@ -1395,7 +1393,7 @@ const changePin = async () => {
               message: 'All fields are required',
               duration: 2000,
               color: 'danger',
-              position: 'top'
+              position: 'top',
             });
             await toast.present();
             return false;
@@ -1406,7 +1404,7 @@ const changePin = async () => {
               message: 'New PINs do not match',
               duration: 2000,
               color: 'danger',
-              position: 'top'
+              position: 'top',
             });
             await toast.present();
             return false;
@@ -1417,7 +1415,7 @@ const changePin = async () => {
               message: 'PIN must be exactly 5 digits',
               duration: 2000,
               color: 'danger',
-              position: 'top'
+              position: 'top',
             });
             await toast.present();
             return false;
@@ -1454,15 +1452,15 @@ const changePin = async () => {
               message: error.message || 'Failed to change PIN',
               duration: 2000,
               color: 'danger',
-              position: 'top'
+              position: 'top',
             });
             await toast.present();
             // Re-open the PIN alert for retry
             changePin();
           }
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -1492,25 +1490,25 @@ const contactSupport = async () => {
         text: 'Chat Support',
         handler: async () => {
           await showLoadingModal('Opening chat...');
-        }
+        },
       },
       {
         text: 'Email Support',
         handler: async () => {
           await showLoadingModal('Opening email...');
-        }
+        },
       },
       {
         text: 'Call Support',
         handler: async () => {
           await showLoadingModal('Connecting call...');
-        }
+        },
       },
       {
         text: 'Cancel',
-        role: 'cancel'
-      }
-    ]
+        role: 'cancel',
+      },
+    ],
   });
   await actionSheet.present();
 };
@@ -1519,7 +1517,7 @@ const showTerms = async () => {
   const alert = await alertController.create({
     header: 'Terms & Conditions',
     message: 'Terms and conditions content will be displayed here.',
-    buttons: ['Close']
+    buttons: ['Close'],
   });
   await alert.present();
 };
@@ -1528,7 +1526,7 @@ const showPrivacy = async () => {
   const alert = await alertController.create({
     header: 'Privacy Policy',
     message: 'Privacy policy content will be displayed here.',
-    buttons: ['Close']
+    buttons: ['Close'],
   });
   await alert.present();
 };
@@ -1536,8 +1534,9 @@ const showPrivacy = async () => {
 const aboutApp = async () => {
   const alert = await alertController.create({
     header: 'About Palengke Online',
-    message: 'Palengke Online Seller\nVersion 1.0.0 (Build 100)\n\nEmpowering Filipino sellers with digital solutions.\n\n© 2024 Palengke Online\nAll rights reserved.',
-    buttons: ['Close']
+    message:
+      'Palengke Online Seller\nVersion 1.0.0 (Build 100)\n\nEmpowering Filipino sellers with digital solutions.\n\n© 2024 Palengke Online\nAll rights reserved.',
+    buttons: ['Close'],
   });
   await alert.present();
 };
@@ -1549,7 +1548,7 @@ const handleLogout = async () => {
     buttons: [
       {
         text: 'Cancel',
-        role: 'cancel'
+        role: 'cancel',
       },
       {
         text: 'Logout',
@@ -1558,6 +1557,14 @@ const handleLogout = async () => {
           const email = localStorage.getItem('userEmail');
           const deviceId = localStorage.getItem('deviceId');
           const hasPin = localStorage.getItem('hasPin');
+
+          const loading = await alertController.create({
+            cssClass: 'loading-modal-simple',
+            message: 'Logging out...',
+            buttons: [],
+          });
+          await loading.present();
+
           try {
             await fetch(`${API_BASE}/seller/devices/logout-current`, {
               method: 'POST',
@@ -1567,17 +1574,20 @@ const handleLogout = async () => {
           } catch {
             // silent
           }
-          ['isAuthenticated', 'token', 'pendingAuth'].forEach(k => localStorage.removeItem(k));
+
+          ['isAuthenticated', 'token', 'pendingAuth'].forEach((k) => localStorage.removeItem(k));
           if (email) localStorage.setItem('userEmail', email);
           if (deviceId) localStorage.setItem('deviceId', deviceId);
           if (hasPin) localStorage.setItem('hasPin', hasPin);
+
+          await loading.dismiss();
           showSuccessLogout();
           setTimeout(() => {
             router.push('/login');
           }, 1500);
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -1587,11 +1597,11 @@ const showSuccessLogout = async () => {
     cssClass: 'success-modal',
     header: ' ',
     message: 'Logged out successfully',
-    buttons: ['OK']
+    buttons: ['OK'],
   });
-  
+
   await alert.present();
-  
+
   // Add the image after modal is presented
   setTimeout(() => {
     const alertElement = document.querySelector('.success-modal .alert-message');
@@ -1599,14 +1609,14 @@ const showSuccessLogout = async () => {
       // Clear the text content
       const textContent = alertElement.textContent;
       alertElement.innerHTML = '';
-      
+
       // Create wrapper for centering
       const wrapper = document.createElement('div');
       wrapper.style.display = 'flex';
       wrapper.style.flexDirection = 'column';
       wrapper.style.alignItems = 'center';
       wrapper.style.textAlign = 'center';
-      
+
       // Create and add the image
       const img = document.createElement('img');
       img.src = '/assets/images/checkmark_success.png';
@@ -1614,7 +1624,7 @@ const showSuccessLogout = async () => {
       img.style.height = '80px';
       img.style.margin = '0 auto 16px auto';
       img.style.display = 'block';
-      
+
       // Create and add the text
       const textDiv = document.createElement('div');
       textDiv.textContent = textContent;
@@ -1622,16 +1632,16 @@ const showSuccessLogout = async () => {
       textDiv.style.fontWeight = '600';
       textDiv.style.color = '#1a1a1a';
       textDiv.style.textAlign = 'center';
-      
+
       // Append to wrapper
       wrapper.appendChild(img);
       wrapper.appendChild(textDiv);
-      
+
       // Append wrapper to alert
       alertElement.appendChild(wrapper);
     }
   }, 50);
-  
+
   setTimeout(() => {
     alert.dismiss();
   }, 1500);
@@ -1670,7 +1680,7 @@ onMounted(() => {
 
 /* Profile Header */
 .profile-header {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
   padding: 40px 20px 32px 20px;
   text-align: center;
   color: white;
@@ -1707,7 +1717,7 @@ onMounted(() => {
   bottom: 0;
   right: 0;
   --background: white;
-  --color: #4CAF50;
+  --color: #4caf50;
   --border-radius: 50%;
   width: 36px;
   height: 36px;
@@ -1805,8 +1815,8 @@ onMounted(() => {
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: #E8F5E9;
-  color: #4CAF50;
+  background: #e8f5e9;
+  color: #4caf50;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1815,8 +1825,8 @@ onMounted(() => {
 }
 
 .info-icon.payment {
-  background: #FFF3E0;
-  color: #FF9800;
+  background: #fff3e0;
+  color: #ff9800;
 }
 
 .info-content {
@@ -1935,11 +1945,11 @@ onMounted(() => {
     width: 80px;
     height: 80px;
   }
-  
+
   .profile-name {
     font-size: 20px;
   }
-  
+
   .stat-value {
     font-size: 20px;
   }
@@ -1973,7 +1983,7 @@ onMounted(() => {
 }
 
 .nav-item.active {
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .nav-item:active {
@@ -2005,7 +2015,7 @@ onMounted(() => {
 }
 
 :deep(.success-modal button) {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   font-weight: 600;
   border-radius: 12px;
@@ -2043,14 +2053,18 @@ onMounted(() => {
   width: 50px;
   height: 50px;
   border: 5px solid #f3f3f3;
-  border-top: 5px solid #1877F2;
+  border-top: 5px solid #1877f2;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 :deep(.loading-modal-simple .alert-button-group) {
@@ -2076,10 +2090,10 @@ onMounted(() => {
 }
 
 .add-payment-btn {
-  --background: #E8F5E9;
-  --color: #4CAF50;
+  --background: #e8f5e9;
+  --color: #4caf50;
   --border-radius: 12px;
-  --border-color: #4CAF50;
+  --border-color: #4caf50;
   --border-style: dashed;
   --border-width: 2px;
   height: 48px;
@@ -2091,38 +2105,38 @@ onMounted(() => {
 
 /* Payment Type Icon Colors */
 .info-icon.gcash {
-  background: #E8F5E9;
-  color: #4CAF50;
+  background: #e8f5e9;
+  color: #4caf50;
 }
 
 .info-icon.bdo {
-  background: #E3F2FD;
-  color: #1565C0;
+  background: #e3f2fd;
+  color: #1565c0;
 }
 
 .info-icon.bpi {
-  background: #FFF3E0;
-  color: #E65100;
+  background: #fff3e0;
+  color: #e65100;
 }
 
 .info-icon.metrobank {
-  background: #F3E5F5;
-  color: #7B1FA2;
+  background: #f3e5f5;
+  color: #7b1fa2;
 }
 
 .info-icon.landbank {
-  background: #E8F5E9;
-  color: #2E7D32;
+  background: #e8f5e9;
+  color: #2e7d32;
 }
 
 .info-icon.unionbank {
-  background: #FFF8E1;
-  color: #F9A825;
+  background: #fff8e1;
+  color: #f9a825;
 }
 
 .info-icon.pnb {
-  background: #FCE4EC;
-  color: #C62828;
+  background: #fce4ec;
+  color: #c62828;
 }
 
 /* Agreement Modal */
@@ -2148,7 +2162,7 @@ onMounted(() => {
 .agreement-icon {
   width: 72px;
   height: 72px;
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -2286,10 +2300,10 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-.hours-closed-toggle input[type="checkbox"] {
+.hours-closed-toggle input[type='checkbox'] {
   width: 16px;
   height: 16px;
-  accent-color: #4CAF50;
+  accent-color: #4caf50;
 }
 
 .hours-time-group {
@@ -2352,7 +2366,7 @@ onMounted(() => {
   padding: 12px;
   border: none;
   border-radius: 12px;
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   font-size: 15px;
   font-weight: 600;

@@ -2,7 +2,6 @@
   <ion-page>
     <ion-content :fullscreen="true" class="step-content">
       <div class="step-container">
-        
         <!-- Back Button -->
         <div class="back-button" @click="goBack">
           <ion-icon :icon="arrowBackOutline"></ion-icon>
@@ -24,7 +23,6 @@
 
         <!-- Form -->
         <div class="form-section">
-          
           <!-- Store Information Section -->
           <div class="section-header">
             <ion-icon :icon="storefrontOutline"></ion-icon>
@@ -35,14 +33,14 @@
           <div class="input-group">
             <label class="input-label">Store Name *</label>
             <div class="input-wrapper" :class="{ error: errors.storeName }">
-              <input 
-                v-model="formData.storeName" 
-                type="text" 
+              <input
+                v-model="formData.storeName"
+                type="text"
                 placeholder="Juan's Fresh Produce"
                 class="custom-input"
                 @blur="validateField('storeName')"
                 @input="errors.storeName = ''"
-              >
+              />
             </div>
             <span v-if="errors.storeName" class="error-message">{{ errors.storeName }}</span>
             <span v-else class="helper-text">This will be visible to customers</span>
@@ -53,8 +51,8 @@
             <label class="input-label">Region *</label>
             <div class="input-wrapper" :class="{ error: errors.region }">
               <ion-icon :icon="locationOutline" class="input-icon"></ion-icon>
-              <select 
-                v-model="formData.region" 
+              <select
+                v-model="formData.region"
                 class="custom-select with-icon"
                 @change="onRegionChange"
                 @blur="validateField('region')"
@@ -73,18 +71,14 @@
             <label class="input-label">City *</label>
             <div class="input-wrapper" :class="{ error: errors.city }">
               <ion-icon :icon="businessOutline" class="input-icon"></ion-icon>
-              <select 
-                v-model="formData.city" 
+              <select
+                v-model="formData.city"
                 class="custom-select with-icon"
                 @change="onCityChange"
                 @blur="validateField('city')"
               >
                 <option value="">Select City</option>
-                <option 
-                  v-for="city in availableCities" 
-                  :key="city" 
-                  :value="city"
-                >
+                <option v-for="city in availableCities" :key="city" :value="city">
                   {{ city }}
                 </option>
               </select>
@@ -97,17 +91,9 @@
             <label class="input-label">Barangay *</label>
             <div class="input-wrapper" :class="{ error: errors.barangay }">
               <ion-icon :icon="mapOutline" class="input-icon"></ion-icon>
-              <select 
-                v-model="formData.barangay" 
-                class="custom-select with-icon"
-                @blur="validateField('barangay')"
-              >
+              <select v-model="formData.barangay" class="custom-select with-icon" @blur="validateField('barangay')">
                 <option value="">Select Barangay</option>
-                <option 
-                  v-for="barangay in availableBarangays" 
-                  :key="barangay" 
-                  :value="barangay"
-                >
+                <option v-for="barangay in availableBarangays" :key="barangay" :value="barangay">
                   {{ barangay }}
                 </option>
               </select>
@@ -121,14 +107,14 @@
             <label class="input-label">Store Location/Address *</label>
             <div class="input-wrapper" :class="{ error: errors.storePlace }">
               <ion-icon :icon="pinOutline" class="input-icon"></ion-icon>
-              <input 
-                v-model="formData.storePlace" 
-                type="text" 
+              <input
+                v-model="formData.storePlace"
+                type="text"
                 placeholder="Carmen Public Market, Stall 12"
                 class="custom-input with-icon"
                 @blur="validateField('storePlace')"
                 @input="errors.storePlace = ''"
-              >
+              />
             </div>
             <span v-if="errors.storePlace" class="error-message">{{ errors.storePlace }}</span>
             <span v-else class="helper-text">Market name, stall number, or street address</span>
@@ -139,8 +125,8 @@
             <label class="input-label">Complete Address *</label>
             <div class="input-wrapper" :class="{ error: errors.completeAddress }">
               <ion-icon :icon="homeOutline" class="input-icon"></ion-icon>
-              <textarea 
-                v-model="formData.completeAddress" 
+              <textarea
+                v-model="formData.completeAddress"
                 placeholder="123 Main Street, Barangay Carmen, Cagayan de Oro City, Misamis Oriental"
                 class="custom-textarea with-icon"
                 rows="3"
@@ -156,36 +142,24 @@
           <div class="info-box">
             <ion-icon :icon="informationCircleOutline"></ion-icon>
             <div class="info-text">
-              <strong>Why we need this:</strong><br>
+              <strong>Why we need this:</strong><br />
               Accurate location helps customers find your store and enables efficient delivery services.
             </div>
           </div>
 
           <!-- Navigation Buttons -->
           <div class="button-group">
-            <ion-button 
-              expand="block" 
-              fill="outline"
-              color="medium"
-              class="back-btn"
-              @click="goBack"
-            >
+            <ion-button expand="block" fill="outline" color="medium" class="back-btn" @click="goBack">
               <ion-icon slot="start" :icon="arrowBackOutline"></ion-icon>
               Back
             </ion-button>
 
-            <ion-button 
-              expand="block" 
-              class="next-button"
-              @click="handleNext"
-              :disabled="!isFormValid"
-            >
+            <ion-button expand="block" class="next-button" @click="handleNext" :disabled="!isFormValid">
               Next
               <ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon>
             </ion-button>
           </div>
         </div>
-
       </div>
     </ion-content>
   </ion-page>
@@ -194,12 +168,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import {
-  IonPage,
-  IonContent,
-  IonButton,
-  IonIcon
-} from '@ionic/vue';
+import { IonPage, IonContent, IonButton, IonIcon } from '@ionic/vue';
 import {
   arrowBackOutline,
   arrowForwardOutline,
@@ -209,7 +178,7 @@ import {
   mapOutline,
   pinOutline,
   homeOutline,
-  informationCircleOutline
+  informationCircleOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -247,7 +216,7 @@ const citiesByRegion = {
     'Olongapo',
     'San Fernando (Pampanga)',
     'San Fernando (La Union)',
-    'Tarlac City'
+    'Tarlac City',
   ],
   visayas: [
     'Cebu City',
@@ -271,7 +240,7 @@ const citiesByRegion = {
     'Victorias',
     'Kabankalan',
     'Bago City',
-    'Escalante'
+    'Escalante',
   ],
   mindanao: [
     'Davao City',
@@ -301,8 +270,8 @@ const citiesByRegion = {
     'Pagadian',
     'Zamboanga City',
     'Dipolog',
-    'Dapitan'
-  ]
+    'Dapitan',
+  ],
 };
 
 // Barangays by city (major cities)
@@ -355,7 +324,7 @@ const barangaysByCity = {
     'Tagpangi',
     'Tignapoloan',
     'Tuburan',
-    'Tumpagon'
+    'Tumpagon',
   ],
   'Davao City': [
     'Acacia',
@@ -499,9 +468,9 @@ const barangaysByCity = {
     'Waan',
     'Wangan',
     'Wilfredo Aquino',
-    'Wines'
+    'Wines',
   ],
-  'Manila': [
+  Manila: [
     'Barangay 1 - Intramuros',
     'Barangay 2 - Intramuros',
     'Barangay 3 - Intramuros',
@@ -524,7 +493,7 @@ const barangaysByCity = {
     'Santa Ana',
     'Santa Cruz',
     'Santa Mesa',
-    'Tondo'
+    'Tondo',
   ],
   'Quezon City': [
     'Alicia',
@@ -670,7 +639,7 @@ const barangaysByCity = {
     'Veterans Village',
     'West Kamias',
     'West Triangle',
-    'White Plains'
+    'White Plains',
   ],
   'Cebu City': [
     'Adlaon',
@@ -754,10 +723,10 @@ const barangaysByCity = {
     'Tinago',
     'Tisa',
     'To-ong Pardo',
-    'Zapatera'
+    'Zapatera',
   ],
   // Default barangays for cities without specific data
-  'default': [
+  default: [
     'Barangay 1 (Poblacion)',
     'Barangay 2 (Poblacion)',
     'Barangay 3 (Poblacion)',
@@ -768,8 +737,8 @@ const barangaysByCity = {
     'Barangay 8 (Poblacion)',
     'Barangay 9 (Poblacion)',
     'Barangay 10 (Poblacion)',
-    'Please select from list or type manually'
-  ]
+    'Please select from list or type manually',
+  ],
 };
 
 // Form data
@@ -779,7 +748,7 @@ const formData = ref({
   city: '',
   barangay: '',
   storePlace: '',
-  completeAddress: ''
+  completeAddress: '',
 });
 
 // Error states
@@ -789,7 +758,7 @@ const errors = ref({
   city: '',
   barangay: '',
   storePlace: '',
-  completeAddress: ''
+  completeAddress: '',
 });
 
 // Available cities based on selected region
@@ -912,12 +881,14 @@ const validateField = (fieldName) => {
 
 // Form validation
 const isFormValid = computed(() => {
-  return formData.value.storeName.trim() && 
-         formData.value.region && 
-         formData.value.city && 
-         formData.value.barangay &&
-         formData.value.storePlace.trim() && 
-         formData.value.completeAddress.trim();
+  return (
+    formData.value.storeName.trim() &&
+    formData.value.region &&
+    formData.value.city &&
+    formData.value.barangay &&
+    formData.value.storePlace.trim() &&
+    formData.value.completeAddress.trim()
+  );
 });
 
 // Navigation
@@ -935,7 +906,7 @@ const saveData = () => {
     city: formData.value.city,
     barangay: formData.value.barangay,
     storePlace: formData.value.storePlace,
-    completeAddress: formData.value.completeAddress
+    completeAddress: formData.value.completeAddress,
   };
   localStorage.setItem('registrationData', JSON.stringify(updatedData));
 };
@@ -947,9 +918,8 @@ const handleNext = () => {
   const isBarangayValid = validateField('barangay');
   const isStorePlaceValid = validateField('storePlace');
   const isAddressValid = validateField('completeAddress');
-  
-  if (isStoreNameValid && isRegionValid && isCityValid && isBarangayValid &&
-      isStorePlaceValid && isAddressValid) {
+
+  if (isStoreNameValid && isRegionValid && isCityValid && isBarangayValid && isStorePlaceValid && isAddressValid) {
     saveData();
     router.push('/register/step4');
   }

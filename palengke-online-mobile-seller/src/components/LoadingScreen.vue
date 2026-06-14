@@ -1,29 +1,22 @@
 <template>
   <div v-if="show" class="loading-container">
     <div class="logo-wrapper">
-      <img src="/assets/images/logo.png" alt="Palengke Online" class="logo-image">
+      <img src="/assets/images/logo.png" alt="Palengke Online" class="logo-image" />
       <svg class="loading-circle" viewBox="0 0 200 200">
-        <circle 
-          cx="100" 
-          cy="100" 
-          r="85" 
-          fill="none" 
-          stroke="#e0e0e0" 
-          stroke-width="6"
-        />
-        <circle 
-          class="animated-stroke-spin" 
-          cx="100" 
-          cy="100" 
-          r="85" 
-          fill="none" 
-          stroke="#2c2c2c" 
+        <circle cx="100" cy="100" r="85" fill="none" stroke="#e0e0e0" stroke-width="6" />
+        <circle
+          class="animated-stroke-spin"
+          cx="100"
+          cy="100"
+          r="85"
+          fill="none"
+          stroke="#2c2c2c"
           stroke-width="6"
           stroke-linecap="round"
         />
       </svg>
     </div>
-    
+
     <!-- Loading text -->
     <div class="loading-text">{{ text }}</div>
   </div>
@@ -35,12 +28,12 @@ import { defineProps } from 'vue';
 const props = defineProps({
   show: {
     type: Boolean,
-    default: true
+    default: true,
   },
   text: {
     type: String,
-    default: 'LOADING...'
-  }
+    default: 'LOADING...',
+  },
 });
 </script>
 
@@ -111,7 +104,8 @@ const props = defineProps({
 }
 
 @keyframes textPulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.3;
   }
   50% {
@@ -124,11 +118,11 @@ const props = defineProps({
     width: 180px;
     height: 180px;
   }
-  
+
   .logo-image {
     width: 120px;
   }
-  
+
   .loading-text {
     font-size: 12px;
     margin-top: 30px;

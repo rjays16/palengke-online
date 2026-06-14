@@ -19,9 +19,7 @@
 
         <div class="text-section">
           <h2 class="pin-title">Enter Your PIN</h2>
-          <p class="pin-message">
-            Enter your device PIN to sign in quickly
-          </p>
+          <p class="pin-message">Enter your device PIN to sign in quickly</p>
           <p class="email-address">{{ maskedEmail }}</p>
         </div>
 
@@ -29,7 +27,7 @@
           <input
             v-for="(digit, index) in pinDigits"
             :key="index"
-            :ref="el => pinRefs[index] = el"
+            :ref="(el) => (pinRefs[index] = el)"
             v-model="pinDigits[index]"
             type="tel"
             maxlength="1"
@@ -41,24 +39,14 @@
         </div>
 
         <div class="options-section">
-          <button class="use-password-btn" @click="goToLogin">
-            Sign in with different account
-          </button>
-          <button class="forgot-pin-btn" @click="handleForgotPin">
-            Forgot PIN?
-          </button>
+          <button class="use-password-btn" @click="goToLogin">Sign in with different account</button>
+          <button class="forgot-pin-btn" @click="handleForgotPin">Forgot PIN?</button>
         </div>
 
-        <ion-button
-          expand="block"
-          class="verify-button"
-          :disabled="!isCodeComplete || isVerifying"
-          @click="verifyPin"
-        >
+        <ion-button expand="block" class="verify-button" :disabled="!isCodeComplete || isVerifying" @click="verifyPin">
           <span v-if="!isVerifying">Sign In</span>
           <ion-spinner v-else name="crescent"></ion-spinner>
         </ion-button>
-
       </div>
     </ion-content>
   </ion-page>
@@ -108,7 +96,7 @@ const pinRefs = ref([]);
 const isVerifying = ref(false);
 
 const isCodeComplete = computed(() => {
-  return pinDigits.value.every(digit => digit !== '');
+  return pinDigits.value.every((digit) => digit !== '');
 });
 
 const pinCode = computed(() => {
@@ -292,7 +280,7 @@ onMounted(async () => {
 .pin-icon {
   width: 100px;
   height: 100px;
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
@@ -327,7 +315,7 @@ onMounted(async () => {
 .email-address {
   font-size: 18px;
   font-weight: 700;
-  color: #4CAF50;
+  color: #4caf50;
   margin: 0;
 }
 
@@ -354,13 +342,13 @@ onMounted(async () => {
 
 .pin-box:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: #4caf50;
   box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
 }
 
 .pin-box.filled {
-  border-color: #4CAF50;
-  background: #E8F5E9;
+  border-color: #4caf50;
+  background: #e8f5e9;
 }
 
 .options-section {
@@ -386,7 +374,7 @@ onMounted(async () => {
 .forgot-pin-btn {
   background: none;
   border: none;
-  color: var(--color-link, #4CAF50);
+  color: var(--color-link, #4caf50);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -402,7 +390,7 @@ onMounted(async () => {
 }
 
 .verify-button {
-  --background: #4CAF50;
+  --background: #4caf50;
   --background-hover: #45a049;
   --border-radius: 12px;
   height: 56px;

@@ -21,14 +21,13 @@
       </div>
 
       <div class="edit-product-container" v-else>
-
         <!-- Product Images -->
         <div class="section">
           <h2 class="section-title">Product Images</h2>
-          
+
           <div class="image-upload-area" @click="selectImage">
             <div class="uploaded-image" v-if="productImage">
-              <img :src="productImage" alt="Product">
+              <img :src="productImage" alt="Product" />
               <div class="remove-image" @click.stop="productImage = ''">
                 <ion-icon :icon="closeCircle"></ion-icon>
               </div>
@@ -44,15 +43,10 @@
         <!-- Basic Information -->
         <div class="section">
           <h2 class="section-title">Basic Information</h2>
-          
+
           <div class="input-group">
             <label>Product Name <span class="required">*</span></label>
-            <input 
-              v-model="productData.name" 
-              type="text" 
-              placeholder="e.g., Fresh Tilapia"
-              class="custom-input"
-            >
+            <input v-model="productData.name" type="text" placeholder="e.g., Fresh Tilapia" class="custom-input" />
           </div>
 
           <div class="input-group">
@@ -65,8 +59,8 @@
 
           <div class="input-group">
             <label>Description</label>
-            <textarea 
-              v-model="productData.description" 
+            <textarea
+              v-model="productData.description"
               placeholder="Describe your product..."
               rows="4"
               class="custom-textarea"
@@ -77,28 +71,28 @@
         <!-- Pricing -->
         <div class="section">
           <h2 class="section-title">Pricing</h2>
-          
+
           <div class="input-group">
             <label>Selling Unit <span class="required">*</span></label>
             <div class="unit-selector">
-              <div 
-                class="unit-option" 
+              <div
+                class="unit-option"
                 :class="{ active: productData.unit === 'kilo' }"
                 @click="productData.unit = 'kilo'"
               >
                 <div class="unit-icon"><font-awesome-icon icon="weight-hanging" /></div>
                 <div class="unit-text">Per Kilo</div>
               </div>
-              <div 
-                class="unit-option" 
+              <div
+                class="unit-option"
                 :class="{ active: productData.unit === 'piece' }"
                 @click="productData.unit = 'piece'"
               >
                 <div class="unit-icon"><font-awesome-icon icon="box" /></div>
                 <div class="unit-text">Per Piece</div>
               </div>
-              <div 
-                class="unit-option" 
+              <div
+                class="unit-option"
                 :class="{ active: productData.unit === 'pack' }"
                 @click="productData.unit = 'pack'"
               >
@@ -112,31 +106,31 @@
             <label>Price <span class="required">*</span></label>
             <div class="price-input">
               <span class="currency">₱</span>
-              <input 
-                v-model.number="productData.price" 
-                type="number" 
+              <input
+                v-model.number="productData.price"
+                type="number"
                 placeholder="0.00"
                 class="custom-input"
                 step="0.01"
-              >
+              />
               <span class="per-unit">/ {{ productData.unit }}</span>
             </div>
           </div>
 
           <div class="input-group" v-if="productData.unit === 'kilo'">
             <label>Minimum Order (kg)</label>
-            <input 
-              v-model.number="productData.minOrder" 
-              type="number" 
+            <input
+              v-model.number="productData.minOrder"
+              type="number"
               placeholder="e.g., 0.5"
               class="custom-input"
               step="0.1"
-            >
+            />
           </div>
 
           <div class="checkbox-group">
             <label class="checkbox-label">
-              <input type="checkbox" v-model="productData.hasDiscount">
+              <input type="checkbox" v-model="productData.hasDiscount" />
               <span>This product has a discount</span>
             </label>
           </div>
@@ -145,16 +139,14 @@
             <label>Discounted Price <span class="required">*</span></label>
             <div class="price-input">
               <span class="currency">₱</span>
-              <input 
-                v-model.number="productData.discountPrice" 
-                type="number" 
+              <input
+                v-model.number="productData.discountPrice"
+                type="number"
                 placeholder="0.00"
                 class="custom-input"
                 step="0.01"
-              >
-              <span class="discount-badge" v-if="discountPercentage">
-                {{ discountPercentage }}% OFF
-              </span>
+              />
+              <span class="discount-badge" v-if="discountPercentage"> {{ discountPercentage }}% OFF </span>
             </div>
           </div>
         </div>
@@ -162,33 +154,27 @@
         <!-- Inventory -->
         <div class="section">
           <h2 class="section-title">Inventory</h2>
-          
+
           <div class="input-group">
             <label>Stock Quantity <span class="required">*</span></label>
-            <input 
-              v-model.number="productData.stock" 
-              type="number" 
+            <input
+              v-model.number="productData.stock"
+              type="number"
               :placeholder="stockPlaceholder"
               class="custom-input"
-            >
+            />
           </div>
 
           <div class="input-group">
             <label>SKU (Stock Keeping Unit)</label>
-            <input 
-              v-model="productData.sku" 
-              type="text" 
-              placeholder="e.g., FISH-TIL-001"
-              class="custom-input"
-            >
+            <input v-model="productData.sku" type="text" placeholder="e.g., FISH-TIL-001" class="custom-input" />
           </div>
-
         </div>
 
         <!-- Additional Details -->
         <div class="section">
           <h2 class="section-title">Additional Details</h2>
-          
+
           <div class="input-group">
             <label>Origin/Source</label>
             <select v-model="productData.origin" class="custom-select">
@@ -199,17 +185,12 @@
 
           <div class="input-group">
             <label>Brand</label>
-            <input 
-              v-model="productData.brand" 
-              type="text" 
-              placeholder="e.g., Del Monte"
-              class="custom-input"
-            >
+            <input v-model="productData.brand" type="text" placeholder="e.g., Del Monte" class="custom-input" />
           </div>
 
           <div class="checkbox-group" v-if="canFeature">
             <label class="checkbox-label">
-              <input type="checkbox" v-model="productData.isFeatured">
+              <input type="checkbox" v-model="productData.isFeatured" />
               <span>Feature this product</span>
             </label>
           </div>
@@ -218,7 +199,7 @@
         <!-- Product Status -->
         <div class="section">
           <h2 class="section-title">Product Status</h2>
-          
+
           <div class="status-toggle">
             <div class="status-info">
               <div class="status-label">{{ productData.isActive ? 'Active' : 'Inactive' }}</div>
@@ -227,7 +208,7 @@
               </div>
             </div>
             <label class="toggle-switch">
-              <input type="checkbox" v-model="productData.isActive">
+              <input type="checkbox" v-model="productData.isActive" />
               <span class="slider"></span>
             </label>
           </div>
@@ -235,37 +216,19 @@
 
         <!-- Action Buttons -->
         <div class="action-buttons">
-          <ion-button 
-            expand="block" 
-            color="success"
-            class="update-button"
-            @click="updateProduct"
-          >
+          <ion-button expand="block" color="success" class="update-button" @click="updateProduct">
             Update Product
           </ion-button>
-          
-          <ion-button 
-            expand="block" 
-            fill="outline"
-            color="medium"
-            class="cancel-button"
-            @click="goBack"
-          >
+
+          <ion-button expand="block" fill="outline" color="medium" class="cancel-button" @click="goBack">
             Cancel
           </ion-button>
 
-          <ion-button 
-            expand="block" 
-            color="danger"
-            fill="outline"
-            class="delete-button"
-            @click="deleteProduct"
-          >
+          <ion-button expand="block" color="danger" fill="outline" class="delete-button" @click="deleteProduct">
             <ion-icon slot="start" :icon="trashOutline"></ion-icon>
             Delete Product
           </ion-button>
         </div>
-
       </div>
 
       <!-- Saving Overlay -->
@@ -295,15 +258,9 @@ import {
   IonIcon,
   IonSpinner,
   alertController,
-  toastController
+  toastController,
 } from '@ionic/vue';
-import {
-  trashOutline,
-  closeCircle,
-  addOutline,
-  cloudUploadOutline,
-  checkmarkCircle
-} from 'ionicons/icons';
+import { trashOutline, closeCircle, addOutline, cloudUploadOutline, checkmarkCircle } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
 
 const router = useRouter();
@@ -344,13 +301,13 @@ async function loadProduct() {
   try {
     const [profileRes, prodRes, locRes] = await Promise.all([
       fetch(`${API_BASE}/seller/profile?email=${encodeURIComponent(userEmail)}`, {
-        headers: { 'Accept': 'application/json' }
+        headers: { Accept: 'application/json' },
       }),
       fetch(`${API_BASE}/seller/products/${productId}?email=${encodeURIComponent(userEmail)}`, {
-        headers: { 'Accept': 'application/json' }
+        headers: { Accept: 'application/json' },
       }),
       fetch(`${API_BASE}/locations`, {
-        headers: { 'Accept': 'application/json' }
+        headers: { Accept: 'application/json' },
       }),
     ]);
 
@@ -358,18 +315,18 @@ async function loadProduct() {
     let cats = (profileData.user && profileData.user.categories) || [];
     if (!cats.length) {
       const allRes = await fetch(`${API_BASE}/categories`, {
-        headers: { 'Accept': 'application/json' }
+        headers: { Accept: 'application/json' },
       });
       const allData = await allRes.json();
-      cats = (Array.isArray(allData) ? allData : (allData.categories || [])).map(c => c.name);
+      cats = (Array.isArray(allData) ? allData : allData.categories || []).map((c) => c.name);
     }
     categories.value = cats;
 
     const locData = await locRes.json();
     const locs = locData.locations || [];
     const cityNames = [];
-    locs.forEach(region => {
-      (region.cities || []).forEach(city => {
+    locs.forEach((region) => {
+      (region.cities || []).forEach((city) => {
         cityNames.push(city.name);
       });
     });
@@ -436,7 +393,7 @@ const selectImage = () => {
     try {
       const res = await fetch(`${API_BASE}/seller/products/upload-image`, {
         method: 'POST',
-        headers: { 'Accept': 'application/json' },
+        headers: { Accept: 'application/json' },
         body: formData,
       });
       const data = await res.json();
@@ -455,7 +412,7 @@ const updateProduct = async () => {
     const alert = await alertController.create({
       header: 'Missing Information',
       message: 'Please fill in all required fields marked with *',
-      buttons: ['OK']
+      buttons: ['OK'],
     });
     await alert.present();
     return;
@@ -465,7 +422,7 @@ const updateProduct = async () => {
   try {
     const res = await fetch(`${API_BASE}/seller/products/${productData.value.id}`, {
       method: 'POST',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: userEmail,
         name: productData.value.name,
@@ -497,7 +454,7 @@ const updateProduct = async () => {
     const alert = await alertController.create({
       header: 'Error',
       message: e.message || 'Failed to update product. Please try again.',
-      buttons: ['OK']
+      buttons: ['OK'],
     });
     await alert.present();
   } finally {
@@ -510,11 +467,11 @@ const showSuccessModal = async (message) => {
     cssClass: 'success-modal',
     header: ' ',
     message: message,
-    buttons: ['OK']
+    buttons: ['OK'],
   });
-  
+
   await alert.present();
-  
+
   // Add the image after modal is presented
   setTimeout(() => {
     const alertElement = document.querySelector('.success-modal .alert-message');
@@ -522,14 +479,14 @@ const showSuccessModal = async (message) => {
       // Clear the text content
       const textContent = alertElement.textContent;
       alertElement.innerHTML = '';
-      
+
       // Create wrapper for centering
       const wrapper = document.createElement('div');
       wrapper.style.display = 'flex';
       wrapper.style.flexDirection = 'column';
       wrapper.style.alignItems = 'center';
       wrapper.style.textAlign = 'center';
-      
+
       // Create and add the image
       const img = document.createElement('img');
       img.src = '/assets/images/checkmark_success.png';
@@ -537,7 +494,7 @@ const showSuccessModal = async (message) => {
       img.style.height = '80px';
       img.style.margin = '0 auto 16px auto';
       img.style.display = 'block';
-      
+
       // Create and add the text
       const textDiv = document.createElement('div');
       textDiv.textContent = textContent;
@@ -545,16 +502,16 @@ const showSuccessModal = async (message) => {
       textDiv.style.fontWeight = '600';
       textDiv.style.color = '#1a1a1a';
       textDiv.style.textAlign = 'center';
-      
+
       // Append to wrapper
       wrapper.appendChild(img);
       wrapper.appendChild(textDiv);
-      
+
       // Append wrapper to alert
       alertElement.appendChild(wrapper);
     }
   }, 50);
-  
+
   // Auto dismiss after 2 seconds
   setTimeout(() => {
     alert.dismiss();
@@ -574,25 +531,28 @@ const deleteProduct = async () => {
         handler: async () => {
           saving.value = true;
           try {
-            const res = await fetch(`${API_BASE}/seller/products/${productData.value.id}?email=${encodeURIComponent(userEmail)}`, {
-              method: 'DELETE',
-              headers: { 'Accept': 'application/json' }
-            });
+            const res = await fetch(
+              `${API_BASE}/seller/products/${productData.value.id}?email=${encodeURIComponent(userEmail)}`,
+              {
+                method: 'DELETE',
+                headers: { Accept: 'application/json' },
+              },
+            );
             if (!res.ok) throw new Error('Failed to delete product');
             await showSuccessModal('Product successfully deleted');
           } catch (e) {
             const alert = await alertController.create({
               header: 'Error',
               message: e.message || 'Failed to delete product.',
-              buttons: ['OK']
+              buttons: ['OK'],
             });
             await alert.present();
           } finally {
             saving.value = false;
           }
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -607,7 +567,7 @@ const showToast = async (message, color = 'success', icon = null) => {
     duration: 2500,
     color,
     position: 'top',
-    cssClass: 'custom-toast'
+    cssClass: 'custom-toast',
   });
   await toast.present();
 };
@@ -633,14 +593,21 @@ onMounted(loadProduct);
 
 .loading-icon {
   font-size: 60px;
-  color: #4CAF50;
+  color: #4caf50;
   margin-bottom: 16px;
   animation: pulse 1.5s ease-in-out infinite;
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.1); }
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
 }
 
 .loading-state p {
@@ -675,7 +642,7 @@ onMounted(loadProduct);
 }
 
 .image-upload-area:hover {
-  border-color: #4CAF50;
+  border-color: #4caf50;
 }
 
 .upload-placeholder {
@@ -769,7 +736,7 @@ onMounted(loadProduct);
 .custom-select:focus,
 .custom-textarea:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: #4caf50;
 }
 
 .custom-textarea {
@@ -797,8 +764,8 @@ onMounted(loadProduct);
 }
 
 .unit-option.active {
-  border-color: #4CAF50;
-  background: #E8F5E9;
+  border-color: #4caf50;
+  background: #e8f5e9;
 }
 
 .unit-icon {
@@ -840,7 +807,7 @@ onMounted(loadProduct);
 }
 
 .discount-badge {
-  background: #FF9800;
+  background: #ff9800;
   color: white;
   padding: 6px 12px;
   border-radius: 8px;
@@ -863,11 +830,11 @@ onMounted(loadProduct);
   color: #333;
 }
 
-.checkbox-label input[type="checkbox"] {
+.checkbox-label input[type='checkbox'] {
   width: 18px;
   height: 18px;
   cursor: pointer;
-  accent-color: #4CAF50;
+  accent-color: #4caf50;
 }
 
 /* Status Toggle */
@@ -920,7 +887,7 @@ onMounted(loadProduct);
 
 .slider:before {
   position: absolute;
-  content: "";
+  content: '';
   height: 24px;
   width: 24px;
   left: 4px;
@@ -931,7 +898,7 @@ onMounted(loadProduct);
 }
 
 input:checked + .slider {
-  background-color: #4CAF50;
+  background-color: #4caf50;
 }
 
 input:checked + .slider:before {
@@ -961,7 +928,7 @@ input:checked + .slider:before {
   .edit-product-container {
     padding: 16px;
   }
-  
+
   .unit-selector {
     grid-template-columns: 1fr;
   }
@@ -1006,7 +973,7 @@ input:checked + .slider:before {
   --border-radius: 12px;
   --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   font-weight: 600;
-  border: 2px solid #4CAF50;
+  border: 2px solid #4caf50;
 }
 
 :deep(.custom-toast::part(message)) {
@@ -1038,7 +1005,7 @@ input:checked + .slider:before {
 }
 
 :deep(.success-modal button) {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   font-weight: 600;
   border-radius: 12px;

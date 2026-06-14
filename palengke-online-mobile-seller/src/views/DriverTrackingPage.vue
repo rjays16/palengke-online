@@ -16,7 +16,6 @@
 
     <ion-content :fullscreen="true">
       <div class="tracking-container">
-        
         <!-- Map Container - FULL SCREEN -->
         <div id="map" class="map-container"></div>
 
@@ -28,7 +27,6 @@
 
         <!-- Collapsible Bottom Sheet -->
         <div class="bottom-sheet" :class="{ expanded: cardsExpanded, collapsed: !cardsExpanded }">
-          
           <!-- Handle Bar -->
           <div class="handle-bar" @click="toggleCards">
             <div class="handle"></div>
@@ -51,12 +49,11 @@
 
           <!-- Full Content (When Expanded) -->
           <div v-if="cardsExpanded" class="expanded-content">
-            
             <!-- Driver Info -->
             <div class="driver-section">
               <div class="driver-header">
                 <div class="driver-avatar">
-                  <img v-if="driverData.avatar" :src="driverData.avatar" alt="Driver">
+                  <img v-if="driverData.avatar" :src="driverData.avatar" alt="Driver" />
                   <ion-icon v-else :icon="personOutline"></ion-icon>
                 </div>
                 <div class="driver-info">
@@ -115,7 +112,12 @@
             <div class="timeline-section">
               <h4 class="section-title">Delivery Progress</h4>
               <div class="timeline">
-                <div class="timeline-item" :class="{ completed: step.completed, active: step.active }" v-for="step in deliverySteps" :key="step.id">
+                <div
+                  class="timeline-item"
+                  :class="{ completed: step.completed, active: step.active }"
+                  v-for="step in deliverySteps"
+                  :key="step.id"
+                >
                   <div class="timeline-icon">
                     <ion-icon :icon="step.completed ? checkmarkCircleOutline : step.icon"></ion-icon>
                   </div>
@@ -134,10 +136,8 @@
                 Message Driver
               </ion-button>
             </div>
-
           </div>
         </div>
-
       </div>
     </ion-content>
   </ion-page>
@@ -156,7 +156,7 @@ import {
   IonButton,
   IonBackButton,
   IonIcon,
-  alertController
+  alertController,
 } from '@ionic/vue';
 import {
   personOutline,
@@ -172,7 +172,7 @@ import {
   bicycleOutline,
   homeOutline,
   chevronUpOutline,
-  chevronDownOutline
+  chevronDownOutline,
 } from 'ionicons/icons';
 
 // Import Leaflet
@@ -201,7 +201,7 @@ const driverData = ref({
   avatar: null,
   status: 'on-route',
   statusText: 'On the way',
-  currentLocation: [8.4850, 124.6517]
+  currentLocation: [8.485, 124.6517],
 });
 
 // Order Data
@@ -209,13 +209,13 @@ const orderData = ref({
   id: '12345',
   deliveryAddress: 'Brgy. Carmen, Cagayan de Oro City',
   eta: '15 minutes',
-  customerName: 'Maria Santos'
+  customerName: 'Maria Santos',
 });
 
 // Tracking Data
 const trackingData = ref({
   distance: '3.2 km',
-  duration: '15 min'
+  duration: '15 min',
 });
 
 // Delivery Steps
@@ -226,7 +226,7 @@ const deliverySteps = ref([
     label: 'Order Picked Up',
     time: '2:30 PM',
     completed: true,
-    active: false
+    active: false,
   },
   {
     id: 2,
@@ -234,7 +234,7 @@ const deliverySteps = ref([
     label: 'Driver En Route',
     time: null,
     completed: false,
-    active: true
+    active: true,
   },
   {
     id: 3,
@@ -242,18 +242,18 @@ const deliverySteps = ref([
     label: 'Delivered',
     time: null,
     completed: false,
-    active: false
-  }
+    active: false,
+  },
 ]);
 
 // Locations
-const sellerLocation = [8.4850, 124.6517];
-const customerLocation = [8.4920, 124.6600];
+const sellerLocation = [8.485, 124.6517];
+const customerLocation = [8.492, 124.66];
 
 // Toggle cards
 const toggleCards = () => {
   cardsExpanded.value = !cardsExpanded.value;
-  
+
   // Resize map after animation
   setTimeout(() => {
     if (map) {
@@ -268,26 +268,26 @@ const initMap = () => {
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors',
-    maxZoom: 19
+    maxZoom: 19,
   }).addTo(map);
 
   // Custom icons
   const sellerIcon = L.divIcon({
     className: 'custom-marker',
     html: '<div style="background: #4CAF50; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">S</div>',
-    iconSize: [40, 40]
+    iconSize: [40, 40],
   });
 
   const customerIcon = L.divIcon({
     className: 'custom-marker',
     html: '<div style="background: #f44336; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">C</div>',
-    iconSize: [40, 40]
+    iconSize: [40, 40],
   });
 
   const driverIcon = L.divIcon({
     className: 'custom-marker',
     html: '<div style="background: #2196F3; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"><i class="fas fa-truck"></i></div>',
-    iconSize: [40, 40]
+    iconSize: [40, 40],
   });
 
   // Add markers
@@ -313,14 +313,11 @@ const drawRoute = () => {
     map.removeLayer(routeLine);
   }
 
-  routeLine = L.polyline(
-    [driverData.value.currentLocation, customerLocation],
-    {
-      color: '#2196F3',
-      weight: 4,
-      opacity: 0.8
-    }
-  ).addTo(map);
+  routeLine = L.polyline([driverData.value.currentLocation, customerLocation], {
+    color: '#2196F3',
+    weight: 4,
+    opacity: 0.8,
+  }).addTo(map);
 
   const distance = map.distance(driverData.value.currentLocation, customerLocation);
   const distanceKm = (distance / 1000).toFixed(1);
@@ -333,11 +330,7 @@ const drawRoute = () => {
 
 // Fit map to markers
 const fitMapToMarkers = () => {
-  const bounds = L.latLngBounds([
-    sellerLocation,
-    customerLocation,
-    driverData.value.currentLocation
-  ]);
+  const bounds = L.latLngBounds([sellerLocation, customerLocation, driverData.value.currentLocation]);
   map.fitBounds(bounds, { padding: [50, 50] });
 };
 
@@ -346,23 +339,23 @@ const simulateDriverMovement = () => {
   locationUpdateInterval = setInterval(() => {
     const currentLat = driverData.value.currentLocation[0];
     const currentLng = driverData.value.currentLocation[1];
-    
+
     const newLat = currentLat + (customerLocation[0] - currentLat) * 0.02;
     const newLng = currentLng + (customerLocation[1] - currentLng) * 0.02;
-    
+
     driverData.value.currentLocation = [newLat, newLng];
-    
+
     if (driverMarker) {
       driverMarker.setLatLng(driverData.value.currentLocation);
     }
-    
+
     drawRoute();
 
     const distance = map.distance(driverData.value.currentLocation, customerLocation);
     if (distance < 100) {
       clearInterval(locationUpdateInterval);
       showSuccessModal('Driver has arrived at delivery location!');
-      
+
       deliverySteps.value[1].completed = true;
       deliverySteps.value[1].active = false;
       deliverySteps.value[2].completed = true;
@@ -383,9 +376,9 @@ const showLoadingModal = async (message = 'Loading...') => {
   const alert = await alertController.create({
     cssClass: 'loading-modal-simple',
     message: message,
-    buttons: []
+    buttons: [],
   });
-  
+
   await alert.present();
   setTimeout(() => alert.dismiss(), 1500);
 };
@@ -395,43 +388,43 @@ const showSuccessModal = async (message) => {
     cssClass: 'success-modal',
     header: ' ',
     message: message,
-    buttons: ['OK']
+    buttons: ['OK'],
   });
-  
+
   await alert.present();
-  
+
   setTimeout(() => {
     const alertElement = document.querySelector('.success-modal .alert-message');
     if (alertElement) {
       const textContent = alertElement.textContent;
       alertElement.innerHTML = '';
-      
+
       const wrapper = document.createElement('div');
       wrapper.style.display = 'flex';
       wrapper.style.flexDirection = 'column';
       wrapper.style.alignItems = 'center';
       wrapper.style.textAlign = 'center';
-      
+
       const img = document.createElement('img');
       img.src = '/assets/images/checkmark_success.png';
       img.style.width = '80px';
       img.style.height = '80px';
       img.style.margin = '0 auto 16px auto';
       img.style.display = 'block';
-      
+
       const textDiv = document.createElement('div');
       textDiv.textContent = textContent;
       textDiv.style.fontSize = '18px';
       textDiv.style.fontWeight = '600';
       textDiv.style.color = '#1a1a1a';
       textDiv.style.textAlign = 'center';
-      
+
       wrapper.appendChild(img);
       wrapper.appendChild(textDiv);
       alertElement.appendChild(wrapper);
     }
   }, 50);
-  
+
   setTimeout(() => alert.dismiss(), 2000);
 };
 
@@ -456,7 +449,7 @@ onUnmounted(() => {
   if (locationUpdateInterval) {
     clearInterval(locationUpdateInterval);
   }
-  
+
   if (map) {
     map.remove();
     map = null;
@@ -499,7 +492,7 @@ onUnmounted(() => {
 
 .toggle-button ion-icon {
   font-size: 20px;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .toggle-button span {
@@ -522,7 +515,9 @@ onUnmounted(() => {
   border-radius: 20px 20px 0 0;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
   z-index: 1000;
-  transition: transform 0.3s ease, height 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    height 0.3s ease;
 }
 
 .bottom-sheet.collapsed {
@@ -565,7 +560,7 @@ onUnmounted(() => {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: #E8F5E9;
+  background: #e8f5e9;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -574,7 +569,7 @@ onUnmounted(() => {
 
 .compact-avatar ion-icon {
   font-size: 24px;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .compact-info {
@@ -600,20 +595,25 @@ onUnmounted(() => {
   gap: 6px;
   font-size: 12px;
   font-weight: 600;
-  color: #2196F3;
+  color: #2196f3;
 }
 
 .status-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #2196F3;
+  background: #2196f3;
   animation: pulse-dot 2s infinite;
 }
 
 @keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* Expanded Content */
@@ -644,7 +644,7 @@ onUnmounted(() => {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: #E8F5E9;
+  background: #e8f5e9;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -660,7 +660,7 @@ onUnmounted(() => {
 
 .driver-avatar ion-icon {
   font-size: 28px;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .driver-info {
@@ -691,8 +691,8 @@ onUnmounted(() => {
 }
 
 .driver-status.on-route {
-  background: #E3F2FD;
-  color: #2196F3;
+  background: #e3f2fd;
+  color: #2196f3;
 }
 
 .call-button {
@@ -718,7 +718,7 @@ onUnmounted(() => {
 
 .stat ion-icon {
   font-size: 28px;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .stat-info {
@@ -757,7 +757,7 @@ onUnmounted(() => {
 
 .detail-item ion-icon {
   font-size: 20px;
-  color: #4CAF50;
+  color: #4caf50;
   margin-top: 2px;
   flex-shrink: 0;
 }
@@ -809,7 +809,7 @@ onUnmounted(() => {
 }
 
 .timeline-item.completed::after {
-  background: #4CAF50;
+  background: #4caf50;
 }
 
 .timeline-icon {
@@ -830,24 +830,25 @@ onUnmounted(() => {
 }
 
 .timeline-item.completed .timeline-icon {
-  background: #E8F5E9;
+  background: #e8f5e9;
 }
 
 .timeline-item.completed .timeline-icon ion-icon {
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .timeline-item.active .timeline-icon {
-  background: #E3F2FD;
+  background: #e3f2fd;
   animation: pulse 2s infinite;
 }
 
 .timeline-item.active .timeline-icon ion-icon {
-  color: #2196F3;
+  color: #2196f3;
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(33, 150, 243, 0.4);
   }
   50% {
@@ -909,14 +910,18 @@ onUnmounted(() => {
   width: 50px;
   height: 50px;
   border: 5px solid #f3f3f3;
-  border-top: 5px solid #4CAF50;
+  border-top: 5px solid #4caf50;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 :deep(.loading-modal-simple .alert-button-group) {
@@ -944,7 +949,7 @@ onUnmounted(() => {
 }
 
 :deep(.success-modal button) {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   font-weight: 600;
   border-radius: 12px;

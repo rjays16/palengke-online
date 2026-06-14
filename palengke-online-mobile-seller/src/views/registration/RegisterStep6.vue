@@ -2,7 +2,6 @@
   <ion-page>
     <ion-content :fullscreen="true" class="step-content">
       <div class="step-container">
-        
         <!-- Back Button -->
         <div class="back-button" @click="goBack">
           <ion-icon :icon="arrowBackOutline"></ion-icon>
@@ -67,9 +66,7 @@
             </div>
           </div>
           <div class="camera-controls">
-            <ion-button fill="clear" class="cancel-camera-btn" @click="cancelCamera">
-              Cancel
-            </ion-button>
+            <ion-button fill="clear" class="cancel-camera-btn" @click="cancelCamera"> Cancel </ion-button>
             <div class="capture-circle" @click="capturePhoto">
               <div class="capture-inner"></div>
             </div>
@@ -89,14 +86,9 @@
 
             <!-- When photo is taken -->
             <div v-else class="photo-preview">
-              <img :src="currentPhoto" alt="ID Photo">
+              <img :src="currentPhoto" alt="ID Photo" />
               <div class="photo-overlay">
-                <ion-button 
-                  size="small" 
-                  fill="clear" 
-                  class="retake-btn"
-                  @click="retakePhoto"
-                >
+                <ion-button size="small" fill="clear" class="retake-btn" @click="retakePhoto">
                   <ion-icon slot="icon-only" :icon="refreshOutline"></ion-icon>
                 </ion-button>
               </div>
@@ -113,28 +105,22 @@
 
           <!-- Hidden canvas and file inputs -->
           <canvas ref="canvasRef" style="display: none"></canvas>
-          <input 
-            ref="fileInput" 
-            type="file" 
-            accept="image/*" 
+          <input
+            ref="fileInput"
+            type="file"
+            accept="image/*"
             capture="environment"
             style="display: none"
             @change="handleFileInput"
-          >
-          <input 
-            ref="uploadInput" 
-            type="file" 
-            accept="image/*"
-            style="display: none"
-            @change="handleFileInput"
-          >
+          />
+          <input ref="uploadInput" type="file" accept="image/*" style="display: none" @change="handleFileInput" />
         </div>
 
         <!-- Tips (hidden during camera preview) -->
         <div v-if="!showCamera" class="tips-box">
           <ion-icon :icon="bulbOutline"></ion-icon>
           <div class="tips-text">
-            <strong>Tips for best results:</strong><br>
+            <strong>Tips for best results:</strong><br />
             Use natural lighting when possible. Hold your phone steady and ensure the entire ID fits within the frame.
           </div>
         </div>
@@ -143,22 +129,12 @@
         <div v-if="!showCamera" class="button-group">
           <!-- Show "Take Photo" and "Upload Photo" when no photo -->
           <template v-if="currentPhoto === null">
-            <ion-button 
-              expand="block" 
-              class="capture-button"
-              @click="openCamera"
-            >
+            <ion-button expand="block" class="capture-button" @click="openCamera">
               <ion-icon slot="start" :icon="cameraOutline"></ion-icon>
               Take Photo
             </ion-button>
 
-            <ion-button 
-              expand="block" 
-              fill="outline"
-              color="primary"
-              class="upload-button"
-              @click="openUpload"
-            >
+            <ion-button expand="block" fill="outline" color="primary" class="upload-button" @click="openUpload">
               <ion-icon slot="start" :icon="cloudUploadOutline"></ion-icon>
               Upload from Gallery
             </ion-button>
@@ -166,22 +142,12 @@
 
           <!-- Show "Retake" and "Confirm" when photo taken -->
           <template v-else>
-            <ion-button 
-              expand="block" 
-              fill="outline"
-              color="medium"
-              class="retake-button"
-              @click="retakePhoto"
-            >
+            <ion-button expand="block" fill="outline" color="medium" class="retake-button" @click="retakePhoto">
               <ion-icon slot="start" :icon="refreshOutline"></ion-icon>
               Retake Photo
             </ion-button>
 
-            <ion-button 
-              expand="block" 
-              class="confirm-button"
-              @click="confirmPhoto"
-            >
+            <ion-button expand="block" class="confirm-button" @click="confirmPhoto">
               <ion-icon slot="start" :icon="checkmarkOutline"></ion-icon>
               {{ currentPhotoStep === 'front' ? 'Confirm & Next' : 'Confirm Photo' }}
             </ion-button>
@@ -190,27 +156,16 @@
 
         <!-- Navigation Buttons (when both photos taken, hidden during camera preview) -->
         <div v-if="!showCamera && frontPhotoTaken && backPhotoTaken" class="nav-buttons">
-          <ion-button 
-            expand="block" 
-            fill="outline"
-            color="medium"
-            class="back-btn"
-            @click="goBack"
-          >
+          <ion-button expand="block" fill="outline" color="medium" class="back-btn" @click="goBack">
             <ion-icon slot="start" :icon="arrowBackOutline"></ion-icon>
             Back
           </ion-button>
 
-          <ion-button 
-            expand="block" 
-            class="next-button"
-            @click="handleNext"
-          >
+          <ion-button expand="block" class="next-button" @click="handleNext">
             Next: Selfie
             <ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon>
           </ion-button>
         </div>
-
       </div>
     </ion-content>
   </ion-page>
@@ -221,14 +176,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { Capacitor } from '@capacitor/core';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import {
-  IonPage,
-  IonContent,
-  IonButton,
-  IonIcon,
-  toastController,
-  alertController
-} from '@ionic/vue';
+import { IonPage, IonContent, IonButton, IonIcon, toastController, alertController } from '@ionic/vue';
 import {
   arrowBackOutline,
   arrowForwardOutline,
@@ -237,7 +185,7 @@ import {
   refreshOutline,
   informationCircleOutline,
   bulbOutline,
-  cloudUploadOutline
+  cloudUploadOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -273,11 +221,11 @@ onMounted(() => {
   if (savedData) {
     const data = JSON.parse(savedData);
     idTypeName.value = data.idTypeName || 'Government ID';
-    
+
     // Load previously taken photos if going back
     if (data.idFrontPhoto) frontPhoto.value = data.idFrontPhoto;
     if (data.idBackPhoto) backPhoto.value = data.idBackPhoto;
-    
+
     // Determine current step
     if (!frontPhoto.value) {
       currentPhotoStep.value = 'front';
@@ -340,7 +288,9 @@ const startCamera = async () => {
     });
     cameraStream.value = stream;
     showCamera.value = true;
-    await new Promise(resolve => { setTimeout(resolve, 100); });
+    await new Promise((resolve) => {
+      setTimeout(resolve, 100);
+    });
     if (videoRef.value) {
       videoRef.value.srcObject = stream;
     }
@@ -352,7 +302,7 @@ const startCamera = async () => {
 // Stop camera stream
 const stopCamera = () => {
   if (cameraStream.value) {
-    cameraStream.value.getTracks().forEach(track => track.stop());
+    cameraStream.value.getTracks().forEach((track) => track.stop());
     cameraStream.value = null;
   }
   showCamera.value = false;
@@ -439,19 +389,18 @@ const confirmPhoto = async () => {
       message: 'Front photo saved! Now capture the back.',
       duration: 2000,
       color: 'success',
-      position: 'top'
+      position: 'top',
     });
     await toast.present();
-    
+
     currentPhotoStep.value = 'back';
-    
   } else {
     // Back photo confirmed
     const toast = await toastController.create({
       message: 'Back photo saved! Both photos captured.',
       duration: 2000,
       color: 'success',
-      position: 'top'
+      position: 'top',
     });
     await toast.present();
   }
@@ -463,7 +412,7 @@ const showToast = async (message, color = 'primary') => {
     message,
     duration: 2500,
     color,
-    position: 'top'
+    position: 'top',
   });
   await toast.present();
 };
@@ -478,16 +427,16 @@ const goBack = async () => {
       buttons: [
         {
           text: 'Cancel',
-          role: 'cancel'
+          role: 'cancel',
         },
         {
           text: 'Discard',
           role: 'destructive',
           handler: () => {
             router.push('/register/step5');
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
     await alert.present();
   } else {
