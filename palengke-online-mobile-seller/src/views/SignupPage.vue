@@ -278,14 +278,16 @@ const goToLogin = () => {
 
 .signup-container {
   min-height: 100vh;
-  padding: 24px;
+  padding: calc(24px + constant(safe-area-inset-top)) 24px calc(24px + constant(safe-area-inset-bottom));
+  padding: calc(24px + env(safe-area-inset-top)) 24px calc(24px + env(safe-area-inset-bottom));
   position: relative;
 }
 
 /* Back Button */
 .back-button {
   position: absolute;
-  top: 24px;
+  top: calc(24px + constant(safe-area-inset-top));
+  top: calc(24px + env(safe-area-inset-top));
   left: 24px;
   width: 40px;
   height: 40px;

@@ -329,7 +329,8 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 40px 24px;
+  padding: calc(40px + constant(safe-area-inset-top)) 24px calc(40px + constant(safe-area-inset-bottom));
+  padding: calc(40px + env(safe-area-inset-top)) 24px calc(40px + env(safe-area-inset-bottom));
 }
 
 /* Logo Section - Seller is 40% bigger than Palengke logo */

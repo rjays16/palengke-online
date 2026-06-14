@@ -832,7 +832,8 @@ onMounted(async () => {
   left: 0;
   right: 0;
   background: white;
-  padding: 16px 20px;
+  padding: 16px 20px calc(16px + constant(safe-area-inset-bottom));
+  padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
   z-index: 100;
 }
