@@ -160,7 +160,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onActivated } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage,
@@ -197,8 +197,8 @@ const isVerified = computed(() => {
 });
 
 // Load account data
-onMounted(() => {
-  const savedData = localStorage.getItem('registrationData');
+function loadAccountData() {
+  const savedData = localStorage.getItem('submittedRegistrationData');
   if (savedData) {
     const data = JSON.parse(savedData);
     
@@ -207,16 +207,19 @@ onMounted(() => {
     accountData.value.fullName = `${data.firstName}${middle}${data.lastName}`;
     
     accountData.value.email = data.email || '';
-    accountData.value.phone = data.phone || '';
+    accountData.value.phone = data.fullPhone || data.phone || '';
     accountData.value.vehicleType = data.vehicleType || '';
     accountData.value.verificationStatus = data.verificationStatus || 'pending';
   }
-});
+}
+
+onMounted(loadAccountData);
+onActivated(loadAccountData);
 
 // Navigation
 const goToLogin = () => {
-  // Clear registration data
-  localStorage.removeItem('registrationData');
+  // Clear submitted data
+  localStorage.removeItem('submittedRegistrationData');
   
   // Show success toast
   showSuccessToast();

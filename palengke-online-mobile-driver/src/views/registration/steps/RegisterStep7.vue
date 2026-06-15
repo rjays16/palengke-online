@@ -218,6 +218,12 @@ const handleSubmit = async () => {
 
   try {
     await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    // Save submitted data for success page, then clear registration flow
+    const submittedData = localStorage.getItem('driverRegistrationData');
+    if (submittedData) {
+      localStorage.setItem('submittedRegistrationData', submittedData);
+    }
     localStorage.removeItem('driverRegistrationData');
     
     await showSuccessModal('Application submitted successfully!\nWe\'ll review it within 24-48 hours.');
