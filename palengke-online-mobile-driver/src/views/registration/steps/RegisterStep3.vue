@@ -2,7 +2,6 @@
   <ion-page>
     <ion-content :fullscreen="true" class="step-content">
       <div class="step-container">
-        
         <!-- Back Button -->
         <div class="back-button" @click="goBack">
           <ion-icon :icon="arrowBackOutline"></ion-icon>
@@ -24,7 +23,6 @@
 
         <!-- Form -->
         <div class="form-section">
-          
           <!-- Section Header -->
           <div class="section-header">
             <ion-icon :icon="cardOutline"></ion-icon>
@@ -36,14 +34,14 @@
             <label class="input-label">License Number *</label>
             <div class="input-wrapper" :class="{ error: errors.licenseNumber }">
               <ion-icon :icon="barcodeOutline" class="input-icon"></ion-icon>
-              <input 
-                v-model="formData.licenseNumber" 
-                type="text" 
+              <input
+                v-model="formData.licenseNumber"
+                type="text"
                 placeholder="N01-12-345678"
                 class="custom-input with-icon"
                 @blur="validateField('licenseNumber')"
                 @input="errors.licenseNumber = ''"
-              >
+              />
             </div>
             <span v-if="errors.licenseNumber" class="error-message">{{ errors.licenseNumber }}</span>
             <span v-else class="helper-text">Enter your 13-character license number</span>
@@ -54,14 +52,40 @@
             <label class="input-label">License Type *</label>
             <div class="input-wrapper" :class="{ error: errors.licenseType }">
               <ion-icon :icon="documentTextOutline" class="input-icon"></ion-icon>
-              <select v-model="formData.licenseType" class="custom-select with-icon" @blur="validateField('licenseType')" @change="errors.licenseType = ''">
-                <option value="">Select license type</option>
-                <option value="Professional 1">Professional 1</option>
-                <option value="Professional 2">Professional 2</option>
-                <option value="Professional 3">Professional 3</option>
+              <select
+                v-model="formData.licenseType"
+                class="custom-input with-icon custom-select"
+                @blur="validateField('licenseType')"
+                @change="errors.licenseType = ''"
+              >
+                <option value="" disabled>Select license type</option>
+                <option value="Student Permit">Student Permit</option>
+                <option value="Non-Professional">Non-Professional</option>
+                <option value="Professional">Professional</option>
               </select>
             </div>
             <span v-if="errors.licenseType" class="error-message">{{ errors.licenseType }}</span>
+          </div>
+
+          <!-- Restriction Code -->
+          <div class="input-group">
+            <label class="input-label">Restriction Code *</label>
+            <div class="input-wrapper" :class="{ error: errors.restrictionCode }">
+              <ion-icon :icon="codeSlashOutline" class="input-icon"></ion-icon>
+              <select
+                v-model="formData.restrictionCode"
+                class="custom-input with-icon custom-select"
+                @change="errors.restrictionCode = ''"
+                @blur="validateField('restrictionCode')"
+              >
+                <option value="" disabled>Select restriction code</option>
+                <option v-for="r in restrictionCodes" :key="r.code" :value="r.code">
+                  {{ r.code }} — {{ r.label }}
+                </option>
+              </select>
+            </div>
+            <span v-if="errors.restrictionCode" class="error-message">{{ errors.restrictionCode }}</span>
+            <span v-else class="helper-text">Found on the back of your license card</span>
           </div>
 
           <!-- Expiry Date -->
@@ -69,14 +93,14 @@
             <label class="input-label">Expiry Date *</label>
             <div class="input-wrapper" :class="{ error: errors.expiryDate }">
               <ion-icon :icon="calendarOutline" class="input-icon"></ion-icon>
-              <input 
-                v-model="formData.expiryDate" 
-                type="date" 
+              <input
+                v-model="formData.expiryDate"
+                type="date"
                 class="custom-input with-icon"
                 :min="minDate"
                 @blur="validateField('expiryDate')"
                 @input="errors.expiryDate = ''"
-              >
+              />
             </div>
             <span v-if="errors.expiryDate" class="error-message">{{ errors.expiryDate }}</span>
             <span v-else class="helper-text">License must not be expired</span>
@@ -86,50 +110,33 @@
           <div class="info-box">
             <ion-icon :icon="informationCircleOutline"></ion-icon>
             <div class="info-text">
-              <strong>Important:</strong><br>
+              <strong>Important:</strong><br />
               Your driver's license must be valid and not expired. Expired licenses will not be accepted.
             </div>
           </div>
 
           <!-- Navigation Buttons -->
           <div class="button-group">
-            <ion-button 
-              expand="block" 
-              fill="outline"
-              color="medium"
-              class="back-btn"
-              @click="goBack"
-            >
+            <ion-button expand="block" fill="outline" color="medium" class="back-btn" @click="goBack">
               <ion-icon slot="start" :icon="arrowBackOutline"></ion-icon>
               Back
             </ion-button>
 
-            <ion-button 
-              expand="block" 
-              class="next-button"
-              @click="handleNext"
-              :disabled="!isFormValid"
-            >
+            <ion-button expand="block" class="next-button" @click="handleNext" :disabled="!isFormValid">
               Next
               <ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon>
             </ion-button>
           </div>
         </div>
-
       </div>
     </ion-content>
   </ion-page>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import {
-  IonPage,
-  IonContent,
-  IonButton,
-  IonIcon
-} from '@ionic/vue';
+import { IonPage, IonContent, IonButton, IonIcon } from '@ionic/vue';
 import {
   arrowBackOutline,
   arrowForwardOutline,
@@ -137,21 +144,35 @@ import {
   barcodeOutline,
   documentTextOutline,
   calendarOutline,
-  informationCircleOutline
+  informationCircleOutline,
+  codeSlashOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
 
+const restrictionCodes = [
+  { code: 'A', label: 'Motorcycles/Tricycles (Automatic Clutch)' },
+  { code: 'A1', label: 'Motorcycles/Tricycles (Manual Clutch)' },
+  { code: 'B', label: 'Light Vehicles — Automatic Transmission' },
+  { code: 'B1', label: 'Light Vehicles — Manual Transmission' },
+  { code: 'B2', label: 'Heavy Vehicles — Automatic Transmission' },
+  { code: 'C', label: 'Heavy Vehicles — Manual Transmission' },
+  { code: 'D', label: 'Articulated Vehicles' },
+  { code: 'BE', label: 'Vehicles with Trailer' },
+];
+
 const formData = ref({
   licenseNumber: '',
   licenseType: '',
-  expiryDate: ''
+  restrictionCode: '',
+  expiryDate: '',
 });
 
 const errors = ref({
   licenseNumber: '',
   licenseType: '',
-  expiryDate: ''
+  restrictionCode: '',
+  expiryDate: '',
 });
 
 const minDate = computed(() => {
@@ -159,10 +180,15 @@ const minDate = computed(() => {
   return today.toISOString().split('T')[0];
 });
 
-const isFormValid = computed(() => {
-  return formData.value.licenseNumber && 
-         formData.value.licenseType && 
-         formData.value.expiryDate;
+onMounted(() => {
+  const savedData = localStorage.getItem('driverRegistrationData');
+  if (savedData) {
+    const data = JSON.parse(savedData);
+    if (data.licenseNumber) formData.value.licenseNumber = data.licenseNumber;
+    if (data.licenseType) formData.value.licenseType = data.licenseType;
+    if (data.restrictionCode) formData.value.restrictionCode = data.restrictionCode;
+    if (data.expiryDate) formData.value.expiryDate = data.expiryDate;
+  }
 });
 
 const validateField = (fieldName) => {
@@ -170,6 +196,10 @@ const validateField = (fieldName) => {
     case 'licenseNumber':
       if (!formData.value.licenseNumber.trim()) {
         errors.value.licenseNumber = 'License number is required';
+        return false;
+      }
+      if (formData.value.licenseNumber.trim().length < 13) {
+        errors.value.licenseNumber = 'License number must be 13 characters';
         return false;
       }
       errors.value.licenseNumber = '';
@@ -183,9 +213,23 @@ const validateField = (fieldName) => {
       errors.value.licenseType = '';
       return true;
 
+    case 'restrictionCode':
+      if (!formData.value.restrictionCode) {
+        errors.value.restrictionCode = 'Please select a restriction code';
+        return false;
+      }
+      errors.value.restrictionCode = '';
+      return true;
+
     case 'expiryDate':
       if (!formData.value.expiryDate) {
         errors.value.expiryDate = 'Expiry date is required';
+        return false;
+      }
+      const expiry = new Date(formData.value.expiryDate);
+      const today = new Date();
+      if (expiry <= today) {
+        errors.value.expiryDate = 'License must not be expired';
         return false;
       }
       errors.value.expiryDate = '';
@@ -196,6 +240,15 @@ const validateField = (fieldName) => {
   }
 };
 
+const isFormValid = computed(() => {
+  return (
+    formData.value.licenseNumber.trim() &&
+    formData.value.licenseType &&
+    formData.value.restrictionCode &&
+    formData.value.expiryDate
+  );
+});
+
 const goBack = () => {
   saveData();
   router.push('/register/step2');
@@ -205,14 +258,24 @@ const saveData = () => {
   const existingData = JSON.parse(localStorage.getItem('driverRegistrationData') || '{}');
   const updatedData = {
     ...existingData,
-    ...formData.value
+    licenseNumber: formData.value.licenseNumber,
+    licenseType: formData.value.licenseType,
+    restrictionCode: formData.value.restrictionCode,
+    expiryDate: formData.value.expiryDate,
   };
   localStorage.setItem('driverRegistrationData', JSON.stringify(updatedData));
 };
 
 const handleNext = () => {
-  saveData();
-  router.push('/register/step4');
+  const isLicenseNumberValid = validateField('licenseNumber');
+  const isLicenseTypeValid = validateField('licenseType');
+  const isRestrictionCodeValid = validateField('restrictionCode');
+  const isExpiryDateValid = validateField('expiryDate');
+
+  if (isLicenseNumberValid && isLicenseTypeValid && isRestrictionCodeValid && isExpiryDateValid) {
+    saveData();
+    router.push('/register/step4');
+  }
 };
 </script>
 
@@ -228,6 +291,7 @@ const handleNext = () => {
   position: relative;
 }
 
+/* Back Button */
 .back-button {
   position: absolute;
   top: 24px;
@@ -254,6 +318,7 @@ const handleNext = () => {
   color: var(--color-text-primary);
 }
 
+/* Progress Section */
 .progress-section {
   margin-top: 70px;
   margin-bottom: 32px;
@@ -282,6 +347,7 @@ const handleNext = () => {
   font-weight: 600;
 }
 
+/* Title Section */
 .title-section {
   text-align: center;
   margin-bottom: 40px;
@@ -300,24 +366,26 @@ const handleNext = () => {
   margin: 0;
 }
 
+/* Form Section */
 .form-section {
   max-width: 500px;
   margin: 0 auto;
   width: 100%;
 }
 
+/* Section Header */
 .section-header {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 24px;
   padding-bottom: 12px;
-  border-bottom: 2px solid var(--color-border);
+  border-bottom: 2px solid var(--color-card-border);
 }
 
 .section-header ion-icon {
   font-size: 24px;
-  color: var(--color-primary);
+  color: var(--color-icon-primary);
 }
 
 .section-header h2 {
@@ -327,6 +395,7 @@ const handleNext = () => {
   margin: 0;
 }
 
+/* Input Group */
 .input-group {
   margin-bottom: 20px;
 }
@@ -348,15 +417,13 @@ const handleNext = () => {
 .input-icon {
   position: absolute;
   left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 16px;
   font-size: 20px;
-  color: var(--color-primary);
+  color: var(--color-icon-primary);
   z-index: 2;
 }
 
-.custom-input,
-.custom-select {
+.custom-input {
   width: 100%;
   padding: 14px 16px;
   border: 2px solid var(--color-border);
@@ -368,13 +435,11 @@ const handleNext = () => {
   font-family: inherit;
 }
 
-.custom-input.with-icon,
-.custom-select.with-icon {
+.custom-input.with-icon {
   padding-left: 48px;
 }
 
-.custom-input:focus,
-.custom-select:focus {
+.custom-input:focus {
   outline: none;
   border-color: var(--color-border-focus);
 }
@@ -384,14 +449,19 @@ const handleNext = () => {
 }
 
 .custom-select {
-  cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 16px center;
-  background-size: 20px;
+  padding-right: 40px;
 }
 
+.custom-select:invalid {
+  color: var(--color-input-placeholder);
+}
+
+/* Error State */
 .input-wrapper.error .custom-input,
 .input-wrapper.error .custom-select {
   border-color: var(--color-error);
@@ -401,6 +471,7 @@ const handleNext = () => {
   color: var(--color-error);
 }
 
+/* Helper/Error Text */
 .helper-text {
   display: block;
   font-size: 12px;
@@ -416,19 +487,20 @@ const handleNext = () => {
   font-weight: 500;
 }
 
+/* Info Box */
 .info-box {
   display: flex;
   gap: 12px;
   background: var(--color-info-bg);
-  border-left: 4px solid var(--color-info);
+  border-left: 4px solid var(--color-info-border);
   padding: 16px;
   border-radius: 8px;
-  margin: 24px 0;
+  margin: 32px 0 24px 0;
 }
 
 .info-box ion-icon {
   font-size: 24px;
-  color: var(--color-info);
+  color: var(--color-info-border);
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -443,6 +515,7 @@ const handleNext = () => {
   font-weight: 700;
 }
 
+/* Button Group */
 .button-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -474,6 +547,7 @@ const handleNext = () => {
   --color: var(--color-text-tertiary);
 }
 
+/* Responsive */
 @media (max-width: 480px) {
   .title {
     font-size: 24px;

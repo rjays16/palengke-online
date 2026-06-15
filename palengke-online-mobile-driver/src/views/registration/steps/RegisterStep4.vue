@@ -1,8 +1,7 @@
 <template>
   <ion-page>
     <ion-content :fullscreen="true" class="step-content">
-      <div class="step-container">
-        
+      <div class="step-container" :data-render="renderKey">
         <!-- Back Button -->
         <div class="back-button" @click="goBack">
           <ion-icon :icon="arrowBackOutline"></ion-icon>
@@ -24,11 +23,16 @@
 
         <!-- Form -->
         <div class="form-section">
-          
           <!-- Section Header -->
           <div class="section-header">
             <ion-icon :icon="carOutline"></ion-icon>
             <h2>Vehicle Details</h2>
+          </div>
+
+          <!-- Restriction Info -->
+          <div class="restriction-info" v-if="getRestrictionCode()">
+            <ion-icon :icon="codeSlashOutline"></ion-icon>
+            <span>Restriction Code <strong>{{ getRestrictionCode() }}</strong> — {{ restrictionCodes[getRestrictionCode()] }}</span>
           </div>
 
           <!-- Vehicle Type -->
@@ -36,15 +40,20 @@
             <label class="input-label">Vehicle Type *</label>
             <div class="input-wrapper" :class="{ error: errors.vehicleType }">
               <ion-icon :icon="bicycleOutline" class="input-icon"></ion-icon>
-              <select v-model="formData.vehicleType" class="custom-select with-icon" @blur="validateField('vehicleType')" @change="errors.vehicleType = ''">
-                <option value="">Select vehicle type</option>
-                <option value="Motorcycle">Motorcycle</option>
-                <option value="Tricycle">Tricycle</option>
-                <option value="Van">Van</option>
-                <option value="Truck">Truck</option>
+              <select
+                v-model="formData.vehicleType"
+                class="custom-input with-icon custom-select"
+                @change="errors.vehicleType = ''"
+                @blur="validateField('vehicleType')"
+              >
+                <option value="" disabled>Select vehicle type</option>
+                <option v-for="v in getAvailableVehicles()" :key="v" :value="v">
+                  {{ v }}
+                </option>
               </select>
             </div>
             <span v-if="errors.vehicleType" class="error-message">{{ errors.vehicleType }}</span>
+            <span v-else class="helper-text">{{ getAvailableVehicles().length }} vehicle type(s) available for restriction code {{ getRestrictionCode() }}</span>
           </div>
 
           <!-- Plate Number -->
@@ -52,14 +61,14 @@
             <label class="input-label">Plate Number *</label>
             <div class="input-wrapper" :class="{ error: errors.plateNumber }">
               <ion-icon :icon="barcodeOutline" class="input-icon"></ion-icon>
-              <input 
-                v-model="formData.plateNumber" 
-                type="text" 
+              <input
+                v-model="formData.plateNumber"
+                type="text"
                 placeholder="ABC 1234"
                 class="custom-input with-icon"
                 @blur="validateField('plateNumber')"
                 @input="errors.plateNumber = ''"
-              >
+              />
             </div>
             <span v-if="errors.plateNumber" class="error-message">{{ errors.plateNumber }}</span>
             <span v-else class="helper-text">Enter your vehicle plate number</span>
@@ -70,14 +79,14 @@
             <label class="input-label">Vehicle Model & Year *</label>
             <div class="input-wrapper" :class="{ error: errors.vehicleModel }">
               <ion-icon :icon="constructOutline" class="input-icon"></ion-icon>
-              <input 
-                v-model="formData.vehicleModel" 
-                type="text" 
+              <input
+                v-model="formData.vehicleModel"
+                type="text"
                 placeholder="Honda Click 125i 2023"
                 class="custom-input with-icon"
                 @blur="validateField('vehicleModel')"
                 @input="errors.vehicleModel = ''"
-              >
+              />
             </div>
             <span v-if="errors.vehicleModel" class="error-message">{{ errors.vehicleModel }}</span>
           </div>
@@ -87,12 +96,12 @@
             <label class="input-label">Vehicle Color *</label>
             <div class="input-wrapper">
               <ion-icon :icon="colorPaletteOutline" class="input-icon"></ion-icon>
-              <input 
-                v-model="formData.vehicleColor" 
-                type="text" 
+              <input
+                v-model="formData.vehicleColor"
+                type="text"
                 placeholder="Black"
                 class="custom-input with-icon"
-              >
+              />
             </div>
           </div>
 
@@ -100,50 +109,33 @@
           <div class="info-box">
             <ion-icon :icon="informationCircleOutline"></ion-icon>
             <div class="info-text">
-              <strong>Note:</strong><br>
+              <strong>Note:</strong><br />
               Your vehicle must be registered and have valid documents (OR/CR).
             </div>
           </div>
 
           <!-- Navigation Buttons -->
           <div class="button-group">
-            <ion-button 
-              expand="block" 
-              fill="outline"
-              color="medium"
-              class="back-btn"
-              @click="goBack"
-            >
+            <ion-button expand="block" fill="outline" color="medium" class="back-btn" @click="goBack">
               <ion-icon slot="start" :icon="arrowBackOutline"></ion-icon>
               Back
             </ion-button>
 
-            <ion-button 
-              expand="block" 
-              class="next-button"
-              @click="handleNext"
-              :disabled="!isFormValid"
-            >
+            <ion-button expand="block" class="next-button" @click="handleNext" :disabled="!isFormValid">
               Next
               <ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon>
             </ion-button>
           </div>
         </div>
-
       </div>
     </ion-content>
   </ion-page>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onActivated } from 'vue';
 import { useRouter } from 'vue-router';
-import {
-  IonPage,
-  IonContent,
-  IonButton,
-  IonIcon
-} from '@ionic/vue';
+import { IonPage, IonContent, IonButton, IonIcon } from '@ionic/vue';
 import {
   arrowBackOutline,
   arrowForwardOutline,
@@ -152,28 +144,91 @@ import {
   barcodeOutline,
   constructOutline,
   colorPaletteOutline,
-  informationCircleOutline
+  informationCircleOutline,
+  codeSlashOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
 
+const restrictionCodes = {
+  A: 'Motorcycles/Tricycles (Automatic Clutch)',
+  A1: 'Motorcycles/Tricycles (Manual Clutch)',
+  B: 'Light Vehicles — Automatic Transmission',
+  B1: 'Light Vehicles — Manual Transmission',
+  B2: 'Heavy Vehicles — Automatic Transmission',
+  C: 'Heavy Vehicles — Manual Transmission',
+  D: 'Articulated Vehicles',
+  BE: 'Vehicles with Trailer',
+};
+
+const vehiclesByCode = {
+  A: ['Motorcycle', 'Tricycle'],
+  A1: ['Motorcycle', 'Tricycle'],
+  B: ['Car', 'Van', 'SUV', 'Pickup'],
+  B1: ['Car', 'Van', 'SUV', 'Pickup'],
+  B2: ['Truck', 'Bus', 'Delivery Van'],
+  C: ['Truck', 'Bus', 'Delivery Van'],
+  D: ['Trailer Truck', 'Articulated Bus'],
+  BE: ['Car with Trailer', 'Van with Trailer', 'Pickup with Trailer'],
+};
+
+const renderKey = ref(0);
 const formData = ref({
   vehicleType: '',
   plateNumber: '',
   vehicleModel: '',
-  vehicleColor: ''
+  vehicleColor: '',
 });
 
 const errors = ref({
   vehicleType: '',
   plateNumber: '',
-  vehicleModel: ''
+  vehicleModel: '',
 });
 
+function loadFromStorage() {
+  const savedData = localStorage.getItem('driverRegistrationData');
+  if (savedData) {
+    const data = JSON.parse(savedData);
+    resetVehicleTypeOnCodeMismatch(data.restrictionCode || '');
+    if (data.vehicleType) formData.value.vehicleType = data.vehicleType;
+    if (data.plateNumber) formData.value.plateNumber = data.plateNumber;
+    if (data.vehicleModel) formData.value.vehicleModel = data.vehicleModel;
+    if (data.vehicleColor) formData.value.vehicleColor = data.vehicleColor;
+  }
+}
+
+onMounted(loadFromStorage);
+onActivated(() => {
+  renderKey.value++;
+  loadFromStorage();
+});
+
+function getRestrictionCode() {
+  const data = JSON.parse(localStorage.getItem('driverRegistrationData') || '{}');
+  return data.restrictionCode || '';
+}
+
+function resetVehicleTypeOnCodeMismatch(code) {
+  const current = formData.value.vehicleType;
+  if (!current) return;
+  const allowed = vehiclesByCode[code] || [];
+  if (!allowed.includes(current)) {
+    formData.value.vehicleType = '';
+  }
+}
+
+function getAvailableVehicles() {
+  const code = getRestrictionCode();
+  return vehiclesByCode[code] || ['Motorcycle', 'Tricycle', 'Car', 'Van', 'Truck'];
+}
+
 const isFormValid = computed(() => {
-  return formData.value.vehicleType && 
-         formData.value.plateNumber && 
-         formData.value.vehicleModel;
+  return (
+    formData.value.vehicleType &&
+    formData.value.plateNumber.trim() &&
+    formData.value.vehicleModel.trim()
+  );
 });
 
 const validateField = (fieldName) => {
@@ -191,12 +246,20 @@ const validateField = (fieldName) => {
         errors.value.plateNumber = 'Plate number is required';
         return false;
       }
+      if (formData.value.plateNumber.trim().length < 3) {
+        errors.value.plateNumber = 'Please enter a valid plate number';
+        return false;
+      }
       errors.value.plateNumber = '';
       return true;
 
     case 'vehicleModel':
       if (!formData.value.vehicleModel.trim()) {
         errors.value.vehicleModel = 'Vehicle model is required';
+        return false;
+      }
+      if (formData.value.vehicleModel.trim().length < 3) {
+        errors.value.vehicleModel = 'Please enter a valid model';
         return false;
       }
       errors.value.vehicleModel = '';
@@ -216,14 +279,23 @@ const saveData = () => {
   const existingData = JSON.parse(localStorage.getItem('driverRegistrationData') || '{}');
   const updatedData = {
     ...existingData,
-    ...formData.value
+    vehicleType: formData.value.vehicleType,
+    plateNumber: formData.value.plateNumber,
+    vehicleModel: formData.value.vehicleModel,
+    vehicleColor: formData.value.vehicleColor,
   };
   localStorage.setItem('driverRegistrationData', JSON.stringify(updatedData));
 };
 
 const handleNext = () => {
-  saveData();
-  router.push('/register/step5');
+  const isVehicleTypeValid = validateField('vehicleType');
+  const isPlateNumberValid = validateField('plateNumber');
+  const isVehicleModelValid = validateField('vehicleModel');
+
+  if (isVehicleTypeValid && isPlateNumberValid && isVehicleModelValid) {
+    saveData();
+    router.push('/register/step5');
+  }
 };
 </script>
 
@@ -239,6 +311,7 @@ const handleNext = () => {
   position: relative;
 }
 
+/* Back Button */
 .back-button {
   position: absolute;
   top: 24px;
@@ -265,6 +338,7 @@ const handleNext = () => {
   color: var(--color-text-primary);
 }
 
+/* Progress Section */
 .progress-section {
   margin-top: 70px;
   margin-bottom: 32px;
@@ -293,6 +367,7 @@ const handleNext = () => {
   font-weight: 600;
 }
 
+/* Title Section */
 .title-section {
   text-align: center;
   margin-bottom: 40px;
@@ -311,24 +386,49 @@ const handleNext = () => {
   margin: 0;
 }
 
+/* Form Section */
 .form-section {
   max-width: 500px;
   margin: 0 auto;
   width: 100%;
 }
 
+/* Restriction Info Banner */
+.restriction-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--color-bg-secondary);
+  border-radius: 12px;
+  margin-bottom: 24px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.restriction-info ion-icon {
+  font-size: 20px;
+  color: var(--color-icon-primary);
+  flex-shrink: 0;
+}
+
+.restriction-info strong {
+  color: var(--color-text-primary);
+}
+
+/* Section Header */
 .section-header {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 24px;
   padding-bottom: 12px;
-  border-bottom: 2px solid var(--color-border);
+  border-bottom: 2px solid var(--color-card-border);
 }
 
 .section-header ion-icon {
   font-size: 24px;
-  color: var(--color-primary);
+  color: var(--color-icon-primary);
 }
 
 .section-header h2 {
@@ -338,6 +438,7 @@ const handleNext = () => {
   margin: 0;
 }
 
+/* Input Group */
 .input-group {
   margin-bottom: 20px;
 }
@@ -359,15 +460,13 @@ const handleNext = () => {
 .input-icon {
   position: absolute;
   left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 16px;
   font-size: 20px;
-  color: var(--color-primary);
+  color: var(--color-icon-primary);
   z-index: 2;
 }
 
-.custom-input,
-.custom-select {
+.custom-input {
   width: 100%;
   padding: 14px 16px;
   border: 2px solid var(--color-border);
@@ -379,13 +478,11 @@ const handleNext = () => {
   font-family: inherit;
 }
 
-.custom-input.with-icon,
-.custom-select.with-icon {
+.custom-input.with-icon {
   padding-left: 48px;
 }
 
-.custom-input:focus,
-.custom-select:focus {
+.custom-input:focus {
   outline: none;
   border-color: var(--color-border-focus);
 }
@@ -395,14 +492,19 @@ const handleNext = () => {
 }
 
 .custom-select {
-  cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 16px center;
-  background-size: 20px;
+  padding-right: 40px;
 }
 
+.custom-select:invalid {
+  color: var(--color-input-placeholder);
+}
+
+/* Error State */
 .input-wrapper.error .custom-input,
 .input-wrapper.error .custom-select {
   border-color: var(--color-error);
@@ -412,6 +514,7 @@ const handleNext = () => {
   color: var(--color-error);
 }
 
+/* Helper/Error Text */
 .helper-text {
   display: block;
   font-size: 12px;
@@ -427,19 +530,20 @@ const handleNext = () => {
   font-weight: 500;
 }
 
+/* Info Box */
 .info-box {
   display: flex;
   gap: 12px;
   background: var(--color-info-bg);
-  border-left: 4px solid var(--color-info);
+  border-left: 4px solid var(--color-info-border);
   padding: 16px;
   border-radius: 8px;
-  margin: 24px 0;
+  margin: 32px 0 24px 0;
 }
 
 .info-box ion-icon {
   font-size: 24px;
-  color: var(--color-info);
+  color: var(--color-info-border);
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -454,6 +558,7 @@ const handleNext = () => {
   font-weight: 700;
 }
 
+/* Button Group */
 .button-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -485,6 +590,7 @@ const handleNext = () => {
   --color: var(--color-text-tertiary);
 }
 
+/* Responsive */
 @media (max-width: 480px) {
   .title {
     font-size: 24px;
