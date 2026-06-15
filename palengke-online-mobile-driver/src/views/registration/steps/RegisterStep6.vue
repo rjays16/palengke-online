@@ -2,7 +2,6 @@
   <ion-page>
     <ion-content :fullscreen="true" class="step-content">
       <div class="step-container">
-        
         <!-- Back Button -->
         <div class="back-button" @click="goBack">
           <ion-icon :icon="arrowBackOutline"></ion-icon>
@@ -19,147 +18,327 @@
         <!-- Title -->
         <div class="title-section">
           <h1 class="title">Selfie Verification</h1>
-          <p class="subtitle">Take a photo with your ID</p>
+          <p class="subtitle">Take a photo with your valid ID</p>
         </div>
 
         <!-- Form -->
         <div class="form-section">
-          
           <!-- Section Header -->
           <div class="section-header">
             <ion-icon :icon="cameraOutline"></ion-icon>
             <h2>Photo Verification</h2>
           </div>
 
-          <!-- Instructions -->
-          <div class="instructions-box">
-            <h3>Selfie with ID Instructions:</h3>
-            <ul>
+          <!-- Instructions Card -->
+          <div class="instructions-card">
+            <div class="instruction-header">
+              <ion-icon :icon="informationCircleOutline"></ion-icon>
+              <h3>Selfie with ID Instructions</h3>
+            </div>
+            <ul class="instruction-list">
               <li>Hold your valid ID beside your face</li>
               <li>Make sure your face and ID are clearly visible</li>
-              <li>Ensure good lighting (no shadows)</li>
-              <li>Keep a neutral expression</li>
+              <li>Ensure good lighting with no shadows or glare</li>
               <li>Do not wear sunglasses or hats</li>
+              <li>Keep a neutral expression</li>
             </ul>
           </div>
 
-          <!-- Camera/Selfie Upload -->
-          <div class="selfie-upload-box" :class="{ uploaded: selfieUploaded }">
-            <input 
-              type="file" 
-              accept="image/*" 
-              capture="user"
-              class="selfie-input"
-              @change="onSelfieUpload"
-            >
-            <div class="selfie-content" v-if="!selfieUploaded">
-              <div class="camera-icon">
+          <!-- Live Camera Preview -->
+          <div v-if="showCamera" class="camera-preview-section">
+            <div class="camera-preview-container">
+              <video ref="videoRef" autoplay playsinline class="camera-video"></video>
+              <canvas ref="canvasRef" style="display: none"></canvas>
+              <div class="selfie-frame-overlay">
+                <div class="oval-frame"></div>
+              </div>
+            </div>
+            <div class="camera-controls">
+              <ion-button fill="clear" class="cancel-camera-btn" @click="cancelCamera"> Cancel </ion-button>
+              <div class="capture-circle" @click="capturePhoto">
+                <div class="capture-inner"></div>
+              </div>
+              <div style="width: 70px"></div>
+            </div>
+          </div>
+
+          <!-- Camera Section (hidden during live preview) -->
+          <div v-if="!showCamera" class="camera-section">
+            <div class="camera-frame">
+              <!-- When no photo taken yet -->
+              <div v-if="selfiePhoto === null" class="camera-placeholder">
                 <ion-icon :icon="cameraOutline"></ion-icon>
+                <p>Take a Selfie with Your ID</p>
+                <span>Tap button below to capture</span>
               </div>
-              <p>Tap to take selfie</p>
-              <span>or upload from gallery</span>
-            </div>
-            <div class="selfie-preview" v-else>
-              <img src="" alt="Selfie preview" id="selfiePreview">
-              <div class="overlay">
-                <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
-                <p>Photo uploaded</p>
+
+              <!-- When photo is taken -->
+              <div v-else class="photo-preview">
+                <img :src="selfiePhoto" alt="Selfie preview" />
+                <div class="photo-overlay">
+                  <ion-button size="small" fill="clear" class="retake-btn" @click="retakePhoto">
+                    <ion-icon slot="icon-only" :icon="refreshOutline"></ion-icon>
+                  </ion-button>
+                </div>
+              </div>
+
+              <!-- Selfie Frame Overlay -->
+              <div class="selfie-frame-overlay">
+                <div class="oval-frame"></div>
               </div>
             </div>
+
+            <!-- Hidden canvas and file inputs -->
+            <canvas ref="canvasRef" style="display: none"></canvas>
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/*"
+              capture="user"
+              style="display: none"
+              @change="handleFileInput"
+            />
           </div>
 
-          <!-- ID Preview -->
-          <div class="id-preview-section" v-if="selfieUploaded">
-            <p class="id-label">Selfie with ID uploaded successfully!</p>
-          </div>
-
-          <!-- Info Box -->
-          <div class="info-box warning">
-            <ion-icon :icon="warningOutline"></ion-icon>
-            <div class="info-text">
-              <strong>Important:</strong><br>
-              The photo must clearly show your face and the ID details. Blurry or unreadable photos will be rejected.
+          <!-- Tips (hidden during camera preview) -->
+          <div v-if="!showCamera" class="tips-box">
+            <ion-icon :icon="bulbOutline"></ion-icon>
+            <div class="tips-text">
+              <strong>Tips for best results:</strong><br />
+              Use natural lighting when possible. Hold your phone steady and ensure both your face and ID are clearly in frame.
             </div>
           </div>
 
-          <!-- Navigation Buttons -->
-          <div class="button-group">
-            <ion-button 
-              expand="block" 
-              fill="outline"
-              color="medium"
-              class="back-btn"
-              @click="goBack"
-            >
+          <!-- Action Buttons (hidden during camera preview) -->
+          <div v-if="!showCamera" class="button-group">
+            <!-- Show "Take Photo" when no photo -->
+            <template v-if="selfiePhoto === null">
+              <ion-button expand="block" class="capture-button" @click="openCamera">
+                <ion-icon slot="start" :icon="cameraOutline"></ion-icon>
+                Take Selfie
+              </ion-button>
+            </template>
+
+            <!-- Show "Retake" and "Confirm" when photo taken -->
+            <template v-else>
+              <ion-button expand="block" fill="outline" color="medium" class="retake-button" @click="retakePhoto">
+                <ion-icon slot="start" :icon="refreshOutline"></ion-icon>
+                Retake Photo
+              </ion-button>
+
+              <ion-button expand="block" class="confirm-button" @click="confirmPhoto">
+                <ion-icon slot="start" :icon="checkmarkOutline"></ion-icon>
+                Confirm Photo
+              </ion-button>
+            </template>
+          </div>
+
+          <!-- Navigation Buttons (when photo confirmed) -->
+          <div v-if="!showCamera && selfieConfirmed" class="nav-buttons">
+            <ion-button expand="block" fill="outline" color="medium" class="back-btn" @click="goBack">
               <ion-icon slot="start" :icon="arrowBackOutline"></ion-icon>
               Back
             </ion-button>
 
-            <ion-button 
-              expand="block" 
-              class="next-button"
-              @click="handleNext"
-              :disabled="!selfieUploaded"
-            >
-              Next
+            <ion-button expand="block" class="next-button" @click="handleNext">
+              Next: Review
               <ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon>
             </ion-button>
           </div>
         </div>
-
       </div>
     </ion-content>
   </ion-page>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import {
-  IonPage,
-  IonContent,
-  IonButton,
-  IonIcon
-} from '@ionic/vue';
+import { Capacitor } from '@capacitor/core';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { IonPage, IonContent, IonButton, IonIcon, toastController } from '@ionic/vue';
 import {
   arrowBackOutline,
   arrowForwardOutline,
   cameraOutline,
-  checkmarkCircleOutline,
-  warningOutline
+  checkmarkOutline,
+  refreshOutline,
+  informationCircleOutline,
+  bulbOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
+const fileInput = ref(null);
+const videoRef = ref(null);
+const canvasRef = ref(null);
 
-const selfieUploaded = ref(false);
+const selfiePhoto = ref(null);
+const selfieConfirmed = ref(false);
+const showCamera = ref(false);
+const cameraStream = ref(null);
 
-const onSelfieUpload = (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    selfieUploaded.value = true;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const preview = document.getElementById('selfiePreview');
-      if (preview && e.target) {
-        preview.src = e.target.result;
+onMounted(() => {
+  const savedData = localStorage.getItem('driverRegistrationData');
+  if (savedData) {
+    const data = JSON.parse(savedData);
+    if (data.selfiePhoto) {
+      selfiePhoto.value = data.selfiePhoto;
+      selfieConfirmed.value = true;
+    }
+  }
+});
+
+onUnmounted(() => {
+  stopCamera();
+});
+
+const openCamera = async () => {
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const photo = await Camera.getPhoto({
+        resultType: CameraResultType.DataUrl,
+        source: CameraSource.Camera,
+        quality: 90,
+      });
+      setPhoto(photo.dataUrl);
+    } catch (error) {
+      if (error.message !== 'User cancelled photos app') {
+        showToast('Failed to capture photo.', 'warning');
       }
-    };
-    reader.readAsDataURL(file);
+    }
+  } else {
+    startCamera();
   }
 };
 
+const startCamera = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: false,
+    });
+    cameraStream.value = stream;
+    showCamera.value = true;
+    await new Promise((resolve) => {
+      setTimeout(resolve, 100);
+    });
+    if (videoRef.value) {
+      videoRef.value.srcObject = stream;
+    }
+  } catch {
+    fileInput.value?.click();
+  }
+};
+
+const stopCamera = () => {
+  if (cameraStream.value) {
+    cameraStream.value.getTracks().forEach((track) => track.stop());
+    cameraStream.value = null;
+  }
+  showCamera.value = false;
+};
+
+const capturePhoto = () => {
+  const video = videoRef.value;
+  const canvas = canvasRef.value;
+  if (!video || !canvas) return;
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0);
+
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+  const approxBytes = dataUrl.length * 0.75;
+  if (approxBytes > 5 * 1024 * 1024) {
+    showToast('Photo is too large. Please use a photo under 5MB.', 'warning');
+    return;
+  }
+  selfiePhoto.value = dataUrl;
+  stopCamera();
+};
+
+const cancelCamera = () => {
+  stopCamera();
+};
+
+const handleFileInput = (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    showToast('Photo is too large. Please use a photo under 5MB.', 'warning');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    selfiePhoto.value = e.target.result;
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+};
+
+const setPhoto = (dataUrl) => {
+  const approxBytes = dataUrl.length * 0.75;
+  if (approxBytes > 5 * 1024 * 1024) {
+    showToast('Photo is too large. Please use a photo under 5MB.', 'warning');
+    return;
+  }
+  selfiePhoto.value = dataUrl;
+};
+
+const retakePhoto = () => {
+  selfiePhoto.value = null;
+  selfieConfirmed.value = false;
+};
+
+const confirmPhoto = async () => {
+  if (!selfiePhoto.value) return;
+  selfieConfirmed.value = true;
+  const toast = await toastController.create({
+    message: 'Selfie photo saved!',
+    duration: 2000,
+    color: 'success',
+    position: 'top',
+  });
+  await toast.present();
+};
+
+const showToast = async (message, color = 'primary') => {
+  const toast = await toastController.create({
+    message,
+    duration: 2500,
+    color,
+    position: 'top',
+  });
+  await toast.present();
+};
+
 const goBack = () => {
+  if (selfiePhoto.value) {
+    saveData();
+  }
   router.push('/register/step5');
 };
 
+const saveData = () => {
+  const existingData = JSON.parse(localStorage.getItem('driverRegistrationData') || '{}');
+  existingData.selfiePhoto = selfiePhoto.value;
+  localStorage.setItem('driverRegistrationData', JSON.stringify(existingData));
+};
+
 const handleNext = () => {
+  if (!selfiePhoto.value || !selfieConfirmed.value) {
+    showToast('Please take and confirm your selfie photo.', 'warning');
+    return;
+  }
+  saveData();
   router.push('/register/step7');
 };
 </script>
 
 <style scoped>
 .step-content {
-  --background: #ffffff;
+  --background: var(--color-bg-primary);
 }
 
 .step-container {
@@ -169,6 +348,7 @@ const handleNext = () => {
   position: relative;
 }
 
+/* Back Button */
 .back-button {
   position: absolute;
   top: 24px;
@@ -178,7 +358,7 @@ const handleNext = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f5f5;
+  background: var(--color-bg-tertiary);
   border-radius: 12px;
   cursor: pointer;
   z-index: 10;
@@ -187,14 +367,15 @@ const handleNext = () => {
 
 .back-button:active {
   transform: scale(0.95);
-  background: #e0e0e0;
+  background: var(--color-border);
 }
 
 .back-button ion-icon {
   font-size: 24px;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
 }
 
+/* Progress Section */
 .progress-section {
   margin-top: 70px;
   margin-bottom: 32px;
@@ -223,9 +404,10 @@ const handleNext = () => {
   font-weight: 600;
 }
 
+/* Title Section */
 .title-section {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 24px;
 }
 
 .title {
@@ -241,24 +423,26 @@ const handleNext = () => {
   margin: 0;
 }
 
+/* Form Section */
 .form-section {
   max-width: 500px;
   margin: 0 auto;
   width: 100%;
 }
 
+/* Section Header */
 .section-header {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 24px;
   padding-bottom: 12px;
-  border-bottom: 2px solid var(--color-border);
+  border-bottom: 2px solid var(--color-card-border);
 }
 
 .section-header ion-icon {
   font-size: 24px;
-  color: var(--color-primary);
+  color: var(--color-icon-primary);
 }
 
 .section-header h2 {
@@ -268,192 +452,224 @@ const handleNext = () => {
   margin: 0;
 }
 
-.instructions-box {
-  background: var(--color-bg-tertiary);
-  border-radius: 12px;
+/* Instructions Card */
+.instructions-card {
+  background: var(--color-success-bg);
+  border-radius: 16px;
   padding: 20px;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+  border: 2px solid var(--color-success-border);
 }
 
-.instructions-box h3 {
-  font-size: 15px;
+.instruction-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.instruction-header ion-icon {
+  font-size: 24px;
+  color: var(--color-success-border);
+}
+
+.instruction-header h3 {
+  font-size: 16px;
   font-weight: 700;
-  color: #1a1a1a;
-  margin: 0 0 12px 0;
-}
-
-.instructions-box ul {
+  color: var(--color-success-text);
   margin: 0;
-  padding-left: 20px;
 }
 
-.instructions-box li {
-  font-size: 13px;
-  color: #666;
+.instruction-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.instruction-list li {
+  font-size: 14px;
+  color: var(--color-success-text);
+  padding-left: 24px;
   margin-bottom: 8px;
-  line-height: 1.4;
-}
-
-.selfie-upload-box {
   position: relative;
-  width: 200px;
-  height: 200px;
-  margin: 0 auto 24px;
-  border: 3px dashed #e0e0e0;
-  border-radius: 50%;
-  overflow: hidden;
-  transition: all 0.2s;
-  cursor: pointer;
 }
 
-.selfie-upload-box:hover {
-  border-color: #4CAF50;
+.instruction-list li:last-child {
+  margin-bottom: 0;
 }
 
-.selfie-upload-box.uploaded {
-  border-color: #4CAF50;
-  border-style: solid;
-}
-
-.selfie-input {
+.instruction-list li::before {
+  content: '\2713';
   position: absolute;
-  top: 0;
   left: 0;
+  color: var(--color-success-border);
+  font-weight: 700;
+}
+
+/* Camera Section */
+.camera-section {
+  margin-bottom: 20px;
+}
+
+.camera-frame {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  aspect-ratio: 1;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--color-bg-tertiary);
+  box-shadow: 0 4px 16px var(--color-card-shadow);
+}
+
+.camera-placeholder {
   width: 100%;
   height: 100%;
-  opacity: 0;
-  cursor: pointer;
-  z-index: 10;
-}
-
-.selfie-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  text-align: center;
+  gap: 12px;
+  background: var(--color-bg-tertiary);
 }
 
-.camera-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: #f0f0f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 12px;
+.camera-placeholder ion-icon {
+  font-size: 64px;
+  color: var(--color-text-tertiary);
 }
 
-.camera-icon ion-icon {
-  font-size: 32px;
-  color: #999;
+.camera-placeholder p {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  margin: 0;
 }
 
-.selfie-content p {
+.camera-placeholder span {
   font-size: 14px;
-  color: #666;
-  margin: 0 0 4px 0;
-  font-weight: 600;
+  color: var(--color-text-tertiary);
+  margin: 0;
 }
 
-.selfie-content span {
-  font-size: 12px;
-  color: #999;
-}
-
-.selfie-preview {
-  position: relative;
+.photo-preview {
   width: 100%;
   height: 100%;
+  position: relative;
 }
 
-.selfie-preview img {
+.photo-preview img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.selfie-preview .overlay {
+.photo-overlay {
   position: absolute;
-  bottom: 0;
+  top: 12px;
+  right: 12px;
+}
+
+.retake-btn {
+  --background: rgba(255, 255, 255, 0.9);
+  --color: var(--color-text-primary);
+  --border-radius: 50%;
+  width: 40px;
+  height: 40px;
+}
+
+/* Selfie Frame Overlay */
+.selfie-frame-overlay {
+  position: absolute;
+  top: 0;
   left: 0;
   right: 0;
-  background: rgba(76, 175, 80, 0.9);
-  padding: 8px;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
+  bottom: 0;
+  pointer-events: none;
 }
 
-.selfie-preview .overlay ion-icon {
-  font-size: 20px;
-  color: white;
+.oval-frame {
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  right: 10%;
+  bottom: 10%;
+  border: 3px dashed var(--color-primary);
+  border-radius: 50%;
+  opacity: 0.6;
 }
 
-.selfie-preview .overlay p {
-  font-size: 12px;
-  color: white;
-  margin: 0;
-  font-weight: 600;
-}
-
-.id-preview-section {
-  text-align: center;
-  margin-bottom: 16px;
-}
-
-.id-label {
-  font-size: 14px;
-  color: #4CAF50;
-  font-weight: 600;
-  margin: 0;
-}
-
-.info-box.warning {
-  background: #FFF3E0;
-  border-left-color: #ff9800;
-}
-
-.info-box.warning ion-icon {
-  color: #ff9800;
-}
-
-.info-box.warning .info-text {
-  color: #e65100;
-}
-
-.info-box {
+/* Tips Box */
+.tips-box {
   display: flex;
   gap: 12px;
+  background: var(--color-warning-bg);
+  border-left: 4px solid var(--color-warning-border);
   padding: 16px;
   border-radius: 8px;
   margin-bottom: 24px;
 }
 
-.info-box ion-icon {
+.tips-box ion-icon {
   font-size: 24px;
+  color: var(--color-warning-border);
   flex-shrink: 0;
   margin-top: 2px;
 }
 
-.info-text {
+.tips-text {
   font-size: 13px;
+  color: var(--color-warning-text);
   line-height: 1.5;
 }
 
-.info-text strong {
+.tips-text strong {
   font-weight: 700;
 }
 
+/* Button Group */
 .button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.capture-button {
+  --background: var(--color-primary);
+  --background-hover: var(--color-primary-hover);
+  --border-radius: 12px;
+  height: 56px;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.retake-button {
+  --border-radius: 12px;
+  --border-width: 2px;
+  height: 52px;
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+.confirm-button {
+  --background: var(--color-primary);
+  --background-hover: var(--color-primary-hover);
+  --border-radius: 12px;
+  height: 52px;
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: none;
+}
+
+/* Navigation Buttons */
+.nav-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  margin-top: 32px;
+  margin-top: 24px;
 }
 
 .back-btn {
@@ -466,8 +682,8 @@ const handleNext = () => {
 }
 
 .next-button {
-  --background: #4CAF50;
-  --background-hover: #45a049;
+  --background: var(--color-primary);
+  --background-hover: var(--color-primary-hover);
   --border-radius: 12px;
   height: 52px;
   font-size: 15px;
@@ -475,11 +691,67 @@ const handleNext = () => {
   text-transform: none;
 }
 
-.next-button:disabled {
-  --background: #e0e0e0;
-  --color: #999;
+/* Live Camera Preview */
+.camera-preview-section {
+  margin-bottom: 20px;
 }
 
+.camera-preview-container {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  aspect-ratio: 1;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 4px 16px var(--color-card-shadow);
+}
+
+.camera-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.camera-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  padding: 20px 0;
+}
+
+.cancel-camera-btn {
+  --color: var(--color-text-secondary);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.capture-circle {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 4px solid var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.capture-circle:active {
+  transform: scale(0.9);
+}
+
+.capture-inner {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-text-primary);
+}
+
+/* Responsive */
 @media (max-width: 480px) {
   .title {
     font-size: 24px;
@@ -489,12 +761,11 @@ const handleNext = () => {
     padding: 20px 16px 100px 16px;
   }
 
-  .selfie-upload-box {
-    width: 180px;
-    height: 180px;
+  .camera-frame {
+    aspect-ratio: 1;
   }
 
-  .button-group {
+  .nav-buttons {
     grid-template-columns: 1fr;
   }
 
