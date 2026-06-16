@@ -135,7 +135,10 @@
     <div class="save-toast" v-if="success">✓ Settings saved successfully</div>
 
     <div class="settings-actions">
-      <button class="save-btn" @click="saveSettings">Save Changes</button>
+      <button class="save-btn" :disabled="saving" @click="saveSettings">
+        <span v-if="saving" class="btn-spinner"></span>
+        {{ saving ? 'Saving...' : 'Save Changes' }}
+      </button>
       <button class="reset-btn" @click="resetSettings">Reset to Default</button>
     </div>
   </div>
@@ -196,6 +199,7 @@ const saved = loadSettings();
 const profile = ref(saved.profile);
 const prefs = ref(saved.prefs);
 const success = ref(false);
+const saving = ref(false);
 
 async function loadBackendSettings() {
   try {
@@ -213,6 +217,7 @@ async function loadBackendSettings() {
 }
 
 async function saveSettings() {
+  saving.value = true;
   const data = { profile: profile.value, prefs: prefs.value };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   try {
@@ -229,6 +234,7 @@ async function saveSettings() {
       });
     }
   } catch {}
+  saving.value = false;
   success.value = true;
   setTimeout(() => {
     success.value = false;
@@ -414,6 +420,24 @@ function resetSettings() {
   cursor: pointer;
   font-family: "Inter", sans-serif;
   transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 .save-btn:hover {
   background: #047857;
