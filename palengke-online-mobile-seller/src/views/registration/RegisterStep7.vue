@@ -490,23 +490,21 @@ const submitVerification = async () => {
 
     await loading.dismiss();
 
-    // Show success message
-    const successAlert = await alertController.create({
-      header: 'Verification Submitted!',
-      message: "Your verification has been submitted successfully. You will be notified once it's reviewed.",
-      cssClass: 'success-alert',
-      buttons: [
-        {
-          text: 'Continue',
-          handler: () => {
-            const redirect = localStorage.getItem('verificationRedirect');
-            localStorage.removeItem('verificationRedirect');
-            router.push(isLoggedIn.value ? (redirect || '/home') : '/register/success');
-          },
-        },
-      ],
+    const redirect = localStorage.getItem('verificationRedirect');
+    localStorage.removeItem('verificationRedirect');
+    const destination = isLoggedIn.value ? (redirect || '/home') : '/register/success';
+
+    const toast = await toastController.create({
+      message: 'Verification submitted successfully!',
+      duration: 2000,
+      color: 'success',
+      position: 'top',
     });
-    await successAlert.present();
+    await toast.present();
+
+    setTimeout(() => {
+      router.replace(destination);
+    }, 500);
   } catch (error) {
     await loading.dismiss();
 

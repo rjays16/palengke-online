@@ -80,7 +80,7 @@
           </div>
 
           <!-- Option 2: Skip for Now -->
-          <div class="option-card skip" @click="selectOption('skip')">
+          <div v-if="allowSkip" class="option-card skip" @click="selectOption('skip')">
             <div class="option-header">
               <div class="option-icon unverified">
                 <ion-icon :icon="alertCircleOutline"></ion-icon>
@@ -131,8 +131,9 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import { onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { IonPage, IonContent, IonIcon, alertController } from '@ionic/vue';
+import { API_BASE } from '@/config/api';
 import {
   arrowBackOutline,
   shieldCheckmarkOutline,
@@ -146,13 +147,23 @@ import {
 } from 'ionicons/icons';
 
 const router = useRouter();
+const allowSkip = ref(true);
 
-onMounted(() => {
+onMounted(async () => {
   if (localStorage.getItem('token')) {
     const redirect = localStorage.getItem('verificationRedirect') || '/home';
     localStorage.removeItem('verificationRedirect');
     router.replace(redirect);
   }
+  try {
+    const res = await fetch(`${API_BASE}/settings`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.allow_skip_verification !== undefined) {
+        allowSkip.value = data.allow_skip_verification === 'true';
+      }
+    }
+  } catch {}
 });
 
 // Navigation

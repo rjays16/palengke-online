@@ -70,6 +70,18 @@
           </div>
           <div class="pref-row">
             <div class="pref-info">
+              <span class="pref-label">Allow Skip Verification</span>
+              <span class="pref-desc"
+                >Let sellers skip ID verification during registration (basic account)</span
+              >
+            </div>
+            <label class="toggle">
+              <input type="checkbox" v-model="prefs.allowSkipVerification" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="pref-row">
+            <div class="pref-info">
               <span class="pref-label">Dark Mode</span>
               <span class="pref-desc">Switch to dark theme</span>
             </div>
@@ -137,11 +149,22 @@ definePageMeta({
 const auth = useAuthStore();
 const theme = useThemeStore();
 auth.restore();
-onMounted(() => {
+onMounted(async () => {
   if (auth.user?.role !== "superadmin") {
     navigateTo("/dashboard");
   }
+  await loadBackendSettings();
 });
+
+function getApiBaseUrl() {
+  const config = useRuntimeConfig();
+  return config.public.apiBaseUrl || "http://localhost:8000";
+}
+
+function getToken() {
+  if (typeof localStorage === "undefined") return null;
+  return localStorage.getItem("palengke_auth_token");
+}
 
 const STORAGE_KEY = "palengke_settings_general";
 
@@ -156,6 +179,7 @@ const defaults = {
     emailNotifs: true,
     smsAlerts: false,
     autoApprove: true,
+    allowSkipVerification: true,
     darkMode: false,
   },
 };
@@ -173,9 +197,38 @@ const profile = ref(saved.profile);
 const prefs = ref(saved.prefs);
 const success = ref(false);
 
-function saveSettings() {
+async function loadBackendSettings() {
+  try {
+    const token = getToken();
+    if (!token) return;
+    const res = await fetch(`${getApiBaseUrl()}/api/admin/settings`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.allow_skip_verification !== undefined) {
+      prefs.value.allowSkipVerification = data.allow_skip_verification === 'true';
+    }
+  } catch {}
+}
+
+async function saveSettings() {
   const data = { profile: profile.value, prefs: prefs.value };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  try {
+    const token = getToken();
+    if (token) {
+      await fetch(`${getApiBaseUrl()}/api/admin/settings`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          settings: {
+            allow_skip_verification: prefs.value.allowSkipVerification ? 'true' : 'false',
+          },
+        }),
+      });
+    }
+  } catch {}
   success.value = true;
   setTimeout(() => {
     success.value = false;
