@@ -59,6 +59,7 @@ Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
 
 // Seller app registration
 Route::post('/seller/register', [SellerRegistrationController::class, 'register']);
+Route::post('/seller/verify', [SellerRegistrationController::class, 'verify']);
 
 // Seller app login
 Route::post('/seller/login', [AuthController::class, 'login']);

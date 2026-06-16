@@ -25,7 +25,7 @@
               <span class="banner-title">Basic Account</span>
               <span class="banner-desc">Limited to 1 product. Verify your ID to add more.</span>
             </div>
-            <ion-button size="small" fill="outline" class="banner-btn" router-link="/register/step5">
+            <ion-button size="small" fill="outline" class="banner-btn" @click="goVerify">
               Verify Now
             </ion-button>
           </div>
@@ -307,6 +307,11 @@ const verificationChoice = ref('');
 
 const isBasicAccount = computed(() => verificationChoice.value === 'skip');
 const hasCategories = computed(() => categories.value.length > 0);
+
+const goVerify = () => {
+  localStorage.setItem('verificationRedirect', '/products/add');
+  router.push('/register/step5');
+};
 
 // Form Data
 const productImage = ref('');

@@ -131,6 +131,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
+import { onMounted } from 'vue';
 import { IonPage, IonContent, IonIcon, alertController } from '@ionic/vue';
 import {
   arrowBackOutline,
@@ -145,6 +146,14 @@ import {
 } from 'ionicons/icons';
 
 const router = useRouter();
+
+onMounted(() => {
+  if (localStorage.getItem('token')) {
+    const redirect = localStorage.getItem('verificationRedirect') || '/home';
+    localStorage.removeItem('verificationRedirect');
+    router.replace(redirect);
+  }
+});
 
 // Navigation
 const goBack = () => {

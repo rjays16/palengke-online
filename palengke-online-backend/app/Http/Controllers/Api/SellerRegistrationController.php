@@ -101,6 +101,44 @@ class SellerRegistrationController extends Controller
         ], 201);
     }
 
+    public function verify(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'id_type' => 'nullable|string',
+            'id_type_name' => 'nullable|string',
+            'id_front_photo' => 'nullable|string',
+            'id_back_photo' => 'nullable|string',
+            'selfie_photo' => 'nullable|string',
+        ]);
+
+        $seller = SellerRegistration::where('email', $validated['email'])->first();
+
+        if (!$seller) {
+            return response()->json(['message' => 'Seller not found.'], 404);
+        }
+
+        foreach (['id_front_photo', 'id_back_photo', 'selfie_photo'] as $field) {
+            if (!empty($validated[$field])) {
+                $validated[$field] = $this->saveBase64Image($validated[$field], $field);
+            }
+        }
+
+        $seller->update([
+            'id_type' => $validated['id_type'] ?? $seller->id_type,
+            'id_type_name' => $validated['id_type_name'] ?? $seller->id_type_name,
+            'id_front_photo' => $validated['id_front_photo'] ?? $seller->id_front_photo,
+            'id_back_photo' => $validated['id_back_photo'] ?? $seller->id_back_photo,
+            'selfie_photo' => $validated['selfie_photo'] ?? $seller->selfie_photo,
+            'verification_status' => 'verified',
+            'verification_choice' => 'complete',
+        ]);
+
+        return response()->json([
+            'message' => 'Verification submitted successfully.',
+        ]);
+    }
+
     private function saveBase64Image(string $dataUrl, string $fieldName): string
     {
         if (!preg_match('/^data:image\/(\w+);base64,(.+)$/', $dataUrl, $matches)) {

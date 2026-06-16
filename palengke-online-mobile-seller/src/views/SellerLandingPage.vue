@@ -491,6 +491,7 @@ const needsVerification = computed(() => {
 });
 
 const goToVerification = () => {
+  localStorage.setItem('verificationRedirect', '/home');
   router.push('/register/step5');
 };
 

@@ -8,7 +8,7 @@
         </div>
 
         <!-- Progress Indicator -->
-        <div class="progress-section">
+        <div v-if="!isLoggedIn" class="progress-section">
           <div class="progress-bar">
             <div class="progress-fill" style="width: 85.68%"></div>
           </div>
@@ -17,7 +17,7 @@
 
         <!-- Title -->
         <div class="title-section">
-          <h1 class="title">Take ID Photos</h1>
+          <h1 class="title">{{ isLoggedIn ? 'Take ID Photos' : 'Take ID Photos' }}</h1>
           <p class="subtitle">{{ idTypeName }}</p>
         </div>
 
@@ -189,6 +189,7 @@ import {
 } from 'ionicons/icons';
 
 const router = useRouter();
+const isLoggedIn = ref(!!localStorage.getItem('token') && !!localStorage.getItem('userEmail'));
 const fileInput = ref(null);
 const uploadInput = ref(null);
 const videoRef = ref(null);
@@ -419,7 +420,9 @@ const showToast = async (message, color = 'primary') => {
 
 // Navigation
 const goBack = async () => {
-  // Show confirmation if photos are taken
+  const backRoute = isLoggedIn.value
+    ? (localStorage.getItem('verificationRedirect') || '/home')
+    : '/register/step5';
   if (frontPhotoTaken.value || backPhotoTaken.value) {
     const alert = await alertController.create({
       header: 'Discard Photos?',
@@ -433,14 +436,14 @@ const goBack = async () => {
           text: 'Discard',
           role: 'destructive',
           handler: () => {
-            router.push('/register/step5');
+            router.push(backRoute);
           },
         },
       ],
     });
     await alert.present();
   } else {
-    router.push('/register/step5');
+    router.push(backRoute);
   }
 };
 

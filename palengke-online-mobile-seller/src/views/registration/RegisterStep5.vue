@@ -8,7 +8,7 @@
         </div>
 
         <!-- Progress Indicator -->
-        <div class="progress-section">
+        <div v-if="!isLoggedIn" class="progress-section">
           <div class="progress-bar">
             <div class="progress-fill" style="width: 71.4%"></div>
           </div>
@@ -17,7 +17,7 @@
 
         <!-- Title -->
         <div class="title-section">
-          <h1 class="title">Select ID Type</h1>
+          <h1 class="title">{{ isLoggedIn ? 'Verify Your Account' : 'Select ID Type' }}</h1>
           <p class="subtitle">Choose your government-issued ID</p>
         </div>
 
@@ -180,6 +180,8 @@ import {
 
 const router = useRouter();
 
+const isLoggedIn = ref(!!localStorage.getItem('token') && !!localStorage.getItem('userEmail'));
+
 // Form data
 const formData = ref({
   idType: '',
@@ -245,7 +247,13 @@ const validateField = (fieldName) => {
 
 // Navigation
 const goBack = () => {
-  router.push('/register/step4');
+  if (isLoggedIn.value) {
+    const redirect = localStorage.getItem('verificationRedirect') || '/home';
+    localStorage.removeItem('verificationRedirect');
+    router.push(redirect);
+  } else {
+    router.push('/register/step4');
+  }
 };
 
 const handleNext = async () => {

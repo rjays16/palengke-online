@@ -8,7 +8,7 @@
         </div>
 
         <!-- Progress Indicator -->
-        <div class="progress-section">
+        <div v-if="!isLoggedIn" class="progress-section">
           <div class="progress-bar">
             <div class="progress-fill" style="width: 100%"></div>
           </div>
@@ -17,7 +17,7 @@
 
         <!-- Title -->
         <div class="title-section">
-          <h1 class="title">Take Selfie with ID</h1>
+          <h1 class="title">{{ isLoggedIn ? 'Take Selfie with ID' : 'Take Selfie with ID' }}</h1>
           <p class="subtitle">Hold your ID next to your face</p>
         </div>
 
@@ -202,6 +202,7 @@ import {
 } from 'ionicons/icons';
 
 const router = useRouter();
+const isLoggedIn = ref(!!localStorage.getItem('token') && !!localStorage.getItem('userEmail'));
 const fileInput = ref(null);
 const uploadInput = ref(null);
 const videoRef = ref(null);
@@ -368,7 +369,9 @@ const showToast = async (message, color = 'primary') => {
 
 // Navigation
 const goBack = async () => {
-  // Show confirmation if photo is taken
+  const backRoute = isLoggedIn.value
+    ? (localStorage.getItem('verificationRedirect') || '/home')
+    : '/register/step6';
   if (selfiePhoto.value !== null) {
     const alert = await alertController.create({
       header: 'Discard Photo?',
@@ -382,14 +385,14 @@ const goBack = async () => {
           text: 'Discard',
           role: 'destructive',
           handler: () => {
-            router.push('/register/step6');
+            router.push(backRoute);
           },
         },
       ],
     });
     await alert.present();
   } else {
-    router.push('/register/step6');
+    router.push(backRoute);
   }
 };
 
@@ -436,37 +439,48 @@ const submitVerification = async () => {
     existingData.verificationSubmittedAt = new Date().toISOString();
     localStorage.setItem('registrationData', JSON.stringify(existingData));
 
-    const response = await fetch(`${API_BASE}/seller/register`, {
+    const email = existingData.email || localStorage.getItem('userEmail');
+    const endpoint = isLoggedIn.value ? `${API_BASE}/seller/verify` : `${API_BASE}/seller/register`;
+    const body = isLoggedIn.value ? {
+      email,
+      id_type: existingData.idType || null,
+      id_type_name: existingData.idTypeName || null,
+      id_front_photo: existingData.idFrontPhoto || null,
+      id_back_photo: existingData.idBackPhoto || null,
+      selfie_photo: existingData.selfiePhoto || null,
+    } : {
+      email: existingData.email,
+      country_code: existingData.countryCode,
+      phone: existingData.phone,
+      full_phone: existingData.fullPhone,
+      email_verified: existingData.emailVerified,
+      password: existingData.password,
+      first_name: existingData.firstName,
+      middle_name: existingData.middleName || '',
+      last_name: existingData.lastName,
+      country: existingData.country,
+      birthdate: existingData.birthdate,
+      birthplace: existingData.birthplace,
+      current_address: existingData.currentAddress,
+      store_name: existingData.storeName,
+      region: existingData.region,
+      city: existingData.city,
+      barangay: existingData.barangay,
+      store_place: existingData.storePlace,
+      complete_address: existingData.completeAddress,
+      verification_choice: existingData.verificationChoice,
+      verification_status: existingData.verificationStatus,
+      id_type: existingData.idType,
+      id_type_name: existingData.idTypeName,
+      id_front_photo: existingData.idFrontPhoto || null,
+      id_back_photo: existingData.idBackPhoto || null,
+      selfie_photo: existingData.selfiePhoto || null,
+    };
+
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: existingData.email,
-        country_code: existingData.countryCode,
-        phone: existingData.phone,
-        full_phone: existingData.fullPhone,
-        email_verified: existingData.emailVerified,
-        password: existingData.password,
-        first_name: existingData.firstName,
-        middle_name: existingData.middleName || '',
-        last_name: existingData.lastName,
-        country: existingData.country,
-        birthdate: existingData.birthdate,
-        birthplace: existingData.birthplace,
-        current_address: existingData.currentAddress,
-        store_name: existingData.storeName,
-        region: existingData.region,
-        city: existingData.city,
-        barangay: existingData.barangay,
-        store_place: existingData.storePlace,
-        complete_address: existingData.completeAddress,
-        verification_choice: existingData.verificationChoice,
-        verification_status: existingData.verificationStatus,
-        id_type: existingData.idType,
-        id_type_name: existingData.idTypeName,
-        id_front_photo: existingData.idFrontPhoto || null,
-        id_back_photo: existingData.idBackPhoto || null,
-        selfie_photo: existingData.selfiePhoto || null,
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
@@ -485,8 +499,9 @@ const submitVerification = async () => {
         {
           text: 'Continue',
           handler: () => {
-            // Navigate to Success page (verified)
-            router.push('/register/success');
+            const redirect = localStorage.getItem('verificationRedirect');
+            localStorage.removeItem('verificationRedirect');
+            router.push(isLoggedIn.value ? (redirect || '/home') : '/register/success');
           },
         },
       ],
