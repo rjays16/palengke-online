@@ -34,9 +34,10 @@
               <input
                 v-model="email"
                 type="email"
-                placeholder="driver@example.com"
+                placeholder="you@example.com"
                 class="custom-input with-icon"
                 :disabled="isEmailVerified"
+                autocomplete="off"
                 @input="onEmailInput"
                 @blur="onEmailBlur"
               />
@@ -92,10 +93,12 @@
               <ion-icon :icon="lockClosedOutline" class="input-icon"></ion-icon>
               <input
                 v-model="password"
-                :type="showPassword ? 'text' : 'password'"
-                placeholder="Create a password"
-                class="custom-input with-icon with-toggle"
-                @input="onPasswordInput"
+                type="password"
+                placeholder="Min. 8 characters"
+                class="custom-input with-icon"
+                :disabled="isEmailVerified"
+                autocomplete="new-password"
+                @input="validateField('password')"
                 @blur="validateField('password')"
               />
               <ion-icon
@@ -116,9 +119,11 @@
               <input
                 v-model="confirmPassword"
                 :type="showConfirmPassword ? 'text' : 'password'"
-                placeholder="Confirm your password"
-                class="custom-input with-icon with-toggle"
-                @input="onConfirmPasswordInput"
+                placeholder="Repeat password"
+                class="custom-input with-icon"
+                :disabled="isEmailVerified"
+                autocomplete="new-password"
+                @input="validateField('confirmPassword')"
                 @blur="validateField('confirmPassword')"
               />
               <ion-icon
@@ -582,8 +587,15 @@ const checkEmailExists = async () => {
 
     if (response.status === 404) {
       emailExistsError.value = '';
-    } else {
+    } else if (response.status === 200) {
       emailExistsError.value = 'This email is already registered.';
+    } else {
+      const data = await response.json();
+      if (data.status === 'rejected') {
+        emailExistsError.value = '';
+      } else {
+        emailExistsError.value = 'This email is already registered.';
+      }
     }
   } catch {
     emailExistsError.value = '';

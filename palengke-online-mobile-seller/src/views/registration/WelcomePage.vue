@@ -80,6 +80,7 @@ import { storefrontOutline, cashOutline, peopleOutline } from 'ionicons/icons';
 const router = useRouter();
 
 const goToRegister = () => {
+  localStorage.removeItem('registrationData');
   router.push('/register/step1');
 };
 

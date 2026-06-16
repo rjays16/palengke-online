@@ -267,7 +267,7 @@
             <div class="docs-grid">
               <div class="doc-card" v-if="selected.validIdPhoto">
                 <img :src="selected.validIdPhoto" class="doc-img" />
-                <span class="doc-label">Valid ID</span>
+                <span class="doc-label">Valid ID (Front)</span>
               </div>
               <div class="doc-card placeholder" v-else>
                 <svg
@@ -281,7 +281,25 @@
                   />
                   <polyline points="14 2 14 8 20 8" />
                 </svg>
-                <span class="doc-label">Valid ID (mock)</span>
+                <span class="doc-label">Valid ID (Front)</span>
+              </div>
+              <div class="doc-card" v-if="selected.idBackPhoto">
+                <img :src="selected.idBackPhoto" class="doc-img" />
+                <span class="doc-label">Valid ID (Back)</span>
+              </div>
+              <div class="doc-card placeholder" v-else>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                  />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+                <span class="doc-label">Valid ID (Back)</span>
               </div>
               <div class="doc-card" v-if="selected.selfiePhoto">
                 <img :src="selected.selfiePhoto" class="doc-img" />

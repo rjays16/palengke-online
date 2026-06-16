@@ -161,12 +161,13 @@ const handleLogin = async () => {
     const data = await response.json();
 
     if (!response.ok) {
+      isLoading.value = false;
+
       if (response.status === 404) {
-        isLoading.value = false;
         const alert = await alertController.create({
-          cssClass: 'not-found-alert',
+          cssClass: 'alert-login',
           header: ' ',
-          message: `No account found with this email. Would you like to sign up instead?`,
+          message: '',
           buttons: [
             {
               text: 'Cancel',
@@ -175,7 +176,7 @@ const handleLogin = async () => {
             },
             {
               text: 'Sign Up',
-              cssClass: 'alert-button-confirm',
+              cssClass: 'alert-button-primary',
               handler: () => {
                 router.push('/welcome');
               },
@@ -183,8 +184,59 @@ const handleLogin = async () => {
           ],
         });
         await alert.present();
+        const alertEl = document.querySelector('.alert-login');
+        if (alertEl) {
+          const msgEl = alertEl.querySelector('.alert-message');
+          if (msgEl) {
+            msgEl.innerHTML = `
+              <div class="custom-alert-body">
+                <div class="custom-alert-icon icon-warning">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div class="custom-alert-title">Account Not Found</div>
+                <div class="custom-alert-text">No account found with <strong>${email.value}</strong>. Would you like to sign up instead?</div>
+              </div>`;
+          }
+        }
         return;
       }
+
+      if (response.status === 403) {
+        if (data.status === 'rejected') {
+          const alert = await alertController.create({
+            cssClass: 'alert-login',
+            header: ' ',
+            message: '',
+            buttons: [
+              {
+                text: 'Register Again',
+                cssClass: 'alert-button-primary',
+                handler: () => router.push('/welcome'),
+              },
+            ],
+          });
+          await alert.present();
+          const alertEl = document.querySelector('.alert-login');
+          if (alertEl) {
+            const msgEl = alertEl.querySelector('.alert-message');
+            if (msgEl) {
+              msgEl.innerHTML = `
+                <div class="custom-alert-body">
+                  <div class="custom-alert-icon icon-error">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+                  </div>
+                  <div class="custom-alert-title">Registration Not Approved</div>
+                  <div class="custom-alert-text">Your previous registration was not approved. Please register again with updated information.</div>
+                </div>`;
+            }
+          }
+        } else {
+          localStorage.setItem('userEmail', email.value);
+          router.push('/account-pending');
+        }
+        return;
+      }
+
       throw new Error(data.message || 'Login failed.');
     }
 
@@ -257,11 +309,26 @@ const handleLogin = async () => {
   } catch (error) {
     isLoading.value = false;
     const alert = await alertController.create({
-      header: 'Login Failed',
-      message: error.message || 'Invalid email. Please try again.',
-      buttons: ['OK'],
+      cssClass: 'alert-login',
+      header: ' ',
+      message: '',
+      buttons: [{ text: 'OK', cssClass: 'alert-button-cancel' }],
     });
     await alert.present();
+    const alertEl = document.querySelector('.alert-login');
+    if (alertEl) {
+      const msgEl = alertEl.querySelector('.alert-message');
+      if (msgEl) {
+        msgEl.innerHTML = `
+          <div class="custom-alert-body">
+            <div class="custom-alert-icon icon-error">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+            </div>
+            <div class="custom-alert-title">Login Failed</div>
+            <div class="custom-alert-text">${error.message || 'Invalid email. Please try again.'}</div>
+          </div>`;
+      }
+    }
   }
 };
 
@@ -576,11 +643,100 @@ onMounted(async () => {
 }
 
 /* Not Found Alert */
-:deep(.not-found-alert .alert-wrapper) {
+:deep(.alert-login .alert-wrapper) {
   border-radius: 20px;
+  max-width: 360px;
   background: var(--color-modal-bg);
-  max-width: 320px;
-  padding: 20px;
+  padding: 0;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+}
+
+:deep(.alert-login .alert-head) {
+  display: none;
+  padding: 0;
+  min-height: 0;
+}
+
+:deep(.alert-login .alert-message) {
+  padding: 24px 24px 8px;
+  text-align: center;
+}
+
+:deep(.alert-login .alert-button-group) {
+  padding: 8px 24px 24px;
+  justify-content: center;
+  gap: 10px;
+}
+
+:deep(.alert-login .alert-button) {
+  border-radius: 12px;
+  height: 46px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: none;
+  flex: 1;
+  margin: 0;
+}
+
+:deep(.alert-login .alert-button-cancel) {
+  color: var(--color-text-secondary) !important;
+  background: var(--color-bg-tertiary);
+}
+
+:deep(.alert-login .alert-button-primary) {
+  color: #fff !important;
+  background: var(--color-primary);
+}
+
+/* Custom Alert Body */
+.custom-alert-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.custom-alert-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.custom-alert-icon.icon-warning {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.custom-alert-icon.icon-error {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.custom-alert-icon.icon-pending {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.custom-alert-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.custom-alert-text {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.custom-alert-text strong {
+  color: var(--color-text-primary);
+  font-weight: 600;
 }
 
 :deep(.not-found-alert .alert-head) {

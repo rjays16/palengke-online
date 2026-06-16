@@ -46,8 +46,13 @@ class AuthController extends Controller
         }
 
         if ($seller->status !== 'approved') {
+            $message = $seller->status === 'rejected'
+                ? 'Your registration was not approved. Please register again with updated information.'
+                : 'Your account is not yet approved. Please wait for admin approval.';
+
             return response()->json([
-                'message' => 'Your account is not yet approved. Please wait for admin approval.',
+                'message' => $message,
+                'status' => $seller->status,
             ], 403);
         }
 

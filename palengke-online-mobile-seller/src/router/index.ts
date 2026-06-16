@@ -6,6 +6,7 @@ import { getSubscription, isExpired } from '@/services/subscriptionService';
 // COMPONENT IMPORTS
 // ============================================
 import LoginPage from '@/views/LoginPage.vue';
+import AccountPendingPage from '@/views/AccountPendingPage.vue';
 import SignupPage from '@/views/SignupPage.vue';
 import SellerDashboard from '@/views/SellerLandingPage.vue';
 import AddProductPage from '@/views/AddProductPage.vue';
@@ -53,6 +54,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/login',
     name: 'Login',
     component: LoginPage,
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/account-pending',
+    name: 'AccountPending',
+    component: AccountPendingPage,
     meta: { requiresAuth: false },
   },
   {

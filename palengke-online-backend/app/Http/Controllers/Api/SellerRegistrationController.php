@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\AccountApprovedMail;
+use App\Mail\AccountRejectedMail;
 use App\Mail\RegistrationConfirmationMail;
 use App\Models\Notification;
 use App\Models\SellerRegistration;
@@ -11,6 +13,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class SellerRegistrationController extends Controller
 {
@@ -25,7 +28,11 @@ class SellerRegistrationController extends Controller
     {
         $validated = $request->validate([
             // Step 1
-            'email' => 'required|email|unique:seller_registrations,email',
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('seller_registrations', 'email')->where(fn ($q) => $q->where('status', '!=', 'rejected')),
+            ],
             'country_code' => 'required|string',
             'phone' => 'required|string',
             'full_phone' => 'required|string',
@@ -152,6 +159,13 @@ class SellerRegistrationController extends Controller
             'reviewed_at' => now(),
         ]);
 
+        Mail::to($registration->email)->send(
+            new AccountApprovedMail(
+                $registration->first_name,
+                $registration->store_name,
+            ),
+        );
+
         return response()->json([
             'message' => 'Registration approved successfully.',
             'registration' => $this->formatForAdmin($registration->fresh()),
@@ -176,6 +190,14 @@ class SellerRegistrationController extends Controller
             'reviewed_by' => request()->user()->id,
             'reviewed_at' => now(),
         ]);
+
+        Mail::to($registration->email)->send(
+            new AccountRejectedMail(
+                $registration->first_name,
+                $registration->store_name,
+                $validated['reason'],
+            ),
+        );
 
         return response()->json([
             'message' => 'Registration rejected.',
@@ -224,6 +246,7 @@ class SellerRegistrationController extends Controller
             'lastName' => $r->last_name,
             'email' => $r->email,
             'validIdPhoto' => $r->id_front_photo,
+            'idBackPhoto' => $r->id_back_photo,
             'selfiePhoto' => $r->selfie_photo,
             'businessPermitPhoto' => null,
             'status' => $r->status,
