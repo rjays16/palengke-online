@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\RegistrationConfirmationMail;
 use App\Models\Notification;
 use App\Models\SellerRegistration;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class SellerRegistrationController extends Controller
@@ -78,6 +80,13 @@ class SellerRegistrationController extends Controller
             'link' => '/approvals',
             'data' => ['registration_id' => $registration->id],
         ]);
+
+        Mail::to($validated['email'])->send(
+            new RegistrationConfirmationMail(
+                $validated['first_name'],
+                $validated['store_name'],
+            ),
+        );
 
         return response()->json([
             'message' => 'Registration submitted successfully. Your application is pending review.',
