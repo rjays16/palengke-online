@@ -788,6 +788,39 @@
       </div>
     </div>
   </div>
+
+  <!-- Logout Loading Overlay -->
+  <div class="logout-loading-overlay" v-if="loggingOut">
+    <div class="logout-loading-card">
+      <div class="logout-spinner"></div>
+      <p>Logging out...</p>
+    </div>
+  </div>
+
+  <!-- Logout Confirmation Modal -->
+  <div class="modal-overlay" v-if="showLogoutModal" @click.self="showLogoutModal = false">
+    <div class="modal-card modal-sm">
+      <div class="modal-top">
+        <span class="modal-title">Confirm Logout</span>
+        <button class="modal-close" @click="showLogoutModal = false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="confirm-text">Are you sure you want to logout?</p>
+        <p class="confirm-hint">You will need to log in again to access the admin panel.</p>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn secondary" @click="showLogoutModal = false">Cancel</button>
+        <button class="modal-btn danger" :disabled="loggingOut" @click="confirmLogout">
+          <span v-if="loggingOut" class="btn-spinner-sm"></span>
+          {{ loggingOut ? 'Logging out...' : 'Logout' }}
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -802,6 +835,8 @@ const sidebarCollapsed = ref(false);
 const sidebarOpen = ref(false);
 const showUserMenu = ref(false);
 const showNotifPanel = ref(false);
+const showLogoutModal = ref(false);
+const loggingOut = ref(false);
 
 // Global search
 const searchQuery = ref("");
@@ -1027,6 +1062,12 @@ const toggleUserMenu = () => {
 
 const handleLogout = async () => {
   showUserMenu.value = false;
+  showLogoutModal.value = true;
+};
+
+const confirmLogout = async () => {
+  showLogoutModal.value = false;
+  loggingOut.value = true;
   await auth.logout();
   router.push("/login");
 };
@@ -2665,8 +2706,181 @@ html.dark-mode {
   color: #64748b;
 }
 .dark-mode .user-logout:hover {
-  background: rgba(220, 38, 38, 0.1);
-  color: #f87171;
+  background: #4b5563;
+  color: #f3f4f6;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 32px;
+  backdrop-filter: blur(2px);
+}
+.modal-card {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.modal-card.modal-sm {
+  max-width: 400px;
+}
+.modal-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f3f4f6;
+}
+.modal-title {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  flex: 1;
+}
+.modal-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #9ca3af;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.modal-close:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+.modal-close svg {
+  width: 18px;
+  height: 18px;
+}
+.modal-body {
+  padding: 20px 24px;
+}
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  padding: 16px 24px 20px;
+  border-top: 1px solid #f3f4f6;
+}
+.modal-btn {
+  flex: 1;
+  padding: 11px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: "Inter", sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+}
+.modal-btn.primary {
+  background: #059669;
+  color: #fff;
+}
+.modal-btn.primary:hover {
+  background: #047857;
+}
+.modal-btn.secondary {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+.modal-btn.secondary:hover {
+  background: #e5e7eb;
+}
+.modal-btn.danger {
+  background: #dc2626;
+  color: #fff;
+}
+.modal-btn.danger:hover {
+  background: #b91c1c;
+}
+.modal-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.btn-spinner-sm {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Logout Loading Overlay */
+.logout-loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+.logout-loading-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px 48px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: scaleIn 0.25s ease;
+}
+.logout-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #059669;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 0 auto 16px;
+}
+.logout-loading-card p {
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.confirm-text {
+  font-size: 14px;
+  color: #374151;
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+.confirm-hint {
+  font-size: 12px;
+  color: #9ca3af;
+  margin: 0;
 }
 
 /* Disputes analytics */
