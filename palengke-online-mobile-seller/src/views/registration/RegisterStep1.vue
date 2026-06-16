@@ -38,11 +38,13 @@
                 class="custom-input with-icon"
                 :disabled="isEmailVerified"
                 @input="onEmailInput"
-                @blur="validateField('email')"
+                @blur="onEmailBlur"
               />
               <ion-icon v-if="isEmailVerified" :icon="checkmarkCircleOutline" class="verified-icon"></ion-icon>
             </div>
             <span v-if="errors.email" class="error-message">{{ errors.email }}</span>
+            <span v-else-if="emailExistsError" class="error-message">{{ emailExistsError }}</span>
+            <span v-else-if="isCheckingEmail" class="helper-text">Checking email...</span>
             <span v-else-if="isEmailVerified" class="verified-text">Email verified</span>
             <span v-else class="helper-text">We'll send verification to this email</span>
           </div>
@@ -132,10 +134,10 @@
 
           <!-- Send OTP Button (shows when email is valid but OTP not sent) -->
           <ion-button
-            v-if="isEmailValid && !showOtpSection && !isEmailVerified && isPasswordValid && isConfirmPasswordValid"
+            v-if="isEmailValid && !showOtpSection && !isEmailVerified && !emailExistsError && isPasswordValid && isConfirmPasswordValid"
             expand="block"
             class="send-otp-button"
-            :disabled="isSendingOtp"
+            :disabled="isSendingOtp || isCheckingEmail"
             @click="sendOtp"
           >
             <ion-icon slot="start" :icon="paperPlaneOutline"></ion-icon>
@@ -489,6 +491,8 @@ const confirmPassword = ref('');
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 const isEmailVerified = ref(false);
+const isCheckingEmail = ref(false);
+const emailExistsError = ref('');
 
 // OTP data
 const showOtpSection = ref(false);
@@ -551,6 +555,7 @@ const isFormValid = computed(() => {
   return (
     isEmailValid.value &&
     isEmailVerified.value &&
+    !emailExistsError.value &&
     isPhoneValid.value &&
     phone.value.length === currentCountry.value.digits &&
     isPasswordValid.value &&
@@ -558,9 +563,47 @@ const isFormValid = computed(() => {
   );
 });
 
+// Check if email already exists in the system
+const checkEmailExists = async () => {
+  if (!isEmailValid.value || isEmailVerified.value) {
+    emailExistsError.value = '';
+    return;
+  }
+
+  isCheckingEmail.value = true;
+  emailExistsError.value = '';
+
+  try {
+    const response = await fetch(`${API_BASE}/seller/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.value }),
+    });
+
+    if (response.status === 404) {
+      emailExistsError.value = '';
+    } else {
+      emailExistsError.value = 'This email is already registered.';
+    }
+  } catch {
+    emailExistsError.value = '';
+  } finally {
+    isCheckingEmail.value = false;
+  }
+};
+
+// Email blur handler
+const onEmailBlur = () => {
+  validateField('email');
+  if (isEmailValid.value && !isEmailVerified.value) {
+    checkEmailExists();
+  }
+};
+
 // Email input handler
 const onEmailInput = () => {
   errors.value.email = '';
+  emailExistsError.value = '';
 };
 
 // Phone input handler
