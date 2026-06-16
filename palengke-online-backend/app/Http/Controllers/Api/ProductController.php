@@ -76,6 +76,15 @@ class ProductController extends Controller
             return response()->json(['message' => 'Seller not found.'], 404);
         }
 
+        if ($seller->verification_choice === 'skip') {
+            $productCount = Product::where('seller_registration_id', $seller->id)->count();
+            if ($productCount >= 1) {
+                return response()->json([
+                    'message' => 'Basic accounts are limited to 1 product. Complete ID verification to add more.',
+                ], 403);
+            }
+        }
+
         unset($validated['email']);
 
         $product = Product::create(array_merge($validated, [

@@ -18,6 +18,29 @@
         </div>
 
         <template v-else>
+          <!-- Basic Account Banner -->
+          <div v-if="isBasicAccount" class="basic-banner">
+            <ion-icon :icon="alertCircleOutline" class="banner-icon"></ion-icon>
+            <div class="banner-text">
+              <span class="banner-title">Basic Account</span>
+              <span class="banner-desc">Limited to 1 product. Verify your ID to add more.</span>
+            </div>
+            <ion-button size="small" fill="outline" class="banner-btn" router-link="/register/step5">
+              Verify Now
+            </ion-button>
+          </div>
+
+          <!-- No Categories Set -->
+          <div v-if="!hasCategories" class="no-categories-card">
+            <ion-icon :icon="gridOutline" class="no-cat-icon"></ion-icon>
+            <h3>No Categories Selected</h3>
+            <p>Please set your product categories in the homepage first before adding a product.</p>
+            <ion-button expand="block" class="home-btn" router-link="/home">
+              Go to Homepage
+            </ion-button>
+          </div>
+
+          <template v-else>
           <!-- Product Images Section -->
           <div class="section">
             <h2 class="section-title">
@@ -223,6 +246,7 @@
             <ion-button expand="block" fill="outline" size="large" @click="saveDraft"> Save as Draft </ion-button>
           </div>
         </template>
+        </template>
       </div>
 
       <!-- Saving Overlay -->
@@ -268,6 +292,7 @@ import {
   listOutline,
   checkmarkCircleOutline,
   checkmarkOutline,
+  alertCircleOutline,
 } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
 
@@ -278,6 +303,10 @@ const categories = ref([]);
 const locations = ref([]);
 const saving = ref(false);
 const pageLoading = ref(true);
+const verificationChoice = ref('');
+
+const isBasicAccount = computed(() => verificationChoice.value === 'skip');
+const hasCategories = computed(() => categories.value.length > 0);
 
 // Form Data
 const productImage = ref('');
@@ -469,15 +498,8 @@ onMounted(async () => {
     ]);
 
     const profileData = await profileRes.json();
-    let cats = (profileData.user && profileData.user.categories) || [];
-    if (!cats.length) {
-      const allRes = await fetch(`${API_BASE}/categories`, {
-        headers: { Accept: 'application/json' },
-      });
-      const allData = await allRes.json();
-      cats = (Array.isArray(allData) ? allData : allData.categories || []).map((c) => c.name);
-    }
-    categories.value = cats;
+    verificationChoice.value = (profileData.user && profileData.user.verificationChoice) || '';
+    categories.value = (profileData.user && profileData.user.categories) || [];
 
     const locData = await locRes.json();
     const locs = locData.locations || [];
@@ -517,6 +539,78 @@ onMounted(async () => {
   color: #4caf50;
   margin-bottom: 16px;
   animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* Basic Account Banner */
+.basic-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 20px;
+}
+.basic-banner .banner-icon {
+  font-size: 22px;
+  color: #d97706;
+  flex-shrink: 0;
+}
+.basic-banner .banner-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.basic-banner .banner-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #92400e;
+}
+.basic-banner .banner-desc {
+  font-size: 12px;
+  color: #b45309;
+}
+.basic-banner .banner-btn {
+  --border-color: #d97706;
+  --color: #d97706;
+  --border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: none;
+  flex-shrink: 0;
+}
+
+/* No Categories Card */
+.no-categories-card {
+  text-align: center;
+  padding: 60px 20px;
+}
+.no-categories-card .no-cat-icon {
+  font-size: 56px;
+  color: #d1d5db;
+  margin-bottom: 16px;
+}
+.no-categories-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 8px;
+}
+.no-categories-card p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0 0 24px;
+  line-height: 1.5;
+}
+.no-categories-card .home-btn {
+  --background: #059669;
+  --border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: none;
+  height: 48px;
 }
 
 @keyframes pulse {
