@@ -140,6 +140,8 @@ class AuthController extends Controller
                 'description' => $seller->description,
                 'categories' => $seller->categories ?? [],
                 'avatar' => $seller->avatar,
+                'verificationStatus' => $seller->verification_status,
+                'verificationChoice' => $seller->verification_choice,
             ],
         ]);
     }

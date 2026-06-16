@@ -51,6 +51,18 @@
               v-if="isTrialActive || expired || subLow"
             ></ion-icon>
           </div>
+
+          <!-- Verify Now Banner -->
+          <div v-if="needsVerification" class="verify-banner" @click="goToVerification">
+            <div class="verify-banner-icon">
+              <ion-icon :icon="shieldCheckmarkOutline"></ion-icon>
+            </div>
+            <div class="verify-banner-text">
+              <span class="verify-banner-title">Verify Your Account</span>
+              <span class="verify-banner-sub">Complete ID verification to unlock all features</span>
+            </div>
+            <ion-icon :icon="chevronForwardOutline" class="verify-banner-arrow"></ion-icon>
+          </div>
         </div>
 
         <!-- Stats Cards -->
@@ -330,6 +342,7 @@ import {
   checkmarkCircleOutline,
   chevronForwardOutline,
   megaphoneOutline,
+  shieldCheckmarkOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -341,6 +354,8 @@ const selectedCategories = ref([]);
 const availableCategories = ref([]);
 const sub = ref(getSubscription());
 const walletBalance = ref(0);
+const verificationStatus = ref('');
+const verificationChoice = ref('');
 
 async function fetchWalletBalance() {
   const email = localStorage.getItem('userEmail');
@@ -374,6 +389,8 @@ const loadProfile = async () => {
       const u = data.user;
       sellerName.value = u.firstName + ' ' + u.lastName;
       selectedCategories.value = u.categories || [];
+      verificationStatus.value = u.verificationStatus || '';
+      verificationChoice.value = u.verificationChoice || '';
     }
   } catch {
     // keep defaults
@@ -468,6 +485,14 @@ const remainingText = computed(() => {
 const goToPlans = () => router.push('/plans');
 const goToWallet = () => router.push('/wallet');
 const canRequestBanner = computed(() => subActive.value && sub.value.planId === '8m');
+
+const needsVerification = computed(() => {
+  return verificationStatus.value === 'not_verified' || verificationChoice.value === 'skip';
+});
+
+const goToVerification = () => {
+  router.push('/register/step5');
+};
 
 const showBannerModal = ref(false);
 const bannerForm = ref({ title: '', subtitle: '', link: '', image: '' });
@@ -1047,6 +1072,64 @@ ion-header ion-toolbar ion-buttons ion-button {
   margin-left: auto;
   font-size: 16px !important;
   opacity: 0.7;
+}
+
+/* Verify Now Banner */
+.verify-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  padding: 12px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  margin-top: 8px;
+}
+
+.verify-banner:active {
+  opacity: 0.8;
+}
+
+.verify-banner-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #fed7aa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.verify-banner-icon ion-icon {
+  font-size: 20px;
+  color: #ea580c;
+}
+
+.verify-banner-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.verify-banner-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #9a3412;
+}
+
+.verify-banner-sub {
+  font-size: 12px;
+  color: #c2410c;
+}
+
+.verify-banner-arrow {
+  font-size: 16px;
+  color: #c2410c;
+  opacity: 0.6;
 }
 
 /* Stats Section */

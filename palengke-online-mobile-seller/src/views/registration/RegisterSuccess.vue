@@ -1,26 +1,49 @@
 <template>
   <ion-page>
     <ion-content :fullscreen="true" class="success-content">
-      <div class="success-container">
+      <!-- Loading overlay for skip submission -->
+      <div v-if="isSubmitting" class="loading-overlay">
+        <div class="loading-card">
+          <div class="loading-spinner"></div>
+          <h3>Creating your account...</h3>
+          <p>Please wait while we set up your seller account.</p>
+        </div>
+      </div>
+
+      <!-- Error overlay -->
+      <div v-if="submitError" class="loading-overlay">
+        <div class="loading-card">
+          <div class="error-icon">!</div>
+          <h3>Submission Failed</h3>
+          <p>{{ submitError }}</p>
+          <ion-button expand="block" class="retry-btn" @click="submitRegistration">
+            <ion-icon slot="start" :icon="refreshOutline"></ion-icon>
+            Try Again
+          </ion-button>
+          <ion-button expand="block" fill="clear" class="back-btn" @click="goToLogin">
+            Back to Login
+          </ion-button>
+        </div>
+      </div>
+
+      <div v-if="!isSubmitting && !submitError" class="success-container">
         <!-- Success Animation/Icon -->
         <div class="success-icon">
-          <div class="icon-circle" :class="{ verified: isVerified, basic: !isVerified }">
-            <ion-icon :icon="isVerified ? checkmarkCircleOutline : alertCircleOutline"></ion-icon>
+          <div class="icon-circle icon-submitted">
+            <ion-icon :icon="timeOutline"></ion-icon>
           </div>
         </div>
 
         <!-- Title -->
         <div class="title-section">
-          <h1 class="title">{{ isVerified ? 'Account Verified!' : 'Account Created!' }}</h1>
-          <p class="subtitle">
-            {{ isVerified ? 'Welcome to Palengke Online Seller' : "You're almost ready to start selling" }}
-          </p>
+          <h1 class="title">Registration Submitted!</h1>
+          <p class="subtitle">Your account is pending admin approval</p>
         </div>
 
-        <!-- Verification Status Badge -->
-        <div class="status-badge" :class="{ verified: isVerified, basic: !isVerified }">
-          <ion-icon :icon="isVerified ? shieldCheckmarkOutline : informationCircleOutline"></ion-icon>
-          <span>{{ isVerified ? 'Fully Verified Account' : 'Basic Account - Not Verified' }}</span>
+        <!-- Status Badge -->
+        <div class="status-badge status-pending">
+          <ion-icon :icon="timeOutline"></ion-icon>
+          <span>Pending Approval</span>
         </div>
 
         <!-- Account Summary -->
@@ -43,100 +66,48 @@
             <span class="value">{{ accountData.storeName }}</span>
           </div>
           <div class="summary-item">
-            <span class="label">Status:</span>
+            <span class="label">Verification:</span>
             <span class="value" :class="{ verified: isVerified, unverified: !isVerified }">
-              {{ isVerified ? 'Verified ' : 'Not Verified' }}
+              {{ isVerified ? 'Submitted with ID' : 'Skipped — verify later' }}
             </span>
           </div>
         </div>
 
-        <!-- VERIFIED VERSION - What's Unlocked -->
-        <div v-if="isVerified" class="unlocked-features">
-          <h3><font-awesome-icon icon="glass-cheers" /> All Features Unlocked!</h3>
-          <div class="features-grid">
-            <div class="feature-item">
-              <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
-              <span>Verified Seller Badge</span>
-            </div>
-            <div class="feature-item">
-              <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
-              <span>Unlimited Listings</span>
-            </div>
-            <div class="feature-item">
-              <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
-              <span>Higher Transaction Limits</span>
-            </div>
-            <div class="feature-item">
-              <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
-              <span>Priority Support</span>
-            </div>
-            <div class="feature-item">
-              <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
-              <span>Featured in Search</span>
-            </div>
-            <div class="feature-item">
-              <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
-              <span>Customer Trust Badge</span>
-            </div>
-          </div>
+        <!-- Verified Note -->
+        <div v-if="isVerified" class="info-card info-success">
+          <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
+          <span>ID documents submitted successfully. You can verify anytime in Settings later.</span>
         </div>
 
-        <!-- NOT VERIFIED VERSION - What's Missing -->
-        <div v-else class="missing-features">
-          <h3><font-awesome-icon icon="exclamation-triangle" /> Limited Account Features</h3>
-          <p class="info-text">Verify your account to unlock all features:</p>
-          <div class="features-list">
-            <div class="feature-item limited">
-              <ion-icon :icon="lockClosedOutline"></ion-icon>
-              <span>Limited to 10 product listings</span>
-            </div>
-            <div class="feature-item limited">
-              <ion-icon :icon="lockClosedOutline"></ion-icon>
-              <span>Lower transaction limits</span>
-            </div>
-            <div class="feature-item limited">
-              <ion-icon :icon="lockClosedOutline"></ion-icon>
-              <span>No verified seller badge</span>
-            </div>
-            <div class="feature-item limited">
-              <ion-icon :icon="lockClosedOutline"></ion-icon>
-              <span>Standard support only</span>
-            </div>
-          </div>
-
-          <!-- Verify Later CTA -->
-          <div class="verify-cta">
-            <ion-icon :icon="informationCircleOutline"></ion-icon>
-            <div class="cta-text">
-              <strong>You can verify anytime!</strong><br />
-              Go to Settings → Account Verification to complete your verification and unlock all features.
-            </div>
-          </div>
+        <!-- Not Verified Note -->
+        <div v-else class="info-card info-warning">
+          <ion-icon :icon="informationCircleOutline"></ion-icon>
+          <span>You skipped ID verification. You can verify later in Settings to unlock all features.</span>
         </div>
 
-        <!-- Next Steps -->
+        <!-- What Happens Next -->
         <div class="next-steps">
-          <h3>What's Next?</h3>
+          <h3>What Happens Next?</h3>
           <div class="steps-list">
             <div class="step-item">
               <div class="step-number">1</div>
               <div class="step-content">
-                <strong>Complete your profile</strong>
-                <p>Add more details about your store</p>
+                <strong>Admin Reviews Your Account</strong>
+                <p>Our team will check your registration details</p>
               </div>
             </div>
             <div class="step-item">
               <div class="step-number">2</div>
               <div class="step-content">
-                <strong>Add your first products</strong>
-                <p>Start listing items to sell</p>
+                <strong>Receive Email Notification</strong>
+                <p>We'll email you once your account is approved</p>
               </div>
             </div>
             <div class="step-item">
               <div class="step-number">3</div>
               <div class="step-content">
-                <strong>Start receiving orders</strong>
-                <p>Begin your selling journey</p>
+                <strong>Log In & Start Selling</strong>
+                <p>Set up your store and start receiving orders</p>
               </div>
             </div>
           </div>
@@ -144,26 +115,10 @@
 
         <!-- Action Buttons -->
         <div class="action-buttons">
-          <!-- NOT VERIFIED: Show both buttons -->
-          <template v-if="!isVerified">
-            <ion-button expand="block" fill="outline" color="primary" class="verify-button" @click="goToVerification">
-              <ion-icon slot="start" :icon="shieldCheckmarkOutline"></ion-icon>
-              Verify Now
-            </ion-button>
-
-            <ion-button expand="block" class="login-button" @click="goToLogin">
-              Continue to Login
-              <ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon>
-            </ion-button>
-          </template>
-
-          <!-- VERIFIED: Show single button -->
-          <template v-else>
-            <ion-button expand="block" class="dashboard-button" @click="goToLogin">
-              Go to Dashboard
-              <ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon>
-            </ion-button>
-          </template>
+          <ion-button expand="block" class="login-button" @click="goToLogin">
+            Go to Login
+            <ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon>
+          </ion-button>
         </div>
 
         <!-- Support Link -->
@@ -181,12 +136,12 @@ import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon, toastController } from '@ionic/vue';
 import {
   checkmarkCircleOutline,
-  alertCircleOutline,
-  shieldCheckmarkOutline,
   informationCircleOutline,
-  lockClosedOutline,
   arrowForwardOutline,
+  refreshOutline,
+  timeOutline,
 } from 'ionicons/icons';
+import { API_BASE } from '@/config/api';
 
 const router = useRouter();
 
@@ -199,10 +154,74 @@ const accountData = ref({
   verificationStatus: 'not_verified',
 });
 
+// Submission state
+const isSubmitting = ref(false);
+const submitError = ref('');
+
 // Computed: Is account verified?
 const isVerified = computed(() => {
   return accountData.value.verificationStatus === 'verified';
 });
+
+// Submit registration to backend
+const submitRegistration = async () => {
+  const savedData = localStorage.getItem('registrationData');
+  if (!savedData) return;
+
+  const existingData = JSON.parse(savedData);
+  isSubmitting.value = true;
+  submitError.value = '';
+
+  try {
+    const response = await fetch(`${API_BASE}/seller/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: existingData.email,
+        country_code: existingData.countryCode,
+        phone: existingData.phone,
+        full_phone: existingData.fullPhone,
+        email_verified: existingData.emailVerified,
+        password: existingData.password,
+        first_name: existingData.firstName,
+        middle_name: existingData.middleName || '',
+        last_name: existingData.lastName,
+        country: existingData.country,
+        birthdate: existingData.birthdate,
+        birthplace: existingData.birthplace,
+        current_address: existingData.currentAddress,
+        store_name: existingData.storeName,
+        region: existingData.region,
+        city: existingData.city,
+        barangay: existingData.barangay,
+        store_place: existingData.storePlace,
+        complete_address: existingData.completeAddress,
+        verification_choice: existingData.verificationChoice,
+        verification_status: existingData.verificationStatus,
+        id_type: existingData.idType || null,
+        id_type_name: existingData.idTypeName || null,
+        id_front_photo: existingData.idFrontPhoto || null,
+        id_back_photo: existingData.idBackPhoto || null,
+        selfie_photo: existingData.selfiePhoto || null,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Registration failed.');
+    }
+
+    existingData.verificationSubmittedAt = new Date().toISOString();
+    localStorage.setItem('registrationData', JSON.stringify(existingData));
+
+    isSubmitting.value = false;
+
+    showSuccessToast();
+  } catch (error) {
+    isSubmitting.value = false;
+    submitError.value = error.message || 'Something went wrong. Please try again.';
+  }
+};
 
 // Load account data
 onMounted(() => {
@@ -218,23 +237,17 @@ onMounted(() => {
     accountData.value.phone = data.phone || '';
     accountData.value.storeName = data.storeName || '';
     accountData.value.verificationStatus = data.verificationStatus || 'not_verified';
+
+    // If skipped verification, submit registration now
+    if (data.verificationChoice === 'skip') {
+      submitRegistration();
+    }
   }
 });
 
-// Navigation
-const goToVerification = () => {
-  // Go back to Step 5 to start verification
-  router.push('/register/step5');
-};
-
 const goToLogin = () => {
-  // Clear registration data
   localStorage.removeItem('registrationData');
-
-  // Show success toast
   showSuccessToast();
-
-  // Navigate to login
   setTimeout(() => {
     router.push('/login');
   }, 1000);
@@ -242,9 +255,7 @@ const goToLogin = () => {
 
 const showSuccessToast = async () => {
   const toast = await toastController.create({
-    message: isVerified.value
-      ? 'Account verified successfully! Please login to continue.'
-      : 'Account created! Please login to continue.',
+    message: 'Registration submitted! Please login to check your approval status.',
     duration: 3000,
     color: 'success',
     position: 'top',
@@ -282,8 +293,8 @@ const contactSupport = async () => {
 }
 
 .icon-circle {
-  width: 120px;
-  height: 120px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -291,19 +302,14 @@ const contactSupport = async () => {
   animation: scaleIn 0.5s ease-out;
 }
 
-.icon-circle.verified {
-  background: linear-gradient(135deg, var(--color-verified-bg) 0%, var(--color-primary) 100%);
-  box-shadow: 0 8px 24px rgba(76, 175, 80, 0.3);
+.icon-circle.icon-submitted {
+  background: linear-gradient(135deg, #e0f2fe 0%, #7dd3fc 100%);
+  box-shadow: 0 8px 24px rgba(14, 165, 233, 0.3);
 }
 
-.icon-circle.basic {
-  background: linear-gradient(135deg, var(--color-unverified-bg) 0%, var(--color-warning) 100%);
-  box-shadow: 0 8px 24px rgba(255, 152, 0, 0.3);
-}
-
-.icon-circle ion-icon {
-  font-size: 64px;
-  color: var(--color-text-inverse);
+.icon-circle.icon-submitted ion-icon {
+  font-size: 52px;
+  color: #0369a1;
 }
 
 @keyframes scaleIn {
@@ -343,246 +349,145 @@ const contactSupport = async () => {
 
 /* Status Badge */
 .status-badge {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 24px;
-  border-radius: 24px;
-  margin-bottom: 32px;
-  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 20px;
   font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 28px;
 }
 
-.status-badge.verified {
-  background: var(--color-verified-bg);
-  color: var(--color-text-inverse);
-}
-
-.status-badge.basic {
-  background: var(--color-unverified-bg);
-  color: var(--color-text-inverse);
+.status-badge.status-pending {
+  background: #fef3c7;
+  color: #92400e;
 }
 
 .status-badge ion-icon {
-  font-size: 20px;
+  font-size: 18px;
 }
 
 /* Summary Card */
 .summary-card {
   width: 100%;
-  max-width: 500px;
   background: var(--color-card-bg);
-  border-radius: 20px;
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 16px var(--color-card-shadow);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--card-shadow);
 }
 
 .summary-card h3 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--color-text-primary);
-  margin: 0 0 20px 0;
+  margin: 0 0 16px;
   padding-bottom: 12px;
-  border-bottom: 2px solid var(--color-card-border);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .summary-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--color-card-border);
-}
-
-.summary-item:last-child {
-  border-bottom: none;
+  padding: 8px 0;
 }
 
 .summary-item .label {
   font-size: 14px;
   color: var(--color-text-secondary);
-  font-weight: 500;
 }
 
 .summary-item .value {
   font-size: 14px;
-  color: var(--color-text-primary);
   font-weight: 600;
+  color: var(--color-text-primary);
   text-align: right;
 }
 
 .summary-item .value.verified {
-  color: var(--color-verified-bg);
+  color: var(--color-primary);
 }
 
 .summary-item .value.unverified {
-  color: var(--color-unverified-bg);
+  color: #d97706;
 }
 
-/* Unlocked Features (Verified) */
-.unlocked-features {
+/* Info Cards */
+.info-card {
   width: 100%;
-  max-width: 500px;
-  background: var(--color-card-bg);
-  border-radius: 20px;
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 16px var(--color-card-shadow);
-  border: 3px solid var(--color-verified-bg);
-}
-
-.unlocked-features h3 {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--color-success-text);
-  margin: 0 0 20px 0;
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.feature-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
-}
-
-.feature-item ion-icon {
-  font-size: 24px;
-  color: var(--color-verified-bg);
-  flex-shrink: 0;
-}
-
-.feature-item span {
-  font-size: 13px;
-  color: var(--color-text-primary);
-  font-weight: 500;
-  line-height: 1.3;
-}
-
-/* Missing Features (Not Verified) */
-.missing-features {
-  width: 100%;
-  max-width: 500px;
-  background: var(--color-card-bg);
-  border-radius: 20px;
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 16px var(--color-card-shadow);
-  border: 3px solid var(--color-unverified-bg);
-}
-
-.missing-features h3 {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--color-warning-text);
-  margin: 0 0 12px 0;
-}
-
-.info-text {
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  margin: 0 0 16px 0;
-}
-
-.features-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.feature-item.limited {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.feature-item.limited ion-icon {
-  font-size: 20px;
-  color: var(--color-unverified-bg);
-  flex-shrink: 0;
-}
-
-.feature-item.limited span {
-  font-size: 14px;
-  color: var(--color-text-secondary);
-}
-
-/* Verify CTA */
-.verify-cta {
-  display: flex;
-  gap: 12px;
-  background: var(--color-warning-bg);
+  padding: 14px 16px;
   border-radius: 12px;
-  padding: 16px;
-  border-left: 4px solid var(--color-warning-border);
-}
-
-.verify-cta ion-icon {
-  font-size: 24px;
-  color: var(--color-warning-border);
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.cta-text {
   font-size: 13px;
-  color: var(--color-warning-text);
   line-height: 1.5;
+  margin-bottom: 24px;
 }
 
-.cta-text strong {
-  font-weight: 700;
-  display: block;
-  margin-bottom: 4px;
+.info-card ion-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.info-card.info-success {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.info-card.info-success ion-icon {
+  color: #16a34a;
+}
+
+.info-card.info-warning {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+
+.info-card.info-warning ion-icon {
+  color: #d97706;
 }
 
 /* Next Steps */
 .next-steps {
   width: 100%;
-  max-width: 500px;
-  background: var(--color-card-bg);
-  border-radius: 20px;
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 16px var(--color-card-shadow);
+  margin-bottom: 32px;
 }
 
 .next-steps h3 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--color-text-primary);
-  margin: 0 0 20px 0;
+  margin: 0 0 16px;
 }
 
 .steps-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
 
 .step-item {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   align-items: flex-start;
 }
 
 .step-number {
-  width: 32px;
-  height: 32px;
-  background: var(--color-primary);
-  color: var(--color-text-inverse);
+  width: 30px;
+  height: 30px;
+  background: #e0f2fe;
+  color: #0369a1;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
   flex-shrink: 0;
 }
 
@@ -591,11 +496,10 @@ const contactSupport = async () => {
 }
 
 .step-content strong {
-  display: block;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 14px;
   color: var(--color-text-primary);
-  margin-bottom: 4px;
+  display: block;
+  margin-bottom: 2px;
 }
 
 .step-content p {
@@ -607,31 +511,18 @@ const contactSupport = async () => {
 /* Action Buttons */
 .action-buttons {
   width: 100%;
-  max-width: 500px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
-.verify-button {
-  --border-radius: 12px;
-  --border-width: 2px;
-  height: 52px;
-  font-size: 15px;
-  font-weight: 600;
-  text-transform: none;
-}
-
-.login-button,
-.dashboard-button {
+.login-button {
   --background: var(--color-primary);
   --background-hover: var(--color-primary-hover);
-  --border-radius: 12px;
-  height: 52px;
-  font-size: 15px;
+  --border-radius: 14px;
+  height: 50px;
+  font-size: 16px;
   font-weight: 600;
   text-transform: none;
+  margin: 0;
 }
 
 /* Support Link */
@@ -671,8 +562,89 @@ const contactSupport = async () => {
     font-size: 56px;
   }
 
-  .features-grid {
-    grid-template-columns: 1fr;
+}
+
+/* Loading / Error Overlay */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 24px;
+}
+
+.loading-card {
+  background: #fff;
+  border-radius: 24px;
+  padding: 40px 32px;
+  text-align: center;
+  max-width: 340px;
+  width: 100%;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+}
+
+.loading-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin: 16px 0 4px;
+}
+
+.loading-card p {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.loading-spinner {
+  width: 44px;
+  height: 44px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #059669;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
+}
+
+.error-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #fef2f2;
+  color: #dc2626;
+  font-size: 28px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.retry-btn {
+  --background: #059669;
+  --border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: none;
+  margin: 20px 0 8px;
+  height: 46px;
+}
+
+.back-btn {
+  --color: #6b7280;
+  font-size: 13px;
+  text-transform: none;
+  font-weight: 500;
+  margin: 0;
 }
 </style>

@@ -250,6 +250,8 @@ class SellerRegistrationController extends Controller
             'selfiePhoto' => $r->selfie_photo,
             'businessPermitPhoto' => null,
             'status' => $r->status,
+            'verificationStatus' => $r->verification_status,
+            'verificationChoice' => $r->verification_choice,
             'submittedAt' => $r->created_at->toDateString(),
             'reviewedAt' => $r->reviewed_at?->toDateString(),
             'reviewedBy' => $r->reviewedBy?->name ?? null,

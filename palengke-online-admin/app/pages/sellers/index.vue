@@ -38,6 +38,7 @@
             <th>Revenue</th>
             <th>Rating</th>
             <th>Subscription</th>
+            <th>Verification</th>
             <th>Status</th>
             <th>Joined</th>
             <th></th>
@@ -67,6 +68,15 @@
                   :class="s.subscription.status"
                   >{{ s.subscription.status }}</span
                 >
+              </div>
+            </td>
+            <td>
+              <div class="sub-col">
+                <span
+                  class="status-badge"
+                  :class="verBadgeClass(s)"
+                >{{ verBadgeLabel(s) }}</span>
+                <span class="ver-choice-hint">{{ verHint(s) }}</span>
               </div>
             </td>
             <td>
@@ -348,6 +358,23 @@ function handleDelete() {
   showDelete.value = false;
   deleteTarget.value = null;
 }
+
+function verBadgeClass(s) {
+  if (s.verificationStatus === "verified") return "ver-verified";
+  if (s.verificationChoice === "complete") return "ver-submitted";
+  return "ver-skipped";
+}
+function verBadgeLabel(s) {
+  if (s.verificationStatus === "verified") return "Verified";
+  if (s.verificationChoice === "complete") return "ID Submitted";
+  return "Basic (Skipped)";
+}
+function verHint(s) {
+  if (s.verificationStatus === "verified") return "Fully verified";
+  if (s.verificationChoice === "complete") return "Awaiting review";
+  if (s.verificationChoice === "skip") return "Skipped verification";
+  return "";
+}
 </script>
 
 <style scoped>
@@ -500,6 +527,31 @@ function handleDelete() {
 .status-badge.inactive {
   background: #f3f4f6;
   color: #6b7280;
+}
+.status-badge.ver-verified {
+  background: #f0fdf4;
+  color: #059669;
+}
+.status-badge.ver-not_verified {
+  background: #fffbeb;
+  color: #d97706;
+}
+.status-badge.ver-pending {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+.status-badge.ver-submitted {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+.status-badge.ver-skipped {
+  background: #fffbeb;
+  color: #d97706;
+}
+.ver-choice-hint {
+  font-size: 11px;
+  color: #9ca3af;
+  white-space: nowrap;
 }
 .sub-col {
   display: flex;

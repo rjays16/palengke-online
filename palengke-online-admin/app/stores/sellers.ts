@@ -20,6 +20,8 @@ export const useSellersStore = defineStore("sellers", () => {
       revenue: 0,
       rating: 0,
       status: raw.status === "approved" ? "active" : "inactive",
+      verificationStatus: raw.verificationStatus || "not_verified",
+      verificationChoice: raw.verificationChoice || "",
       joined: raw.submittedAt || "",
       contact: {
         phone: raw.contact || "",
