@@ -124,8 +124,8 @@ const router = useRouter();
 
 const openSocial = (platform) => {
   const urls = {
-    facebook: 'https://facebook.com/palengkeonline',
-    instagram: 'https://instagram.com/palengkeonline'
+    facebook: 'https://www.facebook.com',
+    instagram: 'https://www.instagram.com'
   };
   window.open(urls[platform], '_blank');
 };
