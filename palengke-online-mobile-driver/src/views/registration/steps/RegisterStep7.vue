@@ -227,7 +227,6 @@ const handleSubmit = async () => {
       phone: data.phone,
       full_phone: data.fullPhone,
       email_verified: data.emailVerified || false,
-      password: data.password,
       first_name: data.firstName,
       middle_name: data.middleName || '',
       last_name: data.lastName,

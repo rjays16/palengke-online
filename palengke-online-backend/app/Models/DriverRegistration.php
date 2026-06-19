@@ -9,7 +9,7 @@ class DriverRegistration extends Model
 {
     use HasApiTokens;
     protected $fillable = [
-        'email', 'country_code', 'phone', 'full_phone', 'email_verified', 'password',
+        'email', 'country_code', 'phone', 'full_phone', 'email_verified',
         'first_name', 'middle_name', 'last_name', 'country', 'birthdate', 'birthplace', 'current_address',
         'license_number', 'license_type', 'restriction_code', 'expiry_date',
         'vehicle_type', 'plate_number', 'vehicle_model', 'vehicle_color',

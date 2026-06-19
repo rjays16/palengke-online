@@ -217,11 +217,6 @@
       <div class="section">
         <h3 class="section-title">Account Settings</h3>
         <div class="settings-list">
-          <div class="settings-item" @click="changePassword">
-            <div class="settings-icon"><ion-icon :icon="lockClosedOutline"></ion-icon></div>
-            <div class="settings-content"><p>Change Password</p></div>
-            <ion-icon :icon="chevronForwardOutline" class="settings-arrow"></ion-icon>
-          </div>
           <div class="settings-item" @click="goToSettings">
             <div class="settings-icon"><ion-icon :icon="settingsOutline"></ion-icon></div>
             <div class="settings-content"><p>All Settings</p></div>
@@ -289,7 +284,7 @@ import {
   cameraOutline, shieldCheckmarkOutline, chevronForwardOutline,
   happyOutline, callOutline, mailOutline, bicycleOutline,
   cardOutline, colorPaletteOutline, checkmarkCircleOutline,
-  lockClosedOutline, settingsOutline, logOutOutline,
+  settingsOutline, logOutOutline,
   homeOutline, cubeOutline, cashOutline, trophyOutline,
   starOutline, flashOutline, thumbsUpOutline, heartOutline,
   timeOutline, closeCircleOutline, warningOutline
@@ -461,24 +456,6 @@ const showSuccessModal = async (message) => {
   }, 50);
   
   await alert.onDidDismiss();
-};
-
-const changePassword = async () => {
-  const alert = await alertController.create({
-    header: 'Change Password',
-    inputs: [
-      { name: 'current', type: 'password', placeholder: 'Current Password' },
-      { name: 'new', type: 'password', placeholder: 'New Password' },
-      { name: 'confirm', type: 'password', placeholder: 'Confirm Password' }
-    ],
-    buttons: [
-      { text: 'Cancel', role: 'cancel' },
-      { text: 'Update', handler: async () => {
-        await showSuccessModal('Password updated!');
-      }}
-    ]
-  });
-  await alert.present();
 };
 
 const handleLogout = async () => {

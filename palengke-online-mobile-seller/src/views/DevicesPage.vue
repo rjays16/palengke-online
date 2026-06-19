@@ -106,7 +106,7 @@ const fetchDevices = async () => {
 const confirmLogout = async (device) => {
   const isCurrent = device.is_current;
   const msg = isCurrent
-    ? 'Logout from this device? You will need to enter your email and password to sign in again.'
+    ? 'Logout from this device? You will need to enter your email and PIN to sign in again.'
     : `Logout "${device.device_name || 'Unknown Device'}"? It will be signed out and removed from your account.`;
 
   const alert = await alertController.create({

@@ -82,7 +82,6 @@ Route::post('/driver/device/status', [DriverDeviceController::class, 'status']);
 // Seller app login
 Route::post('/seller/login', [AuthController::class, 'login']);
 Route::post('/seller/forgot-pin', [AuthController::class, 'forgotPin']);
-Route::post('/seller/change-password', [AuthController::class, 'changePassword']);
 Route::get('/seller/profile', [AuthController::class, 'profile']);
 Route::post('/seller/profile', [AuthController::class, 'updateProfile']);
 

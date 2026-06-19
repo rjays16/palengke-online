@@ -9,7 +9,6 @@ use App\Mail\DriverAccountRejectedMail;
 use App\Models\DriverRegistration;
 use App\Models\Notification;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
@@ -23,7 +22,6 @@ class DriverRegistrationController extends Controller
             'phone' => 'required|string',
             'full_phone' => 'required|string',
             'email_verified' => 'boolean',
-            'password' => 'required|string|min:8',
 
             'first_name' => 'required|string|min:2',
             'middle_name' => 'nullable|string',
@@ -50,8 +48,6 @@ class DriverRegistrationController extends Controller
             'birth_cert_photo' => 'nullable|string',
             'selfie_photo' => 'nullable|string',
         ]);
-
-        $validated['password'] = Hash::make($validated['password']);
 
         foreach (['license_front_photo', 'license_back_photo', 'vehicle_reg_photo', 'nbi_clearance_photo', 'birth_cert_photo', 'selfie_photo'] as $field) {
             if (!empty($validated[$field])) {
@@ -107,7 +103,6 @@ class DriverRegistrationController extends Controller
                 'country_code' => '',
                 'phone' => '',
                 'full_phone' => '',
-                'password' => '',
                 'first_name' => '',
                 'last_name' => '',
                 'country' => '',

@@ -10,7 +10,7 @@ class SellerRegistration extends Model
     use HasApiTokens;
 
     protected $fillable = [
-        'email', 'country_code', 'phone', 'full_phone', 'email_verified', 'password', 'pin',
+        'email', 'country_code', 'phone', 'full_phone', 'email_verified', 'pin',
         'first_name', 'middle_name', 'last_name', 'country', 'birthdate', 'birthplace', 'current_address',
         'store_name', 'region', 'city', 'barangay', 'store_place', 'complete_address',
         'verification_choice', 'verification_status',

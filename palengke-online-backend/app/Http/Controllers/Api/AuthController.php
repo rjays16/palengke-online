@@ -7,7 +7,7 @@ use App\Mail\OtpVerificationMail;
 use App\Models\SellerRegistration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Hash;
+
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
@@ -205,31 +205,6 @@ class AuthController extends Controller
                 'address' => $seller->current_address,
                 'avatar' => $seller->avatar,
             ],
-        ]);
-    }
-
-    public function changePassword(Request $request)
-    {
-        $validated = $request->validate([
-            'email' => 'required|email',
-            'current_password' => 'required|string',
-            'new_password' => 'required|string|min:6',
-        ]);
-
-        $seller = SellerRegistration::where('email', $validated['email'])->first();
-
-        if (!$seller) {
-            return response()->json(['message' => 'Seller not found.'], 404);
-        }
-
-        if (!Hash::check($validated['current_password'], $seller->password)) {
-            return response()->json(['message' => 'Current password is incorrect.'], 401);
-        }
-
-        $seller->update(['password' => Hash::make($validated['new_password'])]);
-
-        return response()->json([
-            'message' => 'Password changed successfully.',
         ]);
     }
 

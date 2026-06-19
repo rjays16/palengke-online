@@ -177,16 +177,6 @@
           <h3 class="section-title">Account Settings</h3>
 
           <div class="settings-list">
-            <div class="settings-item" @click="changePassword">
-              <div class="settings-icon">
-                <ion-icon :icon="lockClosedOutline"></ion-icon>
-              </div>
-              <div class="settings-content">
-                <p class="settings-label">Change Password</p>
-              </div>
-              <ion-icon :icon="chevronForwardOutline" class="settings-arrow"></ion-icon>
-            </div>
-
             <div class="settings-item" @click="changePin">
               <div class="settings-icon">
                 <ion-icon :icon="keypadOutline"></ion-icon>
@@ -417,7 +407,7 @@ import {
   addOutline,
   walletOutline,
   cardOutline,
-  lockClosedOutline,
+
   keypadOutline,
   notificationsOutline,
   languageOutline,
@@ -1238,111 +1228,13 @@ const editField = async (field) => {
   await alert.present();
 };
 
-const changePassword = async () => {
-  const alert = await alertController.create({
-    header: 'Change Password',
-    inputs: [
-      {
-        name: 'currentPassword',
-        type: 'password',
-        placeholder: 'Current Password',
-      },
-      {
-        name: 'newPassword',
-        type: 'password',
-        placeholder: 'New Password',
-      },
-      {
-        name: 'confirmPassword',
-        type: 'password',
-        placeholder: 'Confirm New Password',
-      },
-    ],
-    buttons: [
-      { text: 'Cancel', role: 'cancel' },
-      {
-        text: 'Update',
-        handler: async (data) => {
-          if (!data.currentPassword || !data.newPassword || !data.confirmPassword) {
-            const toast = await toastController.create({
-              message: 'All fields are required',
-              duration: 2000,
-              color: 'danger',
-              position: 'top',
-            });
-            await toast.present();
-            return false;
-          }
-
-          if (data.newPassword !== data.confirmPassword) {
-            const toast = await toastController.create({
-              message: 'Passwords do not match',
-              duration: 2000,
-              color: 'danger',
-              position: 'top',
-            });
-            await toast.present();
-            return false;
-          }
-
-          if (data.newPassword.length < 6) {
-            const toast = await toastController.create({
-              message: 'Password must be at least 6 characters',
-              duration: 2000,
-              color: 'danger',
-              position: 'top',
-            });
-            await toast.present();
-            return false;
-          }
-
-          alert.dismiss();
-          await showLoadingModal('Updating password...', false);
-
-          try {
-            const response = await fetch(`${API_BASE}/seller/change-password`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                email: localStorage.getItem('userEmail') || '',
-                current_password: data.currentPassword,
-                new_password: data.newPassword,
-              }),
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-              throw new Error(result.message || 'Failed to change password');
-            }
-
-            await dismissLoadingModal();
-            await showSuccessModal('Password changed successfully!');
-          } catch (error) {
-            await dismissLoadingModal();
-            const toast = await toastController.create({
-              message: error.message || 'Failed to change password',
-              duration: 2000,
-              color: 'danger',
-              position: 'top',
-            });
-            await toast.present();
-            changePassword();
-          }
-        },
-      },
-    ],
-  });
-  await alert.present();
-};
-
 const changePin = async () => {
   const alert = await alertController.create({
     header: 'Change PIN',
     inputs: [
       {
         name: 'currentPin',
-        type: 'password',
+        type: 'tel',
         placeholder: 'Current PIN',
         attributes: {
           inputmode: 'numeric',
@@ -1352,7 +1244,7 @@ const changePin = async () => {
       },
       {
         name: 'newPin',
-        type: 'password',
+        type: 'tel',
         placeholder: 'New PIN (5 digits)',
         attributes: {
           inputmode: 'numeric',
@@ -1362,7 +1254,7 @@ const changePin = async () => {
       },
       {
         name: 'confirmPin',
-        type: 'password',
+        type: 'tel',
         placeholder: 'Confirm New PIN',
         attributes: {
           inputmode: 'numeric',

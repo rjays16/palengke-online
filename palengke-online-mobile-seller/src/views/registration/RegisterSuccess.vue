@@ -182,7 +182,6 @@ const submitRegistration = async () => {
         phone: existingData.phone,
         full_phone: existingData.fullPhone,
         email_verified: existingData.emailVerified,
-        password: existingData.password,
         first_name: existingData.firstName,
         middle_name: existingData.middleName || '',
         last_name: existingData.lastName,

@@ -42,36 +42,6 @@
             <input v-model="storeName" type="text" placeholder="Store name" class="custom-input" />
           </div>
 
-          <div class="input-group">
-            <ion-icon :icon="lockClosedOutline" class="input-icon"></ion-icon>
-            <input
-              v-model="password"
-              :type="showPassword ? 'text' : 'password'"
-              placeholder="Password"
-              class="custom-input"
-            />
-            <ion-icon
-              :icon="showPassword ? eyeOffOutline : eyeOutline"
-              class="toggle-password"
-              @click="showPassword = !showPassword"
-            ></ion-icon>
-          </div>
-
-          <div class="input-group">
-            <ion-icon :icon="lockClosedOutline" class="input-icon"></ion-icon>
-            <input
-              v-model="confirmPassword"
-              :type="showConfirmPassword ? 'text' : 'password'"
-              placeholder="Confirm password"
-              class="custom-input"
-            />
-            <ion-icon
-              :icon="showConfirmPassword ? eyeOffOutline : eyeOutline"
-              class="toggle-password"
-              @click="showConfirmPassword = !showConfirmPassword"
-            ></ion-icon>
-          </div>
-
           <!-- Terms & Conditions -->
           <div class="terms-checkbox">
             <input type="checkbox" id="terms" v-model="acceptedTerms" class="checkbox-input" />
@@ -126,9 +96,6 @@ import {
   mailOutline,
   callOutline,
   storefrontOutline,
-  lockClosedOutline,
-  eyeOutline,
-  eyeOffOutline,
   logoGoogle,
   logoFacebook,
 } from 'ionicons/icons';
@@ -140,11 +107,7 @@ const fullName = ref('');
 const email = ref('');
 const phone = ref('');
 const storeName = ref('');
-const password = ref('');
-const confirmPassword = ref('');
 const acceptedTerms = ref(false);
-const showPassword = ref(false);
-const showConfirmPassword = ref(false);
 const isLoading = ref(false);
 
 // Form validation
@@ -154,9 +117,6 @@ const isFormValid = computed(() => {
     email.value &&
     phone.value &&
     storeName.value &&
-    password.value &&
-    confirmPassword.value &&
-    password.value === confirmPassword.value &&
     acceptedTerms.value
   );
 });
@@ -177,7 +137,6 @@ const handleSignup = async () => {
       email: email.value,
       phone: phone.value,
       storeName: storeName.value,
-      password: password.value,
     });
 
     // Show success message
@@ -366,17 +325,6 @@ const goToLogin = () => {
 
 .custom-input::placeholder {
   color: #999;
-}
-
-.toggle-password {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 20px;
-  color: #999;
-  cursor: pointer;
-  z-index: 2;
 }
 
 /* Terms Checkbox */

@@ -10,7 +10,6 @@ use App\Models\Notification;
 use App\Models\SellerRegistration;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -37,7 +36,6 @@ class SellerRegistrationController extends Controller
             'phone' => 'required|string',
             'full_phone' => 'required|string',
             'email_verified' => 'boolean',
-            'password' => 'required|string|min:8',
 
             // Step 2
             'first_name' => 'required|string|min:2',
@@ -69,8 +67,6 @@ class SellerRegistrationController extends Controller
             'id_back_photo' => 'nullable|string',
             'selfie_photo' => 'nullable|string',
         ]);
-
-        $validated['password'] = Hash::make($validated['password']);
 
         // Save base64 images as files
         foreach (['id_front_photo', 'id_back_photo', 'selfie_photo'] as $field) {

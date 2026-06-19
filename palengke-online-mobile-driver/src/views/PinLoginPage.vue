@@ -39,7 +39,7 @@
         </div>
 
         <div class="options-section">
-          <button class="use-password-btn" @click="goToLogin">Sign in with different account</button>
+          <button class="switch-account-btn" @click="goToLogin">Sign in with different account</button>
           <button class="forgot-pin-btn" @click="handleForgotPin">Forgot PIN?</button>
         </div>
 
@@ -355,7 +355,7 @@ onMounted(async () => {
   min-height: 40px;
 }
 
-.use-password-btn {
+.switch-account-btn {
   background: none;
   border: none;
   color: #666;
@@ -365,7 +365,7 @@ onMounted(async () => {
   padding: 0;
 }
 
-.use-password-btn:active {
+.switch-account-btn:active {
   transform: scale(0.98);
 }
 
