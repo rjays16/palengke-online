@@ -235,6 +235,8 @@ import {
 
 const router = useRouter();
 
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+
 // Country codes for phone numbers (all countries)
 const countryCodes = ref([
   { code: '+93', country: 'Afghanistan', abbr: 'AF', digits: 9 },
@@ -671,7 +673,15 @@ const sendOtp = async () => {
   isSendingOtp.value = true;
 
   try {
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    const res = await fetch(`${API_BASE}/api/send-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.value }),
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to send code');
+    }
 
     const toast = await toastController.create({
       message: `Verification code sent to ${maskedEmail.value}`,
@@ -770,7 +780,15 @@ const verifyOtp = async () => {
   otpError.value = '';
 
   try {
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    const res = await fetch(`${API_BASE}/api/verify-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.value, otp: otpValue.value }),
+    });
+
+    if (!res.ok) {
+      throw new Error('Invalid code');
+    }
 
     isEmailVerified.value = true;
     showOtpSection.value = false;
@@ -783,7 +801,7 @@ const verifyOtp = async () => {
     });
     await toast.present();
   } catch (error) {
-    otpError.value = 'Verification failed. Please try again.';
+    otpError.value = 'Invalid verification code. Please try again.';
   } finally {
     isVerifyingOtp.value = false;
   }

@@ -36,7 +36,7 @@
                   Hi there,
                 @endif
                 <br>
-                Please use the verification code below to complete your seller registration.
+                Please use the verification code below to complete your registration.
               </p>
             </td>
           </tr>
