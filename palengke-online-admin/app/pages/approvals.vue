@@ -217,6 +217,48 @@
           </div>
 
           <div class="detail-section" v-if="selected.role === 'driver'">
+            <h4>Personal Information</h4>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <span class="dl">Contact</span
+                ><span class="dv">{{ selected.contact }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="dl">Birthdate</span
+                ><span class="dv">{{ selected.birthdate }}</span>
+              </div>
+              <div class="detail-item" v-if="selected.birthplace">
+                <span class="dl">Birthplace</span
+                ><span class="dv">{{ selected.birthplace }}</span>
+              </div>
+              <div class="detail-item" v-if="selected.currentAddress">
+                <span class="dl">Address</span
+                ><span class="dv">{{ selected.currentAddress }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="detail-section" v-if="selected.role === 'driver'">
+            <h4>License Information</h4>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <span class="dl">License #</span
+                ><span class="dv">{{ selected.licenseNumber }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="dl">Type</span
+                ><span class="dv">{{ selected.licenseType }}</span>
+              </div>
+              <div class="detail-item" v-if="selected.restrictionCode">
+                <span class="dl">Restriction</span
+                ><span class="dv">{{ selected.restrictionCode }}</span>
+              </div>
+              <div class="detail-item">
+                <span class="dl">Expiry</span
+                ><span class="dv">{{ selected.expiryDate }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="detail-section" v-if="selected.role === 'driver'">
             <h4>Vehicle Information</h4>
             <div class="detail-grid">
               <div class="detail-item">
@@ -231,13 +273,9 @@
                 <span class="dl">Make/Model</span
                 ><span class="dv">{{ selected.vehicleModel }}</span>
               </div>
-              <div class="detail-item">
-                <span class="dl">Service Area</span
-                ><span class="dv">{{ areaLabel(selected.serviceArea) }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="dl">Contact</span
-                ><span class="dv">{{ selected.contact }}</span>
+              <div class="detail-item" v-if="selected.vehicleColor">
+                <span class="dl">Color</span
+                ><span class="dv">{{ selected.vehicleColor }}</span>
               </div>
             </div>
           </div>
@@ -265,75 +303,70 @@
           <div class="detail-section">
             <h4>Submitted Documents</h4>
             <div class="docs-grid">
-              <div class="doc-card" v-if="selected.validIdPhoto">
-                <img :src="selected.validIdPhoto" class="doc-img" />
-                <span class="doc-label">Valid ID (Front)</span>
-              </div>
-              <div class="doc-card placeholder" v-else>
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path
-                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                  />
-                  <polyline points="14 2 14 8 20 8" />
-                </svg>
-                <span class="doc-label">Valid ID (Front)</span>
-              </div>
-              <div class="doc-card" v-if="selected.idBackPhoto">
-                <img :src="selected.idBackPhoto" class="doc-img" />
-                <span class="doc-label">Valid ID (Back)</span>
-              </div>
-              <div class="doc-card placeholder" v-else>
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path
-                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                  />
-                  <polyline points="14 2 14 8 20 8" />
-                </svg>
-                <span class="doc-label">Valid ID (Back)</span>
-              </div>
-              <div class="doc-card" v-if="selected.selfiePhoto">
-                <img :src="selected.selfiePhoto" class="doc-img" />
-                <span class="doc-label">Selfie w/ ID</span>
-              </div>
-              <div
-                class="doc-card placeholder"
-                v-if="selected.role === 'seller' && !selected.selfiePhoto"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path
-                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                  />
-                  <polyline points="14 2 14 8 20 8" />
-                </svg>
-                <span class="doc-label">Selfie w/ ID (mock)</span>
-              </div>
-              <div class="doc-card" v-if="selected.businessPermitPhoto">
-                <img :src="selected.businessPermitPhoto" class="doc-img" />
-                <span class="doc-label">Business Permit</span>
-              </div>
-              <div class="doc-card" v-if="selected.licensePhoto">
-                <img :src="selected.licensePhoto" class="doc-img" />
-                <span class="doc-label">Driver's License</span>
-              </div>
-              <div class="doc-card" v-if="selected.vehicleRegPhoto">
-                <img :src="selected.vehicleRegPhoto" class="doc-img" />
-                <span class="doc-label">Vehicle Registration</span>
-              </div>
+              <template v-if="selected.role === 'seller'">
+                <div class="doc-card" v-if="selected.validIdPhoto">
+                  <img :src="selected.validIdPhoto" class="doc-img" />
+                  <span class="doc-label">Valid ID (Front)</span>
+                </div>
+                <div class="doc-card placeholder" v-else>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span class="doc-label">Valid ID (Front)</span>
+                </div>
+                <div class="doc-card" v-if="selected.idBackPhoto">
+                  <img :src="selected.idBackPhoto" class="doc-img" />
+                  <span class="doc-label">Valid ID (Back)</span>
+                </div>
+                <div class="doc-card placeholder" v-else>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span class="doc-label">Valid ID (Back)</span>
+                </div>
+                <div class="doc-card" v-if="selected.selfiePhoto">
+                  <img :src="selected.selfiePhoto" class="doc-img" />
+                  <span class="doc-label">Selfie w/ ID</span>
+                </div>
+                <div class="doc-card placeholder" v-else>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span class="doc-label">Selfie w/ ID</span>
+                </div>
+                <div class="doc-card" v-if="selected.businessPermitPhoto">
+                  <img :src="selected.businessPermitPhoto" class="doc-img" />
+                  <span class="doc-label">Business Permit</span>
+                </div>
+              </template>
+              <template v-else>
+                <div class="doc-card" v-if="selected.licenseFrontPhoto || selected.licensePhoto">
+                  <img :src="selected.licenseFrontPhoto || selected.licensePhoto" class="doc-img" />
+                  <span class="doc-label">Driver's License</span>
+                </div>
+                <div class="doc-card placeholder" v-else>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span class="doc-label">Driver's License</span>
+                </div>
+                <div class="doc-card" v-if="selected.vehicleRegPhoto">
+                  <img :src="selected.vehicleRegPhoto" class="doc-img" />
+                  <span class="doc-label">Vehicle Registration</span>
+                </div>
+                <div class="doc-card placeholder" v-else>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span class="doc-label">Vehicle Registration</span>
+                </div>
+                <div class="doc-card" v-if="selected.nbiClearancePhoto">
+                  <img :src="selected.nbiClearancePhoto" class="doc-img" />
+                  <span class="doc-label">NBI Clearance</span>
+                </div>
+                <div class="doc-card" v-if="selected.birthCertPhoto">
+                  <img :src="selected.birthCertPhoto" class="doc-img" />
+                  <span class="doc-label">Birth Certificate</span>
+                </div>
+                <div class="doc-card" v-if="selected.selfiePhoto">
+                  <img :src="selected.selfiePhoto" class="doc-img" />
+                  <span class="doc-label">Selfie w/ ID</span>
+                </div>
+                <div class="doc-card placeholder" v-else>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span class="doc-label">Selfie w/ ID</span>
+                </div>
+              </template>
             </div>
           </div>
 

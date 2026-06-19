@@ -126,9 +126,10 @@
                 Retake Photo
               </ion-button>
 
-              <ion-button expand="block" class="confirm-button" @click="confirmPhoto">
-                <ion-icon slot="start" :icon="checkmarkOutline"></ion-icon>
-                Confirm Photo
+              <ion-button expand="block" class="confirm-button" @click="confirmPhoto" :disabled="uploadingSelfie">
+                <ion-spinner v-if="uploadingSelfie" name="crescent" slot="start"></ion-spinner>
+                <ion-icon v-else slot="start" :icon="checkmarkOutline"></ion-icon>
+                {{ uploadingSelfie ? 'Uploading...' : 'Confirm Photo' }}
               </ion-button>
             </template>
           </div>
@@ -156,7 +157,7 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { Capacitor } from '@capacitor/core';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
-import { IonPage, IonContent, IonButton, IonIcon, toastController } from '@ionic/vue';
+import { IonPage, IonContent, IonButton, IonIcon, IonSpinner, toastController } from '@ionic/vue';
 import {
   arrowBackOutline,
   arrowForwardOutline,
@@ -172,10 +173,20 @@ const fileInput = ref(null);
 const videoRef = ref(null);
 const canvasRef = ref(null);
 
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+
+function getEmail() {
+  try {
+    const data = JSON.parse(localStorage.getItem('driverRegistrationData') || '{}');
+    return data.email || '';
+  } catch { return ''; }
+}
+
 const selfiePhoto = ref(null);
 const selfieConfirmed = ref(false);
 const showCamera = ref(false);
 const cameraStream = ref(null);
+const uploadingSelfie = ref(false);
 
 onMounted(() => {
   const savedData = localStorage.getItem('driverRegistrationData');
@@ -293,14 +304,47 @@ const retakePhoto = () => {
 
 const confirmPhoto = async () => {
   if (!selfiePhoto.value) return;
-  selfieConfirmed.value = true;
-  const toast = await toastController.create({
-    message: 'Selfie photo saved!',
-    duration: 2000,
-    color: 'success',
-    position: 'top',
-  });
-  await toast.present();
+
+  uploadingSelfie.value = true;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/driver/upload-photo`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: getEmail(),
+        photo_type: 'selfie_photo',
+        photo: selfiePhoto.value,
+      }),
+    });
+
+    if (!res.ok) throw new Error('Upload failed');
+
+    const data = await res.json();
+    selfieConfirmed.value = true;
+
+    const saved = JSON.parse(localStorage.getItem('driverRegistrationData') || '{}');
+    saved.selfiePhoto = data.photo_url;
+    localStorage.setItem('driverRegistrationData', JSON.stringify(saved));
+
+    const toast = await toastController.create({
+      message: 'Selfie photo saved!',
+      duration: 2000,
+      color: 'success',
+      position: 'top',
+    });
+    await toast.present();
+  } catch {
+    const toast = await toastController.create({
+      message: 'Failed to upload selfie. Please try again.',
+      duration: 3000,
+      color: 'danger',
+      position: 'top',
+    });
+    await toast.present();
+  } finally {
+    uploadingSelfie.value = false;
+  }
 };
 
 const showToast = async (message, color = 'primary') => {

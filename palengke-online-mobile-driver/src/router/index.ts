@@ -5,6 +5,10 @@ import type { RouteRecordRaw } from 'vue-router';
 // COMPONENT IMPORTS
 // ============================================
 import LoginPage from '@/views/LoginPage.vue';
+import PinLoginPage from '@/views/PinLoginPage.vue';
+import CreatePinPage from '@/views/CreatePinPage.vue';
+import OTPVerificationPage from '@/views/OTPVerificationPage.vue';
+import AccountPendingPage from '@/views/AccountPendingPage.vue';
 import DriverRequirements from '@/views/registration/DriverRequirements.vue';
 import RegisterSuccess from '@/views/registration/RegisterSuccess.vue';
 import HomePage from '@/views/HomePage.vue';
@@ -54,6 +58,30 @@ const routes: Array<RouteRecordRaw> = [
     path: '/login',
     name: 'Login',
     component: LoginPage,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/pin-login',
+    name: 'PinLogin',
+    component: PinLoginPage,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/create-pin',
+    name: 'CreatePin',
+    component: CreatePinPage,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/otp-verification/:email',
+    name: 'OTPVerification',
+    component: OTPVerificationPage,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/account-pending',
+    name: 'AccountPending',
+    component: AccountPendingPage,
     meta: { requiresAuth: false }
   },
   {

@@ -171,7 +171,6 @@ const proceedToRegistration = async () => {
   isLoading.value = true;
   
   try {
-    await new Promise(resolve => setTimeout(resolve, 1000));
     router.push('/register/step1');
   } catch (error) {
     const alert = await alertController.create({

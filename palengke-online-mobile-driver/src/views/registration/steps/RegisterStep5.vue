@@ -37,19 +37,25 @@
               <ion-icon :icon="cardOutline"></ion-icon>
               <span>Driver's License (Front & Back) *</span>
             </div>
-            <div class="upload-box" :class="{ uploaded: uploadedDocs.license }">
+              <div class="upload-box" :class="{ uploaded: uploadedDocs.license, error: uploadErrors.license }">
               <input 
                 type="file" 
                 accept="image/*" 
                 class="upload-input"
                 @change="onFileUpload('license', $event)"
+                :disabled="uploadStates.license === 'uploading'"
               >
               <div class="upload-content">
-                <ion-icon :icon="cloudUploadOutline"></ion-icon>
-                <p v-if="!uploadedDocs.license">Tap to upload</p>
+                <ion-icon v-if="uploadStates.license === 'uploading'" :icon="syncOutline" class="spinning"></ion-icon>
+                <ion-icon v-else-if="uploadStates.license === 'error'" :icon="alertCircleOutline" class="error-icon"></ion-icon>
+                <ion-icon v-else :icon="cloudUploadOutline"></ion-icon>
+                <p v-if="uploadStates.license === 'uploading'">Uploading...</p>
+                <p v-else-if="uploadStates.license === 'error'">Tap to retry</p>
+                <p v-else-if="!uploadedDocs.license">Tap to upload</p>
                 <p v-else class="uploaded-text">Uploaded</p>
               </div>
             </div>
+            <span v-if="uploadErrors.license" class="error-message">{{ uploadErrors.license }}</span>
           </div>
 
           <!-- Vehicle Registration -->
@@ -58,19 +64,25 @@
               <ion-icon :icon="carOutline"></ion-icon>
               <span>Vehicle Registration (OR/CR) *</span>
             </div>
-            <div class="upload-box" :class="{ uploaded: uploadedDocs.vehicleReg }">
+              <div class="upload-box" :class="{ uploaded: uploadedDocs.vehicleReg, error: uploadErrors.vehicleReg }">
               <input 
                 type="file" 
                 accept="image/*" 
                 class="upload-input"
                 @change="onFileUpload('vehicleReg', $event)"
+                :disabled="uploadStates.vehicleReg === 'uploading'"
               >
               <div class="upload-content">
-                <ion-icon :icon="cloudUploadOutline"></ion-icon>
-                <p v-if="!uploadedDocs.vehicleReg">Tap to upload</p>
+                <ion-icon v-if="uploadStates.vehicleReg === 'uploading'" :icon="syncOutline" class="spinning"></ion-icon>
+                <ion-icon v-else-if="uploadStates.vehicleReg === 'error'" :icon="alertCircleOutline" class="error-icon"></ion-icon>
+                <ion-icon v-else :icon="cloudUploadOutline"></ion-icon>
+                <p v-if="uploadStates.vehicleReg === 'uploading'">Uploading...</p>
+                <p v-else-if="uploadStates.vehicleReg === 'error'">Tap to retry</p>
+                <p v-else-if="!uploadedDocs.vehicleReg">Tap to upload</p>
                 <p v-else class="uploaded-text">Uploaded</p>
               </div>
             </div>
+            <span v-if="uploadErrors.vehicleReg" class="error-message">{{ uploadErrors.vehicleReg }}</span>
           </div>
 
           <!-- NBI Clearance -->
@@ -79,19 +91,25 @@
               <ion-icon :icon="shieldOutline"></ion-icon>
               <span>NBI or Police Clearance *</span>
             </div>
-            <div class="upload-box" :class="{ uploaded: uploadedDocs.nbi }">
+              <div class="upload-box" :class="{ uploaded: uploadedDocs.nbi, error: uploadErrors.nbi }">
               <input 
                 type="file" 
                 accept="image/*" 
                 class="upload-input"
                 @change="onFileUpload('nbi', $event)"
+                :disabled="uploadStates.nbi === 'uploading'"
               >
               <div class="upload-content">
-                <ion-icon :icon="cloudUploadOutline"></ion-icon>
-                <p v-if="!uploadedDocs.nbi">Tap to upload</p>
+                <ion-icon v-if="uploadStates.nbi === 'uploading'" :icon="syncOutline" class="spinning"></ion-icon>
+                <ion-icon v-else-if="uploadStates.nbi === 'error'" :icon="alertCircleOutline" class="error-icon"></ion-icon>
+                <ion-icon v-else :icon="cloudUploadOutline"></ion-icon>
+                <p v-if="uploadStates.nbi === 'uploading'">Uploading...</p>
+                <p v-else-if="uploadStates.nbi === 'error'">Tap to retry</p>
+                <p v-else-if="!uploadedDocs.nbi">Tap to upload</p>
                 <p v-else class="uploaded-text">Uploaded</p>
               </div>
             </div>
+            <span v-if="uploadErrors.nbi" class="error-message">{{ uploadErrors.nbi }}</span>
           </div>
 
           <!-- Birth Certificate -->
@@ -100,19 +118,25 @@
               <ion-icon :icon="documentOutline"></ion-icon>
               <span>Birth Certificate *</span>
             </div>
-            <div class="upload-box" :class="{ uploaded: uploadedDocs.birthCert }">
+              <div class="upload-box" :class="{ uploaded: uploadedDocs.birthCert, error: uploadErrors.birthCert }">
               <input 
                 type="file" 
                 accept="image/*" 
                 class="upload-input"
                 @change="onFileUpload('birthCert', $event)"
+                :disabled="uploadStates.birthCert === 'uploading'"
               >
               <div class="upload-content">
-                <ion-icon :icon="cloudUploadOutline"></ion-icon>
-                <p v-if="!uploadedDocs.birthCert">Tap to upload</p>
+                <ion-icon v-if="uploadStates.birthCert === 'uploading'" :icon="syncOutline" class="spinning"></ion-icon>
+                <ion-icon v-else-if="uploadStates.birthCert === 'error'" :icon="alertCircleOutline" class="error-icon"></ion-icon>
+                <ion-icon v-else :icon="cloudUploadOutline"></ion-icon>
+                <p v-if="uploadStates.birthCert === 'uploading'">Uploading...</p>
+                <p v-else-if="uploadStates.birthCert === 'error'">Tap to retry</p>
+                <p v-else-if="!uploadedDocs.birthCert">Tap to upload</p>
                 <p v-else class="uploaded-text">Uploaded</p>
               </div>
             </div>
+            <span v-if="uploadErrors.birthCert" class="error-message">{{ uploadErrors.birthCert }}</span>
           </div>
 
           <!-- Info Box -->
@@ -172,16 +196,48 @@ import {
   carOutline,
   shieldOutline,
   cloudUploadOutline,
-  informationCircleOutline
+  informationCircleOutline,
+  syncOutline,
+  alertCircleOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
+
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+
+function getEmail() {
+  try {
+    const data = JSON.parse(localStorage.getItem('driverRegistrationData') || '{}');
+    return data.email || '';
+  } catch { return ''; }
+}
+
+const docTypes = {
+  license: 'license_front_photo',
+  vehicleReg: 'vehicle_reg_photo',
+  nbi: 'nbi_clearance_photo',
+  birthCert: 'birth_cert_photo',
+};
 
 const uploadedDocs = ref({
   license: false,
   vehicleReg: false,
   nbi: false,
   birthCert: false
+});
+
+const uploadStates = ref({
+  license: 'idle',
+  vehicleReg: 'idle',
+  nbi: 'idle',
+  birthCert: 'idle',
+});
+
+const uploadErrors = ref({
+  license: '',
+  vehicleReg: '',
+  nbi: '',
+  birthCert: '',
 });
 
 const isFormValid = computed(() => {
@@ -191,10 +247,59 @@ const isFormValid = computed(() => {
          uploadedDocs.value.birthCert;
 });
 
-const onFileUpload = (docType, event) => {
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function uploadPhoto(backendField, base64) {
+  const res = await fetch(`${API_BASE}/api/driver/upload-photo`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: getEmail(),
+      photo_type: backendField,
+      photo: base64,
+    }),
+  });
+  if (!res.ok) throw new Error('Upload failed');
+  return await res.json();
+}
+
+const onFileUpload = async (docType, event) => {
   const file = event.target.files[0];
-  if (file) {
+  if (!file) return;
+
+  if (file.size > 5 * 1024 * 1024) {
+    uploadErrors.value[docType] = 'File too large (max 5MB)';
+    return;
+  }
+
+  if (!file.type.startsWith('image/')) {
+    uploadErrors.value[docType] = 'Please select an image file';
+    return;
+  }
+
+  uploadStates.value[docType] = 'uploading';
+  uploadErrors.value[docType] = '';
+
+  try {
+    const base64 = await readFileAsBase64(file);
+    const data = await uploadPhoto(docTypes[docType], base64);
+
     uploadedDocs.value[docType] = true;
+    uploadStates.value[docType] = 'done';
+
+    const saved = JSON.parse(localStorage.getItem('driverRegistrationData') || '{}');
+    saved[docTypes[docType]] = data.photo_url;
+    localStorage.setItem('driverRegistrationData', JSON.stringify(saved));
+  } catch {
+    uploadErrors.value[docType] = 'Upload failed. Please try again.';
+    uploadStates.value[docType] = 'error';
   }
 };
 
@@ -357,6 +462,11 @@ const handleNext = () => {
   background: #e8f5e9;
 }
 
+.upload-box.error {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
 .upload-input {
   position: absolute;
   top: 0;
@@ -382,9 +492,30 @@ const handleNext = () => {
 }
 
 .upload-content p {
+  margin: 8px 0 0;
   font-size: 13px;
   color: #666;
-  margin: 0;
+}
+
+.error-message {
+  display: block;
+  font-size: 12px;
+  color: #ef4444;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.error-icon {
+  color: #ef4444;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .uploaded-text {

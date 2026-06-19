@@ -1,0 +1,304 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Mail\DriverRegistrationConfirmationMail;
+use App\Mail\DriverAccountApprovedMail;
+use App\Mail\DriverAccountRejectedMail;
+use App\Models\DriverRegistration;
+use App\Models\Notification;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+
+class DriverRegistrationController extends Controller
+{
+    public function register(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'country_code' => 'required|string',
+            'phone' => 'required|string',
+            'full_phone' => 'required|string',
+            'email_verified' => 'boolean',
+            'password' => 'required|string|min:8',
+
+            'first_name' => 'required|string|min:2',
+            'middle_name' => 'nullable|string',
+            'last_name' => 'required|string|min:2',
+            'country' => 'required|string',
+            'birthdate' => 'required|date',
+            'birthplace' => 'required|string|min:3',
+            'current_address' => 'required|string|min:10',
+
+            'license_number' => 'required|string',
+            'license_type' => 'required|string',
+            'restriction_code' => 'required|string',
+            'expiry_date' => 'required|date',
+
+            'vehicle_type' => 'required|string',
+            'plate_number' => 'required|string',
+            'vehicle_model' => 'required|string',
+            'vehicle_color' => 'nullable|string',
+
+            'license_front_photo' => 'nullable|string',
+            'license_back_photo' => 'nullable|string',
+            'vehicle_reg_photo' => 'nullable|string',
+            'nbi_clearance_photo' => 'nullable|string',
+            'birth_cert_photo' => 'nullable|string',
+            'selfie_photo' => 'nullable|string',
+        ]);
+
+        $validated['password'] = Hash::make($validated['password']);
+
+        foreach (['license_front_photo', 'license_back_photo', 'vehicle_reg_photo', 'nbi_clearance_photo', 'birth_cert_photo', 'selfie_photo'] as $field) {
+            if (!empty($validated[$field])) {
+                $validated[$field] = $this->saveBase64Image($validated[$field], $field);
+            }
+        }
+
+        $validated['status'] = 'pending';
+
+        $registration = DriverRegistration::updateOrCreate(
+            ['email' => $validated['email']],
+            $validated
+        );
+
+        Notification::create([
+            'type' => 'new_driver',
+            'message' => "New driver registration: {$validated['first_name']} {$validated['last_name']}",
+            'link' => '/approvals',
+            'data' => ['registration_id' => $registration->id],
+        ]);
+
+        Mail::to($validated['email'])->send(
+            new DriverRegistrationConfirmationMail(
+                $validated['first_name'],
+            ),
+        );
+
+        return response()->json([
+            'message' => 'Registration submitted successfully. Your application is pending review.',
+            'registration' => [
+                'id' => $this->formatId($registration),
+                'status' => $registration->status,
+            ],
+        ], 201);
+    }
+
+    public function uploadPhoto(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'photo_type' => 'required|string|in:license_front_photo,license_back_photo,vehicle_reg_photo,nbi_clearance_photo,birth_cert_photo,selfie_photo',
+            'photo' => 'required|string',
+        ]);
+
+        $registration = DriverRegistration::where('email', $validated['email'])
+            ->whereIn('status', ['draft', 'pending'])
+            ->first();
+
+        if (!$registration) {
+            $registration = DriverRegistration::create([
+                'email' => $validated['email'],
+                'status' => 'draft',
+                'country_code' => '',
+                'phone' => '',
+                'full_phone' => '',
+                'password' => '',
+                'first_name' => '',
+                'last_name' => '',
+                'country' => '',
+                'birthdate' => now()->toDateString(),
+                'birthplace' => '',
+                'current_address' => '',
+                'license_number' => '',
+                'license_type' => '',
+                'restriction_code' => '',
+                'expiry_date' => now()->toDateString(),
+                'vehicle_type' => '',
+                'plate_number' => '',
+                'vehicle_model' => '',
+            ]);
+        }
+
+        $photoPath = $this->saveBase64Image($validated['photo'], $validated['photo_type']);
+        $registration->update([$validated['photo_type'] => $photoPath]);
+
+        return response()->json([
+            'message' => 'Photo uploaded successfully.',
+            'photo_url' => $photoPath,
+        ]);
+    }
+
+    public function pending()
+    {
+        $registrations = DriverRegistration::where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(fn ($r) => $this->formatForAdmin($r));
+
+        return response()->json([
+            'pending' => $registrations,
+        ]);
+    }
+
+    public function history()
+    {
+        $registrations = DriverRegistration::whereIn('status', ['approved', 'rejected'])
+            ->orderBy('reviewed_at', 'desc')
+            ->get()
+            ->map(fn ($r) => $this->formatForAdmin($r));
+
+        return response()->json([
+            'history' => $registrations,
+        ]);
+    }
+
+    public function approve($id)
+    {
+        $registration = DriverRegistration::findOrFail($this->resolveId($id));
+
+        if ($registration->status !== 'pending') {
+            return response()->json(['message' => 'Registration is not pending.'], 400);
+        }
+
+        $registration->update([
+            'status' => 'approved',
+            'reviewed_by' => request()->user()->id,
+            'reviewed_at' => now(),
+        ]);
+
+        Mail::to($registration->email)->send(
+            new DriverAccountApprovedMail($registration->first_name),
+        );
+
+        return response()->json([
+            'message' => 'Driver approved successfully.',
+            'registration' => $this->formatForAdmin($registration->fresh()),
+        ]);
+    }
+
+    public function reject(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'reason' => 'required|string|min:3',
+        ]);
+
+        $registration = DriverRegistration::findOrFail($this->resolveId($id));
+
+        if ($registration->status !== 'pending') {
+            return response()->json(['message' => 'Registration is not pending.'], 400);
+        }
+
+        $registration->update([
+            'status' => 'rejected',
+            'rejection_reason' => $validated['reason'],
+            'reviewed_by' => request()->user()->id,
+            'reviewed_at' => now(),
+        ]);
+
+        Mail::to($registration->email)->send(
+            new DriverAccountRejectedMail($registration->first_name, $validated['reason']),
+        );
+
+        return response()->json([
+            'message' => 'Driver registration rejected.',
+            'registration' => $this->formatForAdmin($registration->fresh()),
+        ]);
+    }
+
+    public function index()
+    {
+        $registrations = DriverRegistration::whereIn('status', ['approved', 'pending'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(fn ($r) => $this->formatForAdmin($r));
+
+        return response()->json([
+            'drivers' => $registrations,
+        ]);
+    }
+
+    public function show($id)
+    {
+        $registration = DriverRegistration::findOrFail($this->resolveId($id));
+        return response()->json([
+            'registration' => $this->formatForAdmin($registration),
+        ]);
+    }
+
+    private function saveBase64Image(string $dataUrl, string $fieldName): string
+    {
+        if (!preg_match('/^data:image\/(\w+);base64,(.+)$/', $dataUrl, $matches)) {
+            return $dataUrl;
+        }
+
+        $extension = $matches[1] === 'jpeg' ? 'jpg' : $matches[1];
+        $base64Data = $matches[2];
+        $decoded = base64_decode($base64Data);
+
+        if ($decoded === false) {
+            return $dataUrl;
+        }
+
+        $filename = 'driver-photos/' . uniqid() . '-' . $fieldName . '.' . $extension;
+        Storage::disk('public')->put($filename, $decoded);
+
+        return Storage::disk('public')->url($filename);
+    }
+
+    private function resolveId($id): int
+    {
+        if (is_numeric($id)) {
+            return (int) $id;
+        }
+        if (str_starts_with($id, 'DRIVER-')) {
+            return hexdec(substr($id, 7));
+        }
+        return (int) $id;
+    }
+
+    private function formatId($r): string
+    {
+        return 'DRIVER-' . strtoupper(dechex($r->id));
+    }
+
+    private function formatForAdmin($r)
+    {
+        return [
+            'id' => $this->formatId($r),
+            'role' => 'driver',
+            'firstName' => $r->first_name,
+            'middleName' => $r->middle_name,
+            'lastName' => $r->last_name,
+            'email' => $r->email,
+            'contact' => $r->full_phone,
+            'licenseNumber' => $r->license_number,
+            'licenseType' => $r->license_type,
+            'restrictionCode' => $r->restriction_code,
+            'expiryDate' => $r->expiry_date,
+            'vehicleType' => $r->vehicle_type,
+            'plateNumber' => $r->plate_number,
+            'vehicleModel' => $r->vehicle_model,
+            'vehicleColor' => $r->vehicle_color,
+            'country' => $r->country,
+            'birthdate' => $r->birthdate,
+            'birthplace' => $r->birthplace,
+            'currentAddress' => $r->current_address,
+            'licenseFrontPhoto' => $r->license_front_photo,
+            'licenseBackPhoto' => $r->license_back_photo,
+            'vehicleRegPhoto' => $r->vehicle_reg_photo,
+            'nbiClearancePhoto' => $r->nbi_clearance_photo,
+            'birthCertPhoto' => $r->birth_cert_photo,
+            'selfiePhoto' => $r->selfie_photo,
+            'status' => $r->status,
+            'submittedAt' => $r->created_at->toDateString(),
+            'reviewedAt' => $r->reviewed_at?->toDateString(),
+            'reviewedBy' => $r->reviewedBy?->name ?? null,
+            'rejectReason' => $r->rejection_reason,
+        ];
+    }
+}

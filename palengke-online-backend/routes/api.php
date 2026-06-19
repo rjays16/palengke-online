@@ -33,6 +33,9 @@ use App\Http\Controllers\Api\AdminWalletController;
 use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\AdminSubscriptionController;
 use App\Http\Controllers\Api\RestrictionCodeController;
+use App\Http\Controllers\Api\DriverRegistrationController;
+use App\Http\Controllers\Api\DriverAuthController;
+use App\Http\Controllers\Api\DriverDeviceController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -61,6 +64,20 @@ Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
 // Seller app registration
 Route::post('/seller/register', [SellerRegistrationController::class, 'register']);
 Route::post('/seller/verify', [SellerRegistrationController::class, 'verify']);
+
+// Driver app registration
+Route::post('/driver/upload-photo', [DriverRegistrationController::class, 'uploadPhoto']);
+Route::post('/driver/register', [DriverRegistrationController::class, 'register']);
+
+// Driver login
+Route::post('/driver/login', [DriverAuthController::class, 'login']);
+Route::post('/driver/forgot-pin', [DriverAuthController::class, 'forgotPin']);
+
+// Driver device PIN management
+Route::post('/driver/device/register', [DriverDeviceController::class, 'register']);
+Route::post('/driver/device/verify-pin', [DriverDeviceController::class, 'verifyPin']);
+Route::post('/driver/device/change-pin', [DriverDeviceController::class, 'changePin']);
+Route::post('/driver/device/status', [DriverDeviceController::class, 'status']);
 
 // Seller app login
 Route::post('/seller/login', [AuthController::class, 'login']);
@@ -184,6 +201,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/sellers/{id}/orders', [OrderController::class, 'adminIndex']);
     Route::post('/admin/sellers/{id}/approve', [SellerRegistrationController::class, 'approve']);
     Route::post('/admin/sellers/{id}/reject', [SellerRegistrationController::class, 'reject']);
+
+    // Admin — driver registrations
+    Route::get('/admin/drivers', [DriverRegistrationController::class, 'index']);
+    Route::get('/admin/drivers/pending', [DriverRegistrationController::class, 'pending']);
+    Route::get('/admin/drivers/history', [DriverRegistrationController::class, 'history']);
+    Route::get('/admin/drivers/{id}', [DriverRegistrationController::class, 'show']);
+    Route::post('/admin/drivers/{id}/approve', [DriverRegistrationController::class, 'approve']);
+    Route::post('/admin/drivers/{id}/reject', [DriverRegistrationController::class, 'reject']);
 
     Route::get('/admin/notifications', [AdminNotificationController::class, 'index']);
     Route::get('/admin/notifications/unread-count', [AdminNotificationController::class, 'unreadCount']);

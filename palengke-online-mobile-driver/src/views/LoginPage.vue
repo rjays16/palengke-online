@@ -2,13 +2,12 @@
   <ion-page>
     <ion-content :fullscreen="true" class="login-content">
       <div class="login-container">
-        
         <!-- Logo Section -->
         <div class="logo-section">
           <div class="logos-wrapper">
-            <img src="/assets/images/logo.png" alt="Palengke Online" class="logo-main">
+            <img src="/assets/images/logo.png" alt="Palengke Online" class="logo-main" />
             <div class="plus-sign">+</div>
-            <img src="/assets/images/palengke-driver.png" alt="Driver" class="logo-driver">
+            <img src="/assets/images/palengke-driver.png" alt="Driver" class="logo-driver" />
           </div>
         </div>
 
@@ -18,314 +17,257 @@
 
         <!-- Login Form -->
         <div class="form-section">
-          
-          <!-- Email Input -->
           <div class="input-group">
             <ion-icon :icon="mailOutline" class="input-icon"></ion-icon>
-            <input 
-              v-model="email" 
-              type="email" 
+            <input
+              v-model="email"
+              type="email"
               placeholder="Email address"
               class="custom-input"
-              :disabled="showOtpSection"
               @keyup.enter="handleLogin"
-            >
+            />
           </div>
 
-          <!-- Password Input -->
-          <div class="input-group" v-if="!showOtpSection">
-            <ion-icon :icon="lockClosedOutline" class="input-icon"></ion-icon>
-            <input 
-              v-model="password" 
-              :type="showPassword ? 'text' : 'password'" 
-              placeholder="Password"
-              class="custom-input"
-              @keyup.enter="handleLogin"
-            >
-            <ion-icon 
-              :icon="showPassword ? eyeOffOutline : eyeOutline" 
-              class="toggle-password"
-              @click="showPassword = !showPassword"
-            ></ion-icon>
-          </div>
-
-          <!-- Forgot Password -->
-          <div class="forgot-password" v-if="!showOtpSection">
-            <a href="#" @click.prevent="handleForgotPassword">Forgot Password?</a>
-          </div>
-
-          <!-- Sign In Button -->
-          <ion-button 
-            v-if="!showOtpSection"
-            expand="block" 
-            class="login-button"
-            @click="handleLogin"
-            :disabled="!email || !password || isLoading"
-          >
+          <ion-button expand="block" class="login-button" @click="handleLogin" :disabled="!email">
             <span v-if="!isLoading">Sign In</span>
             <ion-spinner v-else name="crescent"></ion-spinner>
           </ion-button>
-
-          <!-- OTP Section -->
-          <div v-if="showOtpSection" class="otp-section">
-            <div class="otp-header">
-              <ion-icon :icon="shieldCheckmarkOutline"></ion-icon>
-              <div class="otp-text">
-                <h3>Verify Your Email</h3>
-                <p>Enter the 6-digit code sent to <strong>{{ maskedEmail }}</strong></p>
-              </div>
-            </div>
-
-            <div class="otp-inputs">
-              <input 
-                v-for="(digit, index) in otpDigits" 
-                :key="index"
-                :ref="el => otpInputs[index] = el"
-                v-model="otpDigits[index]"
-                type="tel"
-                maxlength="1"
-                class="otp-input"
-                :class="{ error: otpError }"
-                @input="onOtpInput(index)"
-                @keydown="onOtpKeydown($event, index)"
-                @paste="onOtpPaste"
-              >
-            </div>
-
-            <div v-if="otpError" class="otp-error">
-              <ion-icon :icon="alertCircleOutline"></ion-icon>
-              <span>{{ otpError }}</span>
-            </div>
-
-            <div class="otp-actions">
-              <button 
-                class="resend-button" 
-                :disabled="resendTimer > 0"
-                @click="resendOtp"
-              >
-                {{ resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend Code' }}
-              </button>
-              <button class="change-email-button" @click="changeEmail">
-                Change Email
-              </button>
-            </div>
-
-            <ion-button 
-              expand="block" 
-              class="verify-button"
-              :disabled="otpValue.length !== 6 || isVerifying"
-              @click="verifyOtp"
-            >
-              <span v-if="!isVerifying">Verify & Sign In</span>
-              <ion-spinner v-else name="crescent"></ion-spinner>
-            </ion-button>
-          </div>
-
         </div>
 
         <!-- Sign Up Link -->
         <div class="signup-section">
           <p class="signup-text">
-            Don't have an account? 
+            Don't have an account?
             <a href="#" @click.prevent="goToSignup">Sign Up</a>
           </p>
         </div>
-
       </div>
     </ion-content>
   </ion-page>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { 
-  IonPage, 
-  IonContent, 
-  IonButton, 
-  IonIcon, 
-  IonSpinner,
-  alertController,
-  toastController
-} from '@ionic/vue';
-import { 
-  mailOutline, 
-  lockClosedOutline, 
-  eyeOutline, 
-  eyeOffOutline,
-  shieldCheckmarkOutline,
-  alertCircleOutline
-} from 'ionicons/icons';
+import { IonPage, IonContent, IonButton, IonIcon, IonSpinner, alertController } from '@ionic/vue';
+import { mailOutline } from 'ionicons/icons';
 
 const router = useRouter();
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
 const email = ref('');
-const password = ref('');
-const showPassword = ref(false);
 const isLoading = ref(false);
-const isVerifying = ref(false);
 
-const showOtpSection = ref(false);
-const otpDigits = ref(['', '', '', '', '', '']);
-const otpInputs = ref([]);
-const otpError = ref('');
-const resendTimer = ref(0);
-
-const maskedEmail = computed(() => {
-  if (!email.value) return '';
-  const atIndex = email.value.indexOf('@');
-  if (atIndex === -1) return email.value;
-  const localPart = email.value.substring(0, atIndex);
-  const domain = email.value.substring(atIndex);
-  if (localPart.length > 3) {
-    return localPart.substring(0, 2) + '***' + localPart.substring(localPart.length - 1) + domain;
-  }
-  return '***' + domain;
-});
-
-const otpValue = computed(() => {
-  return otpDigits.value.join('');
-});
-
-const handleLogin = async () => {
-  if (!email.value || !password.value) return;
-  
-  isLoading.value = true;
-  
-  try {
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    const toast = await toastController.create({
-      message: `Verification code sent to ${maskedEmail.value}`,
-      duration: 3000,
-      color: 'medium',
-      position: 'top'
-    });
-    await toast.present();
-
-    showOtpSection.value = true;
-    startResendTimer();
-    
-    setTimeout(() => {
-      if (otpInputs.value[0]) {
-        otpInputs.value[0].focus();
-      }
-    }, 300);
-
-  } catch (error) {
-    const alert = await alertController.create({
-      header: 'Login Failed',
-      message: 'Something went wrong. Please try again.',
-      buttons: ['OK']
-    });
-    await alert.present();
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-const onOtpInput = (index) => {
-  otpDigits.value[index] = otpDigits.value[index].replace(/\D/g, '');
-  otpError.value = '';
-  
-  if (otpDigits.value[index] && index < 5) {
-    otpInputs.value[index + 1]?.focus();
-  }
-};
-
-const onOtpKeydown = (event, index) => {
-  if (event.key === 'Backspace' && !otpDigits.value[index] && index > 0) {
-    otpInputs.value[index - 1]?.focus();
-  }
-};
-
-const onOtpPaste = (event) => {
-  event.preventDefault();
-  const pastedData = event.clipboardData.getData('text').replace(/\D/g, '');
-  
-  if (pastedData.length === 6) {
-    for (let i = 0; i < 6; i++) {
-      otpDigits.value[i] = pastedData[i] || '';
-    }
-    otpInputs.value[5]?.focus();
-  }
-};
-
-const verifyOtp = async () => {
-  if (otpValue.value.length !== 6) return;
-
-  isVerifying.value = true;
-  otpError.value = '';
-
-  try {
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    localStorage.setItem('isAuthenticated', 'true');
-    router.push('/home');
-    
-  } catch (error) {
-    otpError.value = 'Verification failed. Please try again.';
-  } finally {
-    isVerifying.value = false;
-  }
-};
-
-const resendOtp = async () => {
-  if (resendTimer.value > 0) return;
-  
-  otpDigits.value = ['', '', '', '', '', ''];
-  otpError.value = '';
-  
-  await handleLogin();
-};
-
-const startResendTimer = () => {
-  resendTimer.value = 60;
-  const interval = setInterval(() => {
-    resendTimer.value--;
-    if (resendTimer.value <= 0) {
-      clearInterval(interval);
-    }
-  }, 1000);
-};
-
-const changeEmail = () => {
-  showOtpSection.value = false;
-  otpDigits.value = ['', '', '', '', '', ''];
-  otpError.value = '';
-  resendTimer.value = 0;
-};
-
-const handleForgotPassword = async () => {
+const showLoadingModal = async (message = 'Loading...', autoDismiss = true) => {
   const alert = await alertController.create({
-    header: 'Reset Password',
-    message: 'Enter your email address to receive a password reset link.',
-    inputs: [
-      {
-        name: 'email',
-        type: 'email',
-        placeholder: 'Email address'
-      }
-    ],
-    buttons: [
-      {
-        text: 'Cancel',
-        role: 'cancel'
-      },
-      {
-        text: 'Send',
-        handler: (data) => {
-          console.log('Reset password for:', data.email);
-        }
-      }
-    ]
+    cssClass: 'loading-modal-simple',
+    message: message,
+    buttons: [],
   });
   await alert.present();
+  if (autoDismiss) {
+    setTimeout(() => alert.dismiss(), 1500);
+  }
+  return alert;
+};
+
+const handleLogin = async () => {
+  if (!email.value) return;
+
+  isLoading.value = true;
+
+  try {
+    const response = await fetch(`${API_BASE}/api/driver/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.value }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      isLoading.value = false;
+
+      if (response.status === 404) {
+        const alert = await alertController.create({
+          cssClass: 'alert-login',
+          header: ' ',
+          message: '',
+          buttons: [
+            {
+              text: 'Cancel',
+              role: 'cancel',
+              cssClass: 'alert-button-cancel',
+            },
+            {
+              text: 'Sign Up',
+              cssClass: 'alert-button-primary',
+              handler: () => router.push('/signup'),
+            },
+          ],
+        });
+        await alert.present();
+        const alertEl = document.querySelector('.alert-login');
+        if (alertEl) {
+          const msgEl = alertEl.querySelector('.alert-message');
+          if (msgEl) {
+            msgEl.innerHTML = `
+              <div class="custom-alert-body">
+                <div class="custom-alert-icon icon-warning">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div class="custom-alert-title">Account Not Found</div>
+                <div class="custom-alert-text">No account found with <strong>${email.value}</strong>. Would you like to sign up instead?</div>
+              </div>`;
+          }
+        }
+        return;
+      }
+
+      if (response.status === 403) {
+        if (data.status === 'rejected') {
+          const alert = await alertController.create({
+            cssClass: 'alert-login',
+            header: ' ',
+            message: '',
+            buttons: [
+              {
+                text: 'Register Again',
+                cssClass: 'alert-button-primary',
+                handler: () => router.push('/signup'),
+              },
+            ],
+          });
+          await alert.present();
+          const alertEl = document.querySelector('.alert-login');
+          if (alertEl) {
+            const msgEl = alertEl.querySelector('.alert-message');
+            if (msgEl) {
+              msgEl.innerHTML = `
+                <div class="custom-alert-body">
+                  <div class="custom-alert-icon icon-error">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+                  </div>
+                  <div class="custom-alert-title">Registration Not Approved</div>
+                  <div class="custom-alert-text">Your previous registration was not approved. Please register again with updated information.</div>
+                </div>`;
+            }
+          }
+        } else {
+          localStorage.setItem('userEmail', email.value);
+          router.push('/account-pending');
+        }
+        return;
+      }
+
+      throw new Error(data.message || 'Login failed.');
+    }
+
+    isLoading.value = false;
+
+    localStorage.setItem('hasPin', data.hasPin ? 'true' : 'false');
+    localStorage.setItem('userEmail', email.value);
+
+    const alert = await alertController.create({
+      header: 'Verify Account',
+      message: 'Do you want to link this device to your account?',
+      subHeader:
+        'We need to do a quick authentication before linking your device. A 6-digit verification code will be sent to your registered email address.',
+      cssClass: 'otp-confirm-alert',
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          cssClass: 'alert-button-cancel',
+        },
+        {
+          text: 'Send Code',
+          cssClass: 'alert-button-confirm',
+          handler: async () => {
+            const loading = await showLoadingModal('Sending verification code...', false);
+
+            try {
+              await fetch(`${API_BASE}/api/send-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email.value }),
+              });
+            } catch (e) {
+              // Silent
+            }
+
+            localStorage.setItem('pendingAuth', 'true');
+
+            await loading.dismiss();
+            router.push({
+              name: 'OTPVerification',
+              params: { email: email.value },
+            });
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  } catch (error) {
+    isLoading.value = false;
+    const alert = await alertController.create({
+      cssClass: 'alert-login',
+      header: ' ',
+      message: '',
+      buttons: [{ text: 'OK', cssClass: 'alert-button-cancel' }],
+    });
+    await alert.present();
+    const alertEl = document.querySelector('.alert-login');
+    if (alertEl) {
+      const msgEl = alertEl.querySelector('.alert-message');
+      if (msgEl) {
+        msgEl.innerHTML = `
+          <div class="custom-alert-body">
+            <div class="custom-alert-icon icon-error">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+            </div>
+            <div class="custom-alert-title">Login Failed</div>
+            <div class="custom-alert-text">${error.message || 'Invalid email. Please try again.'}</div>
+          </div>`;
+      }
+    }
+  }
 };
 
 const goToSignup = () => {
   router.push('/signup');
 };
+
+onMounted(async () => {
+  if (!localStorage.getItem('deviceId')) {
+    const deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
+    localStorage.setItem('deviceId', deviceId);
+  }
+
+  const email = localStorage.getItem('userEmail');
+  const devId = localStorage.getItem('deviceId');
+  if (email && devId) {
+    try {
+      const res = await fetch(`${API_BASE}/api/driver/device/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, device_id: devId }),
+      });
+      const data = await res.json();
+      if (data.hasPin) {
+        localStorage.setItem('hasPin', 'true');
+        router.replace('/pin-login');
+      } else {
+        localStorage.removeItem('hasPin');
+      }
+    } catch {
+      if (localStorage.getItem('hasPin') === 'true') {
+        router.replace('/pin-login');
+      }
+    }
+  }
+});
 </script>
 
 <style scoped>
@@ -338,7 +280,8 @@ const goToSignup = () => {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 40px 24px;
+  padding: calc(40px + constant(safe-area-inset-top)) 24px calc(40px + constant(safe-area-inset-bottom));
+  padding: calc(40px + env(safe-area-inset-top)) 24px calc(40px + env(safe-area-inset-bottom));
 }
 
 .logo-section {
@@ -362,7 +305,7 @@ const goToSignup = () => {
 .plus-sign {
   font-size: 36px;
   font-weight: 700;
-  color: #000000;
+  color: #1a1a1a;
   line-height: 1;
   margin: 0 2px;
 }
@@ -429,34 +372,6 @@ const goToSignup = () => {
   color: #999;
 }
 
-.custom-input:disabled {
-  background: #f5f5f5;
-  color: #999;
-}
-
-.toggle-password {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 20px;
-  color: #999;
-  cursor: pointer;
-  z-index: 2;
-}
-
-.forgot-password {
-  text-align: right;
-  margin-bottom: 24px;
-}
-
-.forgot-password a {
-  color: #4CAF50;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-}
-
 .login-button {
   --background: #4CAF50;
   --background-hover: #45a049;
@@ -466,144 +381,9 @@ const goToSignup = () => {
   font-weight: 600;
   text-transform: none;
   letter-spacing: 0.5px;
-  margin-bottom: 24px;
+  margin-bottom: 0;
 }
 
-/* OTP Section */
-.otp-section {
-  background: #E3F2FD;
-  border-radius: 16px;
-  padding: 24px;
-  margin-top: 20px;
-  border: 2px solid #2196F3;
-}
-
-.otp-header {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.otp-header ion-icon {
-  font-size: 32px;
-  color: #2196F3;
-  flex-shrink: 0;
-}
-
-.otp-text h3 {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1565C0;
-  margin: 0 0 6px 0;
-}
-
-.otp-text p {
-  font-size: 13px;
-  color: #1976D2;
-  margin: 0;
-  line-height: 1.4;
-}
-
-.otp-text strong {
-  font-weight: 700;
-}
-
-.otp-inputs {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-
-.otp-input {
-  width: 48px;
-  height: 56px;
-  border: 2px solid #2196F3;
-  border-radius: 12px;
-  text-align: center;
-  font-size: 24px;
-  font-weight: 700;
-  color: #1a1a1a;
-  background: white;
-  transition: all 0.2s;
-}
-
-.otp-input:focus {
-  outline: none;
-  border-color: #1976D2;
-  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
-}
-
-.otp-input.error {
-  border-color: #f44336;
-}
-
-.otp-error {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px;
-  background: #FFEBEE;
-  border-radius: 8px;
-  margin-bottom: 16px;
-}
-
-.otp-error ion-icon {
-  font-size: 20px;
-  color: #f44336;
-  flex-shrink: 0;
-}
-
-.otp-error span {
-  font-size: 13px;
-  color: #c62828;
-  font-weight: 500;
-}
-
-.otp-actions {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.resend-button,
-.change-email-button {
-  background: none;
-  border: none;
-  color: #2196F3;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 8px;
-  font-family: inherit;
-}
-
-.resend-button:disabled {
-  color: #999;
-  cursor: not-allowed;
-}
-
-.change-email-button {
-  color: #666;
-}
-
-.verify-button {
-  --background: #2196F3;
-  --background-hover: #1976D2;
-  --border-radius: 12px;
-  height: 56px;
-  font-size: 16px;
-  font-weight: 600;
-  text-transform: none;
-}
-
-.verify-button:disabled {
-  --background: #e0e0e0;
-  --color: #999;
-}
-
-/* Sign Up Section */
 .signup-section {
   text-align: center;
   margin-top: 32px;
@@ -626,30 +406,20 @@ const goToSignup = () => {
   .logos-wrapper {
     gap: 6px;
   }
-  
   .logo-main {
     width: 90px;
     height: 90px;
   }
-  
   .plus-sign {
     font-size: 28px;
     margin: 0 1px;
   }
-  
   .logo-driver {
     width: 126px;
     height: 126px;
   }
-  
   .title {
     font-size: 28px;
-  }
-
-  .otp-input {
-    width: 44px;
-    height: 52px;
-    font-size: 22px;
   }
 }
 
@@ -657,28 +427,182 @@ const goToSignup = () => {
   .login-container {
     padding: 32px 20px;
   }
-  
   .logos-wrapper {
     gap: 5px;
   }
-  
   .logo-main {
     width: 75px;
     height: 75px;
   }
-  
   .plus-sign {
     font-size: 24px;
     margin: 0 1px;
   }
-  
   .logo-driver {
     width: 105px;
     height: 105px;
   }
-  
   .title {
     font-size: 24px;
   }
+}
+
+/* Loading Modal */
+:deep(.loading-modal-simple .alert-wrapper) {
+  border-radius: 20px;
+  text-align: center;
+  max-width: 280px;
+  padding: 50px 30px;
+  background: white;
+}
+
+:deep(.loading-modal-simple .alert-head) {
+  display: none;
+}
+
+:deep(.loading-modal-simple .alert-message) {
+  padding: 0;
+  position: relative;
+  padding-top: 70px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+:deep(.loading-modal-simple .alert-message::before) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: -25px;
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f0f0f0;
+  border-top: 5px solid #4CAF50;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+:deep(.loading-modal-simple .alert-button-group) {
+  display: none;
+}
+
+/* OTP Confirm Alert */
+:deep(.otp-confirm-alert .alert-wrapper) {
+  border-radius: 20px;
+  background: white;
+}
+
+:deep(.otp-confirm-alert .alert-head h2) {
+  color: #1a1a1a;
+}
+
+:deep(.otp-confirm-alert .alert-message) {
+  color: #666;
+}
+
+:deep(.otp-confirm-alert .alert-button-cancel) {
+  color: #666;
+}
+
+:deep(.otp-confirm-alert .alert-button-confirm) {
+  color: #4CAF50;
+  font-weight: 600;
+}
+
+/* Alert Shared Styles */
+:deep(.alert-login .alert-wrapper) {
+  border-radius: 20px;
+  max-width: 360px;
+  background: white;
+  padding: 0;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+}
+
+:deep(.alert-login .alert-head) {
+  display: none;
+  padding: 0;
+  min-height: 0;
+}
+
+:deep(.alert-login .alert-message) {
+  padding: 24px 24px 8px;
+  text-align: center;
+}
+
+:deep(.alert-login .alert-button-group) {
+  padding: 8px 24px 24px;
+  justify-content: center;
+  gap: 10px;
+}
+
+:deep(.alert-login .alert-button) {
+  border-radius: 12px;
+  height: 46px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: none;
+  flex: 1;
+  margin: 0;
+}
+
+:deep(.alert-login .alert-button-cancel) {
+  color: #666 !important;
+  background: #f5f5f5;
+}
+
+:deep(.alert-login .alert-button-primary) {
+  color: #fff !important;
+  background: #4CAF50;
+}
+
+.custom-alert-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.custom-alert-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.custom-alert-icon.icon-warning {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.custom-alert-icon.icon-error {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.custom-alert-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.custom-alert-text {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.custom-alert-text strong {
+  color: #1a1a1a;
+  font-weight: 600;
 }
 </style>

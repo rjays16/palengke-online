@@ -75,16 +75,19 @@
               <select
                 v-model="formData.restrictionCode"
                 class="custom-input with-icon custom-select"
+                :disabled="loadingCodes"
                 @change="errors.restrictionCode = ''"
                 @blur="validateField('restrictionCode')"
               >
-                <option value="" disabled>Select restriction code</option>
+                <option value="" disabled>{{ loadingCodes ? 'Loading...' : 'Select restriction code' }}</option>
                 <option v-for="r in restrictionCodes" :key="r.code" :value="r.code">
                   {{ r.code }} — {{ r.label }}
                 </option>
               </select>
+              <ion-spinner v-if="loadingCodes" name="crescent" class="input-spinner"></ion-spinner>
             </div>
             <span v-if="errors.restrictionCode" class="error-message">{{ errors.restrictionCode }}</span>
+            <span v-else-if="loadingCodes" class="helper-text">Fetching restriction codes...</span>
             <span v-else class="helper-text">Found on the back of your license card</span>
           </div>
 
@@ -136,7 +139,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { IonPage, IonContent, IonButton, IonIcon } from '@ionic/vue';
+import { IonPage, IonContent, IonButton, IonIcon, IonSpinner } from '@ionic/vue';
 import {
   arrowBackOutline,
   arrowForwardOutline,
@@ -152,18 +155,12 @@ const router = useRouter();
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
-const restrictionCodes = ref([
-  { code: 'A', label: 'Motorcycles/Tricycles (Automatic Clutch)' },
-  { code: 'A1', label: 'Motorcycles/Tricycles (Manual Clutch)' },
-  { code: 'B', label: 'Light Vehicles — Automatic Transmission' },
-  { code: 'B1', label: 'Light Vehicles — Manual Transmission' },
-  { code: 'B2', label: 'Heavy Vehicles — Automatic Transmission' },
-  { code: 'C', label: 'Heavy Vehicles — Manual Transmission' },
-  { code: 'D', label: 'Articulated Vehicles' },
-  { code: 'BE', label: 'Vehicles with Trailer' },
-]);
+const restrictionCodes = ref([]);
+
+const loadingCodes = ref(false);
 
 async function fetchRestrictionCodes() {
+  loadingCodes.value = true;
   try {
     const res = await fetch(`${API_BASE}/api/restriction-codes`);
     if (res.ok) {
@@ -173,7 +170,9 @@ async function fetchRestrictionCodes() {
       }
     }
   } catch {
-    // fallback to hardcoded
+    restrictionCodes.value = [];
+  } finally {
+    loadingCodes.value = false;
   }
 }
 
@@ -436,6 +435,16 @@ const handleNext = () => {
   left: 16px;
   top: 16px;
   font-size: 20px;
+  color: var(--color-icon-primary);
+}
+
+.input-spinner {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
   color: var(--color-icon-primary);
   z-index: 2;
 }

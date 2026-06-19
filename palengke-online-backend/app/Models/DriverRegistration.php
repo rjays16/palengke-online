@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class DriverRegistration extends Model
+{
+    protected $fillable = [
+        'email', 'country_code', 'phone', 'full_phone', 'email_verified', 'password',
+        'first_name', 'middle_name', 'last_name', 'country', 'birthdate', 'birthplace', 'current_address',
+        'license_number', 'license_type', 'restriction_code', 'expiry_date',
+        'vehicle_type', 'plate_number', 'vehicle_model', 'vehicle_color',
+        'license_front_photo', 'license_back_photo', 'vehicle_reg_photo',
+        'nbi_clearance_photo', 'birth_cert_photo', 'selfie_photo',
+        'pin', 'status', 'rejection_reason', 'reviewed_by', 'reviewed_at',
+    ];
+
+    protected $casts = [
+        'email_verified' => 'boolean',
+        'reviewed_at' => 'datetime',
+    ];
+
+    public function reviewedBy()
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
+    }
+}

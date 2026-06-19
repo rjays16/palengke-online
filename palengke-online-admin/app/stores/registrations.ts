@@ -21,13 +21,12 @@ export const useRegistrationsStore = defineStore("registrations", () => {
     error.value = "";
     try {
       const token = getToken();
-      const data: any = await $fetch(
-        `${getApiBaseUrl()}/api/admin/sellers/pending`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-      pending.value = data.pending;
+      const headers = { Authorization: `Bearer ${token}` };
+      const [sellerRes, driverRes] = await Promise.all([
+        $fetch(`${getApiBaseUrl()}/api/admin/sellers/pending`, { headers }),
+        $fetch(`${getApiBaseUrl()}/api/admin/drivers/pending`, { headers }),
+      ]);
+      pending.value = [...(sellerRes.pending || []), ...(driverRes.pending || [])];
     } catch (err: any) {
       error.value = err?.data?.message || "Failed to fetch pending registrations";
     } finally {
@@ -40,13 +39,12 @@ export const useRegistrationsStore = defineStore("registrations", () => {
     error.value = "";
     try {
       const token = getToken();
-      const data: any = await $fetch(
-        `${getApiBaseUrl()}/api/admin/sellers/history`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-      history.value = data.history;
+      const headers = { Authorization: `Bearer ${token}` };
+      const [sellerRes, driverRes] = await Promise.all([
+        $fetch(`${getApiBaseUrl()}/api/admin/sellers/history`, { headers }),
+        $fetch(`${getApiBaseUrl()}/api/admin/drivers/history`, { headers }),
+      ]);
+      history.value = [...(sellerRes.history || []), ...(driverRes.history || [])];
     } catch (err: any) {
       error.value = err?.data?.message || "Failed to fetch history";
     } finally {
@@ -59,7 +57,8 @@ export const useRegistrationsStore = defineStore("registrations", () => {
     error.value = "";
     try {
       const token = getToken();
-      await $fetch(`${getApiBaseUrl()}/api/admin/sellers/${id}/approve`, {
+      const prefix = id.startsWith("DRIVER-") ? "drivers" : "sellers";
+      await $fetch(`${getApiBaseUrl()}/api/admin/${prefix}/${id}/approve`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -77,7 +76,8 @@ export const useRegistrationsStore = defineStore("registrations", () => {
     error.value = "";
     try {
       const token = getToken();
-      await $fetch(`${getApiBaseUrl()}/api/admin/sellers/${id}/reject`, {
+      const prefix = id.startsWith("DRIVER-") ? "drivers" : "sellers";
+      await $fetch(`${getApiBaseUrl()}/api/admin/${prefix}/${id}/reject`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

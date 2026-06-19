@@ -211,28 +211,70 @@ const goBack = () => {
   router.push('/register/step6');
 };
 
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+
 const handleSubmit = async () => {
   if (!acceptedTerms.value || isSubmitting.value) return;
 
   isSubmitting.value = true;
 
   try {
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Save submitted data for success page, then clear registration flow
+    const data = JSON.parse(localStorage.getItem('driverRegistrationData') || '{}');
+
+    const payload = {
+      email: data.email,
+      country_code: data.countryCode,
+      phone: data.phone,
+      full_phone: data.fullPhone,
+      email_verified: data.emailVerified || false,
+      password: data.password,
+      first_name: data.firstName,
+      middle_name: data.middleName || '',
+      last_name: data.lastName,
+      country: data.country,
+      birthdate: data.birthdate,
+      birthplace: data.birthplace,
+      current_address: data.currentAddress,
+      license_number: data.licenseNumber,
+      license_type: data.licenseType,
+      restriction_code: data.restrictionCode,
+      expiry_date: data.expiryDate,
+      vehicle_type: data.vehicleType,
+      plate_number: data.plateNumber,
+      vehicle_model: data.vehicleModel,
+      vehicle_color: data.vehicleColor || '',
+      license_front_photo: data.license_front_photo || '',
+      vehicle_reg_photo: data.vehicle_reg_photo || '',
+      nbi_clearance_photo: data.nbi_clearance_photo || '',
+      birth_cert_photo: data.birth_cert_photo || '',
+      selfie_photo: data.selfiePhoto || '',
+    };
+
+    const res = await fetch(`${API_BASE}/api/driver/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await res.json();
+
+    if (!res.ok) {
+      throw new Error(result.message || 'Submission failed');
+    }
+
     const submittedData = localStorage.getItem('driverRegistrationData');
     if (submittedData) {
       localStorage.setItem('submittedRegistrationData', submittedData);
     }
     localStorage.removeItem('driverRegistrationData');
-    
+
     await showSuccessModal('Application submitted successfully!\nWe\'ll review it within 24-48 hours.');
-    
-    setTimeout(() => router.push('/register/success'), 2000);
+
+    router.push('/register/success');
   } catch (error) {
     const alert = await alertController.create({
       header: 'Error',
-      message: 'Something went wrong. Please try again.',
+      message: error.message || 'Something went wrong. Please try again.',
       buttons: ['OK']
     });
     await alert.present();
