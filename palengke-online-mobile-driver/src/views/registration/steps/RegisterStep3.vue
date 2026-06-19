@@ -150,7 +150,9 @@ import {
 
 const router = useRouter();
 
-const restrictionCodes = [
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+
+const restrictionCodes = ref([
   { code: 'A', label: 'Motorcycles/Tricycles (Automatic Clutch)' },
   { code: 'A1', label: 'Motorcycles/Tricycles (Manual Clutch)' },
   { code: 'B', label: 'Light Vehicles — Automatic Transmission' },
@@ -159,7 +161,21 @@ const restrictionCodes = [
   { code: 'C', label: 'Heavy Vehicles — Manual Transmission' },
   { code: 'D', label: 'Articulated Vehicles' },
   { code: 'BE', label: 'Vehicles with Trailer' },
-];
+]);
+
+async function fetchRestrictionCodes() {
+  try {
+    const res = await fetch(`${API_BASE}/api/restriction-codes`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.restriction_codes?.length) {
+        restrictionCodes.value = data.restriction_codes;
+      }
+    }
+  } catch {
+    // fallback to hardcoded
+  }
+}
 
 const formData = ref({
   licenseNumber: '',
@@ -181,6 +197,7 @@ const minDate = computed(() => {
 });
 
 onMounted(() => {
+  fetchRestrictionCodes();
   const savedData = localStorage.getItem('driverRegistrationData');
   if (savedData) {
     const data = JSON.parse(savedData);

@@ -32,6 +32,7 @@ use App\Http\Controllers\Api\AdminSubscriptionPaymentController;
 use App\Http\Controllers\Api\AdminWalletController;
 use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\AdminSubscriptionController;
+use App\Http\Controllers\Api\RestrictionCodeController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -153,6 +154,9 @@ Route::get('/contact-supports', [ContactSupportController::class, 'index']);
 // Public endpoint for seller app to fetch enabled countries
 Route::get('/countries', [CountryController::class, 'index']);
 
+// Public endpoint for driver app to fetch enabled restriction codes
+Route::get('/restriction-codes', [RestrictionCodeController::class, 'index']);
+
 // Public endpoint for seller app to fetch enabled locations
 Route::get('/locations', [LocationController::class, 'index']);
 
@@ -219,6 +223,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/admin/sellers/{id}/subscription/change', [AdminSubscriptionController::class, 'changePlan']);
     Route::post('/admin/sellers/{id}/subscription/extend', [AdminSubscriptionController::class, 'extend']);
     Route::post('/admin/sellers/{id}/subscription/cancel', [AdminSubscriptionController::class, 'cancel']);
+
+    Route::get('/admin/restriction-codes', [RestrictionCodeController::class, 'adminIndex']);
+    Route::post('/admin/restriction-codes/{id}/toggle', [RestrictionCodeController::class, 'toggle']);
 });
 
 // Public — fetch active notices for seller / customer / driver apps

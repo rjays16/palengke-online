@@ -27,6 +27,7 @@ const items: NavItem[] = [
   { to: "/settings/payments", label: "Payments" },
   { to: "/settings/locations", label: "Locations", exact: true },
   { to: "/settings/countries", label: "Countries" },
+  { to: "/settings/restriction-codes", label: "Restriction Codes" },
   { to: "/settings/contact-support", label: "Contact Support" },
 ];
 </script>

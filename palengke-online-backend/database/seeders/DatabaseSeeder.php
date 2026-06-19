@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             SystemSettingSeeder::class,
             OrderSeeder::class,
             PaymentMethodSeeder::class,
+            RestrictionCodeSeeder::class,
         ]);
     }
 }
