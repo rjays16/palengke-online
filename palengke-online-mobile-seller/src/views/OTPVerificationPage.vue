@@ -116,6 +116,7 @@ const otpRefs = ref([]);
 const isVerifying = ref(false);
 const countdown = ref(60);
 let countdownInterval = null;
+let isMounted = true;
 
 // Computed
 const isCodeComplete = computed(() => {
@@ -188,6 +189,7 @@ const startCountdown = (autoResend = false) => {
 };
 
 const resendCode = async () => {
+  if (!isMounted) return;
   isVerifying.value = true;
   try {
     const res = await fetch(`${API_BASE}/send-otp`, {
@@ -243,6 +245,8 @@ const verifyCode = async () => {
     if (!response.ok) {
       throw new Error(data.message || 'Invalid code.');
     }
+
+    if (countdownInterval) clearInterval(countdownInterval);
 
     localStorage.removeItem('pendingAuth');
 
@@ -338,6 +342,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  isMounted = false;
   if (countdownInterval) {
     clearInterval(countdownInterval);
   }

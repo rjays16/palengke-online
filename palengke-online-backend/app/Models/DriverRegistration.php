@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Sanctum\HasApiTokens;
 
 class DriverRegistration extends Model
 {
+    use HasApiTokens;
     protected $fillable = [
         'email', 'country_code', 'phone', 'full_phone', 'email_verified', 'password',
         'first_name', 'middle_name', 'last_name', 'country', 'birthdate', 'birthplace', 'current_address',
