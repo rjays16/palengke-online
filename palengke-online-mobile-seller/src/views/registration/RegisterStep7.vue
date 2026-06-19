@@ -170,6 +170,64 @@
         </div>
       </div>
     </ion-content>
+
+    <!-- Review Photos Modal -->
+    <ion-modal
+      :is-open="showReviewModal"
+      @did-dismiss="showReviewModal = false"
+      class="review-modal"
+    >
+      <ion-header>
+        <ion-toolbar color="success">
+          <ion-title>Review Your Photos</ion-title>
+          <ion-buttons slot="end">
+            <ion-button @click="showReviewModal = false">
+              <ion-icon :icon="closeOutline"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="modal-content">
+        <div class="review-container">
+          <div class="photo-card">
+            <h3>ID Front</h3>
+            <div class="photo-frame">
+              <img v-if="reviewPhotos.idFront" :src="reviewPhotos.idFront" alt="ID Front" />
+              <div v-else class="no-photo">
+                <ion-icon :icon="imageOutline"></ion-icon>
+                <span>No photo</span>
+              </div>
+            </div>
+          </div>
+          <div class="photo-card">
+            <h3>ID Back</h3>
+            <div class="photo-frame">
+              <img v-if="reviewPhotos.idBack" :src="reviewPhotos.idBack" alt="ID Back" />
+              <div v-else class="no-photo">
+                <ion-icon :icon="imageOutline"></ion-icon>
+                <span>No photo</span>
+              </div>
+            </div>
+          </div>
+          <div class="photo-card">
+            <h3>Selfie with ID</h3>
+            <div class="photo-frame">
+              <img v-if="reviewPhotos.selfie" :src="reviewPhotos.selfie" alt="Selfie" />
+              <div v-else class="no-photo">
+                <ion-icon :icon="imageOutline"></ion-icon>
+                <span>No photo</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <ion-button expand="block" class="close-review-btn" @click="showReviewModal = false">
+            <ion-icon slot="start" :icon="checkmarkCircleOutline"></ion-icon>
+            Done Reviewing
+          </ion-button>
+        </div>
+      </ion-content>
+    </ion-modal>
   </ion-page>
 </template>
 
@@ -184,6 +242,11 @@ import {
   IonContent,
   IonButton,
   IonIcon,
+  IonModal,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonButtons,
   toastController,
   alertController,
   loadingController,
@@ -199,6 +262,7 @@ import {
   informationCircleOutline,
   bulbOutline,
   cloudUploadOutline,
+  imageOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -212,6 +276,10 @@ const canvasRef = ref(null);
 const selfiePhoto = ref(null);
 const showCamera = ref(false);
 const cameraStream = ref(null);
+
+// Review Photos Modal
+const showReviewModal = ref(false);
+const reviewPhotos = ref({ idFront: null, idBack: null, selfie: null });
 
 // Load data
 onMounted(() => {
@@ -410,7 +478,18 @@ const handleSubmit = async () => {
     buttons: [
       {
         text: 'Review Photos',
-        role: 'cancel',
+        handler: () => {
+          const savedData = localStorage.getItem('registrationData');
+          if (savedData) {
+            const data = JSON.parse(savedData);
+            reviewPhotos.value = {
+              idFront: data.idFrontPhoto || null,
+              idBack: data.idBackPhoto || null,
+              selfie: selfiePhoto.value,
+            };
+          }
+          showReviewModal.value = true;
+        },
       },
       {
         text: 'Submit',

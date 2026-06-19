@@ -38,11 +38,12 @@
                 class="custom-input with-icon"
                 :disabled="isEmailVerified"
                 @input="onEmailInput"
-                @blur="validateField('email')"
+                @blur="onEmailBlur"
               />
               <ion-icon v-if="isEmailVerified" :icon="checkmarkCircleOutline" class="verified-icon"></ion-icon>
             </div>
             <span v-if="errors.email" class="error-message">{{ errors.email }}</span>
+            <span v-else-if="emailExistsError" class="error-message">{{ emailExistsError }}</span>
             <span v-else-if="isEmailVerified" class="verified-text">Email verified</span>
             <span v-else class="helper-text">We'll send verification to this email</span>
           </div>
@@ -500,6 +501,9 @@ const resendTimer = ref(0);
 const isSendingOtp = ref(false);
 const isVerifyingOtp = ref(false);
 
+const emailExistsError = ref('');
+const isCheckingEmail = ref(false);
+
 // Errors
 const errors = ref({
   email: '',
@@ -570,6 +574,7 @@ const isFormValid = computed(() => {
   return (
     isEmailValid.value &&
     isEmailVerified.value &&
+    !emailExistsError.value &&
     isPhoneValid.value &&
     phone.value.length === currentCountry.value.digits &&
     isPasswordValid.value &&
@@ -580,6 +585,51 @@ const isFormValid = computed(() => {
 // Email input handler
 const onEmailInput = () => {
   errors.value.email = '';
+  emailExistsError.value = '';
+};
+
+// Check if email already exists in the system
+const checkEmailExists = async () => {
+  if (!isEmailValid.value || isEmailVerified.value) {
+    emailExistsError.value = '';
+    return;
+  }
+
+  isCheckingEmail.value = true;
+  emailExistsError.value = '';
+
+  try {
+    const response = await fetch(`${API_BASE}/api/driver/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.value }),
+    });
+
+    if (response.status === 404) {
+      emailExistsError.value = '';
+    } else if (response.status === 200) {
+      emailExistsError.value = 'This email is already registered.';
+    } else {
+      const data = await response.json();
+      if (data.status === 'rejected') {
+        emailExistsError.value = '';
+      } else {
+        emailExistsError.value = 'This email is already registered.';
+      }
+    }
+  } catch {
+    emailExistsError.value = '';
+  } finally {
+    isCheckingEmail.value = false;
+  }
+};
+
+// Email blur handler
+const onEmailBlur = () => {
+  validateField('email');
+  if (isEmailValid.value && !isEmailVerified.value) {
+    checkEmailExists();
+  }
 };
 
 // Phone input handler
