@@ -181,6 +181,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { compressImage, readFileAsDataURL as readFileAsBase64 } from '@/utils/imageCompression';
 import {
   IonPage,
   IonContent,
@@ -247,15 +248,6 @@ const isFormValid = computed(() => {
          uploadedDocs.value.birthCert;
 });
 
-function readFileAsBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
 async function uploadPhoto(backendField, base64) {
   const res = await fetch(`${API_BASE}/api/driver/upload-photo`, {
     method: 'POST',
@@ -288,8 +280,9 @@ const onFileUpload = async (docType, event) => {
   uploadErrors.value[docType] = '';
 
   try {
-    const base64 = await readFileAsBase64(file);
-    const data = await uploadPhoto(docTypes[docType], base64);
+    const raw = await readFileAsBase64(file);
+    const compressed = await compressImage(raw);
+    const data = await uploadPhoto(docTypes[docType], compressed);
 
     uploadedDocs.value[docType] = true;
     uploadStates.value[docType] = 'done';

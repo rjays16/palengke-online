@@ -176,6 +176,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { Capacitor } from '@capacitor/core';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { compressImage } from '@/utils/imageCompression';
 import { IonPage, IonContent, IonButton, IonIcon, toastController, alertController } from '@ionic/vue';
 import {
   arrowBackOutline,
@@ -249,7 +250,7 @@ const openCamera = async () => {
         source: CameraSource.Camera,
         quality: 90,
       });
-      setPhoto(photo.dataUrl);
+      await setPhoto(photo.dataUrl);
     } catch (error) {
       if (error.message !== 'User cancelled photos app') {
         showToast('Failed to capture photo.', 'warning');
@@ -269,7 +270,7 @@ const openUpload = async () => {
         source: CameraSource.Photos,
         quality: 90,
       });
-      setPhoto(photo.dataUrl);
+      await setPhoto(photo.dataUrl);
     } catch (error) {
       if (error.message !== 'User cancelled photos app') {
         showToast('Failed to load photo.', 'warning');
@@ -310,7 +311,7 @@ const stopCamera = () => {
 };
 
 // Capture photo from video
-const capturePhoto = () => {
+const capturePhoto = async () => {
   const video = videoRef.value;
   const canvas = canvasRef.value;
   if (!video || !canvas) return;
@@ -320,16 +321,22 @@ const capturePhoto = () => {
   const ctx = canvas.getContext('2d');
   ctx.drawImage(video, 0, 0);
 
-  const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-  const approxBytes = dataUrl.length * 0.75;
+  const raw = canvas.toDataURL('image/jpeg', 0.9);
+  const approxBytes = raw.length * 0.75;
   if (approxBytes > 5 * 1024 * 1024) {
     showToast('Photo is too large. Please use a photo under 5MB.', 'warning');
     return;
   }
+  let compressed;
+  try {
+    compressed = await compressImage(raw);
+  } catch {
+    compressed = raw;
+  }
   if (currentPhotoStep.value === 'front') {
-    frontPhoto.value = dataUrl;
+    frontPhoto.value = compressed;
   } else {
-    backPhoto.value = dataUrl;
+    backPhoto.value = compressed;
   }
   stopCamera();
 };
@@ -340,7 +347,7 @@ const cancelCamera = () => {
 };
 
 // Fallback file handler for web browser
-const handleFileInput = (event) => {
+const handleFileInput = async (event) => {
   const file = event.target.files[0];
   if (!file) return;
   if (file.size > 5 * 1024 * 1024) {
@@ -348,11 +355,18 @@ const handleFileInput = (event) => {
     return;
   }
   const reader = new FileReader();
-  reader.onload = (e) => {
+  reader.onload = async (e) => {
+    const raw = e.target.result;
+    let compressed;
+    try {
+      compressed = await compressImage(raw);
+    } catch {
+      compressed = raw;
+    }
     if (currentPhotoStep.value === 'front') {
-      frontPhoto.value = e.target.result;
+      frontPhoto.value = compressed;
     } else {
-      backPhoto.value = e.target.result;
+      backPhoto.value = compressed;
     }
   };
   reader.readAsDataURL(file);
@@ -360,16 +374,22 @@ const handleFileInput = (event) => {
 };
 
 // Set photo for current step
-const setPhoto = (dataUrl) => {
+const setPhoto = async (dataUrl) => {
   const approxBytes = dataUrl.length * 0.75;
   if (approxBytes > 5 * 1024 * 1024) {
     showToast('Photo is too large. Please use a photo under 5MB.', 'warning');
     return;
   }
+  let compressed;
+  try {
+    compressed = await compressImage(dataUrl);
+  } catch {
+    compressed = dataUrl;
+  }
   if (currentPhotoStep.value === 'front') {
-    frontPhoto.value = dataUrl;
+    frontPhoto.value = compressed;
   } else {
-    backPhoto.value = dataUrl;
+    backPhoto.value = compressed;
   }
 };
 

@@ -157,6 +157,7 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { Capacitor } from '@capacitor/core';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { compressImage } from '@/utils/imageCompression';
 import { IonPage, IonContent, IonButton, IonIcon, IonSpinner, toastController } from '@ionic/vue';
 import {
   arrowBackOutline,
@@ -211,7 +212,7 @@ const openCamera = async () => {
         source: CameraSource.Camera,
         quality: 90,
       });
-      setPhoto(photo.dataUrl);
+      await setPhoto(photo.dataUrl);
     } catch (error) {
       if (error.message !== 'User cancelled photos app') {
         showToast('Failed to capture photo.', 'warning');
@@ -249,7 +250,7 @@ const stopCamera = () => {
   showCamera.value = false;
 };
 
-const capturePhoto = () => {
+const capturePhoto = async () => {
   const video = videoRef.value;
   const canvas = canvasRef.value;
   if (!video || !canvas) return;
@@ -259,13 +260,17 @@ const capturePhoto = () => {
   const ctx = canvas.getContext('2d');
   ctx.drawImage(video, 0, 0);
 
-  const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-  const approxBytes = dataUrl.length * 0.75;
+  const raw = canvas.toDataURL('image/jpeg', 0.9);
+  const approxBytes = raw.length * 0.75;
   if (approxBytes > 5 * 1024 * 1024) {
     showToast('Photo is too large. Please use a photo under 5MB.', 'warning');
     return;
   }
-  selfiePhoto.value = dataUrl;
+  try {
+    selfiePhoto.value = await compressImage(raw);
+  } catch {
+    selfiePhoto.value = raw;
+  }
   stopCamera();
 };
 
@@ -273,7 +278,7 @@ const cancelCamera = () => {
   stopCamera();
 };
 
-const handleFileInput = (event) => {
+const handleFileInput = async (event) => {
   const file = event.target.files[0];
   if (!file) return;
   if (file.size > 5 * 1024 * 1024) {
@@ -281,20 +286,29 @@ const handleFileInput = (event) => {
     return;
   }
   const reader = new FileReader();
-  reader.onload = (e) => {
-    selfiePhoto.value = e.target.result;
+  reader.onload = async (e) => {
+    const raw = e.target.result;
+    try {
+      selfiePhoto.value = await compressImage(raw);
+    } catch {
+      selfiePhoto.value = raw;
+    }
   };
   reader.readAsDataURL(file);
   event.target.value = '';
 };
 
-const setPhoto = (dataUrl) => {
+const setPhoto = async (dataUrl) => {
   const approxBytes = dataUrl.length * 0.75;
   if (approxBytes > 5 * 1024 * 1024) {
     showToast('Photo is too large. Please use a photo under 5MB.', 'warning');
     return;
   }
-  selfiePhoto.value = dataUrl;
+  try {
+    selfiePhoto.value = await compressImage(dataUrl);
+  } catch {
+    selfiePhoto.value = dataUrl;
+  }
 };
 
 const retakePhoto = () => {
