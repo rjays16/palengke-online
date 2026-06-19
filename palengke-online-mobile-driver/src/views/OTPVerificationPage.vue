@@ -148,13 +148,14 @@ const handlePaste = (event) => {
   otpRefs.value[nextEmpty]?.focus();
 };
 
-const startCountdown = () => {
+const startCountdown = (autoResend = false) => {
   countdown.value = 60;
   countdownInterval = setInterval(() => {
     if (countdown.value > 0) {
       countdown.value--;
     } else {
       clearInterval(countdownInterval);
+      if (autoResend) resendCode();
     }
   }, 1000);
 };
@@ -183,7 +184,7 @@ const resendCode = async () => {
 
     otpDigits.value = ['', '', '', '', '', ''];
     otpRefs.value[0]?.focus();
-    startCountdown();
+    startCountdown(true);
   } catch (e) {
     const toast = await toastController.create({
       message: e.message || 'Failed to resend code',
@@ -253,7 +254,7 @@ const verifyCode = async () => {
       buttons: ['OK'],
     });
     await alert.present();
-    otpDigits.value = ['', '', '', '', ''];
+    otpDigits.value = ['', '', '', '', '', ''];
     otpRefs.value[0]?.focus();
   } finally {
     isVerifying.value = false;
@@ -264,7 +265,7 @@ onMounted(() => {
   setTimeout(() => {
     otpRefs.value[0]?.focus();
   }, 300);
-  startCountdown();
+  startCountdown(true);
 });
 
 onUnmounted(() => {
