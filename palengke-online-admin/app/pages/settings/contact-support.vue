@@ -2,13 +2,20 @@
   <div class="page-shell">
     <SettingsSubnav />
 
+    <div v-if="isSeller" class="role-banner seller-banner">
+      <span class="role-banner-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span> Seller Contact Support
+    </div>
+    <div v-if="isDriver" class="role-banner driver-banner">
+      <span class="role-banner-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="16" r="3"/><circle cx="18" cy="16" r="3"/><path d="M9 16h9"/><path d="M4 9h5l2 4"/><path d="M18 5l-3 2v9"/><rect x="13" y="6" width="5" height="4" rx="1"/></svg></span> Driver Contact Support
+    </div>
+
     <div class="settings-grid">
       <div class="settings-section">
         <div class="section-header">
           <div>
             <h3>Contact Support</h3>
             <p class="section-desc">
-              Enable or disable contact support options. Only enabled options will appear in the seller app's Help & Support page.
+              Enable or disable contact support options. Only enabled options will appear in the driver and seller app Help & Support pages.
             </p>
           </div>
           <div class="bulk-actions">
@@ -78,6 +85,7 @@ definePageMeta({
 });
 
 const auth = useAuthStore();
+const { isDriver, isSeller } = useSettingsRole();
 auth.restore();
 onMounted(() => {
   if (auth.user?.role !== "superadmin") {
@@ -198,6 +206,36 @@ onMounted(() => {
   flex-direction: column;
   gap: 24px;
   max-width: 900px;
+}
+.role-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.role-banner-icon {
+  display: inline-flex;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.role-banner-icon svg {
+  width: 100%;
+  height: 100%;
+}
+.seller-banner {
+  background: #f0fdf4;
+  color: #059669;
+  border: 1px solid #bbf7d0;
+}
+.driver-banner {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
 }
 .settings-grid {
   display: flex;

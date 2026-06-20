@@ -2,6 +2,10 @@
   <div class="page-shell">
     <SettingsSubnav />
 
+    <div class="role-banner driver-banner">
+      <span class="role-banner-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="16" r="3"/><circle cx="18" cy="16" r="3"/><path d="M9 16h9"/><path d="M4 9h5l2 4"/><path d="M18 5l-3 2v9"/><rect x="13" y="6" width="5" height="4" rx="1"/></svg></span> Driver Restriction Codes
+    </div>
+
     <div class="settings-grid">
       <div class="settings-section">
         <div class="section-header">
@@ -144,6 +148,31 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+.role-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.role-banner-icon {
+  display: inline-flex;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.role-banner-icon svg {
+  width: 100%;
+  height: 100%;
+}
+.driver-banner {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
 }
 .settings-section {
   background: #fff;

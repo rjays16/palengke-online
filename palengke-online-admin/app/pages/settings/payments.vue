@@ -2,6 +2,10 @@
   <div class="page-shell">
     <SettingsSubnav />
 
+    <div class="role-banner seller-banner">
+      <span class="role-banner-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span> Seller Payment Settings
+    </div>
+
     <div class="settings-section">
       <h3>Seller Payment Information</h3>
       <p class="settings-desc">
@@ -257,6 +261,31 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+.role-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.role-banner-icon {
+  display: inline-flex;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.role-banner-icon svg {
+  width: 100%;
+  height: 100%;
+}
+.seller-banner {
+  background: #f0fdf4;
+  color: #059669;
+  border: 1px solid #bbf7d0;
 }
 .settings-subnav {
   display: flex;

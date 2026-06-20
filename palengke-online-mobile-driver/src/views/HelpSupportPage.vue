@@ -31,34 +31,23 @@
         <!-- Contact Support Cards -->
         <div class="contact-section">
           <h3 class="section-title">Contact Support</h3>
-          <div class="contact-grid">
-            <div class="contact-card" @click="chatSupport">
-              <div class="contact-icon blue">
-                <ion-icon :icon="chatbubbleOutline"></ion-icon>
+
+          <div v-if="loadingContacts" class="loading-state">Loading support options...</div>
+          <div v-else class="contact-cards">
+            <div
+              v-for="contact in contactSupports"
+              :key="contact.key"
+              class="contact-card"
+              @click="handleContactAction(contact)"
+            >
+              <div class="contact-icon" :class="getIconClass(contact.type)">
+                <ion-icon :icon="getIconForType(contact.type)"></ion-icon>
               </div>
-              <span>Live Chat</span>
-              <span class="contact-status online">Online</span>
-            </div>
-            <div class="contact-card" @click="callSupport">
-              <div class="contact-icon green">
-                <ion-icon :icon="callOutline"></ion-icon>
+              <div class="contact-content">
+                <h3>{{ contact.title }}</h3>
+                <p>{{ contact.subtitle }}</p>
               </div>
-              <span>Call Us</span>
-              <span class="contact-status">24/7</span>
-            </div>
-            <div class="contact-card" @click="emailSupport">
-              <div class="contact-icon orange">
-                <ion-icon :icon="mailOutline"></ion-icon>
-              </div>
-              <span>Email</span>
-              <span class="contact-status">Reply in 24h</span>
-            </div>
-            <div class="contact-card" @click="reportProblem">
-              <div class="contact-icon red">
-                <ion-icon :icon="warningOutline"></ion-icon>
-              </div>
-              <span>Report</span>
-              <span class="contact-status">Issue</span>
+              <ion-icon :icon="chevronForwardOutline" class="arrow"></ion-icon>
             </div>
           </div>
         </div>
@@ -141,7 +130,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
@@ -154,7 +143,8 @@ import {
   chevronUpOutline, chevronDownOutline, chevronForwardOutline,
   documentTextOutline, shieldCheckmarkOutline, alertCircleOutline,
   starOutline, cashOutline, bicycleOutline, personOutline,
-  cubeOutline, helpCircleOutline
+  cubeOutline, helpCircleOutline, chatbubbleEllipsesOutline,
+  logoFacebook
 } from 'ionicons/icons';
 import { mockTopics, mockFaqs } from '@/mock/help';
 
@@ -163,6 +153,8 @@ const router = useRouter();
 const searchQuery = ref('');
 const selectedTopic = ref('all');
 const openFaqs = ref([]);
+const contactSupports = ref([]);
+const loadingContacts = ref(true);
 
 const topics = ref(mockTopics);
 const faqs = ref(mockFaqs);
@@ -197,100 +189,110 @@ const filterByTopic = (topicId) => {
 
 const onSearch = () => { selectedTopic.value = 'all'; };
 
-const chatSupport = async () => {
+// Contact Support - API driven
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+
+async function fetchContactSupports() {
+  try {
+    const response = await fetch(`${API_BASE}/api/contact-supports`);
+    const data = await response.json();
+    contactSupports.value = data.contacts || [];
+    if (contactSupports.value.length === 0) {
+      contactSupports.value = getDefaultContacts();
+    }
+  } catch {
+    contactSupports.value = getDefaultContacts();
+  } finally {
+    loadingContacts.value = false;
+  }
+}
+
+function getDefaultContacts() {
+  return [
+    {
+      key: 'live_chat',
+      title: 'Live Chat',
+      subtitle: 'Chat with our support team',
+      type: 'chat',
+      value: null,
+      enabled: true,
+    },
+    {
+      key: 'call',
+      title: 'Call Us',
+      subtitle: '+63 912 345 6789',
+      type: 'phone',
+      value: '+639123456789',
+      enabled: true,
+    },
+    {
+      key: 'email',
+      title: 'Email Support',
+      subtitle: 'support@palengke-online.com',
+      type: 'email',
+      value: 'support@palengke-online.com',
+      enabled: true,
+    },
+    {
+      key: 'facebook',
+      title: 'Facebook',
+      subtitle: 'Message us on Facebook',
+      type: 'facebook',
+      value: 'https://facebook.com/PalengkeOnlinePH',
+      enabled: true,
+    },
+  ];
+}
+
+function getIconForType(type) {
+  const icons = {
+    chat: chatbubbleEllipsesOutline,
+    phone: callOutline,
+    email: mailOutline,
+    facebook: logoFacebook,
+  };
+  return icons[type] || chatbubbleEllipsesOutline;
+}
+
+function getIconClass(type) {
+  const classes = {
+    chat: 'chat',
+    phone: 'phone',
+    email: 'email',
+    facebook: 'facebook',
+  };
+  return classes[type] || 'chat';
+}
+
+function handleContactAction(contact) {
+  switch (contact.type) {
+    case 'chat':
+      showLoadingModal('Opening live chat...');
+      break;
+    case 'phone':
+      if (contact.value) window.location.href = `tel:${contact.value}`;
+      break;
+    case 'email':
+      if (contact.value) window.location.href = `mailto:${contact.value}`;
+      break;
+    case 'facebook':
+      if (contact.value) window.open(contact.value, '_blank');
+      break;
+    default:
+      break;
+  }
+}
+
+const showLoadingModal = async (message) => {
   const toast = await toastController.create({
-    message: 'Connecting to live chat...', duration: 2000, color: 'medium', position: 'top'
+    message, duration: 2000, color: 'medium', position: 'top'
   });
   await toast.present();
 };
 
-const callSupport = async () => {
-  const alert = await alertController.create({
-    header: 'Call Support',
-    message: 'Palengke Online Driver Support\n1800-PALENGKE\nAvailable 24/7',
-    buttons: [
-      { text: 'Cancel', role: 'cancel' },
-      { text: 'Call Now', handler: () => { window.location.href = 'tel:1800-PALENGKE'; } }
-    ]
-  });
-  await alert.present();
-};
-
-const emailSupport = async () => {
-  const alert = await alertController.create({
-    header: 'Email Support',
-    message: 'Send us an email at:\nsupport@palengkeonline.com\n\nWe reply within 24 hours.',
-    buttons: [
-      { text: 'Cancel', role: 'cancel' },
-      { text: 'Send Email', handler: () => { window.location.href = 'mailto:support@palengkeonline.com'; } }
-    ]
-  });
-  await alert.present();
-};
-
-const reportProblem = async () => {
-  const alert = await alertController.create({
-    header: 'Report a Problem',
-    inputs: [
-      { name: 'issue', type: 'textarea', placeholder: 'Describe your problem...' }
-    ],
-    buttons: [
-      { text: 'Cancel', role: 'cancel' },
-      { text: 'Submit', handler: async (data) => {
-        if (data.issue) {
-          await showSuccessModal('Report submitted!\nWe\'ll get back to you within 24 hours.');
-        }
-      }}
-    ]
-  });
-  await alert.present();
-};
-
-const showSuccessModal = async (message) => {
-  const alert = await alertController.create({
-    cssClass: 'success-modal',
-    header: ' ',
-    message: message,
-    buttons: ['OK']
-  });
-  
-  await alert.present();
-  
-  setTimeout(() => {
-    const alertElement = document.querySelector('.success-modal .alert-message');
-    if (alertElement) {
-      const textContent = alertElement.textContent;
-      alertElement.innerHTML = '';
-      
-      const wrapper = document.createElement('div');
-      wrapper.style.display = 'flex';
-      wrapper.style.flexDirection = 'column';
-      wrapper.style.alignItems = 'center';
-      wrapper.style.textAlign = 'center';
-      
-      const img = document.createElement('img');
-      img.src = '/assets/images/checkmark_success.png';
-      img.style.width = '80px';
-      img.style.height = '80px';
-      img.style.margin = '0 auto 16px auto';
-      img.style.display = 'block';
-      
-      const textDiv = document.createElement('div');
-      textDiv.textContent = textContent;
-      textDiv.style.fontSize = '18px';
-      textDiv.style.fontWeight = '600';
-      textDiv.style.color = '#1a1a1a';
-      textDiv.style.textAlign = 'center';
-      textDiv.style.whiteSpace = 'pre-line';
-      
-      wrapper.appendChild(img);
-      wrapper.appendChild(textDiv);
-      alertElement.appendChild(wrapper);
-    }
-  }, 50);
-  
-  await alert.onDidDismiss();
-};
+onMounted(() => {
+  fetchContactSupports();
+});
 
 const openLink = async (type) => {
   const titles = { terms: 'Terms & Conditions', privacy: 'Privacy Policy', safety: 'Safety Guidelines' };
@@ -330,26 +332,33 @@ const rateApp = async () => {
 
 .section-title { font-size: 16px; font-weight: 700; color: #1a1a1a; margin: 0 0 16px 0; }
 
-/* Contact Grid */
+/* Contact Section */
 .contact-section { margin-bottom: 20px; }
-.contact-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.contact-cards { display: flex; flex-direction: column; gap: 10px; }
 
 .contact-card {
-  background: white; border-radius: 16px; padding: 16px 8px;
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  background: white; border-radius: 14px; padding: 14px 16px;
+  display: flex; align-items: center; gap: 14px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; transition: transform 0.2s;
 }
-.contact-card:active { transform: scale(0.95); }
+.contact-card:active { transform: scale(0.97); }
 
-.contact-icon { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 26px; }
-.contact-icon.blue { background: #E3F2FD; color: #2196F3; }
-.contact-icon.green { background: #E8F5E9; color: #4CAF50; }
-.contact-icon.orange { background: #FFF3E0; color: #FF9800; }
-.contact-icon.red { background: #FFEBEE; color: #f44336; }
+.contact-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.contact-icon.chat { background: #E3F2FD; color: #2196F3; }
+.contact-icon.phone { background: #E8F5E9; color: #4CAF50; }
+.contact-icon.email { background: #FFF3E0; color: #FF9800; }
+.contact-icon.facebook { background: #E7F3FF; color: #1877F2; }
 
-.contact-card span:nth-child(2) { font-size: 13px; font-weight: 700; color: #1a1a1a; }
-.contact-status { font-size: 11px; color: #999; }
-.contact-status.online { color: #4CAF50; font-weight: 600; }
+.contact-content { flex: 1; min-width: 0; }
+.contact-content h3 { font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 0 0 2px 0; }
+.contact-content p { font-size: 12px; color: #888; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.contact-card .arrow { font-size: 18px; color: #ccc; flex-shrink: 0; }
+
+.loading-state { text-align: center; padding: 20px; color: #999; font-size: 14px; }
 
 /* Topics */
 .topics-section { margin-bottom: 20px; }
