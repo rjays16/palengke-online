@@ -56,10 +56,11 @@
         <div class="topics-section">
           <h3 class="section-title">Quick Topics</h3>
           <div class="topics-grid">
-            <div class="topic-chip" v-for="topic in topics" :key="topic.id"
-              :class="{ active: selectedTopic === topic.id }"
-              @click="filterByTopic(topic.id)">
-              <ion-icon :icon="topic.icon"></ion-icon>
+            <div v-if="loadingTopics" class="loading-state">Loading topics...</div>
+            <div class="topic-chip" v-for="topic in topics" :key="topic.key"
+              :class="{ active: selectedTopic === topic.key }"
+              @click="filterByTopic(topic.key)">
+              <ion-icon :icon="getTopicIcon(topic.icon)"></ion-icon>
               <span>{{ topic.name }}</span>
             </div>
           </div>
@@ -68,7 +69,7 @@
         <!-- FAQ Section -->
         <div class="faq-section">
           <h3 class="section-title">
-            {{ selectedTopic === 'all' ? 'Frequently Asked Questions' : topics.find(t => t.id === selectedTopic)?.name }}
+            {{ selectedTopic === 'all' ? 'Frequently Asked Questions' : topics.find(t => t.key === selectedTopic)?.name }}
           </h3>
 
           <div v-if="filteredFaqs.length === 0" class="no-results">
@@ -144,9 +145,9 @@ import {
   documentTextOutline, shieldCheckmarkOutline, alertCircleOutline,
   starOutline, cashOutline, bicycleOutline, personOutline,
   cubeOutline, helpCircleOutline, chatbubbleEllipsesOutline,
-  logoFacebook
+  logoFacebook, rocketOutline, storefrontOutline, alertCircle,
 } from 'ionicons/icons';
-import { mockTopics, mockFaqs } from '@/mock/help';
+import { mockFaqs } from '@/mock/help';
 
 const router = useRouter();
 
@@ -156,8 +157,9 @@ const openFaqs = ref([]);
 const contactSupports = ref([]);
 const loadingContacts = ref(true);
 
-const topics = ref(mockTopics);
+const topics = ref([]);
 const faqs = ref(mockFaqs);
+const loadingTopics = ref(true);
 
 const filteredFaqs = computed(() => {
   let list = faqs.value;
@@ -283,6 +285,32 @@ function handleContactAction(contact) {
   }
 }
 
+function getTopicIcon(iconName) {
+  const icons = {
+    'help-circle': helpCircleOutline,
+    'cash': cashOutline,
+    'cube': cubeOutline,
+    'person': personOutline,
+    'bicycle': bicycleOutline,
+    'rocket': rocketOutline,
+    'storefront': storefrontOutline,
+    'warning': alertCircle,
+  };
+  return icons[iconName] || helpCircleOutline;
+}
+
+async function fetchHelpTopics() {
+  try {
+    const response = await fetch(`${API_BASE}/api/help-topics?role=driver`);
+    const data = await response.json();
+    topics.value = data.topics || [];
+  } catch {
+    topics.value = [];
+  } finally {
+    loadingTopics.value = false;
+  }
+}
+
 const showLoadingModal = async (message) => {
   const toast = await toastController.create({
     message, duration: 2000, color: 'medium', position: 'top'
@@ -292,6 +320,7 @@ const showLoadingModal = async (message) => {
 
 onMounted(() => {
   fetchContactSupports();
+  fetchHelpTopics();
 });
 
 const openLink = async (type) => {

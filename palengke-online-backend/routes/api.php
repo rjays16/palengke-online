@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\SellerRegistrationController;
 use App\Http\Controllers\Api\AdminNotificationController;
 use App\Http\Controllers\Api\SellerDeviceController;
 use App\Http\Controllers\Api\ContactSupportController;
+use App\Http\Controllers\Api\HelpTopicController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\FeedbackController;
 use App\Http\Controllers\Api\SellerPaymentMethodController;
@@ -170,6 +171,9 @@ Route::get('/contact-supports', [ContactSupportController::class, 'index']);
 // Public endpoint for seller app to fetch enabled countries
 Route::get('/countries', [CountryController::class, 'index']);
 
+// Public endpoint for driver/seller app to fetch enabled help topics
+Route::get('/help-topics', [HelpTopicController::class, 'index']);
+
 // Public endpoint for driver app to fetch enabled restriction codes
 Route::get('/restriction-codes', [RestrictionCodeController::class, 'index']);
 
@@ -217,6 +221,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/admin/contact-supports', [ContactSupportController::class, 'adminIndex']);
     Route::put('/admin/contact-supports', [ContactSupportController::class, 'update']);
+
+    Route::get('/admin/help-topics', [HelpTopicController::class, 'adminIndex']);
+    Route::put('/admin/help-topics', [HelpTopicController::class, 'update']);
 
     Route::get('/admin/reports', [ReportController::class, 'adminIndex']);
     Route::put('/admin/reports/{id}', [ReportController::class, 'updateStatus']);

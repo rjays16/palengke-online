@@ -67,6 +67,7 @@ const allItems: NavItem[] = [
   { to: "/settings/countries", label: "Countries", roles: ['all', 'driver', 'seller'] },
   { to: "/settings/restriction-codes", label: "Restriction Codes", roles: ['all', 'driver'] },
   { to: "/settings/contact-support", label: "Contact Support", roles: ['all', 'driver', 'seller'] },
+  { to: "/settings/help-topics", label: "Help Topics", roles: ['all', 'driver', 'seller'] },
 ];
 
 const filteredItems = computed(() =>
