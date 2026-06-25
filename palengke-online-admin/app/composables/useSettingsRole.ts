@@ -3,12 +3,11 @@ export function useSettingsRole() {
   const role = computed(() => {
     const r = route.query.role as string;
     if (r && ['driver', 'seller'].includes(r)) return r;
-    return 'all';
+    return 'driver';
   });
 
-  const isDriver = computed(() => role.value === 'driver' || role.value === 'all');
-  const isSeller = computed(() => role.value === 'seller' || role.value === 'all');
-  const isAll = computed(() => role.value === 'all');
+  const isDriver = computed(() => role.value === 'driver');
+  const isSeller = computed(() => role.value === 'seller');
 
-  return { role, isDriver, isSeller, isAll };
+  return { role, isDriver, isSeller };
 }

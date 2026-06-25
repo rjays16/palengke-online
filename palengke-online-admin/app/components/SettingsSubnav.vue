@@ -16,7 +16,7 @@
       <NuxtLink
         v-for="item in filteredItems"
         :key="item.to"
-        :to="item.to + (activeRole !== 'all' ? `?role=${activeRole}` : '')"
+        :to="item.to + `?role=${activeRole}`"
         class="subnav-item"
         active-class="active"
         :exact-active-class="item.exact ? 'active' : undefined"
@@ -38,14 +38,9 @@ interface NavItem {
 const route = useRoute();
 const router = useRouter();
 
-const activeRole = ref<string>('all');
+const activeRole = ref<string>('driver');
 
 const roles = [
-  {
-    key: 'all',
-    label: 'All',
-    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>',
-  },
   {
     key: 'driver',
     label: 'Driver',
@@ -59,15 +54,14 @@ const roles = [
 ];
 
 const allItems: NavItem[] = [
-  { to: "/settings", label: "General", exact: true, roles: ['all'] },
-  { to: "/settings/fees", label: "Delivery Fees", roles: ['all', 'driver', 'seller'] },
-  { to: "/settings/commissions", label: "Commissions", roles: ['all', 'seller', 'driver'] },
-  { to: "/settings/payments", label: "Payments", roles: ['all', 'seller'] },
-  { to: "/settings/locations", label: "Locations", exact: true, roles: ['all', 'driver', 'seller'] },
-  { to: "/settings/countries", label: "Countries", roles: ['all', 'driver', 'seller'] },
-  { to: "/settings/restriction-codes", label: "Restriction Codes", roles: ['all', 'driver'] },
-  { to: "/settings/contact-support", label: "Contact Support", roles: ['all', 'driver', 'seller'] },
-  { to: "/settings/help-topics", label: "Help Topics", roles: ['all', 'driver', 'seller'] },
+  { to: "/settings/fees", label: "Delivery Fees", roles: ['driver', 'seller'] },
+  { to: "/settings/commissions", label: "Commissions", roles: ['seller', 'driver'] },
+  { to: "/settings/payments", label: "Payments", roles: ['seller'] },
+  { to: "/settings/locations", label: "Locations", exact: true, roles: ['driver', 'seller'] },
+  { to: "/settings/countries", label: "Countries", roles: ['driver', 'seller'] },
+  { to: "/settings/restriction-codes", label: "Restriction Codes", roles: ['driver'] },
+  { to: "/settings/contact-support", label: "Contact Support", roles: ['driver', 'seller'] },
+  { to: "/settings/help-topics", label: "Help Topics", roles: ['driver', 'seller'] },
 ];
 
 const filteredItems = computed(() =>
@@ -76,13 +70,12 @@ const filteredItems = computed(() =>
 
 function setRole(role: string) {
   activeRole.value = role;
-  const query = role !== 'all' ? { role } : {};
-  router.replace({ query });
+  router.replace({ query: { role } });
 }
 
 onMounted(() => {
   const role = route.query.role as string;
-  if (role && ['all', 'driver', 'seller'].includes(role)) {
+  if (role && ['driver', 'seller'].includes(role)) {
     activeRole.value = role;
   }
 });

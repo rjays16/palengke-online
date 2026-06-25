@@ -2,13 +2,6 @@
   <div class="page-shell">
     <SettingsSubnav />
 
-    <div v-if="isDriver" class="role-banner driver-banner">
-      <span class="role-banner-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="16" r="3"/><circle cx="18" cy="16" r="3"/><path d="M9 16h9"/><path d="M4 9h5l2 4"/><path d="M18 5l-3 2v9"/><rect x="13" y="6" width="5" height="4" rx="1"/></svg></span> Driver Help Topics
-    </div>
-    <div v-if="isSeller" class="role-banner seller-banner">
-      <span class="role-banner-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span> Seller Help Topics
-    </div>
-
     <div class="settings-grid">
       <div class="settings-section">
         <div class="section-header">
@@ -26,25 +19,11 @@
 
         <div class="filter-tabs">
           <button
-            class="filter-tab"
-            :class="{ active: filterRole === 'all' }"
-            @click="filterRole = 'all'"
-          >All</button>
-          <button
-            class="filter-tab"
-            :class="{ active: filterRole === 'driver' }"
-            @click="filterRole = 'driver'"
+            class="filter-tab active"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><circle cx="6" cy="16" r="3"/><circle cx="18" cy="16" r="3"/><path d="M9 16h9"/><path d="M4 9h5l2 4"/><path d="M18 5l-3 2v9"/><rect x="13" y="6" width="5" height="4" rx="1"/></svg>
-            Driver
-          </button>
-          <button
-            class="filter-tab"
-            :class="{ active: filterRole === 'seller' }"
-            @click="filterRole = 'seller'"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            Seller
+            <svg v-if="isDriver" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><circle cx="6" cy="16" r="3"/><circle cx="18" cy="16" r="3"/><path d="M9 16h9"/><path d="M4 9h5l2 4"/><path d="M18 5l-3 2v9"/><rect x="13" y="6" width="5" height="4" rx="1"/></svg>
+            <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            {{ isDriver ? 'Driver' : 'Seller' }} Help Topics
           </button>
         </div>
 
@@ -130,15 +109,21 @@ function getToken() {
   return localStorage.getItem("palengke_auth_token");
 }
 
+const route = useRoute();
+
 const topics = ref<any[]>([]);
 const isLoading = ref(false);
 const success = ref(false);
 const error = ref("");
-const filterRole = ref("all");
+
+const currentRole = computed(() => {
+  const r = route.query.role as string;
+  if (r && ['driver', 'seller'].includes(r)) return r;
+  return 'driver';
+});
 
 const filteredTopics = computed(() => {
-  if (filterRole.value === "all") return topics.value;
-  return topics.value.filter((t) => t.role === filterRole.value);
+  return topics.value.filter((t) => t.role === currentRole.value);
 });
 
 const totalTopics = computed(() => filteredTopics.value.length);

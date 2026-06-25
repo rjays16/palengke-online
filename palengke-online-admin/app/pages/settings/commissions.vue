@@ -156,7 +156,7 @@
         </div>
       </div>
 
-      <div v-if="isAll" class="settings-section">
+      <div class="settings-section">
         <h3>Commission Breakdown Example</h3>
         <div class="example-box">
           <p class="example-intro">For a <strong>₱500</strong> order:</p>
@@ -193,7 +193,7 @@ definePageMeta({
 });
 
 const auth = useAuthStore();
-const { isDriver, isSeller, isAll } = useSettingsRole();
+const { isDriver, isSeller } = useSettingsRole();
 auth.restore();
 onMounted(() => {
   if (auth.user?.role !== "superadmin") {
