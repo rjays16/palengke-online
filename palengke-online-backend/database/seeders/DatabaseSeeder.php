@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             PaymentMethodSeeder::class,
             RestrictionCodeSeeder::class,
             HelpTopicSeeder::class,
+            FaqSeeder::class,
         ]);
     }
 }

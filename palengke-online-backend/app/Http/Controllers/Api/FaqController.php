@@ -15,6 +15,8 @@ class FaqController extends Controller
                 'id' => $f->id,
                 'question' => $f->question,
                 'answer' => $f->answer,
+                'role' => $f->role,
+                'topic' => $f->topic,
                 'active' => $f->active,
                 'sort_order' => $f->sort_order,
             ]),
@@ -26,6 +28,8 @@ class FaqController extends Controller
         $validated = $request->validate([
             'question' => 'required|string|max:255',
             'answer' => 'required|string',
+            'role' => 'nullable|string|in:driver,seller',
+            'topic' => 'nullable|string|max:50',
             'active' => 'boolean',
             'sort_order' => 'integer|min:0',
         ]);
@@ -38,6 +42,8 @@ class FaqController extends Controller
                 'id' => $faq->id,
                 'question' => $faq->question,
                 'answer' => $faq->answer,
+                'role' => $faq->role,
+                'topic' => $faq->topic,
                 'active' => $faq->active,
                 'sort_order' => $faq->sort_order,
             ],
@@ -51,6 +57,8 @@ class FaqController extends Controller
         $validated = $request->validate([
             'question' => 'required|string|max:255',
             'answer' => 'required|string',
+            'role' => 'nullable|string|in:driver,seller',
+            'topic' => 'nullable|string|max:50',
             'active' => 'boolean',
             'sort_order' => 'integer|min:0',
         ]);
@@ -63,6 +71,8 @@ class FaqController extends Controller
                 'id' => $faq->id,
                 'question' => $faq->question,
                 'answer' => $faq->answer,
+                'role' => $faq->role,
+                'topic' => $faq->topic,
                 'active' => $faq->active,
                 'sort_order' => $faq->sort_order,
             ],
@@ -76,17 +86,23 @@ class FaqController extends Controller
         return response()->json(['message' => 'FAQ deleted.']);
     }
 
-    public function active()
+    public function active(Request $request)
     {
-        $faqs = Faq::where('active', true)
-            ->orderBy('sort_order')
-            ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(fn($f) => [
-                'id' => $f->id,
-                'question' => $f->question,
-                'answer' => $f->answer,
-            ]);
+        $query = Faq::where('active', true);
+
+        $role = $request->query('role');
+        if ($role && in_array($role, ['driver', 'seller'])) {
+            $query->where(function ($q) use ($role) {
+                $q->where('role', $role)->orWhereNull('role');
+            });
+        }
+
+        $faqs = $query->orderBy('sort_order')->orderBy('created_at', 'desc')->get()->map(fn($f) => [
+            'id' => $f->id,
+            'question' => $f->question,
+            'answer' => $f->answer,
+            'topic' => $f->topic,
+        ]);
 
         return response()->json(['faqs' => $faqs]);
     }

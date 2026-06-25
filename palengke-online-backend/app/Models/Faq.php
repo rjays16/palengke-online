@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Faq extends Model
 {
     protected $fillable = [
-        'question', 'answer', 'active', 'sort_order',
+        'question', 'answer', 'role', 'topic', 'active', 'sort_order',
     ];
 
     protected $casts = [

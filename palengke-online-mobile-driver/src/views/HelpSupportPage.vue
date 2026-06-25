@@ -147,8 +147,6 @@ import {
   cubeOutline, helpCircleOutline, chatbubbleEllipsesOutline,
   logoFacebook, rocketOutline, storefrontOutline, alertCircle,
 } from 'ionicons/icons';
-import { mockFaqs } from '@/mock/help';
-
 const router = useRouter();
 
 const searchQuery = ref('');
@@ -158,7 +156,8 @@ const contactSupports = ref([]);
 const loadingContacts = ref(true);
 
 const topics = ref([]);
-const faqs = ref(mockFaqs);
+const faqs = ref([]);
+const loadingFaqs = ref(true);
 const loadingTopics = ref(true);
 
 const filteredFaqs = computed(() => {
@@ -311,6 +310,18 @@ async function fetchHelpTopics() {
   }
 }
 
+async function fetchFaqs() {
+  try {
+    const response = await fetch(`${API_BASE}/api/faqs?role=driver`);
+    const data = await response.json();
+    faqs.value = data.faqs || [];
+  } catch {
+    faqs.value = [];
+  } finally {
+    loadingFaqs.value = false;
+  }
+}
+
 const showLoadingModal = async (message) => {
   const toast = await toastController.create({
     message, duration: 2000, color: 'medium', position: 'top'
@@ -321,6 +332,7 @@ const showLoadingModal = async (message) => {
 onMounted(() => {
   fetchContactSupports();
   fetchHelpTopics();
+  fetchFaqs();
 });
 
 const openLink = async (type) => {
