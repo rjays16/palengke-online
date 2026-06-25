@@ -254,12 +254,18 @@ const validatePassword = () => {
 };
 
 const handleLogin = async () => {
-  auth.loginError = "";
-  const emailOk = validateEmail();
-  const passOk = validatePassword();
-  if (!emailOk || !passOk) return;
-  const success = await auth.login(form.value.email, form.value.password);
-  if (success) navigateTo("/dashboard");
+  try {
+    auth.loginError = "";
+    const emailOk = validateEmail();
+    const passOk = validatePassword();
+    if (!emailOk || !passOk) return;
+    const success = await auth.login(form.value.email, form.value.password);
+    const redirect = new URLSearchParams(window.location.search).get("redirect") || "/dashboard";
+    if (success) await navigateTo(redirect);
+  } catch (e) {
+    auth.loginError = "An unexpected error occurred. Please try again.";
+    auth.isLoading = false;
+  }
 };
 
 </script>

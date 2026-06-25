@@ -9,7 +9,29 @@ class OrderSeeder extends Seeder
 {
     public function run(): void
     {
-        $sellerId = 6; // first seller ID
+        // Ensure test seller exists
+        $sellerId = DB::table('seller_registrations')->insertGetId([
+            'email' => 'seller@test.com',
+            'country_code' => '+63',
+            'phone' => '+63 912 345 6789',
+            'full_phone' => '+639123456789',
+            'first_name' => 'Juan',
+            'middle_name' => null,
+            'last_name' => 'Dela Cruz',
+            'country' => 'Philippines',
+            'birthdate' => '1990-01-01',
+            'birthplace' => 'Cagayan de Oro City',
+            'current_address' => '123 Main St, Cagayan de Oro City',
+            'store_name' => 'Juan\'s Fresh Produce',
+            'region' => 'Northern Mindanao',
+            'city' => 'Cagayan de Oro City',
+            'barangay' => 'Barangay 1',
+            'store_place' => 'Public Market',
+            'complete_address' => '123 Main St, Cagayan de Oro City',
+            'status' => 'approved',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         $orders = [
             [

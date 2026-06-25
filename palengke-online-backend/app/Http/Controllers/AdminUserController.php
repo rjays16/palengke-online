@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\AdminCredentialsMail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 class AdminUserController extends Controller
@@ -46,8 +48,16 @@ class AdminUserController extends Controller
             'status' => 'active',
         ]);
 
+        try {
+            Mail::to($validated['email'])->send(new AdminCredentialsMail(
+                $validated['name'],
+            ));
+        } catch (\Throwable $e) {
+            // Email sending is non-critical; log and continue
+        }
+
         return response()->json([
-            'message' => 'Admin user created successfully',
+            'message' => 'Admin user created successfully. Credentials sent via email.',
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
