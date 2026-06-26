@@ -176,6 +176,7 @@ import {
   IonSpinner,
   alertController
 } from '@ionic/vue';
+import { useRegistrationStore } from '@/composables/useRegistrationStore';
 import {
   arrowBackOutline,
   mailOutline,
@@ -190,7 +191,7 @@ const router = useRouter();
 const acceptedTerms = ref(false);
 const isSubmitting = ref(false);
 
-const registrationData = JSON.parse(localStorage.getItem('driverRegistrationData') || '{}');
+const { state: registrationData } = useRegistrationStore();
 
 const fullName = computed(() => {
   const { firstName, middleName, lastName } = registrationData;
@@ -219,35 +220,8 @@ const handleSubmit = async () => {
   isSubmitting.value = true;
 
   try {
-    const data = JSON.parse(localStorage.getItem('driverRegistrationData') || '{}');
-
-    const payload = {
-      email: data.email,
-      country_code: data.countryCode,
-      phone: data.phone,
-      full_phone: data.fullPhone,
-      email_verified: data.emailVerified || false,
-      first_name: data.firstName,
-      middle_name: data.middleName || '',
-      last_name: data.lastName,
-      country: data.country,
-      birthdate: data.birthdate,
-      birthplace: data.birthplace,
-      current_address: data.currentAddress,
-      license_number: data.licenseNumber,
-      license_type: data.licenseType,
-      restriction_code: data.restrictionCode,
-      expiry_date: data.expiryDate,
-      vehicle_type: data.vehicleType,
-      plate_number: data.plateNumber,
-      vehicle_model: data.vehicleModel,
-      vehicle_color: data.vehicleColor || '',
-      license_front_photo: data.license_front_photo || '',
-      vehicle_reg_photo: data.vehicle_reg_photo || '',
-      nbi_clearance_photo: data.nbi_clearance_photo || '',
-      birth_cert_photo: data.birth_cert_photo || '',
-      selfie_photo: data.selfiePhoto || '',
-    };
+    const { getApiPayload, onSubmitted } = useRegistrationStore();
+    const payload = getApiPayload();
 
     const res = await fetch(`${API_BASE}/api/driver/register`, {
       method: 'POST',
@@ -261,11 +235,7 @@ const handleSubmit = async () => {
       throw new Error(result.message || 'Submission failed');
     }
 
-    const submittedData = localStorage.getItem('driverRegistrationData');
-    if (submittedData) {
-      localStorage.setItem('submittedRegistrationData', submittedData);
-    }
-    localStorage.removeItem('driverRegistrationData');
+    onSubmitted();
 
     await showSuccessModal('Application submitted successfully!\nWe\'ll review it within 24-48 hours.');
 

@@ -182,6 +182,7 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { compressImage, readFileAsDataURL as readFileAsBase64 } from '@/utils/imageCompression';
+import { useRegistrationStore } from '@/composables/useRegistrationStore';
 import {
   IonPage,
   IonContent,
@@ -207,10 +208,8 @@ const router = useRouter();
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
 function getEmail() {
-  try {
-    const data = JSON.parse(localStorage.getItem('driverRegistrationData') || '{}');
-    return data.email || '';
-  } catch { return ''; }
+  const { getEmail } = useRegistrationStore();
+  return getEmail();
 }
 
 const docTypes = {
@@ -287,9 +286,8 @@ const onFileUpload = async (docType, event) => {
     uploadedDocs.value[docType] = true;
     uploadStates.value[docType] = 'done';
 
-    const saved = JSON.parse(localStorage.getItem('driverRegistrationData') || '{}');
-    saved[docTypes[docType]] = data.photo_url;
-    localStorage.setItem('driverRegistrationData', JSON.stringify(saved));
+    const { setPhoto } = useRegistrationStore();
+    setPhoto(docTypes[docType], data.photo_url);
   } catch {
     uploadErrors.value[docType] = 'Upload failed. Please try again.';
     uploadStates.value[docType] = 'error';

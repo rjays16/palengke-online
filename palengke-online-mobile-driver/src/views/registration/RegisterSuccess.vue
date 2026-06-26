@@ -167,8 +167,10 @@ import {
   IonContent,
   IonButton,
   IonIcon,
+  IonSpinner,
   toastController
 } from '@ionic/vue';
+import { useRegistrationStore } from '@/composables/useRegistrationStore';
 import {
   checkmarkCircleOutline,
   alertCircleOutline,
@@ -198,14 +200,11 @@ const isVerified = computed(() => {
 
 // Load account data
 function loadAccountData() {
-  const savedData = localStorage.getItem('submittedRegistrationData');
-  if (savedData) {
-    const data = JSON.parse(savedData);
-    
-    // Build full name
+  const { getSubmittedData } = useRegistrationStore();
+  const data = getSubmittedData();
+  if (data) {
     const middle = data.middleName ? ` ${data.middleName} ` : ' ';
     accountData.value.fullName = `${data.firstName}${middle}${data.lastName}`;
-    
     accountData.value.email = data.email || '';
     accountData.value.phone = data.fullPhone || data.phone || '';
     accountData.value.vehicleType = data.vehicleType || '';
@@ -218,8 +217,8 @@ onActivated(loadAccountData);
 
 // Navigation
 const goToLogin = () => {
-  // Clear submitted data
-  localStorage.removeItem('submittedRegistrationData');
+  const { clearSubmittedData } = useRegistrationStore();
+  clearSubmittedData();
   
   // Show success toast
   showSuccessToast();

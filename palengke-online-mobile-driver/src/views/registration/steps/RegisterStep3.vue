@@ -140,6 +140,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon, IonSpinner } from '@ionic/vue';
+import { useRegistrationStore } from '@/composables/useRegistrationStore';
 import {
   arrowBackOutline,
   arrowForwardOutline,
@@ -197,14 +198,11 @@ const minDate = computed(() => {
 
 onMounted(() => {
   fetchRestrictionCodes();
-  const savedData = localStorage.getItem('driverRegistrationData');
-  if (savedData) {
-    const data = JSON.parse(savedData);
-    if (data.licenseNumber) formData.value.licenseNumber = data.licenseNumber;
-    if (data.licenseType) formData.value.licenseType = data.licenseType;
-    if (data.restrictionCode) formData.value.restrictionCode = data.restrictionCode;
-    if (data.expiryDate) formData.value.expiryDate = data.expiryDate;
-  }
+  const { state } = useRegistrationStore();
+  if (state.licenseNumber) formData.value.licenseNumber = state.licenseNumber;
+  if (state.licenseType) formData.value.licenseType = state.licenseType;
+  if (state.restrictionCode) formData.value.restrictionCode = state.restrictionCode;
+  if (state.expiryDate) formData.value.expiryDate = state.expiryDate;
 });
 
 const validateField = (fieldName) => {
@@ -271,15 +269,13 @@ const goBack = () => {
 };
 
 const saveData = () => {
-  const existingData = JSON.parse(localStorage.getItem('driverRegistrationData') || '{}');
-  const updatedData = {
-    ...existingData,
+  const { setLicenseInfo } = useRegistrationStore();
+  setLicenseInfo({
     licenseNumber: formData.value.licenseNumber,
     licenseType: formData.value.licenseType,
     restrictionCode: formData.value.restrictionCode,
     expiryDate: formData.value.expiryDate,
-  };
-  localStorage.setItem('driverRegistrationData', JSON.stringify(updatedData));
+  });
 };
 
 const handleNext = () => {

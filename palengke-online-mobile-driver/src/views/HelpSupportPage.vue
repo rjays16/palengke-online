@@ -28,103 +28,135 @@
 
       <div class="help-container">
 
-        <!-- Contact Support Cards -->
-        <div class="contact-section">
-          <h3 class="section-title">Contact Support</h3>
+        <!-- Search Results -->
+        <div v-if="hasSearchQuery" class="search-results-section">
+          <h3 class="section-title">Search Results</h3>
 
-          <div v-if="loadingContacts" class="loading-state">Loading support options...</div>
-          <div v-else class="contact-cards">
+          <div v-if="searchResults.length === 0" class="no-results">
+            <ion-icon :icon="searchOutline"></ion-icon>
+            <p>No results found for "{{ searchQuery }}"</p>
+          </div>
+
+          <div v-else class="search-results-list">
             <div
-              v-for="contact in contactSupports"
-              :key="contact.key"
-              class="contact-card"
-              @click="handleContactAction(contact)"
+              v-for="(result, idx) in searchResults"
+              :key="idx"
+              class="search-result-card"
+              @click="handleSearchResult(result)"
             >
-              <div class="contact-icon" :class="getIconClass(contact.type)">
-                <ion-icon :icon="getIconForType(contact.type)"></ion-icon>
+              <div class="result-icon" :class="result.type">
+                <ion-icon :icon="result.type === 'faq' ? chatbubbleEllipsesOutline : result.type === 'topic' ? helpCircleOutline : getIconForType(result.type)"></ion-icon>
               </div>
-              <div class="contact-content">
-                <h3>{{ contact.title }}</h3>
-                <p>{{ contact.subtitle }}</p>
+              <div class="result-content">
+                <h3>{{ result.title }}</h3>
+                <p>{{ result.snippet }}</p>
               </div>
               <ion-icon :icon="chevronForwardOutline" class="arrow"></ion-icon>
             </div>
           </div>
         </div>
 
-        <!-- Quick Topics -->
-        <div class="topics-section">
-          <h3 class="section-title">Quick Topics</h3>
-          <div class="topics-grid">
-            <div v-if="loadingTopics" class="loading-state">Loading topics...</div>
-            <div class="topic-chip" v-for="topic in topics" :key="topic.key"
-              :class="{ active: selectedTopic === topic.key }"
-              @click="filterByTopic(topic.key)">
-              <ion-icon :icon="getTopicIcon(topic.icon)"></ion-icon>
-              <span>{{ topic.name }}</span>
-            </div>
-          </div>
-        </div>
+        <!-- Normal Content (hidden during search) -->
+        <template v-if="!hasSearchQuery">
 
-        <!-- FAQ Section -->
-        <div class="faq-section">
-          <h3 class="section-title">
-            {{ selectedTopic === 'all' ? 'Frequently Asked Questions' : topics.find(t => t.key === selectedTopic)?.name }}
-          </h3>
+          <!-- Contact Support Cards -->
+          <div class="contact-section">
+            <h3 class="section-title">Contact Support</h3>
 
-          <div v-if="filteredFaqs.length === 0" class="no-results">
-            <ion-icon :icon="searchOutline"></ion-icon>
-            <p>No results found for "{{ searchQuery }}"</p>
-          </div>
-
-          <div v-else class="faq-list">
-            <div
-              v-for="faq in filteredFaqs"
-              :key="faq.id"
-              class="faq-item"
-              @click="toggleFaq(faq.id)"
-            >
-              <div class="faq-question">
-                <span>{{ faq.question }}</span>
-                <ion-icon
-                  :icon="openFaqs.includes(faq.id) ? chevronUpOutline : chevronDownOutline"
-                  class="faq-arrow"
-                ></ion-icon>
-              </div>
-              <div class="faq-answer" v-if="openFaqs.includes(faq.id)">
-                <p>{{ faq.answer }}</p>
+            <div v-if="loadingContacts" class="loading-state">Loading support options...</div>
+            <div v-else class="contact-cards">
+              <div
+                v-for="contact in contactSupports"
+                :key="contact.key"
+                class="contact-card"
+                @click="handleContactAction(contact)"
+              >
+                <div class="contact-icon" :class="getIconClass(contact.type)">
+                  <ion-icon :icon="getIconForType(contact.type)"></ion-icon>
+                </div>
+                <div class="contact-content">
+                  <h3>{{ contact.title }}</h3>
+                  <p>{{ contact.subtitle }}</p>
+                </div>
+                <ion-icon :icon="chevronForwardOutline" class="arrow"></ion-icon>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Useful Links -->
-        <div class="links-section">
-          <h3 class="section-title">Useful Links</h3>
-          <div class="links-list">
-            <div class="link-item" @click="openLink('terms')">
-              <ion-icon :icon="documentTextOutline"></ion-icon>
-              <span>Terms & Conditions</span>
-              <ion-icon :icon="chevronForwardOutline" class="link-arrow"></ion-icon>
-            </div>
-            <div class="link-item" @click="openLink('privacy')">
-              <ion-icon :icon="shieldCheckmarkOutline"></ion-icon>
-              <span>Privacy Policy</span>
-              <ion-icon :icon="chevronForwardOutline" class="link-arrow"></ion-icon>
-            </div>
-            <div class="link-item" @click="openLink('safety')">
-              <ion-icon :icon="alertCircleOutline"></ion-icon>
-              <span>Safety Guidelines</span>
-              <ion-icon :icon="chevronForwardOutline" class="link-arrow"></ion-icon>
-            </div>
-            <div class="link-item" @click="rateApp">
-              <ion-icon :icon="starOutline"></ion-icon>
-              <span>Rate Our App</span>
-              <ion-icon :icon="chevronForwardOutline" class="link-arrow"></ion-icon>
+          <!-- Quick Topics -->
+          <div class="topics-section">
+            <h3 class="section-title">Quick Topics</h3>
+            <div class="topics-grid">
+              <div v-if="loadingTopics" class="loading-state">Loading topics...</div>
+              <div class="topic-chip" v-for="topic in topics" :key="topic.key"
+                :class="{ active: selectedTopic === topic.key }"
+                @click="filterByTopic(topic.key)">
+                <ion-icon :icon="getTopicIcon(topic.icon)"></ion-icon>
+                <span>{{ topic.name }}</span>
+              </div>
             </div>
           </div>
-        </div>
 
+          <!-- FAQ Section -->
+          <div class="faq-section">
+            <h3 class="section-title">
+              {{ selectedTopic === 'all' ? 'Frequently Asked Questions' : topics.find(t => t.key === selectedTopic)?.name }}
+            </h3>
+
+            <div v-if="filteredFaqs.length === 0" class="no-results">
+              <ion-icon :icon="searchOutline"></ion-icon>
+              <p>No FAQs found for this topic.</p>
+            </div>
+
+            <div v-else class="faq-list">
+              <div
+                v-for="faq in filteredFaqs"
+                :key="faq.id"
+                class="faq-item"
+                @click="toggleFaq(faq.id)"
+              >
+                <div class="faq-question">
+                  <span>{{ faq.question }}</span>
+                  <ion-icon
+                    :icon="openFaqs.includes(faq.id) ? chevronUpOutline : chevronDownOutline"
+                    class="faq-arrow"
+                  ></ion-icon>
+                </div>
+                <div class="faq-answer" v-if="openFaqs.includes(faq.id)">
+                  <p>{{ faq.answer }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Useful Links -->
+          <div class="links-section">
+            <h3 class="section-title">Useful Links</h3>
+            <div class="links-list">
+              <div class="link-item" @click="openLink('terms')">
+                <ion-icon :icon="documentTextOutline"></ion-icon>
+                <span>Terms & Conditions</span>
+                <ion-icon :icon="chevronForwardOutline" class="link-arrow"></ion-icon>
+              </div>
+              <div class="link-item" @click="openLink('privacy')">
+                <ion-icon :icon="shieldCheckmarkOutline"></ion-icon>
+                <span>Privacy Policy</span>
+                <ion-icon :icon="chevronForwardOutline" class="link-arrow"></ion-icon>
+              </div>
+              <div class="link-item" @click="openLink('safety')">
+                <ion-icon :icon="alertCircleOutline"></ion-icon>
+                <span>Safety Guidelines</span>
+                <ion-icon :icon="chevronForwardOutline" class="link-arrow"></ion-icon>
+              </div>
+              <div class="link-item" @click="rateApp">
+                <ion-icon :icon="starOutline"></ion-icon>
+                <span>Rate Our App</span>
+                <ion-icon :icon="chevronForwardOutline" class="link-arrow"></ion-icon>
+              </div>
+            </div>
+          </div>
+
+        </template>
       </div>
     </ion-content>
   </ion-page>
@@ -160,19 +192,40 @@ const faqs = ref([]);
 const loadingFaqs = ref(true);
 const loadingTopics = ref(true);
 
+const hasSearchQuery = computed(() => searchQuery.value.trim().length > 0);
+
 const filteredFaqs = computed(() => {
   let list = faqs.value;
   if (selectedTopic.value !== 'all') {
     list = list.filter(f => f.topic === selectedTopic.value);
   }
-  if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase();
-    list = list.filter(f =>
-      f.question.toLowerCase().includes(query) ||
-      f.answer.toLowerCase().includes(query)
-    );
-  }
   return list;
+});
+
+const searchResults = computed(() => {
+  if (!hasSearchQuery.value) return [];
+  const q = searchQuery.value.toLowerCase().trim();
+  const results = [];
+
+  faqs.value.forEach((faq) => {
+    if (faq.question.toLowerCase().includes(q) || faq.answer.toLowerCase().includes(q)) {
+      results.push({ type: 'faq', title: faq.question, snippet: faq.answer, faq });
+    }
+  });
+
+  contactSupports.value.forEach((contact) => {
+    if (contact.title.toLowerCase().includes(q) || contact.subtitle.toLowerCase().includes(q)) {
+      results.push({ type: contact.type, title: contact.title, snippet: contact.subtitle, contact });
+    }
+  });
+
+  topics.value.forEach((topic) => {
+    if (topic.name.toLowerCase().includes(q)) {
+      results.push({ type: 'topic', title: topic.name, snippet: `Browse ${topic.name} help articles`, topic });
+    }
+  });
+
+  return results;
 });
 
 const toggleFaq = (id) => {
@@ -189,6 +242,16 @@ const filterByTopic = (topicId) => {
 };
 
 const onSearch = () => { selectedTopic.value = 'all'; };
+
+function handleSearchResult(result) {
+  if (result.type === 'faq' && result.faq) {
+    toggleFaq(result.faq.id);
+  } else if (result.contact) {
+    handleContactAction(result.contact);
+  } else if (result.type === 'topic' && result.topic) {
+    filterByTopic(result.topic.key);
+  }
+}
 
 // Contact Support - API driven
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
@@ -454,4 +517,32 @@ const rateApp = async () => {
 .link-item > ion-icon:first-child { font-size: 22px; color: #4CAF50; }
 .link-item span { flex: 1; font-size: 15px; font-weight: 600; color: #1a1a1a; }
 .link-arrow { font-size: 18px; color: #ccc; }
+
+/* Search Results */
+.search-results-section { margin-bottom: 20px; }
+.search-results-list { display: flex; flex-direction: column; gap: 10px; }
+
+.search-result-card {
+  background: white; border-radius: 14px; padding: 14px 16px;
+  display: flex; align-items: center; gap: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; transition: transform 0.2s;
+}
+.search-result-card:active { transform: scale(0.97); }
+
+.result-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.result-icon.faq { background: #E8F5E9; color: #4CAF50; }
+.result-icon.topic { background: #E3F2FD; color: #2196F3; }
+.result-icon.chat { background: #E3F2FD; color: #2196F3; }
+.result-icon.phone { background: #E8F5E9; color: #4CAF50; }
+.result-icon.email { background: #FFF3E0; color: #FF9800; }
+.result-icon.facebook { background: #E7F3FF; color: #1877F2; }
+
+.result-content { flex: 1; min-width: 0; }
+.result-content h3 { font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 0 0 2px 0; }
+.result-content p { font-size: 12px; color: #888; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.search-result-card .arrow { font-size: 18px; color: #ccc; flex-shrink: 0; }
 </style>

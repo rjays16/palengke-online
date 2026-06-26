@@ -136,6 +136,7 @@
 import { ref, computed, onMounted, onActivated } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon } from '@ionic/vue';
+import { useRegistrationStore } from '@/composables/useRegistrationStore';
 import {
   arrowBackOutline,
   arrowForwardOutline,
@@ -187,15 +188,12 @@ const errors = ref({
 });
 
 function loadFromStorage() {
-  const savedData = localStorage.getItem('driverRegistrationData');
-  if (savedData) {
-    const data = JSON.parse(savedData);
-    resetVehicleTypeOnCodeMismatch(data.restrictionCode || '');
-    if (data.vehicleType) formData.value.vehicleType = data.vehicleType;
-    if (data.plateNumber) formData.value.plateNumber = data.plateNumber;
-    if (data.vehicleModel) formData.value.vehicleModel = data.vehicleModel;
-    if (data.vehicleColor) formData.value.vehicleColor = data.vehicleColor;
-  }
+  const { state } = useRegistrationStore();
+  resetVehicleTypeOnCodeMismatch(state.restrictionCode || '');
+  if (state.vehicleType) formData.value.vehicleType = state.vehicleType;
+  if (state.plateNumber) formData.value.plateNumber = state.plateNumber;
+  if (state.vehicleModel) formData.value.vehicleModel = state.vehicleModel;
+  if (state.vehicleColor) formData.value.vehicleColor = state.vehicleColor;
 }
 
 onMounted(loadFromStorage);
@@ -205,8 +203,8 @@ onActivated(() => {
 });
 
 function getRestrictionCode() {
-  const data = JSON.parse(localStorage.getItem('driverRegistrationData') || '{}');
-  return data.restrictionCode || '';
+  const { getRestrictionCode: code } = useRegistrationStore();
+  return code();
 }
 
 function resetVehicleTypeOnCodeMismatch(code) {
@@ -276,15 +274,13 @@ const goBack = () => {
 };
 
 const saveData = () => {
-  const existingData = JSON.parse(localStorage.getItem('driverRegistrationData') || '{}');
-  const updatedData = {
-    ...existingData,
+  const { setVehicleInfo } = useRegistrationStore();
+  setVehicleInfo({
     vehicleType: formData.value.vehicleType,
     plateNumber: formData.value.plateNumber,
     vehicleModel: formData.value.vehicleModel,
     vehicleColor: formData.value.vehicleColor,
-  };
-  localStorage.setItem('driverRegistrationData', JSON.stringify(updatedData));
+  });
 };
 
 const handleNext = () => {

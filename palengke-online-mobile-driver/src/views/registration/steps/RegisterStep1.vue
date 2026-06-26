@@ -174,6 +174,7 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon, IonSpinner, toastController } from '@ionic/vue';
+import { useRegistrationStore } from '@/composables/useRegistrationStore';
 import {
   arrowBackOutline,
   arrowForwardOutline,
@@ -766,14 +767,14 @@ const goBack = () => {
 const handleNext = () => {
   if (!isFormValid.value) return;
 
-  const registrationData = {
+  const { setContactInfo } = useRegistrationStore();
+  setContactInfo({
     email: email.value,
     countryCode: countryCode.value,
     phone: phone.value,
     fullPhone: `${countryCode.value}${phone.value}`,
     emailVerified: isEmailVerified.value,
-  };
-  localStorage.setItem('driverRegistrationData', JSON.stringify(registrationData));
+  });
 
   router.push('/register/step2');
 };

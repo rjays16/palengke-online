@@ -193,6 +193,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon } from '@ionic/vue';
+import { useRegistrationStore } from '@/composables/useRegistrationStore';
 import {
   arrowBackOutline,
   arrowForwardOutline,
@@ -478,18 +479,15 @@ const maxDate = computed(() => {
 });
 
 onMounted(() => {
-  const savedData = localStorage.getItem('driverRegistrationData');
-  if (savedData) {
-    const data = JSON.parse(savedData);
-    if (data.firstName) formData.value.firstName = data.firstName;
-    if (data.middleName) formData.value.middleName = data.middleName;
-    if (data.lastName) formData.value.lastName = data.lastName;
-    if (data.country) formData.value.country = data.country;
-    if (data.birthdate) formData.value.birthdate = data.birthdate;
-    if (data.birthplace) formData.value.birthplace = data.birthplace;
-    if (data.currentAddress) formData.value.currentAddress = data.currentAddress;
-    if (data.sameAsBirthplace) sameAsBirthplace.value = data.sameAsBirthplace;
-  }
+  const { state } = useRegistrationStore();
+  if (state.firstName) formData.value.firstName = state.firstName;
+  if (state.middleName) formData.value.middleName = state.middleName;
+  if (state.lastName) formData.value.lastName = state.lastName;
+  if (state.country) formData.value.country = state.country;
+  if (state.birthdate) formData.value.birthdate = state.birthdate;
+  if (state.birthplace) formData.value.birthplace = state.birthplace;
+  if (state.currentAddress) formData.value.currentAddress = state.currentAddress;
+  if (state.sameAsBirthplace) sameAsBirthplace.value = state.sameAsBirthplace;
 });
 
 const validateField = (fieldName) => {
@@ -604,9 +602,8 @@ const goBack = () => {
 };
 
 const saveData = () => {
-  const existingData = JSON.parse(localStorage.getItem('driverRegistrationData') || '{}');
-  const updatedData = {
-    ...existingData,
+  const { setPersonalInfo } = useRegistrationStore();
+  setPersonalInfo({
     firstName: formData.value.firstName,
     middleName: formData.value.middleName,
     lastName: formData.value.lastName,
@@ -615,8 +612,7 @@ const saveData = () => {
     birthplace: formData.value.birthplace,
     currentAddress: formData.value.currentAddress,
     sameAsBirthplace: sameAsBirthplace.value,
-  };
-  localStorage.setItem('driverRegistrationData', JSON.stringify(updatedData));
+  });
 };
 
 const handleNext = () => {

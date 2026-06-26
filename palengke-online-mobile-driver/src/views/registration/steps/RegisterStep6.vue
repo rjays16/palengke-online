@@ -159,6 +159,7 @@ import { Capacitor } from '@capacitor/core';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { compressImage } from '@/utils/imageCompression';
 import { IonPage, IonContent, IonButton, IonIcon, IonSpinner, toastController } from '@ionic/vue';
+import { useRegistrationStore } from '@/composables/useRegistrationStore';
 import {
   arrowBackOutline,
   arrowForwardOutline,
@@ -177,10 +178,8 @@ const canvasRef = ref(null);
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
 function getEmail() {
-  try {
-    const data = JSON.parse(localStorage.getItem('driverRegistrationData') || '{}');
-    return data.email || '';
-  } catch { return ''; }
+  const { getEmail } = useRegistrationStore();
+  return getEmail();
 }
 
 const selfiePhoto = ref(null);
@@ -190,13 +189,10 @@ const cameraStream = ref(null);
 const uploadingSelfie = ref(false);
 
 onMounted(() => {
-  const savedData = localStorage.getItem('driverRegistrationData');
-  if (savedData) {
-    const data = JSON.parse(savedData);
-    if (data.selfiePhoto) {
-      selfiePhoto.value = data.selfiePhoto;
-      selfieConfirmed.value = true;
-    }
+  const { state } = useRegistrationStore();
+  if (state.selfiePhoto) {
+    selfiePhoto.value = state.selfiePhoto;
+    selfieConfirmed.value = true;
   }
 });
 
@@ -337,9 +333,8 @@ const confirmPhoto = async () => {
     const data = await res.json();
     selfieConfirmed.value = true;
 
-    const saved = JSON.parse(localStorage.getItem('driverRegistrationData') || '{}');
-    saved.selfiePhoto = data.photo_url;
-    localStorage.setItem('driverRegistrationData', JSON.stringify(saved));
+    const { setSelfiePhoto } = useRegistrationStore();
+    setSelfiePhoto(data.photo_url);
 
     const toast = await toastController.create({
       message: 'Selfie photo saved!',
@@ -379,9 +374,8 @@ const goBack = () => {
 };
 
 const saveData = () => {
-  const existingData = JSON.parse(localStorage.getItem('driverRegistrationData') || '{}');
-  existingData.selfiePhoto = selfiePhoto.value;
-  localStorage.setItem('driverRegistrationData', JSON.stringify(existingData));
+  const { setSelfiePhoto } = useRegistrationStore();
+  setSelfiePhoto(selfiePhoto.value);
 };
 
 const handleNext = () => {
