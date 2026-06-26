@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Country;
 use App\Models\ServiceLocation;
 use Illuminate\Http\Request;
 
@@ -19,6 +20,42 @@ class LocationController extends Controller
 
         return response()->json([
             'locations' => $location->data,
+        ]);
+    }
+
+    public function publicIndex()
+    {
+        $location = ServiceLocation::first();
+
+        if (! $location) {
+            return response()->json([
+                'locations' => null,
+            ]);
+        }
+
+        $locations = $location->data;
+
+        $country = Country::where('code', 'PH')->first();
+        if ($country) {
+            $regions = $country->regions()->get();
+            foreach ($locations as &$region) {
+                $cr = $regions->firstWhere('name', $region['name']);
+                if ($cr && !$cr->enabled) {
+                    $region['checked'] = false;
+                    $region['indeterminate'] = false;
+                    foreach ($region['cities'] as &$city) {
+                        $city['checked'] = false;
+                        $city['indeterminate'] = false;
+                        foreach ($city['barangays'] as &$b) {
+                            $b['checked'] = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        return response()->json([
+            'locations' => $locations,
         ]);
     }
 

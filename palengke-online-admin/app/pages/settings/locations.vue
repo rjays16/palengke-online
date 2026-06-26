@@ -17,10 +17,34 @@
           </div>
         </div>
 
-        <LocationTree
-          v-model="locations"
-          v-model:open-ids="openIds"
-        />
+        <div v-if="isLoading || countries.length === 0" class="loading-state">{{ isLoading ? 'Loading locations...' : 'Loading countries...' }}</div>
+        <div v-else class="countries-wrap">
+          <div v-for="country in countries.filter(c => c.enabled)" :key="country.id" class="country-section">
+            <div class="country-header" @click="toggleCountry(country.id)">
+              <span class="country-arrow">{{ country._expanded ? '&#9660;' : '&#9654;' }}</span>
+              <span class="country-name">{{ country.name }}</span>
+              <span class="country-code">{{ country.code }}</span>
+            </div>
+            <div v-if="country._expanded" class="country-body">
+              <div v-if="country._loadingRegions" class="loading-state">Loading regions...</div>
+              <div v-else>
+                <div class="region-status-bar">
+                  <span v-for="region in country._regions" :key="region.id" class="region-chip" :class="region.enabled ? 'on' : 'off'" @click="toggleRegionChip(country, region)">
+                    {{ region.name }}
+                  </span>
+                </div>
+                <div v-if="country._regions.length === 0" class="empty-state">
+                  No location data configured for this country yet.
+                </div>
+                <LocationTree
+                  v-if="country.code === 'PH'"
+                  v-model="locations"
+                  v-model:open-ids="openIds"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="settings-section">
@@ -49,8 +73,6 @@
     <div class="error-toast" v-if="error">
       ✕ {{ error }}
     </div>
-
-    <div v-if="isLoading" class="loading-state">Loading locations...</div>
 
     <div class="settings-actions" v-if="!isLoading">
       <button class="save-btn" @click="saveLocations" :disabled="isSaving">
@@ -100,6 +122,7 @@ const success = ref(false);
 const isLoading = ref(false);
 const isSaving = ref(false);
 const error = ref("");
+const countries = ref<any[]>([]);
 
 // ===== COMPUTED =====
 const enabledRegions = computed(() => locations.value.filter((r) => r.checked).length);
@@ -229,10 +252,104 @@ function resetLocations(): void {
   saveLocations();
 }
 
+function toggleCountry(countryId: number) {
+  const country = countries.value.find((c) => c.id === countryId);
+  if (!country) return;
+
+  if (!country._expanded) {
+    country._expanded = true;
+    country._loadingRegions = true;
+
+    const token = getToken();
+    $fetch(`${getApiBaseUrl()}/api/admin/countries/${countryId}/regions`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res: any) => {
+        country._regions = res.regions;
+      })
+      .catch(() => {
+        country._regions = [];
+      })
+      .finally(() => {
+        country._loadingRegions = false;
+      });
+  } else {
+    country._expanded = false;
+  }
+}
+
+async function loadPHRegions() {
+  const ph = countries.value.find(c => c.code === 'PH');
+  if (!ph) return;
+
+  try {
+    const token = getToken();
+    const res: any = await $fetch(`${getApiBaseUrl()}/api/admin/countries/${ph.id}/regions`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    ph._regions = res.regions;
+    syncRegionsWithTree(res.regions);
+  } catch {
+    // silently fail
+  }
+}
+
+function syncRegionsWithTree(regions: any[]) {
+  regions.forEach((cr: any) => {
+    const locRegion = locations.value.find((r: any) => r.name === cr.name);
+    if (locRegion && !cr.enabled) {
+      locRegion.checked = false;
+      locRegion.indeterminate = false;
+      locRegion.cities.forEach((city: any) => {
+        city.checked = false;
+        city.indeterminate = false;
+        city.barangays.forEach((b: any) => (b.checked = false));
+      });
+    }
+  });
+}
+
+async function toggleRegionChip(country: any, region: any) {
+  try {
+    const token = getToken();
+    const res: any = await $fetch(
+      `${getApiBaseUrl()}/api/admin/countries/${country.id}/regions/${region.id}/toggle`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    region.enabled = res.region.enabled;
+    syncRegionsWithTree(country._regions);
+    success.value = true;
+    setTimeout(() => { success.value = false; }, 2500);
+  } catch {
+    // silently fail
+  }
+}
+
+async function fetchCountries() {
+  try {
+    const token = getToken();
+    const response: any = await $fetch(`${getApiBaseUrl()}/api/admin/countries`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    countries.value = response.countries.map((c: any) => ({
+      ...c,
+      _expanded: false,
+      _loadingRegions: false,
+      _regions: [],
+    }));
+  } catch {
+    countries.value = [];
+  }
+}
+
 // ===== LIFECYCLE =====
-onMounted(() => {
+onMounted(async () => {
   loadOpenState();
-  loadLocations();
+  await Promise.all([loadLocations(), fetchCountries()]);
+  await loadPHRegions();
 });
 
 // ===== WATCH =====
@@ -342,11 +459,81 @@ watch(openIds, saveOpenState, { deep: true });
   font-size: 13px;
   font-weight: 600;
 }
-.loading-state {
+.loading-state,
+.empty-state {
   padding: 40px;
   text-align: center;
   font-size: 14px;
   color: #6b7280;
+}
+.countries-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.country-section {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.country-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background 0.1s;
+  user-select: none;
+}
+.country-header:hover {
+  background: #f9fafb;
+}
+.country-arrow {
+  font-size: 11px;
+  color: #9ca3af;
+  width: 14px;
+  text-align: center;
+}
+.country-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+.country-code {
+  font-size: 11px;
+  color: #9ca3af;
+  background: #f3f4f6;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+.country-body {
+  border-top: 1px solid #f3f4f6;
+  padding: 16px;
+}
+.region-status-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.region-chip {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.region-chip:hover {
+  opacity: 0.7;
+}
+.region-chip.on {
+  background: #f0fdf4;
+  color: #059669;
+}
+.region-chip.off {
+  background: #f3f4f6;
+  color: #9ca3af;
 }
 .save-btn {
   padding: 12px 24px;

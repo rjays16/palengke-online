@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             RestrictionCodeSeeder::class,
             HelpTopicSeeder::class,
             FaqSeeder::class,
+            CountryRegionSeeder::class,
         ]);
     }
 }

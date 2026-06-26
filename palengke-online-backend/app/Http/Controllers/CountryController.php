@@ -9,14 +9,7 @@ class CountryController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Country::query();
-
-        // If the request is from the seller app (no auth), only return enabled countries
-        if (! $request->user()) {
-            $query->where('enabled', true);
-        }
-
-        $countries = $query->orderBy('name')->get();
+        $countries = Country::orderBy('name')->get();
 
         return response()->json([
             'countries' => $countries,

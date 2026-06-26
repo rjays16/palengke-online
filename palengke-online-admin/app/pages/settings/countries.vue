@@ -20,20 +20,52 @@
         <div v-if="isLoading" class="loading-state">Loading countries...</div>
         <div v-else-if="error" class="error-state">{{ error }}</div>
         <div v-else class="countries-list">
-          <div v-for="country in countries" :key="country.id" class="country-row">
-            <label class="toggle-label">
-              <input
-                type="checkbox"
-                v-model="country.enabled"
-                @change="onToggle(country)"
-              />
-              <span class="checkmark"></span>
-              <span class="country-name">{{ country.name }}</span>
-              <span class="country-code">{{ country.code }}</span>
-            </label>
-            <span class="status-badge" :class="country.enabled ? 'active' : 'inactive'">
-              {{ country.enabled ? 'Enabled' : 'Disabled' }}
-            </span>
+          <div v-for="country in countries" :key="country.id">
+            <div class="country-row">
+              <label class="toggle-label">
+                <input
+                  type="checkbox"
+                  v-model="country.enabled"
+                  @change="onToggle(country)"
+                />
+                <span class="checkmark"></span>
+                <span class="country-name">{{ country.name }}</span>
+                <span class="country-code">{{ country.code }}</span>
+                <span class="dial-code">{{ country.dial_code }}</span>
+              </label>
+              <span class="status-badge" :class="country.enabled ? 'active' : 'inactive'">
+                {{ country.enabled ? 'Enabled' : 'Disabled' }}
+              </span>
+              <button
+                v-if="country.code === 'PH'"
+                class="expand-btn"
+                @click="toggleRegions(country)"
+              >
+                <span v-if="country._expanded">&#9660;</span>
+                <span v-else>&#9654;</span>
+              </button>
+            </div>
+            <div v-if="country.code === 'PH' && country._expanded" class="regions-list">
+              <div v-if="country._loadingRegions" class="loading-state">Loading regions...</div>
+              <div
+                v-for="region in country._regions"
+                :key="region.id"
+                class="region-row"
+              >
+                <label class="toggle-label region-toggle">
+                  <input
+                    type="checkbox"
+                    v-model="region.enabled"
+                    @change="onRegionToggle(country, region)"
+                  />
+                  <span class="checkmark"></span>
+                  <span class="region-name">{{ region.name }}</span>
+                </label>
+                <span class="status-badge" :class="region.enabled ? 'active' : 'inactive'">
+                  {{ region.enabled ? 'Enabled' : 'Disabled' }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -97,6 +129,7 @@ const countries = ref<any[]>([]);
 const isLoading = ref(false);
 const success = ref(false);
 const error = ref("");
+const expandedRegions = ref<Set<number>>(new Set());
 
 const totalCountries = computed(() => countries.value.length);
 const enabledCount = computed(() => countries.value.filter((c) => c.enabled).length);
@@ -114,7 +147,12 @@ async function fetchCountries() {
       },
     });
 
-    countries.value = response.countries;
+    countries.value = response.countries.map((c: any) => ({
+      ...c,
+      _expanded: false,
+      _loadingRegions: false,
+      _regions: [],
+    }));
   } catch (err: any) {
     error.value = err?.data?.message || "Failed to load countries";
   } finally {
@@ -180,6 +218,47 @@ async function updateAll(enabled: boolean) {
     }, 2500);
   } catch (err: any) {
     error.value = err?.data?.message || "Failed to update countries";
+  }
+}
+
+async function toggleRegions(country: any) {
+  if (!country._expanded) {
+    country._expanded = true;
+    country._loadingRegions = true;
+    try {
+      const token = getToken();
+      const response: any = await $fetch(
+        `${getApiBaseUrl()}/api/admin/countries/${country.id}/regions`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      country._regions = response.regions;
+    } catch {
+      country._regions = [];
+    } finally {
+      country._loadingRegions = false;
+    }
+  } else {
+    country._expanded = false;
+  }
+}
+
+async function onRegionToggle(country: any, region: any) {
+  try {
+    const token = getToken();
+    const response: any = await $fetch(
+      `${getApiBaseUrl()}/api/admin/countries/${country.id}/regions/${region.id}/toggle`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    region.enabled = response.region.enabled;
+    success.value = true;
+    setTimeout(() => { success.value = false; }, 2500);
+  } catch {
+    region.enabled = !region.enabled;
   }
 }
 
@@ -318,6 +397,14 @@ onMounted(() => {
   padding: 2px 8px;
   border-radius: 4px;
 }
+.dial-code {
+  font-size: 12px;
+  color: #6b7280;
+  background: #e5e7eb;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
 .status-badge {
   font-size: 11px;
   font-weight: 600;
@@ -374,6 +461,44 @@ onMounted(() => {
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
+}
+.expand-btn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 8px;
+  color: #6b7280;
+  font-family: "Inter", sans-serif;
+  transition: color 0.15s;
+}
+.expand-btn:hover {
+  color: #111827;
+}
+.regions-list {
+  padding: 0 16px 8px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.region-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: 6px;
+  transition: background 0.1s;
+}
+.region-row:hover {
+  background: #f9fafb;
+}
+.region-toggle {
+  gap: 10px;
+}
+.region-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
 }
 @media (max-width: 600px) {
   .summary-grid {

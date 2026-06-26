@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\CountryController;
+use App\Http\Controllers\CountryRegionController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\SellerRegistrationController;
 use App\Http\Controllers\Api\AdminNotificationController;
@@ -56,6 +57,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/countries', [CountryController::class, 'index']);
     Route::post('/admin/countries/{id}/toggle', [CountryController::class, 'toggle']);
     Route::put('/admin/countries/bulk', [CountryController::class, 'bulkUpdate']);
+
+    Route::get('/admin/countries/{country}/regions', [CountryRegionController::class, 'index']);
+    Route::post('/admin/countries/{country}/regions/{region}/toggle', [CountryRegionController::class, 'toggle']);
 });
 
 // Seller app OTP verification
@@ -178,8 +182,8 @@ Route::get('/help-topics', [HelpTopicController::class, 'index']);
 // Public endpoint for driver app to fetch enabled restriction codes
 Route::get('/restriction-codes', [RestrictionCodeController::class, 'index']);
 
-// Public endpoint for seller app to fetch enabled locations
-Route::get('/locations', [LocationController::class, 'index']);
+// Public endpoint for seller app to fetch enabled locations (filtered by country_regions)
+Route::get('/locations', [LocationController::class, 'publicIndex']);
 
 // Admin — categories
 Route::middleware('auth:sanctum')->group(function () {
