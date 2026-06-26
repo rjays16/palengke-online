@@ -69,6 +69,7 @@ Route::post('/seller/verify', [SellerRegistrationController::class, 'verify']);
 // Driver app registration
 Route::post('/driver/upload-photo', [DriverRegistrationController::class, 'uploadPhoto']);
 Route::post('/driver/register', [DriverRegistrationController::class, 'register']);
+Route::post('/driver/check-email', [DriverRegistrationController::class, 'checkEmail']);
 
 // Driver login
 Route::post('/driver/login', [DriverAuthController::class, 'login']);

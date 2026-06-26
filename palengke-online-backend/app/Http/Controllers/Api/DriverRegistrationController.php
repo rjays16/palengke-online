@@ -14,6 +14,24 @@ use Illuminate\Support\Facades\Storage;
 
 class DriverRegistrationController extends Controller
 {
+    public function checkEmail(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $existing = DriverRegistration::where('email', $validated['email'])->first();
+
+        if (!$existing) {
+            return response()->json(['available' => true]);
+        }
+
+        return response()->json([
+            'available' => false,
+            'status' => $existing->status,
+        ]);
+    }
+
     public function register(Request $request)
     {
         $validated = $request->validate([

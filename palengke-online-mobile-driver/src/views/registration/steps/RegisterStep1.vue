@@ -536,19 +536,17 @@ const checkEmailExists = async () => {
   emailExistsError.value = '';
 
   try {
-    const response = await fetch(`${API_BASE}/api/driver/login`, {
+    const response = await fetch(`${API_BASE}/api/driver/check-email`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email.value }),
     });
 
-    if (response.status === 404) {
-      emailExistsError.value = '';
-    } else if (response.status === 200) {
-      emailExistsError.value = 'This email is already registered.';
-    } else {
+    if (response.ok) {
       const data = await response.json();
-      if (data.status === 'rejected') {
+      if (data.available) {
+        emailExistsError.value = '';
+      } else if (data.status === 'rejected') {
         emailExistsError.value = '';
       } else {
         emailExistsError.value = 'This email is already registered.';
