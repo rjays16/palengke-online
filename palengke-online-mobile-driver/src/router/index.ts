@@ -9,6 +9,7 @@ import PinLoginPage from '@/views/PinLoginPage.vue';
 import CreatePinPage from '@/views/CreatePinPage.vue';
 import OTPVerificationPage from '@/views/OTPVerificationPage.vue';
 import AccountPendingPage from '@/views/AccountPendingPage.vue';
+import AreaNotAvailablePage from '@/views/AreaNotAvailablePage.vue';
 import DriverRequirements from '@/views/registration/DriverRequirements.vue';
 import RegisterSuccess from '@/views/registration/RegisterSuccess.vue';
 import HomePage from '@/views/HomePage.vue';
@@ -82,6 +83,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/account-pending',
     name: 'AccountPending',
     component: AccountPendingPage,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/area-not-available/:reason',
+    name: 'AreaNotAvailable',
+    component: AreaNotAvailablePage,
     meta: { requiresAuth: false }
   },
   {

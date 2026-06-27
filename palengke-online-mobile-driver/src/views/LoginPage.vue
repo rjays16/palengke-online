@@ -71,6 +71,68 @@ const showLoadingModal = async (message = 'Loading...', autoDismiss = true) => {
   return alert;
 };
 
+const checkAvailability = async () => {
+  const savedData = localStorage.getItem('registrationData');
+  if (!savedData) return { available: true };
+
+  const registration = JSON.parse(savedData);
+  const userCountry = registration.country;
+  const userCity = registration.birthplace || '';
+
+  if (!userCountry) return { available: true };
+
+  try {
+    const response = await fetch(`${API_BASE}/api/countries`);
+    const data = await response.json();
+
+    if (!data.countries || data.countries.length === 0) {
+      return { available: false, reason: 'country' };
+    }
+
+    const countryEnabled = data.countries.find((c) => c.code === userCountry && c.enabled);
+    if (!countryEnabled) {
+      return { available: false, reason: 'country' };
+    }
+
+    const locResponse = await fetch(`${API_BASE}/api/locations`);
+    const locData = await locResponse.json();
+
+    if (locData.locations && locData.locations.length > 0) {
+      let foundRegion = null;
+      let foundCity = null;
+
+      for (const region of locData.locations) {
+        const city = region.cities.find((c) =>
+          userCity.toLowerCase().includes(c.name.toLowerCase())
+        );
+        if (city) {
+          foundRegion = region;
+          foundCity = city;
+          break;
+        }
+      }
+
+      if (!foundRegion) {
+        return { available: false, reason: 'area' };
+      }
+
+      const regionHasEnabledCities = foundRegion.cities.some((c) => c.checked);
+      if (!regionHasEnabledCities) {
+        return { available: false, reason: 'region' };
+      }
+
+      if (!foundCity.checked) {
+        return { available: false, reason: 'area' };
+      }
+    }
+
+    return { available: true };
+  } catch (err) {
+    console.error('Availability check failed:', err);
+    return { available: true };
+  }
+};
+
 const handleLogin = async () => {
   if (!email.value) return;
 
@@ -167,6 +229,13 @@ const handleLogin = async () => {
 
     localStorage.setItem('hasPin', data.hasPin ? 'true' : 'false');
     localStorage.setItem('userEmail', email.value);
+
+    const availability = await checkAvailability();
+
+    if (!availability.available) {
+      router.push(`/area-not-available/${availability.reason}`);
+      return;
+    }
 
     const alert = await alertController.create({
       header: 'Verify Account',
