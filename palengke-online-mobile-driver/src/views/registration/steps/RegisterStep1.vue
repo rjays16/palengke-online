@@ -44,6 +44,7 @@
             </div>
             <span v-if="errors.email" class="error-message">{{ errors.email }}</span>
             <span v-else-if="emailExistsError" class="error-message">{{ emailExistsError }}</span>
+            <span v-else-if="isCheckingEmail" class="helper-text">Checking email...</span>
             <span v-else-if="isEmailVerified" class="verified-text">Email verified</span>
             <span v-else class="helper-text">We'll send verification to this email</span>
           </div>
@@ -54,11 +55,18 @@
             <div class="phone-input-row">
               <!-- Country Code Dropdown -->
               <div class="country-code-wrapper">
-                <select v-model="countryCode" class="country-code-select">
-                  <option v-for="c in countryCodes" :key="c.code" :value="c.code">
-                    {{ c.code }} {{ c.abbr || c.country.substring(0, 2).toUpperCase() }}
-                  </option>
-                </select>
+                <template v-if="isLoadingCountries">
+                  <div class="country-code-select loading-placeholder">
+                    <ion-spinner name="crescent" class="loading-spinner"></ion-spinner>
+                  </div>
+                </template>
+                <template v-else>
+                  <select v-model="countryCode" class="country-code-select">
+                    <option v-for="c in countryCodes" :key="c.code" :value="c.code">
+                      {{ c.code }} {{ c.abbr || c.country.substring(0, 2).toUpperCase() }}
+                    </option>
+                  </select>
+                </template>
               </div>
               <!-- Phone Number Input -->
               <div
@@ -88,10 +96,10 @@
 
           <!-- Send OTP Button (shows when email is valid but OTP not sent) -->
           <ion-button
-            v-if="isEmailValid && !showOtpSection && !isEmailVerified"
+            v-if="isEmailValid && !showOtpSection && !isEmailVerified && !emailExistsError"
             expand="block"
             class="send-otp-button"
-            :disabled="isSendingOtp"
+            :disabled="isSendingOtp || isCheckingEmail"
             @click="sendOtp"
           >
             <ion-icon slot="start" :icon="paperPlaneOutline"></ion-icon>
@@ -754,6 +762,19 @@ const handleNext = () => {
 .country-code-select option {
   font-size: 16px;
   padding: 10px;
+}
+
+.loading-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
 }
 
 .phone-number-wrapper {

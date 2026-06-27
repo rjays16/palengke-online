@@ -56,11 +56,18 @@
             <div class="phone-input-row">
               <!-- Country Code Dropdown -->
               <div class="country-code-wrapper">
-                <select v-model="countryCode" class="country-code-select">
-                  <option v-for="c in countryCodes" :key="c.code" :value="c.code">
-                    {{ c.code }} {{ c.abbr || c.country.substring(0, 2).toUpperCase() }}
-                  </option>
-                </select>
+                <template v-if="isLoadingCountries">
+                  <div class="country-code-select loading-placeholder">
+                    <ion-spinner name="crescent" class="loading-spinner"></ion-spinner>
+                  </div>
+                </template>
+                <template v-else>
+                  <select v-model="countryCode" class="country-code-select">
+                    <option v-for="c in countryCodes" :key="c.code" :value="c.code">
+                      {{ c.code }} {{ c.abbr || c.country.substring(0, 2).toUpperCase() }}
+                    </option>
+                  </select>
+                </template>
               </div>
               <!-- Phone Number Input -->
               <div
@@ -773,6 +780,19 @@ const handleNext = () => {
 .country-code-select option {
   font-size: 16px;
   padding: 10px;
+}
+
+.loading-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
 }
 
 .phone-number-wrapper {
