@@ -78,70 +78,66 @@ const showLoadingModal = async (message = 'Loading...', autoDismiss = true) => {
   return alert;
 };
 
-// Check if user's country is available
+// Check if user's country / region / area is available
 const checkAvailability = async () => {
-  // Get user's registration data
   const savedData = localStorage.getItem('registrationData');
-  if (!savedData) return { available: true }; // No registration data, allow login
+  if (!savedData) return { available: true };
 
   const registration = JSON.parse(savedData);
   const userCountry = registration.country;
   const userCity = registration.birthplace || '';
 
-  if (!userCountry) return { available: true }; // No country set, allow login
+  if (!userCountry) return { available: true };
 
   try {
-    // Fetch enabled countries from backend
     const response = await fetch(`${API_BASE}/countries`);
     const data = await response.json();
 
     if (!data.countries || data.countries.length === 0) {
-      return { available: false, reason: 'country', message: 'No countries are currently enabled.' };
+      return { available: false, reason: 'country' };
     }
 
-    // Check if user's country is enabled
     const countryEnabled = data.countries.find((c) => c.code === userCountry && c.enabled);
-
     if (!countryEnabled) {
-      return {
-        available: false,
-        reason: 'country',
-        message: 'This app is not available in your country.',
-      };
+      return { available: false, reason: 'country' };
     }
 
-    // If Philippines, check if city is enabled
-    if (userCountry === 'PH') {
-      const locResponse = await fetch(`${API_BASE}/locations`);
-      const locData = await locResponse.json();
+    const locResponse = await fetch(`${API_BASE}/locations`);
+    const locData = await locResponse.json();
 
-      if (locData.locations) {
-        // Search through all cities in all regions
-        let cityFound = false;
-        for (const region of locData.locations) {
-          for (const city of region.cities) {
-            if (city.checked && userCity.toLowerCase().includes(city.name.toLowerCase())) {
-              cityFound = true;
-              break;
-            }
-          }
-          if (cityFound) break;
-        }
+    if (locData.locations && locData.locations.length > 0) {
+      let foundRegion = null;
+      let foundCity = null;
 
-        if (!cityFound) {
-          return {
-            available: false,
-            reason: 'area',
-            message: 'This app is not available yet in your area.',
-          };
+      for (const region of locData.locations) {
+        const city = region.cities.find((c) =>
+          userCity.toLowerCase().includes(c.name.toLowerCase())
+        );
+        if (city) {
+          foundRegion = region;
+          foundCity = city;
+          break;
         }
+      }
+
+      if (!foundRegion) {
+        return { available: false, reason: 'area' };
+      }
+
+      const regionHasEnabledCities = foundRegion.cities.some((c) => c.checked);
+      if (!regionHasEnabledCities) {
+        return { available: false, reason: 'region' };
+      }
+
+      if (!foundCity.checked) {
+        return { available: false, reason: 'area' };
       }
     }
 
     return { available: true };
   } catch (err) {
     console.error('Availability check failed:', err);
-    return { available: true }; // Allow login on API failure
+    return { available: true };
   }
 };
 
@@ -248,19 +244,7 @@ const handleLogin = async () => {
     const availability = await checkAvailability();
 
     if (!availability.available) {
-      const alert = await alertController.create({
-        header: availability.reason === 'country' ? 'Country Not Available' : 'Area Not Available',
-        message: availability.message,
-        cssClass: 'availability-alert',
-        buttons: [
-          {
-            text: 'OK',
-            role: 'cancel',
-            cssClass: 'alert-button-cancel',
-          },
-        ],
-      });
-      await alert.present();
+      router.push(`/area-not-available/${availability.reason}`);
       return;
     }
 

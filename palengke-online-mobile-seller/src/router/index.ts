@@ -25,6 +25,7 @@ import HelpSupportPage from '@/views/HelpSupportPage.vue';
 import DevicesPage from '@/views/DevicesPage.vue';
 import AboutPage from '@/views/AboutPage.vue';
 import PlansPage from '@/views/PlansPage.vue';
+import AreaNotAvailablePage from '@/views/AreaNotAvailablePage.vue';
 
 // ============================================
 // REGISTRATION FLOW IMPORTS
@@ -60,6 +61,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/account-pending',
     name: 'AccountPending',
     component: AccountPendingPage,
+    meta: { requiresAuth: false },
+  },
+  {
+    path: '/area-not-available/:reason',
+    name: 'AreaNotAvailable',
+    component: AreaNotAvailablePage,
     meta: { requiresAuth: false },
   },
   {
