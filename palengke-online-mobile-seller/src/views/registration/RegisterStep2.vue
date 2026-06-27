@@ -74,17 +74,25 @@
             <label class="input-label">Country *</label>
             <div class="input-wrapper" :class="{ error: errors.country }">
               <ion-icon :icon="globeOutline" class="input-icon"></ion-icon>
-              <select
-                v-model="formData.country"
-                class="custom-input with-icon custom-select"
-                @blur="validateField('country')"
-                @change="errors.country = ''"
-              >
-                <option value="" disabled>Select your country</option>
-                <option v-for="c in countries" :key="c.code" :value="c.code">
-                  {{ c.name }}
-                </option>
-              </select>
+              <template v-if="isLoadingCountries">
+                <div class="custom-input with-icon loading-placeholder">
+                  <ion-spinner name="crescent" class="loading-spinner"></ion-spinner>
+                  <span>Loading countries...</span>
+                </div>
+              </template>
+              <template v-else>
+                <select
+                  v-model="formData.country"
+                  class="custom-input with-icon custom-select"
+                  @blur="validateField('country')"
+                  @change="errors.country = ''"
+                >
+                  <option value="" disabled>Select your country</option>
+                  <option v-for="c in countries" :key="c.code" :value="c.code">
+                    {{ c.name }}
+                  </option>
+                </select>
+              </template>
             </div>
             <span v-if="errors.country" class="error-message">{{ errors.country }}</span>
           </div>
@@ -192,7 +200,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { IonPage, IonContent, IonButton, IonIcon } from '@ionic/vue';
+import { IonPage, IonContent, IonButton, IonIcon, IonSpinner } from '@ionic/vue';
 import {
   arrowBackOutline,
   arrowForwardOutline,
@@ -215,7 +223,7 @@ onMounted(async () => {
   try {
     const res = await fetch(`${API_BASE}/api/countries`);
     const data = await res.json();
-    countries.value = data.countries.map(c => ({ code: c.code, name: c.name }));
+    countries.value = data.countries.filter(c => c.enabled).map(c => ({ code: c.code, name: c.name }));
   } catch {
     countries.value = [];
   } finally {
@@ -614,6 +622,19 @@ const handleNext = () => {
 
 .custom-select:invalid {
   color: var(--color-input-placeholder);
+}
+
+.loading-placeholder {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
 }
 
 /* Error State */

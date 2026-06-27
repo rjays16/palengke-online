@@ -73,6 +73,16 @@ import { lockClosedOutline } from 'ionicons/icons';
 const router = useRouter();
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
+const showLoadingModal = async (message = 'Loading...') => {
+  const alert = await alertController.create({
+    cssClass: 'loading-modal-simple',
+    message: message,
+    buttons: [],
+  });
+  await alert.present();
+  return alert;
+};
+
 const userEmail = ref(localStorage.getItem('userEmail') || '');
 const deviceId = ref(localStorage.getItem('deviceId') || '');
 
@@ -260,6 +270,8 @@ const handleForgotPin = async () => {
       {
         text: 'Send Code',
         handler: async () => {
+          const loading = await showLoadingModal('Sending verification code...');
+
           try {
             const res = await fetch(`${API_BASE}/api/driver/forgot-pin`, {
               method: 'POST',
@@ -268,6 +280,8 @@ const handleForgotPin = async () => {
             });
 
             const data = await res.json();
+
+            await loading.dismiss();
 
             if (!res.ok) {
               throw new Error(data.message || 'Failed to send code.');
@@ -279,6 +293,7 @@ const handleForgotPin = async () => {
               query: { mode: 'forgot-pin' },
             });
           } catch (e) {
+            await loading.dismiss();
             const errAlert = await alertController.create({
               header: 'Error',
               message: e.message || 'Failed to send verification code.',
@@ -503,5 +518,54 @@ onMounted(async () => {
     height: 46px;
     font-size: 18px;
   }
+}
+
+/* Loading Modal Styling */
+:deep(.loading-modal-simple .alert-wrapper) {
+  border-radius: 20px;
+  text-align: center;
+  max-width: 280px;
+  padding: 50px 30px;
+  background: white;
+}
+
+:deep(.loading-modal-simple .alert-head) {
+  display: none;
+}
+
+:deep(.loading-modal-simple .alert-message) {
+  padding: 0;
+  position: relative;
+  padding-top: 70px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+:deep(.loading-modal-simple .alert-message::before) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: -25px;
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f0f0f0;
+  border-top: 5px solid #4CAF50;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+:deep(.loading-modal-simple .alert-button-group) {
+  display: none;
 }
 </style>

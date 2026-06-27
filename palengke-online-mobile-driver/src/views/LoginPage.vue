@@ -225,17 +225,18 @@ const handleLogin = async () => {
       throw new Error(data.message || 'Login failed.');
     }
 
-    isLoading.value = false;
-
     localStorage.setItem('hasPin', data.hasPin ? 'true' : 'false');
     localStorage.setItem('userEmail', email.value);
 
     const availability = await checkAvailability();
 
     if (!availability.available) {
+      isLoading.value = false;
       router.push(`/area-not-available/${availability.reason}`);
       return;
     }
+
+    isLoading.value = false;
 
     const alert = await alertController.create({
       header: 'Verify Account',
