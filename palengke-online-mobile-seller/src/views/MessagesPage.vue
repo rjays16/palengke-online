@@ -277,11 +277,41 @@ import {
   cubeOutline,
 } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
+import { useChatWebSocket } from '@/composables/useChatWebSocket';
 const QUICK_REPLIES = ['Yes, available po!', 'Out of stock po', 'On the way!', 'Thank you!'];
 
 const router = useRouter();
 
 const userEmail = localStorage.getItem('userEmail');
+
+const chatWs = useChatWebSocket(userEmail, {
+  onConversationsUpdate(list) {
+    conversations.value = list;
+    if (selectedChat.value) {
+      const updated = list.find((c) => c.id === selectedChat.value.id);
+      if (updated) {
+        const prevMsgCount = selectedChat.value.messages.length;
+        selectedChat.value = { ...selectedChat.value, ...updated };
+        if (updated.lastMessage !== selectedChat.value.lastMessage) {
+          if (!updated.muted) playMessageSound();
+        }
+      }
+    }
+  },
+  onMessagesUpdate(conversationId, messages) {
+    if (selectedChat.value && selectedChat.value.id === conversationId) {
+      const prevLen = selectedChat.value.messages.length;
+      selectedChat.value.messages = messages;
+      if (messages.length > prevLen && !selectedChat.value.muted) {
+        playMessageSound();
+      }
+      nextTick(() => scrollToBottom());
+    }
+  },
+  onNewMessageSound() {
+    playMessageSound();
+  },
+});
 
 // State
 const showSearch = ref(false);
@@ -433,11 +463,11 @@ const openChat = async (conversation) => {
     scrollToBottom();
   });
 
-  startMessagePolling(conversation.id);
+  chatWs.watchConversation(conversation.id);
 };
 
 const closeChat = () => {
-  stopMessagePolling();
+  chatWs.watchConversation(null);
   selectedChat.value = null;
   newMessage.value = '';
 };
@@ -483,73 +513,7 @@ const playCallSound = () => {
   } catch {}
 };
 
-// Polling
-let conversationCount = 0;
-let pollTimer = null;
-
-const startPolling = () => {
-  conversationCount = conversations.value.length;
-  pollTimer = setInterval(async () => {
-    if (!userEmail) return;
-    const prev = conversationCount;
-    try {
-      const res = await fetch(`${API_BASE}/seller/conversations?email=${encodeURIComponent(userEmail)}`, {
-        headers: { Accept: 'application/json' },
-      });
-      const data = await res.json();
-      const newList = data.conversations || [];
-      if (newList.length > prev && prev > 0) {
-        const hasUnmutedNew = newList.some((c) => !c.muted);
-        if (hasUnmutedNew) {
-          playMessageSound();
-        }
-      }
-      conversations.value = newList;
-      conversationCount = newList.length;
-    } catch {}
-  }, 5000);
-};
-
-const stopPolling = () => {
-  if (pollTimer) {
-    clearInterval(pollTimer);
-    pollTimer = null;
-  }
-};
-
-// Poll for new messages in open chat
-let messagePollTimer = null;
-
-const startMessagePolling = (conversationId) => {
-  stopMessagePolling();
-  messagePollTimer = setInterval(async () => {
-    if (!userEmail || !selectedChat.value) return;
-    try {
-      const res = await fetch(
-        `${API_BASE}/seller/conversations/${conversationId}?email=${encodeURIComponent(userEmail)}`,
-        {
-          headers: { Accept: 'application/json' },
-        },
-      );
-      const data = await res.json();
-      const serverMessages = data.messages || [];
-      if (serverMessages.length > selectedChat.value.messages.length) {
-        if (!selectedChat.value.muted) {
-          playMessageSound();
-        }
-        selectedChat.value.messages = serverMessages;
-        nextTick(() => scrollToBottom());
-      }
-    } catch {}
-  }, 3000);
-};
-
-const stopMessagePolling = () => {
-  if (messagePollTimer) {
-    clearInterval(messagePollTimer);
-    messagePollTimer = null;
-  }
-};
+// Real-time updates via WebSocket (falls back to polling)
 
 const scrollToBottom = () => {
   if (chatContent.value && chatContent.value.$el) {
@@ -799,16 +763,13 @@ const goHome = () => {
 
 onMounted(() => {
   document.addEventListener('ionBackButton', handleBackButton);
-  loadConversations().then(() => {
-    conversationCount = conversations.value.length;
-    startPolling();
-  });
+  loadConversations();
+  chatWs.connect();
 });
 
 onUnmounted(() => {
   document.removeEventListener('ionBackButton', handleBackButton);
-  stopPolling();
-  stopMessagePolling();
+  chatWs.disconnect();
 });
 </script>
 
