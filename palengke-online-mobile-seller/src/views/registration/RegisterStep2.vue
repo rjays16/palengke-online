@@ -212,8 +212,10 @@ import {
   globeOutline,
 } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
+import { useRegistrationStore } from '@/stores/registration';
 
 const router = useRouter();
+const reg = useRegistrationStore();
 
 const countries = ref([]);
 const isLoadingCountries = ref(true);
@@ -265,18 +267,15 @@ const maxDate = computed(() => {
 
 // Load data from Step 1
 onMounted(() => {
-  const savedData = localStorage.getItem('registrationData');
-  if (savedData) {
-    const data = JSON.parse(savedData);
-    if (data.firstName) formData.value.firstName = data.firstName;
-    if (data.middleName) formData.value.middleName = data.middleName;
-    if (data.lastName) formData.value.lastName = data.lastName;
-    if (data.country) formData.value.country = data.country;
-    if (data.birthdate) formData.value.birthdate = data.birthdate;
-    if (data.birthplace) formData.value.birthplace = data.birthplace;
-    if (data.currentAddress) formData.value.currentAddress = data.currentAddress;
-    if (data.sameAsBirthplace) sameAsBirthplace.value = data.sameAsBirthplace;
-  }
+  reg.load();
+  if (reg.data.firstName) formData.value.firstName = reg.data.firstName;
+  if (reg.data.middleName) formData.value.middleName = reg.data.middleName;
+  if (reg.data.lastName) formData.value.lastName = reg.data.lastName;
+  if (reg.data.country) formData.value.country = reg.data.country;
+  if (reg.data.birthdate) formData.value.birthdate = reg.data.birthdate;
+  if (reg.data.birthplace) formData.value.birthplace = reg.data.birthplace;
+  if (reg.data.currentAddress) formData.value.currentAddress = reg.data.currentAddress;
+  if (reg.data.sameAsBirthplace) sameAsBirthplace.value = reg.data.sameAsBirthplace;
 });
 
 // Field validation
@@ -398,9 +397,7 @@ const goBack = () => {
 };
 
 const saveData = () => {
-  const existingData = JSON.parse(localStorage.getItem('registrationData') || '{}');
-  const updatedData = {
-    ...existingData,
+  reg.setFields({
     firstName: formData.value.firstName,
     middleName: formData.value.middleName,
     lastName: formData.value.lastName,
@@ -409,8 +406,7 @@ const saveData = () => {
     birthplace: formData.value.birthplace,
     currentAddress: formData.value.currentAddress,
     sameAsBirthplace: sameAsBirthplace.value,
-  };
-  localStorage.setItem('registrationData', JSON.stringify(updatedData));
+  });
 };
 
 const handleNext = () => {

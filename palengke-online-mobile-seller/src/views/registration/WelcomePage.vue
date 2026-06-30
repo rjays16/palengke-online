@@ -76,11 +76,13 @@
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon, toastController } from '@ionic/vue';
 import { storefrontOutline, cashOutline, peopleOutline } from 'ionicons/icons';
+import { useRegistrationStore } from '@/stores/registration';
 
 const router = useRouter();
+const reg = useRegistrationStore();
 
 const goToRegister = () => {
-  localStorage.removeItem('registrationData');
+  reg.clearAll();
   router.push('/register/step1');
 };
 

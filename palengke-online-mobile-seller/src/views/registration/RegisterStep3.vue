@@ -180,8 +180,10 @@ import {
   homeOutline,
   informationCircleOutline,
 } from 'ionicons/icons';
+import { useRegistrationStore } from '@/stores/registration';
 
 const router = useRouter();
+const reg = useRegistrationStore();
 
 // Cities by region
 const citiesByRegion = {
@@ -781,16 +783,13 @@ const barangayCount = computed(() => {
 
 // Load data
 onMounted(() => {
-  const savedData = localStorage.getItem('registrationData');
-  if (savedData) {
-    const data = JSON.parse(savedData);
-    if (data.storeName) formData.value.storeName = data.storeName;
-    if (data.region) formData.value.region = data.region;
-    if (data.city) formData.value.city = data.city;
-    if (data.barangay) formData.value.barangay = data.barangay;
-    if (data.storePlace) formData.value.storePlace = data.storePlace;
-    if (data.completeAddress) formData.value.completeAddress = data.completeAddress;
-  }
+  reg.load();
+  if (reg.data.storeName) formData.value.storeName = reg.data.storeName;
+  if (reg.data.region) formData.value.region = reg.data.region;
+  if (reg.data.city) formData.value.city = reg.data.city;
+  if (reg.data.barangay) formData.value.barangay = reg.data.barangay;
+  if (reg.data.storePlace) formData.value.storePlace = reg.data.storePlace;
+  if (reg.data.completeAddress) formData.value.completeAddress = reg.data.completeAddress;
 });
 
 // Region change handler
@@ -898,17 +897,14 @@ const goBack = () => {
 };
 
 const saveData = () => {
-  const existingData = JSON.parse(localStorage.getItem('registrationData') || '{}');
-  const updatedData = {
-    ...existingData,
+  reg.setFields({
     storeName: formData.value.storeName,
     region: formData.value.region,
     city: formData.value.city,
     barangay: formData.value.barangay,
     storePlace: formData.value.storePlace,
     completeAddress: formData.value.completeAddress,
-  };
-  localStorage.setItem('registrationData', JSON.stringify(updatedData));
+  });
 };
 
 const handleNext = () => {

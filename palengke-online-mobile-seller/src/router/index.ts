@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router';
 import type { RouteRecordRaw } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 import { getSubscription, isExpired } from '@/services/subscriptionService';
 
 // ============================================
@@ -274,9 +275,10 @@ const router = createRouter({
 // AUTHENTICATION GUARD
 // ============================================
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
-  const hasPin = localStorage.getItem('hasPin') === 'true';
-  const userEmail = localStorage.getItem('userEmail');
+  const auth = useAuthStore();
+  const isAuthenticated = auth.isAuthenticated;
+  const hasPin = auth.hasPin;
+  const userEmail = auth.userEmail;
 
   if (to.meta.requiresAuth && !isAuthenticated) {
     if (hasPin && userEmail) {

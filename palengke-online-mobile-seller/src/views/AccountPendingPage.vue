@@ -36,17 +36,19 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon } from '@ionic/vue';
-import { logInOutline } from 'ionicons/icons';
+import { timeOutline, arrowBackOutline } from 'ionicons/icons';
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
+const auth = useAuthStore();
 const email = ref('');
 
 onMounted(() => {
-  email.value = localStorage.getItem('userEmail') || '';
+  email.value = auth.userEmail || '';
 });
 
 const goToLogin = () => {
-  localStorage.removeItem('userEmail');
+  auth.clearAuth();
   router.push('/login');
 };
 </script>

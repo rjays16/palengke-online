@@ -429,8 +429,10 @@ import {
   checkmarkCircleOutline,
 } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
+const auth = useAuthStore();
 
 // Profile Data
 const profileData = ref({
@@ -1429,9 +1431,9 @@ const handleLogout = async () => {
         text: 'Logout',
         role: 'destructive',
         handler: async () => {
-          const email = localStorage.getItem('userEmail');
-          const deviceId = localStorage.getItem('deviceId');
-          const hasPin = localStorage.getItem('hasPin');
+          const email = auth.userEmail;
+          const deviceId = auth.deviceId;
+          const hasPin = auth.hasPin;
 
           const loading = await alertController.create({
             cssClass: 'loading-modal-simple',
@@ -1450,10 +1452,10 @@ const handleLogout = async () => {
             // silent
           }
 
-          ['isAuthenticated', 'token', 'pendingAuth'].forEach((k) => localStorage.removeItem(k));
-          if (email) localStorage.setItem('userEmail', email);
-          if (deviceId) localStorage.setItem('deviceId', deviceId);
-          if (hasPin) localStorage.setItem('hasPin', hasPin);
+          auth.clearAuth();
+          if (email) auth.userEmail = email;
+          if (deviceId) auth.deviceId = deviceId;
+          if (hasPin) auth.setHasPin(true);
 
           await loading.dismiss();
           showSuccessLogout();

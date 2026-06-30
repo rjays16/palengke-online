@@ -297,6 +297,7 @@
 import { API_BASE } from '@/config/api';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 import { onIonViewWillEnter } from '@ionic/vue';
 import { getSubscription, daysLeft, isExpired, refreshSubscription } from '@/services/subscriptionService';
 import {
@@ -346,6 +347,7 @@ import {
 } from 'ionicons/icons';
 
 const router = useRouter();
+const auth = useAuthStore();
 
 // Seller Data
 const sellerName = ref('Loading...');
@@ -627,7 +629,7 @@ const handleLogout = async () => {
         text: 'Logout',
         role: 'destructive',
         handler: () => {
-          localStorage.removeItem('isAuthenticated');
+          auth.clearAuth();
           showSuccessLogout();
           setTimeout(() => {
             router.push('/login');

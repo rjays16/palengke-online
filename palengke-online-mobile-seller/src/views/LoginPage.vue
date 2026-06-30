@@ -52,8 +52,12 @@ import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon, IonSpinner, alertController } from '@ionic/vue';
 import { mailOutline } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
+import { useAuthStore } from '@/stores/auth';
+import { useRegistrationStore } from '@/stores/registration';
 
 const router = useRouter();
+const auth = useAuthStore();
+const reg = useRegistrationStore();
 
 // Form data
 const email = ref('');
@@ -80,12 +84,10 @@ const showLoadingModal = async (message = 'Loading...', autoDismiss = true) => {
 
 // Check if user's country / region / area is available
 const checkAvailability = async () => {
-  const savedData = localStorage.getItem('registrationData');
-  if (!savedData) return { available: true };
-
-  const registration = JSON.parse(savedData);
-  const userCountry = registration.country;
-  const userCity = registration.birthplace || '';
+  reg.load();
+  const userCountry = reg.data.country;
+  const userCity = reg.data.birthplace || '';
+  if (!userCountry) return { available: true };
 
   if (!userCountry) return { available: true };
 
@@ -236,7 +238,8 @@ const handleLogin = async () => {
       throw new Error(data.message || 'Login failed.');
     }
 
-    localStorage.setItem('hasPin', data.hasPin ? 'true' : 'false');
+    auth.setHasPin(data.hasPin);
+    auth.userEmail = email.value;
     localStorage.setItem('userEmail', email.value);
 
     const availability = await checkAvailability();
@@ -324,13 +327,10 @@ const goToSignup = () => {
 
 // Ensure device ID exists and check backend for PIN
 onMounted(async () => {
-  if (!localStorage.getItem('deviceId')) {
-    const deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
-    localStorage.setItem('deviceId', deviceId);
-  }
+  auth.initFromStorage();
 
-  const email = localStorage.getItem('userEmail');
-  const devId = localStorage.getItem('deviceId');
+  const email = auth.userEmail;
+  const devId = auth.deviceId;
   if (email && devId) {
     try {
       const res = await fetch(`${API_BASE}/seller/device/status`, {
@@ -340,14 +340,14 @@ onMounted(async () => {
       });
       const data = await res.json();
       if (data.hasPin) {
-        localStorage.setItem('hasPin', 'true');
+        auth.setHasPin(true);
         router.replace('/pin-login');
       } else {
-        localStorage.removeItem('hasPin');
+        auth.setHasPin(false);
       }
     } catch {
-      // fallback to localStorage check
-      if (localStorage.getItem('hasPin') === 'true') {
+      // fallback to store check
+      if (auth.hasPin) {
         router.replace('/pin-login');
       }
     }

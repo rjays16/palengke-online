@@ -195,8 +195,10 @@ import {
   informationCircleOutline,
   alertCircleOutline,
 } from 'ionicons/icons';
+import { useRegistrationStore } from '@/stores/registration';
 
 const router = useRouter();
+const reg = useRegistrationStore();
 
 const countryCodes = ref([]);
 const isLoadingCountries = ref(true);
@@ -569,15 +571,13 @@ const goBack = () => {
 const handleNext = () => {
   if (!isFormValid.value) return;
 
-  // Save data
-  const registrationData = {
+  reg.setFields({
     email: email.value,
     countryCode: countryCode.value,
     phone: phone.value,
     fullPhone: `${countryCode.value}${phone.value}`,
     emailVerified: isEmailVerified.value,
-  };
-  localStorage.setItem('registrationData', JSON.stringify(registrationData));
+  });
 
   // Navigate to Step 2
   router.push('/register/step2');

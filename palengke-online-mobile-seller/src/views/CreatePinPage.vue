@@ -68,8 +68,10 @@ import {
 } from '@ionic/vue';
 import { keyOutline, shieldCheckmarkOutline } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
+const auth = useAuthStore();
 
 const step = ref('create');
 const pinDigits = ref(['', '', '', '', '']);
@@ -78,8 +80,8 @@ const pinRefs = ref([]);
 const isSaving = ref(false);
 const errorMessage = ref('');
 
-const userEmail = ref(localStorage.getItem('userEmail') || '');
-const deviceId = ref(localStorage.getItem('deviceId') || '');
+const userEmail = ref(auth.userEmail || '');
+const deviceId = ref(auth.deviceId || '');
 
 const isCodeComplete = computed(() => {
   return pinDigits.value.every((digit) => digit !== '');
@@ -152,11 +154,7 @@ const handleNext = async () => {
       throw new Error(data.message || 'Failed to save PIN.');
     }
 
-    localStorage.setItem('hasPin', 'true');
-    localStorage.setItem('isAuthenticated', 'true');
-    if (data.token) {
-      localStorage.setItem('token', data.token);
-    }
+    auth.setSession(userEmail.value, data.token || '', true, deviceId.value);
 
     const alert = await alertController.create({
       cssClass: 'success-modal',

@@ -34,9 +34,11 @@
 import { computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon } from '@ionic/vue';
-import { logInOutline } from 'ionicons/icons';
+import { locationOutline, arrowBackOutline } from 'ionicons/icons';
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
+const auth = useAuthStore();
 const route = useRoute();
 const reason = route.params.reason || 'country';
 
@@ -68,7 +70,7 @@ const iconClass = computed(() => config.value.iconClass);
 const reasonLabel = computed(() => config.value.label);
 
 const goToLogin = () => {
-  localStorage.removeItem('userEmail');
+  auth.clearAuth();
   router.push('/login');
 };
 </script>

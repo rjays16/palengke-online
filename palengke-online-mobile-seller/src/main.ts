@@ -1,4 +1,5 @@
 import { createApp } from 'vue';
+import { createPinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
 
@@ -102,7 +103,7 @@ library.add(
   faStar,
 );
 
-const app = createApp(App).use(IonicVue).use(router);
+const app = createApp(App).use(IonicVue).use(router).use(createPinia());
 
 app.component('font-awesome-icon', FontAwesomeIcon);
 

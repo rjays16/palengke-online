@@ -81,12 +81,14 @@ import {
 } from '@ionic/vue';
 import { mailOpenOutline, shieldCheckmarkOutline } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
 const route = useRoute();
+const auth = useAuthStore();
 
-// Get email from route params or localStorage
-const userEmail = ref(route.params.email || localStorage.getItem('userEmail') || '');
+// Get email from route params or store
+const userEmail = ref(route.params.email || auth.userEmail || '');
 
 // Computed to mask email for display
 const maskedEmail = computed(() => {
@@ -250,11 +252,7 @@ const verifyCode = async () => {
 
     localStorage.removeItem('pendingAuth');
 
-    // Generate device ID if not exists
-    if (!localStorage.getItem('deviceId')) {
-      const deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
-      localStorage.setItem('deviceId', deviceId);
-    }
+    auth.initFromStorage();
 
     await showSuccessModal('Verification successful!');
 
@@ -265,8 +263,7 @@ const verifyCode = async () => {
       return;
     }
 
-    // Check if seller already has a PIN
-    const hasPin = localStorage.getItem('hasPin') === 'true';
+    const hasPin = auth.hasPin;
     if (hasPin) {
       router.push('/pin-login');
     } else {

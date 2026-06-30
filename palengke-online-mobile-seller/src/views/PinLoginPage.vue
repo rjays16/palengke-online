@@ -70,8 +70,12 @@ import {
 } from '@ionic/vue';
 import { lockClosedOutline } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
+import { useAuthStore } from '@/stores/auth';
+import { useRegistrationStore } from '@/stores/registration';
 
 const router = useRouter();
+const auth = useAuthStore();
+const reg = useRegistrationStore();
 
 const showLoadingModal = async (message = 'Loading...') => {
   const alert = await alertController.create({
@@ -83,16 +87,14 @@ const showLoadingModal = async (message = 'Loading...') => {
   return alert;
 };
 
-const userEmail = ref(localStorage.getItem('userEmail') || '');
-const deviceId = ref(localStorage.getItem('deviceId') || '');
+const userEmail = ref(auth.userEmail || '');
+const deviceId = ref(auth.deviceId || '');
 
 const checkAvailability = async () => {
-  const savedData = localStorage.getItem('registrationData');
-  if (!savedData) return { available: true };
-
-  const registration = JSON.parse(savedData);
-  const userCountry = registration.country;
-  const userCity = registration.birthplace || '';
+  reg.load();
+  const userCountry = reg.data.country;
+  const userCity = reg.data.birthplace || '';
+  if (!userCountry) return { available: true };
 
   if (!userCountry) return { available: true };
 
@@ -219,8 +221,7 @@ const verifyPin = async () => {
       throw new Error(data.message || 'Invalid PIN.');
     }
 
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('isAuthenticated', 'true');
+    auth.setSession(userEmail.value, data.token, true, deviceId.value);
 
     const availability = await checkAvailability();
 
@@ -232,7 +233,7 @@ const verifyPin = async () => {
     router.push('/home');
   } catch (error) {
     if (error.message && error.message.includes('No PIN set')) {
-      localStorage.removeItem('hasPin');
+      auth.setHasPin(false);
       router.push('/login');
       return;
     }
@@ -250,11 +251,7 @@ const verifyPin = async () => {
 };
 
 const goToLogin = () => {
-  localStorage.removeItem('isAuthenticated');
-  localStorage.removeItem('token');
-  localStorage.removeItem('hasPin');
-  localStorage.removeItem('deviceId');
-  localStorage.removeItem('userEmail');
+  auth.clearAuth();
   router.push('/login');
 };
 
@@ -309,11 +306,9 @@ const handleForgotPin = async () => {
 };
 
 onMounted(async () => {
-  if (!localStorage.getItem('deviceId')) {
-    const newId = 'device_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
-    localStorage.setItem('deviceId', newId);
-    deviceId.value = newId;
-  }
+  auth.initFromStorage();
+  userEmail.value = auth.userEmail || '';
+  deviceId.value = auth.deviceId || '';
   if (!userEmail.value) {
     router.replace('/login');
     return;
@@ -327,13 +322,13 @@ onMounted(async () => {
     });
     const data = await res.json();
     if (!data.hasPin) {
-      localStorage.removeItem('hasPin');
+      auth.setHasPin(false);
       router.replace('/login');
       return;
     }
   } catch {
-    // fallback — rely on localStorage
-    if (!localStorage.getItem('hasPin')) {
+    // fallback — rely on store
+    if (!auth.hasPin) {
       router.replace('/login');
       return;
     }

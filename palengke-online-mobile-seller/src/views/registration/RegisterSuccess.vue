@@ -142,8 +142,10 @@ import {
   timeOutline,
 } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
+import { useRegistrationStore } from '@/stores/registration';
 
 const router = useRouter();
+const reg = useRegistrationStore();
 
 // Account data
 const accountData = ref({
@@ -165,10 +167,10 @@ const isVerified = computed(() => {
 
 // Submit registration to backend
 const submitRegistration = async () => {
-  const savedData = localStorage.getItem('registrationData');
-  if (!savedData) return;
+  reg.load();
+  const d = reg.getAll();
+  if (!d.email) return;
 
-  const existingData = JSON.parse(savedData);
   isSubmitting.value = true;
   submitError.value = '';
 
@@ -177,31 +179,31 @@ const submitRegistration = async () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: existingData.email,
-        country_code: existingData.countryCode,
-        phone: existingData.phone,
-        full_phone: existingData.fullPhone,
-        email_verified: existingData.emailVerified,
-        first_name: existingData.firstName,
-        middle_name: existingData.middleName || '',
-        last_name: existingData.lastName,
-        country: existingData.country,
-        birthdate: existingData.birthdate,
-        birthplace: existingData.birthplace,
-        current_address: existingData.currentAddress,
-        store_name: existingData.storeName,
-        region: existingData.region,
-        city: existingData.city,
-        barangay: existingData.barangay,
-        store_place: existingData.storePlace,
-        complete_address: existingData.completeAddress,
-        verification_choice: existingData.verificationChoice,
-        verification_status: existingData.verificationStatus,
-        id_type: existingData.idType || null,
-        id_type_name: existingData.idTypeName || null,
-        id_front_photo: existingData.idFrontPhoto || null,
-        id_back_photo: existingData.idBackPhoto || null,
-        selfie_photo: existingData.selfiePhoto || null,
+        email: d.email,
+        country_code: d.countryCode,
+        phone: d.phone,
+        full_phone: d.fullPhone,
+        email_verified: d.emailVerified,
+        first_name: d.firstName,
+        middle_name: d.middleName || '',
+        last_name: d.lastName,
+        country: d.country,
+        birthdate: d.birthdate,
+        birthplace: d.birthplace,
+        current_address: d.currentAddress,
+        store_name: d.storeName,
+        region: d.region,
+        city: d.city,
+        barangay: d.barangay,
+        store_place: d.storePlace,
+        complete_address: d.completeAddress,
+        verification_choice: d.verificationChoice,
+        verification_status: d.verificationStatus,
+        id_type: d.idType || null,
+        id_type_name: d.idTypeName || null,
+        id_front_photo: d.idFrontPhoto || null,
+        id_back_photo: d.idBackPhoto || null,
+        selfie_photo: d.selfiePhoto || null,
       }),
     });
 
@@ -210,8 +212,7 @@ const submitRegistration = async () => {
       throw new Error(errorData.message || 'Registration failed.');
     }
 
-    existingData.verificationSubmittedAt = new Date().toISOString();
-    localStorage.setItem('registrationData', JSON.stringify(existingData));
+    reg.setFields({ verificationSubmittedAt: new Date().toISOString() });
 
     isSubmitting.value = false;
 
@@ -224,28 +225,25 @@ const submitRegistration = async () => {
 
 // Load account data
 onMounted(() => {
-  const savedData = localStorage.getItem('registrationData');
-  if (savedData) {
-    const data = JSON.parse(savedData);
+  reg.load();
 
-    // Build full name
-    const middle = data.middleName ? ` ${data.middleName} ` : ' ';
-    accountData.value.fullName = `${data.firstName}${middle}${data.lastName}`;
+  // Build full name
+  const middle = reg.data.middleName ? ` ${reg.data.middleName} ` : ' ';
+  accountData.value.fullName = `${reg.data.firstName}${middle}${reg.data.lastName}`;
 
-    accountData.value.email = data.email || '';
-    accountData.value.phone = data.phone || '';
-    accountData.value.storeName = data.storeName || '';
-    accountData.value.verificationStatus = data.verificationStatus || 'not_verified';
+  accountData.value.email = reg.data.email || '';
+  accountData.value.phone = reg.data.phone || '';
+  accountData.value.storeName = reg.data.storeName || '';
+  accountData.value.verificationStatus = reg.data.verificationStatus || 'not_verified';
 
-    // If skipped verification, submit registration now
-    if (data.verificationChoice === 'skip') {
-      submitRegistration();
-    }
+  // If skipped verification, submit registration now
+  if (reg.data.verificationChoice === 'skip') {
+    submitRegistration();
   }
 });
 
 const goToLogin = () => {
-  localStorage.removeItem('registrationData');
+  reg.clearAll();
   showSuccessToast();
   setTimeout(() => {
     router.push('/login');

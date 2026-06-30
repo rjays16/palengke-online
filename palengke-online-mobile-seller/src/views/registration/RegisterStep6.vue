@@ -188,8 +188,10 @@ import {
   bulbOutline,
   cloudUploadOutline,
 } from 'ionicons/icons';
+import { useRegistrationStore } from '@/stores/registration';
 
 const router = useRouter();
+const reg = useRegistrationStore();
 const isLoggedIn = ref(!!localStorage.getItem('token') && !!localStorage.getItem('userEmail'));
 const fileInput = ref(null);
 const uploadInput = ref(null);
@@ -219,21 +221,17 @@ const backPhotoTaken = computed(() => {
 
 // Load data
 onMounted(() => {
-  const savedData = localStorage.getItem('registrationData');
-  if (savedData) {
-    const data = JSON.parse(savedData);
-    idTypeName.value = data.idTypeName || 'Government ID';
+  reg.load();
+  idTypeName.value = reg.data.idTypeName || 'Government ID';
 
-    // Load previously taken photos if going back
-    if (data.idFrontPhoto) frontPhoto.value = data.idFrontPhoto;
-    if (data.idBackPhoto) backPhoto.value = data.idBackPhoto;
+  // Load previously taken photos if going back
+  if (reg.data.idFrontPhoto) frontPhoto.value = reg.data.idFrontPhoto;
+  if (reg.data.idBackPhoto) backPhoto.value = reg.data.idBackPhoto;
 
-    // Determine current step
-    if (!frontPhoto.value) {
-      currentPhotoStep.value = 'front';
-    } else if (!backPhoto.value) {
-      currentPhotoStep.value = 'back';
-    }
+  if (!frontPhoto.value) {
+    currentPhotoStep.value = 'front';
+  } else if (!backPhoto.value) {
+    currentPhotoStep.value = 'back';
   }
 });
 
@@ -473,11 +471,7 @@ const handleNext = () => {
     return;
   }
 
-  // Save photos
-  const existingData = JSON.parse(localStorage.getItem('registrationData') || '{}');
-  existingData.idFrontPhoto = frontPhoto.value;
-  existingData.idBackPhoto = backPhoto.value;
-  localStorage.setItem('registrationData', JSON.stringify(existingData));
+  reg.setFields({ idFrontPhoto: frontPhoto.value, idBackPhoto: backPhoto.value });
 
   // Navigate to Step 7 (Selfie)
   router.push('/register/step7');

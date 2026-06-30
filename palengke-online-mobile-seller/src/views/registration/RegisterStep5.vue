@@ -215,11 +215,8 @@ const idTypeNames = {
 
 // Load data
 onMounted(() => {
-  const savedData = localStorage.getItem('registrationData');
-  if (savedData) {
-    const data = JSON.parse(savedData);
-    if (data.idType) formData.value.idType = data.idType;
-  }
+  reg.load();
+  if (reg.data.idType) formData.value.idType = reg.data.idType;
 });
 
 // Get ID name
@@ -275,11 +272,7 @@ const handleNext = async () => {
         text: "I'm Ready",
         cssClass: 'alert-button-confirm',
         handler: () => {
-          // Save ID type
-          const existingData = JSON.parse(localStorage.getItem('registrationData') || '{}');
-          existingData.idType = formData.value.idType;
-          existingData.idTypeName = getIdName(formData.value.idType);
-          localStorage.setItem('registrationData', JSON.stringify(existingData));
+          reg.setFields({ idType: formData.value.idType, idTypeName: getIdName(formData.value.idType) });
 
           // Navigate to Step 6 (ID Photo Capture)
           router.push('/register/step6');

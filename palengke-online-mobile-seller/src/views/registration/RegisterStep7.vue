@@ -265,8 +265,12 @@ import {
   cloudUploadOutline,
   imageOutline,
 } from 'ionicons/icons';
+import { useRegistrationStore } from '@/stores/registration';
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
+const auth = useAuthStore();
+const reg = useRegistrationStore();
 const isLoggedIn = ref(!!localStorage.getItem('token') && !!localStorage.getItem('userEmail'));
 const fileInput = ref(null);
 const uploadInput = ref(null);
@@ -284,14 +288,11 @@ const reviewPhotos = ref({ idFront: null, idBack: null, selfie: null });
 
 // Load data
 onMounted(() => {
-  const savedData = localStorage.getItem('registrationData');
-  if (savedData) {
-    const data = JSON.parse(savedData);
+  reg.load();
 
-    // Load previously taken selfie if going back
-    if (data.selfiePhoto) {
-      selfiePhoto.value = data.selfiePhoto;
-    }
+  // Load previously taken selfie if going back
+  if (reg.data.selfiePhoto) {
+    selfiePhoto.value = reg.data.selfiePhoto;
   }
 });
 
@@ -493,15 +494,12 @@ const handleSubmit = async () => {
       {
         text: 'Review Photos',
         handler: () => {
-          const savedData = localStorage.getItem('registrationData');
-          if (savedData) {
-            const data = JSON.parse(savedData);
-            reviewPhotos.value = {
-              idFront: data.idFrontPhoto || null,
-              idBack: data.idBackPhoto || null,
-              selfie: selfiePhoto.value,
-            };
-          }
+          reg.load();
+          reviewPhotos.value = {
+            idFront: reg.data.idFrontPhoto || null,
+            idBack: reg.data.idBackPhoto || null,
+            selfie: selfiePhoto.value,
+          };
           showReviewModal.value = true;
         },
       },
@@ -526,21 +524,21 @@ const submitVerification = async () => {
   await loading.present();
 
   try {
-    const existingData = JSON.parse(localStorage.getItem('registrationData') || '{}');
-    existingData.selfiePhoto = selfiePhoto.value;
-    existingData.verificationStatus = 'verified';
-    existingData.verificationSubmittedAt = new Date().toISOString();
-    localStorage.setItem('registrationData', JSON.stringify(existingData));
+    reg.setFields({
+      selfiePhoto: selfiePhoto.value,
+      verificationStatus: 'verified',
+      verificationSubmittedAt: new Date().toISOString(),
+    });
 
-    const email = existingData.email || localStorage.getItem('userEmail');
+    const email = reg.data.email || auth.userEmail;
     const endpoint = isLoggedIn.value ? `${API_BASE}/seller/verify` : `${API_BASE}/seller/register`;
     const body = isLoggedIn.value ? {
       email,
-      id_type: existingData.idType || null,
-      id_type_name: existingData.idTypeName || null,
-      id_front_photo: existingData.idFrontPhoto || null,
-      id_back_photo: existingData.idBackPhoto || null,
-      selfie_photo: existingData.selfiePhoto || null,
+      id_type: reg.data.idType || null,
+      id_type_name: reg.data.idTypeName || null,
+      id_front_photo: reg.data.idFrontPhoto || null,
+      id_back_photo: reg.data.idBackPhoto || null,
+      selfie_photo: reg.data.selfiePhoto || null,
     } : {
       email: existingData.email,
       country_code: existingData.countryCode,

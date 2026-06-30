@@ -129,24 +129,21 @@
   </ion-page>
 </template>
 
-<script setup>
+    <script setup>
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { ref, onMounted } from 'vue';
-import { IonPage, IonContent, IonIcon, alertController } from '@ionic/vue';
-import { API_BASE } from '@/config/api';
+import { IonPage, IonContent, IonButton, IonIcon, IonSpinner, alertController } from '@ionic/vue';
 import {
   arrowBackOutline,
-  shieldCheckmarkOutline,
-  checkmarkCircleOutline,
-  checkmarkOutline,
-  alertCircleOutline,
-  removeCircleOutline,
+  arrowForwardOutline,
   informationCircleOutline,
-  timeOutline,
-  lockClosedOutline,
+  shieldCheckmarkOutline,
 } from 'ionicons/icons';
+import { API_BASE } from '@/config/api';
+import { useRegistrationStore } from '@/stores/registration';
 
 const router = useRouter();
+const reg = useRegistrationStore();
 const allowSkip = ref(true);
 
 onMounted(async () => {
@@ -192,12 +189,7 @@ const selectOption = async (option) => {
           text: 'I Understand, Continue',
           cssClass: 'alert-button-confirm',
           handler: () => {
-            // Save verification choice
-            const existingData = JSON.parse(localStorage.getItem('registrationData') || '{}');
-            existingData.verificationChoice = 'verify';
-            localStorage.setItem('registrationData', JSON.stringify(existingData));
-
-            // Navigate to Step 5 (Select ID Type)
+            reg.setFields({ verificationChoice: 'verify' });
             router.push('/register/step5');
           },
         },
@@ -220,11 +212,7 @@ const selectOption = async (option) => {
           text: 'Skip & Continue',
           cssClass: 'alert-button-confirm',
           handler: () => {
-            // Save verification choice
-            const existingData = JSON.parse(localStorage.getItem('registrationData') || '{}');
-            existingData.verificationChoice = 'skip';
-            existingData.verificationStatus = 'not_verified';
-            localStorage.setItem('registrationData', JSON.stringify(existingData));
+            reg.setFields({ verificationChoice: 'skip', verificationStatus: 'not_verified' });
 
             // Navigate to Success page (not verified)
             router.push('/register/success');
