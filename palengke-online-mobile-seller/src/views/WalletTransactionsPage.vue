@@ -76,7 +76,6 @@ import { arrowBackOutline, walletOutline, addCircleOutline, removeCircleOutline,
 import { API_BASE } from '@/config/api';
 
 const router = useRouter();
-const API = API_BASE.replace('/api', '');
 
 const balance = ref(0);
 const transactions = ref([]);
@@ -124,7 +123,7 @@ async function fetchTransactions() {
   if (!email) return;
   loading.value = true;
   try {
-    const res = await fetch(`${API}/api/seller/wallet/transactions?email=${encodeURIComponent(email)}`, {
+    const res = await fetch(`${API_BASE}/seller/wallet/transactions?email=${encodeURIComponent(email)}`, {
       headers: { Accept: 'application/json' },
     });
     if (res.ok) {

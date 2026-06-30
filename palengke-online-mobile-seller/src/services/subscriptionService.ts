@@ -1,5 +1,5 @@
+import { API_BASE } from '@/config/api';
 const SUB_KEY = 'palengke_subscription';
-const API_BASE = 'http://localhost:8000/api';
 
 export interface Plan {
   id: string;

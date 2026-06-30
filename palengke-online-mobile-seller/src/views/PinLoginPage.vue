@@ -97,7 +97,7 @@ const checkAvailability = async () => {
   if (!userCountry) return { available: true };
 
   try {
-    const response = await fetch(`${API_BASE}/api/countries`);
+    const response = await fetch(`${API_BASE}/countries`);
     const data = await response.json();
 
     if (!data.countries || data.countries.length === 0) {
@@ -109,7 +109,7 @@ const checkAvailability = async () => {
       return { available: false, reason: 'country' };
     }
 
-    const locResponse = await fetch(`${API_BASE}/api/locations`);
+    const locResponse = await fetch(`${API_BASE}/locations`);
     const locData = await locResponse.json();
 
     if (locData.locations && locData.locations.length > 0) {

@@ -211,17 +211,16 @@ import {
   shieldCheckmarkOutline,
   globeOutline,
 } from 'ionicons/icons';
+import { API_BASE } from '@/config/api';
 
 const router = useRouter();
-
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
 const countries = ref([]);
 const isLoadingCountries = ref(true);
 
 onMounted(async () => {
   try {
-    const res = await fetch(`${API_BASE}/api/countries`);
+    const res = await fetch(`${API_BASE}/countries`);
     const data = await res.json();
     countries.value = data.countries.filter(c => c.enabled).map(c => ({ code: c.code, name: c.name }));
   } catch {

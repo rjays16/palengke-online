@@ -205,7 +205,7 @@ const countryCode = ref('+63');
 
 onMounted(async () => {
   try {
-    const res = await fetch(`${API_BASE}/api/countries`);
+    const res = await fetch(`${API_BASE}/countries`);
     const data = await res.json();
     countryCodes.value = data.countries.map(c => ({
       code: c.dial_code,

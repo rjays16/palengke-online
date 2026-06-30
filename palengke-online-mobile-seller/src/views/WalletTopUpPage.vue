@@ -109,7 +109,6 @@ import { arrowBackOutline, walletOutline, checkmarkCircle, chevronForwardOutline
 import { API_BASE } from '@/config/api';
 
 const router = useRouter();
-const API = API_BASE.replace('/api', '');
 
 function goToHistory() {
   router.push('/wallet/transactions');
@@ -147,7 +146,7 @@ async function fetchBalance() {
   const email = getEmail();
   if (!email) return;
   try {
-    const res = await fetch(`${API}/api/seller/wallet/balance?email=${encodeURIComponent(email)}`, {
+    const res = await fetch(`${API_BASE}/seller/wallet/balance?email=${encodeURIComponent(email)}`, {
       headers: { Accept: 'application/json' },
     });
     if (res.ok) {
@@ -161,7 +160,7 @@ async function fetchBalance() {
 
 async function fetchPaymentMethods() {
   try {
-    const res = await fetch(`${API}/api/payment-methods`, {
+    const res = await fetch(`${API_BASE}/payment-methods`, {
       headers: { Accept: 'application/json' },
     });
     if (res.ok) {
@@ -187,7 +186,7 @@ async function processTopUp() {
   error.value = null;
 
   try {
-    const res = await fetch(`${API}/api/seller/wallet/top-up`, {
+    const res = await fetch(`${API_BASE}/seller/wallet/top-up`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({

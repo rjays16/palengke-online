@@ -355,7 +355,7 @@ const loadingFaqs = ref(true);
 const loadFaqs = async () => {
   loadingFaqs.value = true;
   try {
-    const response = await fetch(`${API_BASE}/api/faqs?role=seller`, {
+    const response = await fetch(`${API_BASE}/faqs?role=seller`, {
       headers: { Accept: 'application/json' },
     });
     const data = await response.json();
