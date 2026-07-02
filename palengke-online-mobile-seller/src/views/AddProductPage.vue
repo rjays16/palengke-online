@@ -260,7 +260,7 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { getSubscription } from '@/services/subscriptionService';
@@ -295,12 +295,13 @@ import {
   alertCircleOutline,
 } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
+import { type Product } from '@/types';
 
 const router = useRouter();
 
 const userEmail = localStorage.getItem('userEmail');
-const categories = ref([]);
-const locations = ref([]);
+const categories = ref([] as string[]);
+const locations = ref([] as string[]);
 const saving = ref(false);
 const pageLoading = ref(true);
 const verificationChoice = ref('');
@@ -349,12 +350,12 @@ const selectImage = () => {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/png,image/jpg,image/jpeg,image/webp';
-  input.onchange = async (e) => {
-    const file = e.target.files[0];
+  input.onchange = async (e: any) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
     if (!file) return;
     const formData = new FormData();
     formData.append('image', file);
-    formData.append('email', userEmail);
+    formData.append('email', userEmail || '');
     try {
       const res = await fetch(`${API_BASE}/seller/products/upload-image`, {
         method: 'POST',
@@ -365,14 +366,14 @@ const selectImage = () => {
       if (res.ok) {
         productImage.value = data.url;
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error('Upload failed:', e);
     }
   };
   input.click();
 };
 
-const saveWithStatus = async (status) => {
+const saveWithStatus = async (status: string) => {
   if (!productName.value || !category.value || !description.value || !price.value || !stockQuantity.value) {
     const alert = await alertController.create({
       header: 'Missing Information',
@@ -389,7 +390,7 @@ const saveWithStatus = async (status) => {
       method: 'POST',
       headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: userEmail,
+        email: userEmail || '',
         name: productName.value,
         category: category.value,
         description: description.value,
@@ -417,7 +418,7 @@ const saveWithStatus = async (status) => {
 
     await showSuccessModal(status === 'draft' ? 'Draft saved!' : 'Product added successfully!');
     router.push('/products');
-  } catch (e) {
+  } catch (e: any) {
     const alert = await alertController.create({
       header: 'Error',
       message: e.message || 'Failed to save product. Please try again.',
@@ -431,7 +432,7 @@ const saveWithStatus = async (status) => {
 
 const saveProduct = () => saveWithStatus('active');
 
-const showSuccessModal = async (message) => {
+const showSuccessModal = async (message: string) => {
   const alert = await alertController.create({
     cssClass: 'success-modal',
     header: ' ',
@@ -494,7 +495,7 @@ onMounted(async () => {
   }
   try {
     const [profileRes, locRes] = await Promise.all([
-      fetch(`${API_BASE}/seller/profile?email=${encodeURIComponent(userEmail)}`, {
+      fetch(`${API_BASE}/seller/profile?email=${encodeURIComponent(userEmail || '')}`, {
         headers: { Accept: 'application/json' },
       }),
       fetch(`${API_BASE}/locations`, {
@@ -508,14 +509,14 @@ onMounted(async () => {
 
     const locData = await locRes.json();
     const locs = locData.locations || [];
-    const cityNames = [];
-    locs.forEach((region) => {
-      (region.cities || []).forEach((city) => {
+    const cityNames: string[] = [];
+    locs.forEach((region: any) => {
+      (region.cities || []).forEach((city: any) => {
         cityNames.push(city.name);
       });
     });
     locations.value = cityNames;
-  } catch (e) {
+  } catch (e: any) {
     console.error('Failed to load data:', e);
   } finally {
     pageLoading.value = false;

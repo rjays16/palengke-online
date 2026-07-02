@@ -197,7 +197,7 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon, IonSpinner } from '@ionic/vue';
@@ -213,18 +213,19 @@ import {
 } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
 import { useRegistrationStore } from '@/stores/registration';
+import { type Country, type PersonalInfoForm } from '@/types';
 
 const router = useRouter();
 const reg = useRegistrationStore();
 
-const countries = ref([]);
+const countries = ref([] as Country[]);
 const isLoadingCountries = ref(true);
 
 onMounted(async () => {
   try {
     const res = await fetch(`${API_BASE}/countries`);
     const data = await res.json();
-    countries.value = data.countries.filter(c => c.enabled).map(c => ({ code: c.code, name: c.name }));
+    countries.value = data.countries.filter((c: any) => c.enabled).map((c: any) => ({ code: c.code, name: c.name }));
   } catch {
     countries.value = [];
   } finally {
@@ -241,7 +242,7 @@ const formData = ref({
   birthdate: '',
   birthplace: '',
   currentAddress: '',
-});
+} as PersonalInfoForm);
 
 // Checkbox state
 const sameAsBirthplace = ref(false);
@@ -279,7 +280,7 @@ onMounted(() => {
 });
 
 // Field validation
-const validateField = (fieldName) => {
+const validateField = (fieldName: string) => {
   switch (fieldName) {
     case 'firstName':
       if (!formData.value.firstName.trim()) {

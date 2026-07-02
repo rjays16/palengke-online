@@ -373,7 +373,7 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { Capacitor } from '@capacitor/core';
@@ -430,6 +430,7 @@ import {
 } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
 import { useAuthStore } from '@/stores/auth';
+import { type SellerProfile, type OperatingHours, type PaymentMethod } from '@/types';
 
 const router = useRouter();
 const auth = useAuthStore();
@@ -450,7 +451,7 @@ const profileData = ref({
   totalOrders: 0,
   rating: 0,
   joinedDays: 0,
-});
+} as SellerProfile);
 
 const loadProfile = async () => {
   const email = localStorage.getItem('userEmail');
@@ -484,11 +485,11 @@ const loadProfile = async () => {
 const paymentMethodsEnabled = ref(true);
 const showHoursModal = ref(false);
 
-const fileInputRef = ref(null);
+const fileInputRef = ref(null as any);
 const cameraCaptureMode = ref('camera');
 
 const dayKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-const dayLabels = {
+const dayLabels: Record<string, string> = {
   monday: 'Monday',
   tuesday: 'Tuesday',
   wednesday: 'Wednesday',
@@ -507,26 +508,28 @@ const defaultDayHours = {
   closeAmPm: 'PM',
   closed: false,
 };
-const hoursData = ref({});
+const hoursData = ref({} as OperatingHours);
 
-function initDefaultHours() {
-  const h = {};
-  dayKeys.forEach((day) => {
-    h[day] = { ...defaultDayHours };
-  });
-  h.saturday = { ...defaultDayHours, openHour: 8, closeHour: 12 };
-  h.sunday = { ...defaultDayHours, closed: true };
-  return h;
+function initDefaultHours(): OperatingHours {
+  return {
+    monday: { ...defaultDayHours },
+    tuesday: { ...defaultDayHours },
+    wednesday: { ...defaultDayHours },
+    thursday: { ...defaultDayHours },
+    friday: { ...defaultDayHours },
+    saturday: { ...defaultDayHours, openHour: 8, closeHour: 12 },
+    sunday: { ...defaultDayHours, closed: true },
+  };
 }
 
-function parseHoursFromString(str) {
+function parseHoursFromString(str: string): OperatingHours {
   if (!str) return initDefaultHours();
   try {
     const parsed = JSON.parse(str);
     const h = initDefaultHours();
     dayKeys.forEach((day) => {
       if (parsed[day]) {
-        h[day] = { ...h[day], ...parsed[day] };
+        (h as any)[day] = { ...h[day], ...parsed[day] };
       }
     });
     return h;
@@ -535,13 +538,13 @@ function parseHoursFromString(str) {
   }
 }
 
-function formatOpenClose(day) {
+function formatOpenClose(day: string) {
   const d = hoursData.value[day];
   if (!d || d.closed) return 'Closed';
   return `${d.openHour}:${d.openMin} ${d.openAmPm} - ${d.closeHour}:${d.closeMin} ${d.closeAmPm}`;
 }
 
-function formatOperatingHours(hoursObj) {
+function formatOperatingHours(hoursObj: any) {
   const lines = dayKeys.map((day) => {
     const d = hoursObj[day];
     if (!d || d.closed) return `${dayLabels[day]}: Closed`;
@@ -550,7 +553,7 @@ function formatOperatingHours(hoursObj) {
   return lines.join('\n');
 }
 
-function getHoursSummary(str) {
+function getHoursSummary(str: string) {
   if (!str) return 'Set operating hours';
   try {
     const parsed = JSON.parse(str);
@@ -609,7 +612,7 @@ const saveOperatingHours = async () => {
 
     profileData.value.shopHours = hoursString;
     await showSuccessModal('Operating hours updated!');
-  } catch (error) {
+  } catch (error: any) {
     await dismissLoadingModal();
     const toast = await toastController.create({
       message: error.message || 'Failed to save operating hours',
@@ -621,7 +624,7 @@ const saveOperatingHours = async () => {
   }
 };
 
-let loadingModalRef = null;
+let loadingModalRef: any = null;
 
 // Loading Modal Function
 const showLoadingModal = async (message = 'Loading...', autoDismiss = true) => {
@@ -650,7 +653,7 @@ const dismissLoadingModal = async () => {
 };
 
 // Payment Methods
-const paymentMethods = ref([]);
+const paymentMethods = ref([] as PaymentMethod[]);
 
 const loadSettings = async () => {
   try {
@@ -682,8 +685,8 @@ const loadPaymentMethods = async () => {
   }
 };
 
-const paymentIcon = (type) => {
-  const icons = {
+const paymentIcon = (type: string) => {
+  const icons: Record<string, any> = {
     gcash: walletOutline,
     bdo: businessOutline,
     bpi: businessOutline,
@@ -695,8 +698,8 @@ const paymentIcon = (type) => {
   return icons[type] || cardOutline;
 };
 
-const displayType = (type) => {
-  const names = {
+const displayType = (type: string) => {
+  const names: Record<string, string> = {
     gcash: 'GCash',
     bdo: 'BDO',
     bpi: 'BPI',
@@ -708,7 +711,7 @@ const displayType = (type) => {
   return names[type] || type.charAt(0).toUpperCase() + type.slice(1);
 };
 
-const maskAccount = (number) => {
+const maskAccount = (number: string) => {
   if (!number) return '';
   if (number.length <= 4) return number;
   return '****' + number.slice(-4);
@@ -782,7 +785,7 @@ const showAddPaymentForm = async () => {
   await typeAlert.present();
 };
 
-const showPaymentDetailsForm = async (selectedType) => {
+const showPaymentDetailsForm = async (selectedType: string) => {
   const alert = await alertController.create({
     header: `${displayType(selectedType)} Details`,
     inputs: [
@@ -838,7 +841,7 @@ const showPaymentDetailsForm = async (selectedType) => {
             await dismissLoadingModal();
             await showSuccessModal('Payment method added successfully!');
             await loadPaymentMethods();
-          } catch (error) {
+          } catch (error: any) {
             await dismissLoadingModal();
             const toast = await toastController.create({
               message: error.message || 'Failed to add payment method',
@@ -855,7 +858,7 @@ const showPaymentDetailsForm = async (selectedType) => {
   await alert.present();
 };
 
-const deletePaymentMethod = async (id) => {
+const deletePaymentMethod = async (id: any) => {
   const alert = await alertController.create({
     header: 'Remove Payment Method',
     message: 'Are you sure you want to remove this payment method?',
@@ -879,7 +882,7 @@ const deletePaymentMethod = async (id) => {
             await dismissLoadingModal();
             await showSuccessModal('Payment method removed successfully!');
             await loadPaymentMethods();
-          } catch (error) {
+          } catch (error: any) {
             await dismissLoadingModal();
             const toast = await toastController.create({
               message: error.message || 'Failed to remove payment method',
@@ -897,7 +900,7 @@ const deletePaymentMethod = async (id) => {
 };
 
 // Success Modal Function
-const showSuccessModal = async (message) => {
+const showSuccessModal = async (message: string) => {
   const alert = await alertController.create({
     cssClass: 'success-modal',
     header: ' ',
@@ -975,8 +978,8 @@ const changePhoto = async () => {
               if (photo?.dataUrl) {
                 await uploadAvatar(photo.dataUrl);
               }
-            } catch (e) {
-              if (e?.message !== 'User cancelled photos app') {
+            } catch (e: any) {
+                if (e?.message !== 'User cancelled photos app') {
                 const toast = await toastController.create({
                   message: 'Failed to take photo',
                   duration: 2000,
@@ -1013,8 +1016,8 @@ const changePhoto = async () => {
               if (photo?.dataUrl) {
                 await uploadAvatar(photo.dataUrl);
               }
-            } catch (e) {
-              if (e?.message !== 'User cancelled photos app') {
+            } catch (e: any) {
+                if (e?.message !== 'User cancelled photos app') {
                 const toast = await toastController.create({
                   message: 'Failed to pick photo',
                   duration: 2000,
@@ -1064,7 +1067,7 @@ const changePhoto = async () => {
 
             profileData.value.avatar = null;
             await showSuccessModal('Photo removed!');
-          } catch (error) {
+          } catch (error: any) {
             await dismissLoadingModal();
             const toast = await toastController.create({
               message: error.message || 'Failed to remove photo',
@@ -1086,7 +1089,7 @@ const changePhoto = async () => {
   await actionSheet.present();
 };
 
-const handleFileInput = async (event) => {
+const handleFileInput = async (event: any) => {
   const file = event.target.files?.[0];
   if (!file) return;
 
@@ -1101,7 +1104,7 @@ const handleFileInput = async (event) => {
   event.target.value = '';
 };
 
-const uploadAvatar = async (dataUrl) => {
+const uploadAvatar = async (dataUrl: string) => {
   const email = localStorage.getItem('userEmail');
   if (!email) return;
 
@@ -1123,11 +1126,11 @@ const uploadAvatar = async (dataUrl) => {
 
     const result = await response.json();
     profileData.value.avatar = result.user?.avatar || null;
-    await showSuccessModal('Photo updated!');
-  } catch (error) {
-    await dismissLoadingModal();
-    const toast = await toastController.create({
-      message: error.message || 'Failed to upload photo',
+            await showSuccessModal('Photo updated!');
+          } catch (error: any) {
+            await dismissLoadingModal();
+            const toast = await toastController.create({
+              message: error.message || 'Failed to upload photo',
       duration: 2000,
       color: 'danger',
       position: 'top',
@@ -1136,8 +1139,8 @@ const uploadAvatar = async (dataUrl) => {
   }
 };
 
-const editField = async (field) => {
-  const fieldNames = {
+const editField = async (field: string) => {
+  const fieldNames: Record<string, string> = {
     name: 'Full Name',
     phone: 'Phone Number',
     email: 'Email Address',
@@ -1157,7 +1160,7 @@ const editField = async (field) => {
         name: 'value',
         type: field === 'email' ? 'email' : field === 'phone' ? 'tel' : 'text',
         placeholder: `Enter ${fieldNames[field]}`,
-        value: profileData.value[field],
+        value: (profileData.value as any)[field],
       },
     ],
     buttons: [
@@ -1170,7 +1173,7 @@ const editField = async (field) => {
         handler: async (data) => {
           if (!data.value) return;
 
-          profileData.value[field] = data.value;
+          (profileData.value as any)[field] = data.value;
 
           const shopFields = ['shopName', 'shopAddress', 'description', 'address', 'phone', 'email'];
           if (shopFields.includes(field)) {
@@ -1184,7 +1187,7 @@ const editField = async (field) => {
             await showLoadingModal('Saving...', false);
 
             try {
-              const body = { email };
+              const body: Record<string, any> = { email };
               if (field === 'shopName') body.store_name = data.value;
               if (field === 'shopAddress') body.store_place = data.value;
               if (field === 'shopHours') body.operating_hours = data.value;
@@ -1209,7 +1212,7 @@ const editField = async (field) => {
               if (field === 'email') {
                 localStorage.setItem('userEmail', data.value);
               }
-            } catch (error) {
+            } catch (error: any) {
               await dismissLoadingModal();
               const toast = await toastController.create({
                 message: error.message || 'Failed to save',
@@ -1327,7 +1330,7 @@ const changePin = async () => {
             // Dismiss loading before showing success
             await dismissLoadingModal();
             await showSuccessModal('PIN changed successfully!');
-          } catch (error) {
+          } catch (error: any) {
             // Dismiss loading before showing error
             await dismissLoadingModal();
             const toast = await toastController.create({

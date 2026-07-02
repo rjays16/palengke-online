@@ -221,7 +221,7 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { API_BASE } from '@/config/api';
 import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
@@ -229,7 +229,7 @@ import { getDisputeByOrderId } from '../services/disputeService';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-delete L.Icon.Default.prototype._getIconUrl;
+delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
@@ -266,15 +266,16 @@ import {
   shareOutline,
   alertCircleOutline,
 } from 'ionicons/icons';
+import { type Order } from '@/types';
 
 const router = useRouter();
 const route = useRoute();
 
-const order = ref(null);
+const order = ref(null as Order | null);
 
 const dispute = computed(() => {
   if (!order.value) return null;
-  return getDisputeByOrderId(order.value.id);
+  return getDisputeByOrderId(String(order.value.id));
 });
 
 onMounted(() => {
@@ -319,11 +320,11 @@ const loadOrderDetails = async () => {
 const showMap = ref(false);
 const mapDistance = ref('');
 const mapDuration = ref('');
-let mapInstance = null;
+let mapInstance: any = null;
 
 const toggleMap = () => {
   showMap.value = !showMap.value;
-  if (showMap.value && order.value.latitude && order.value.longitude) {
+  if (showMap.value && order.value?.latitude && order.value?.longitude) {
     setTimeout(() => initMap(), 200);
   }
 };
@@ -335,8 +336,8 @@ const initMap = () => {
   }
   const el = document.getElementById('customer-map');
   if (!el) return;
-  const custLat = order.value.latitude;
-  const custLng = order.value.longitude;
+  const custLat = order.value!.latitude;
+  const custLng = order.value!.longitude;
 
   mapInstance = L.map(el, { zoomControl: false }).setView([custLat, custLng], 15);
 
@@ -346,7 +347,7 @@ const initMap = () => {
 
   L.marker([custLat, custLng])
     .addTo(mapInstance)
-    .bindPopup('<b>Customer</b><br>' + order.value.deliveryAddress);
+    .bindPopup('<b>Customer</b><br>' + order.value?.deliveryAddress);
 
   navigator.geolocation.getCurrentPosition(
     (pos) => {
@@ -401,7 +402,7 @@ const initMap = () => {
   );
 };
 
-const showOrderNotFound = (orderId) => {
+const showOrderNotFound = (orderId: any) => {
   alertController
     .create({
       header: 'Order Not Found',
@@ -418,11 +419,11 @@ const showOrderNotFound = (orderId) => {
     .then((alert) => alert.present());
 };
 
-const formatPrice = (price) => {
+const formatPrice = (price: any) => {
   return price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
-const formatFullDate = (dateString) => {
+const formatFullDate = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleString('en-US', {
     month: 'long',
@@ -434,8 +435,8 @@ const formatFullDate = (dateString) => {
   });
 };
 
-const getStatusColor = (status) => {
-  const colors = {
+const getStatusColor = (status: string) => {
+  const colors: Record<string, any> = {
     pending: 'warning',
     processing: 'primary',
     completed: 'success',
@@ -444,8 +445,8 @@ const getStatusColor = (status) => {
   return colors[status] || 'medium';
 };
 
-const getStatusIcon = (status) => {
-  const icons = {
+const getStatusIcon = (status: string) => {
+  const icons: Record<string, any> = {
     pending: hourglassOutline,
     processing: rocketOutline,
     completed: checkmarkCircleOutline,
@@ -454,8 +455,8 @@ const getStatusIcon = (status) => {
   return icons[status] || timeOutline;
 };
 
-const getStatusTitle = (status) => {
-  const titles = {
+const getStatusTitle = (status: string) => {
+  const titles: Record<string, any> = {
     pending: 'Order Received',
     processing: 'Order is Being Prepared',
     completed: 'Order Completed',
@@ -464,8 +465,8 @@ const getStatusTitle = (status) => {
   return titles[status] || 'Unknown Status';
 };
 
-const getStatusMessage = (status) => {
-  const messages = {
+const getStatusMessage = (status: string) => {
+  const messages: Record<string, any> = {
     pending: 'Waiting for your confirmation',
     processing: 'Preparing the order for delivery',
     completed: 'Order has been delivered successfully',
@@ -484,7 +485,7 @@ const showLoadingModal = async () => {
   return alert;
 };
 
-const showSuccessModal = async (message) => {
+const showSuccessModal = async (message: string) => {
   const alert = await alertController.create({
     cssClass: 'success-modal',
     header: ' ',
@@ -540,11 +541,11 @@ const showSuccessModal = async (message) => {
   }, 2000);
 };
 
-const updateOrderStatus = async (newStatus) => {
+const updateOrderStatus = async (newStatus: any) => {
   const email = localStorage.getItem('userEmail');
   if (!email) return false;
   try {
-    const response = await fetch(`${API_BASE}/seller/orders/${order.value.id}/status`, {
+    const response = await fetch(`${API_BASE}/seller/orders/${order.value?.id}/status`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ email, status: newStatus }),
@@ -558,7 +559,7 @@ const updateOrderStatus = async (newStatus) => {
 const acceptOrder = async () => {
   const alert = await alertController.create({
     header: 'Accept Order',
-    message: `Accept this order from ${order.value.customerName}?`,
+    message: `Accept this order from ${order.value?.customerName}?`,
     buttons: [
       {
         text: 'Cancel',
@@ -571,7 +572,7 @@ const acceptOrder = async () => {
           const ok = await updateOrderStatus('processing');
           await loading.dismiss();
           if (ok) {
-            order.value.status = 'processing';
+            order.value!.status = 'processing';
             await showSuccessModal('Order accepted successfully!');
           } else {
             showToast('Failed to accept order', 'danger');
@@ -599,7 +600,7 @@ const completeOrder = async () => {
           const ok = await updateOrderStatus('completed');
           await loading.dismiss();
           if (ok) {
-            order.value.status = 'completed';
+            order.value!.status = 'completed';
             await showSuccessModal('Order completed successfully!');
           } else {
             showToast('Failed to complete order', 'danger');
@@ -635,7 +636,7 @@ const cancelOrder = async () => {
           const ok = await updateOrderStatus('cancelled');
           await loading.dismiss();
           if (ok) {
-            order.value.status = 'cancelled';
+            order.value!.status = 'cancelled';
             const declineAlert = await alertController.create({
               cssClass: 'decline-modal',
               header: ' ',
@@ -655,7 +656,7 @@ const cancelOrder = async () => {
 };
 
 const callCustomer = () => {
-  window.location.href = `tel:${order.value.customerPhone}`;
+  window.location.href = `tel:${order.value?.customerPhone}`;
 };
 
 const showMoreOptions = async () => {
@@ -692,7 +693,7 @@ const showMoreOptions = async () => {
   await actionSheet.present();
 };
 
-const showToast = async (message, color = 'dark') => {
+const showToast = async (message: string, color = 'dark') => {
   const toast = await toastController.create({
     message,
     duration: 2000,

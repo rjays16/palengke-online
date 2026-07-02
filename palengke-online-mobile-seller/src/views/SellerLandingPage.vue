@@ -164,13 +164,13 @@
             <div class="order-details">
               <div class="order-customer">
                 <ion-icon :icon="personOutline"></ion-icon>
-                <span>{{ order.customer }}</span>
+                <span>{{ (order as any).customer }}</span>
               </div>
-              <div class="order-items">{{ order.items }} items</div>
+              <div class="order-items">{{ (order as any).items }} items</div>
             </div>
             <div class="order-footer">
-              <div class="order-time">{{ order.time }}</div>
-              <div class="order-amount">₱{{ order.amount.toLocaleString() }}</div>
+              <div class="order-time">{{ (order as any).time }}</div>
+              <div class="order-amount">₱{{ (order as any).amount.toLocaleString() }}</div>
             </div>
           </div>
 
@@ -214,8 +214,8 @@
           <div class="notice-modal-icon">
             <ion-icon :icon="megaphoneOutline"></ion-icon>
           </div>
-          <h2 class="notice-modal-title">{{ activeNotice.title }}</h2>
-          <p class="notice-modal-msg">{{ activeNotice.message }}</p>
+          <h2 class="notice-modal-title">{{ (activeNotice as any).title }}</h2>
+          <p class="notice-modal-msg">{{ (activeNotice as any).message }}</p>
           <ion-button expand="block" class="notice-modal-btn" @click="closeNoticeModal">Got it</ion-button>
         </div>
       </ion-content>
@@ -293,7 +293,7 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { API_BASE } from '@/config/api';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
@@ -345,6 +345,7 @@ import {
   megaphoneOutline,
   shieldCheckmarkOutline,
 } from 'ionicons/icons';
+import { type Order, type Notice, type BannerRequest } from '@/types';
 
 const router = useRouter();
 const auth = useAuthStore();
@@ -352,8 +353,8 @@ const auth = useAuthStore();
 // Seller Data
 const sellerName = ref('Loading...');
 const notificationCount = ref(3);
-const selectedCategories = ref([]);
-const availableCategories = ref([]);
+const selectedCategories = ref([] as string[]);
+const availableCategories = ref([] as any[]);
 const sub = ref(getSubscription());
 const walletBalance = ref(0);
 const verificationStatus = ref('');
@@ -416,14 +417,14 @@ const loadCategories = async () => {
 // Notice banner
 const DISMISS_KEY = 'palengke_seller_dismissed_notices';
 const dismissedNotices = ref(JSON.parse(localStorage.getItem(DISMISS_KEY) || '[]'));
-const allNotices = ref([]);
+const allNotices = ref([] as Notice[]);
 const showNoticeModal = ref(false);
 
 const activeNotice = computed(() => {
   return allNotices.value.find((n) => n.active && (n.target === 'all' || n.target === 'seller')) || null;
 });
 
-function dismissNotice(id) {
+function dismissNotice(id: any) {
   if (!dismissedNotices.value.includes(id)) {
     dismissedNotices.value.push(id);
     localStorage.setItem(DISMISS_KEY, JSON.stringify(dismissedNotices.value));
@@ -498,7 +499,7 @@ const goToVerification = () => {
 };
 
 const showBannerModal = ref(false);
-const bannerForm = ref({ title: '', subtitle: '', link: '', image: '' });
+const bannerForm = ref({ title: '', subtitle: '', link: '', image: '' } as BannerRequest);
 
 function openBannerRequest() {
   bannerForm.value = { title: '', subtitle: '', link: '', image: '' };
@@ -544,7 +545,7 @@ const totalProducts = ref(0);
 const weekSales = ref(0);
 
 // Recent Orders
-const recentOrders = ref([]);
+const recentOrders = ref([] as Order[]);
 
 const loadOrders = async () => {
   const email = localStorage.getItem('userEmail');
@@ -561,7 +562,7 @@ const loadOrders = async () => {
 
     const ordersData = await ordersRes.json();
     if (ordersRes.ok && ordersData.orders) {
-      recentOrders.value = ordersData.orders.map((o) => ({
+      recentOrders.value = ordersData.orders.map((o: any) => ({
         id: o.id,
         customer: o.customer_name,
         items: o.item_count,
@@ -696,7 +697,7 @@ const showSuccessLogout = async () => {
   }, 1500);
 };
 
-const showSuccessModal = async (message) => {
+const showSuccessModal = async (message: string) => {
   const alert = await alertController.create({
     cssClass: 'success-modal',
     header: ' ',
@@ -753,7 +754,7 @@ const showSuccessModal = async (message) => {
 };
 
 // Show loading with text only (no HTML)
-const showLoadingWithLogo = async (message) => {
+const showLoadingWithLogo = async (message: string) => {
   const alert = await alertController.create({
     cssClass: 'loading-modal-simple',
     message: message,
@@ -859,7 +860,7 @@ const shareShop = async () => {
   await actionSheet.present();
 };
 
-const showToast = async (message, color = 'dark') => {
+const showToast = async (message: string, color = 'dark') => {
   const toast = await toastController.create({
     message,
     duration: 2000,
@@ -877,13 +878,13 @@ const viewAllOrders = () => {
   router.push('/orders');
 };
 
-const viewOrderDetails = (orderId) => {
+const viewOrderDetails = (orderId: any) => {
   router.push(`/orders/${orderId}`);
 };
 
 const manageCategories = async () => {
-  const inputs = availableCategories.value.map((c) => ({
-    type: 'checkbox',
+  const inputs = availableCategories.value.map((c: any) => ({
+    type: 'checkbox' as const,
     label: c.name,
     value: c.name,
     checked: selectedCategories.value.includes(c.name),
@@ -891,16 +892,16 @@ const manageCategories = async () => {
 
   if (inputs.length === 0) {
     inputs.push(
-      { type: 'checkbox', label: 'Fish', value: 'Fish' },
-      { type: 'checkbox', label: 'Shellfish', value: 'Shellfish' },
-      { type: 'checkbox', label: 'Squid & Octopus', value: 'Squid' },
-      { type: 'checkbox', label: 'Pork', value: 'Pork' },
-      { type: 'checkbox', label: 'Chicken', value: 'Chicken' },
-      { type: 'checkbox', label: 'Vegetables', value: 'Vegetables', checked: true },
-      { type: 'checkbox', label: 'Fruits', value: 'Fruits', checked: true },
-      { type: 'checkbox', label: 'Condiments', value: 'Condiments' },
-      { type: 'checkbox', label: 'Dairy & Goods', value: 'Dairy' },
-      { type: 'checkbox', label: 'Rice & Grains', value: 'Rice' },
+      { type: 'checkbox' as const, label: 'Fish', value: 'Fish', checked: false },
+      { type: 'checkbox' as const, label: 'Shellfish', value: 'Shellfish', checked: false },
+      { type: 'checkbox' as const, label: 'Squid & Octopus', value: 'Squid', checked: false },
+      { type: 'checkbox' as const, label: 'Pork', value: 'Pork', checked: false },
+      { type: 'checkbox' as const, label: 'Chicken', value: 'Chicken', checked: false },
+      { type: 'checkbox' as const, label: 'Vegetables', value: 'Vegetables', checked: true },
+      { type: 'checkbox' as const, label: 'Fruits', value: 'Fruits', checked: true },
+      { type: 'checkbox' as const, label: 'Condiments', value: 'Condiments', checked: false },
+      { type: 'checkbox' as const, label: 'Dairy & Goods', value: 'Dairy', checked: false },
+      { type: 'checkbox' as const, label: 'Rice & Grains', value: 'Rice', checked: false },
     );
   }
 

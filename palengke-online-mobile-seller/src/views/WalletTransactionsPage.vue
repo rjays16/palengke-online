@@ -68,17 +68,18 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonButtons, IonIcon } from '@ionic/vue';
 import { arrowBackOutline, walletOutline, addCircleOutline, removeCircleOutline, receiptOutline } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
+import { type Transaction } from '@/types';
 
 const router = useRouter();
 
 const balance = ref(0);
-const transactions = ref([]);
+const transactions = ref([] as Transaction[]);
 const loading = ref(true);
 const activeFilter = ref('all');
 
@@ -97,23 +98,23 @@ function getEmail() {
   return localStorage.getItem('userEmail');
 }
 
-function txnIcon(type) {
+function txnIcon(type: string) {
   if (type === 'top_up') return addCircleOutline;
   return removeCircleOutline;
 }
 
-function txnLabel(txn) {
+function txnLabel(txn: any) {
   switch (txn.type) {
     case 'top_up':
       return 'Wallet Top-Up';
     case 'subscription_payment':
       return 'Subscription Payment';
     default:
-      return txn.type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+      return txn.type.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase());
   }
 }
 
-function formatDate(dateStr) {
+function formatDate(dateStr: string) {
   const d = new Date(dateStr);
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }

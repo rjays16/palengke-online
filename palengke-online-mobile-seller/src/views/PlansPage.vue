@@ -227,7 +227,7 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
@@ -254,14 +254,15 @@ import {
 } from 'ionicons/icons';
 import { PLANS, getSubscription, daysLeft, refreshSubscription, subscribePlan } from '@/services/subscriptionService';
 import { API_BASE } from '@/config/api';
+import { type PaymentMethod } from '@/types';
 
 const router = useRouter();
 const sub = ref(getSubscription());
 const remaining = ref(daysLeft(sub.value));
 const plans = PLANS;
 const selected = ref('');
-const selectedPayment = ref(null);
-const paymentMethods = ref([]);
+const selectedPayment = ref<number | null>(null);
+const paymentMethods = ref([] as PaymentMethod[]);
 const subscribing = ref(false);
 
 const showPaymentModal = ref(false);
@@ -301,8 +302,8 @@ onMounted(async () => {
       headers: { Accept: 'application/json' },
     });
     if (res.ok) {
-      const all = await res.json();
-      paymentMethods.value = all.filter((p) => p.name !== 'Cash on Delivery');
+      const all: any[] = await res.json();
+      paymentMethods.value = all.filter((p: any) => p.name !== 'Cash on Delivery');
       const first = paymentMethods.value.find((p) => !p.coming_soon);
       if (first) selectedPayment.value = first.id;
     }
@@ -312,18 +313,18 @@ onMounted(async () => {
   fetchWalletBalance();
 });
 
-const pmLogo = (name) => {
-  const map = {
+const pmLogo = (name: string | undefined) => {
+  const map: Record<string, string | undefined> = {
     'Palengke Wallet': '/assets/payment-methods-logo/palengke-wallet.png',
     GCash: '/assets/payment-methods-logo/gcash.png',
     PayPal: '/assets/payment-methods-logo/paypal.png',
     Stripe: '/assets/payment-methods-logo/cards.png',
-    'Cash on Delivery': null,
+    'Cash on Delivery': undefined,
   };
-  return map[name] || null;
+  return name ? map[name] : undefined;
 };
 
-const selectPayment = (pm) => {
+const selectPayment = (pm: any) => {
   if (pm.coming_soon) return;
   selectedPayment.value = pm.id;
 };
@@ -365,7 +366,7 @@ const processPayment = async () => {
     remaining.value = daysLeft(sub.value);
     walletBalance.value = sub.value.planId ? 0 : walletBalance.value;
     paymentStep.value = 'success';
-  } catch (err) {
+  } catch (err: any) {
     if (err && err.code === 'insufficient_balance') {
       shortfall.value = err.shortfall || 0;
       walletBalance.value = err.balance || 0;

@@ -64,7 +64,7 @@
               <img
                 :src="product.image"
                 :alt="product.name"
-                @error="$event.target.src = '/assets/images/product-placeholder.svg'"
+                @error="($event.target as HTMLImageElement).src = '/assets/images/product-placeholder.svg'"
               />
               <div class="product-badge" :class="product.status">
                 {{ product.status }}
@@ -185,7 +185,7 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import {
@@ -218,6 +218,7 @@ import {
   personOutline,
 } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
+import { type Product } from '@/types';
 
 const router = useRouter();
 
@@ -230,7 +231,7 @@ const toggling = ref(false);
 const searchQuery = ref('');
 const selectedFilter = ref('all');
 
-const products = ref([]);
+const products = ref([] as Product[]);
 
 async function loadProducts() {
   if (!userEmail) return;
@@ -240,7 +241,7 @@ async function loadProducts() {
       headers: { Accept: 'application/json' },
     });
     const data = await res.json();
-    products.value = (data.products || []).map((p) => ({
+    products.value = (data.products || []).map((p: any) => ({
       ...p,
       image: p.images?.[0] || '/assets/images/product-placeholder.svg',
       unit: p.selling_unit,
@@ -293,13 +294,13 @@ const goToAddProduct = () => {
   router.push('/products/add');
 };
 
-const editProduct = (product) => {
+const editProduct = (product: any) => {
   // TODO: Navigate to edit page with product data
   console.log('Edit product:', product);
   router.push(`/products/edit/${product.id}`);
 };
 
-const toggleProductStatus = async (product) => {
+const toggleProductStatus = async (product: any) => {
   const newIsActive = !product.is_active;
   const statusText = newIsActive ? 'activate' : 'deactivate';
 
@@ -338,7 +339,7 @@ const toggleProductStatus = async (product) => {
   await alert.present();
 };
 
-const deleteProduct = async (product) => {
+const deleteProduct = async (product: any) => {
   const alert = await alertController.create({
     header: 'Delete Product',
     message: `Are you sure you want to delete "${product.name}"? This action cannot be undone.`,
@@ -351,7 +352,7 @@ const deleteProduct = async (product) => {
           deleting.value = true;
           try {
             const res = await fetch(
-              `${API_BASE}/seller/products/${product.id}?email=${encodeURIComponent(userEmail)}`,
+              `${API_BASE}/seller/products/${product.id}?email=${encodeURIComponent(userEmail || '')}`,
               {
                 method: 'DELETE',
                 headers: { Accept: 'application/json' },
@@ -377,7 +378,7 @@ const deleteProduct = async (product) => {
   await alert.present();
 };
 
-const showToast = async (message, color = 'success') => {
+const showToast = async (message: string, color: string = 'success') => {
   const toast = await toastController.create({
     message,
     duration: 2000,
@@ -387,7 +388,7 @@ const showToast = async (message, color = 'success') => {
   await toast.present();
 };
 
-const showSuccessModal = async (message) => {
+const showSuccessModal = async (message: string) => {
   const alert = await alertController.create({
     cssClass: 'success-modal',
     header: ' ',

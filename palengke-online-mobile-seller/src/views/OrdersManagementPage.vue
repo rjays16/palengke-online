@@ -120,7 +120,7 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { API_BASE } from '@/config/api';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
@@ -155,6 +155,7 @@ import {
   homeOutline,
   cubeOutline,
 } from 'ionicons/icons';
+import { type Order } from '@/types';
 
 const router = useRouter();
 
@@ -163,7 +164,7 @@ const selectedTab = ref('all');
 const searchQuery = ref('');
 const loading = ref(false);
 
-const orders = ref([]);
+const orders = ref([] as Order[]);
 
 const loadOrders = async () => {
   const email = localStorage.getItem('userEmail');
@@ -175,7 +176,7 @@ const loadOrders = async () => {
     });
     const data = await response.json();
     if (response.ok && data.orders) {
-      orders.value = data.orders.map((o) => ({
+      orders.value = data.orders.map((o: any) => ({
         id: o.id,
         customerName: o.customer_name,
         customerPhone: o.customer_phone,
@@ -244,7 +245,7 @@ const emptyStateMessage = computed(() => {
 });
 
 // Methods
-const handleTabChange = (event) => {
+const handleTabChange = (event: any) => {
   selectedTab.value = event.detail.value;
 };
 
@@ -252,10 +253,10 @@ const handleSearch = () => {
   // Search is handled by computed property
 };
 
-const formatDate = (dateString) => {
+const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   const now = new Date();
-  const diff = now - date;
+  const diff = now.getTime() - date.getTime();
   const minutes = Math.floor(diff / 60000);
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
@@ -271,12 +272,12 @@ const formatDate = (dateString) => {
   }
 };
 
-const formatPrice = (price) => {
+const formatPrice = (price: any) => {
   return price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
-const getStatusColor = (status) => {
-  const colors = {
+const getStatusColor = (status: string) => {
+  const colors: Record<string, any> = {
     pending: 'warning',
     processing: 'primary',
     completed: 'success',
@@ -285,24 +286,24 @@ const getStatusColor = (status) => {
   return colors[status] || 'medium';
 };
 
-const getActionColor = (status) => {
+const getActionColor = (status: string) => {
   if (status === 'pending') return 'success';
   if (status === 'processing') return 'primary';
   return 'medium';
 };
 
-const getActionText = (status) => {
+const getActionText = (status: string) => {
   if (status === 'pending') return 'Accept';
   if (status === 'processing') return 'Complete';
   if (status === 'completed') return 'View';
   return 'View';
 };
 
-const viewOrderDetails = (orderId) => {
+const viewOrderDetails = (orderId: any) => {
   router.push(`/orders/${orderId}`);
 };
 
-const quickAction = async (order) => {
+const quickAction = async (order: any) => {
   if (order.status === 'pending') {
     await acceptOrder(order);
   } else if (order.status === 'processing') {
@@ -322,7 +323,7 @@ const showLoadingModal = async () => {
   return alert;
 };
 
-const updateOrderStatus = async (orderId, newStatus) => {
+const updateOrderStatus = async (orderId: any, newStatus: any) => {
   const email = localStorage.getItem('userEmail');
   if (!email) return false;
   try {
@@ -337,7 +338,7 @@ const updateOrderStatus = async (orderId, newStatus) => {
   }
 };
 
-const showSuccessModal = async (message) => {
+const showSuccessModal = async (message: string) => {
   const alert = await alertController.create({
     cssClass: 'success-modal',
     header: ' ',
@@ -393,7 +394,7 @@ const showSuccessModal = async (message) => {
   }, 2000);
 };
 
-const acceptOrder = async (order) => {
+const acceptOrder = async (order: any) => {
   const alert = await alertController.create({
     header: 'Accept Order',
     message: `Accept order #${order.id} from ${order.customerName}?`,
@@ -421,7 +422,7 @@ const acceptOrder = async (order) => {
   await alert.present();
 };
 
-const completeOrder = async (order) => {
+const completeOrder = async (order: any) => {
   const alert = await alertController.create({
     header: 'Complete Order',
     message: `Mark order #${order.id} as completed?`,
@@ -457,7 +458,7 @@ const showFilterOptions = async () => {
         text: 'Newest First',
         icon: timeOutline,
         handler: () => {
-          orders.value.sort((a, b) => new Date(b.date) - new Date(a.date));
+          orders.value.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
           showToast('Sorted by newest first');
         },
       },
@@ -465,7 +466,7 @@ const showFilterOptions = async () => {
         text: 'Oldest First',
         icon: timeOutline,
         handler: () => {
-          orders.value.sort((a, b) => new Date(a.date) - new Date(b.date));
+          orders.value.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
           showToast('Sorted by oldest first');
         },
       },
@@ -494,7 +495,7 @@ const showFilterOptions = async () => {
   await actionSheet.present();
 };
 
-const showToast = async (message, color = 'dark') => {
+const showToast = async (message: string, color = 'dark') => {
   const toast = await toastController.create({
     message,
     duration: 2000,

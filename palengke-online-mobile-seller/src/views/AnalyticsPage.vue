@@ -367,7 +367,7 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { API_BASE } from '@/config/api';
 import { ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
@@ -406,6 +406,7 @@ import {
   informationCircleOutline,
   createOutline,
 } from 'ionicons/icons';
+import { type AnalyticsStats, type ChartDataPoint, type TopProduct, type CategorySales, type Activity, type MonthlyGoals } from '@/types';
 const router = useRouter();
 
 // State
@@ -423,21 +424,21 @@ const currentStats = ref({
   avgDeliveryTime: 0,
   rating: 0,
   customers: 0,
-});
+} as AnalyticsStats);
 
 const avgOrderValueGrowth = computed(() => currentStats.value.avgOrderValueGrowth);
 
-const salesData = ref([]);
-const topProducts = ref([]);
-const categories = ref([]);
-const recentActivity = ref([]);
+const salesData = ref([] as ChartDataPoint[]);
+const topProducts = ref([] as TopProduct[]);
+const categories = ref([] as CategorySales[]);
+const recentActivity = ref([] as Activity[]);
 const monthlyGoals = ref({
   salesTarget: 50000,
   ordersTarget: 100,
   satisfactionTarget: 5.0,
   currentSales: 0,
   currentOrders: 0,
-});
+} as MonthlyGoals);
 
 const showDateModal = ref(false);
 const startDate = ref('');
@@ -463,9 +464,9 @@ const loadAnalytics = async () => {
       salesData.value = data.chartData;
       topProducts.value = data.topProducts;
       categories.value = data.categorySales;
-      recentActivity.value = data.recentActivity.map((a) => ({
+      recentActivity.value = data.recentActivity.map((a: any) => ({
         ...a,
-        icon: getActivityIcon(a.type),
+        icon: getActivityIcon(a.type as string),
       }));
       monthlyGoals.value = data.monthlyGoals;
     }
@@ -482,8 +483,8 @@ watch(selectedPeriod, () => {
   loadAnalytics();
 });
 
-function getActivityIcon(type) {
-  const map = {
+function getActivityIcon(type: string) {
+  const map: Record<string, any> = {
     sale: cartOutline,
     payment: cashOutline,
     warning: alertCircleOutline,
@@ -573,7 +574,7 @@ const applyCustomRange = async () => {
   await loadAnalytics();
 };
 
-const editGoal = async (type) => {
+const editGoal = async (type: string) => {
   const isSales = type === 'sales';
   const current = isSales ? monthlyGoals.value.salesTarget : monthlyGoals.value.ordersTarget;
   const label = isSales ? 'Monthly Sales Target (₱)' : 'Monthly Orders Target';

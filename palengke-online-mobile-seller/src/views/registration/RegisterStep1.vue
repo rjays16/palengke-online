@@ -179,7 +179,7 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { API_BASE } from '@/config/api';
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
@@ -196,11 +196,12 @@ import {
   alertCircleOutline,
 } from 'ionicons/icons';
 import { useRegistrationStore } from '@/stores/registration';
+import { type CountryCode } from '@/types';
 
 const router = useRouter();
 const reg = useRegistrationStore();
 
-const countryCodes = ref([]);
+const countryCodes = ref([] as CountryCode[]);
 const isLoadingCountries = ref(true);
 
 const countryCode = ref('+63');
@@ -209,7 +210,7 @@ onMounted(async () => {
   try {
     const res = await fetch(`${API_BASE}/countries`);
     const data = await res.json();
-    countryCodes.value = data.countries.map(c => ({
+    countryCodes.value = data.countries.map((c: any) => ({
       code: c.dial_code,
       country: c.name,
       abbr: c.code,
@@ -236,7 +237,7 @@ const emailExistsError = ref('');
 // OTP data
 const showOtpSection = ref(false);
 const otpDigits = ref(['', '', '', '', '', '']);
-const otpInputs = ref([]);
+const otpInputs = ref([] as any[]);
 const otpError = ref('');
 const resendTimer = ref(0);
 const isSendingOtp = ref(false);
@@ -352,7 +353,7 @@ const onPhoneInput = () => {
 };
 
 // Validate field
-const validateField = (field) => {
+const validateField = (field: string) => {
   if (field === 'email') {
     if (!email.value) {
       errors.value.email = 'Email is required';
@@ -386,7 +387,7 @@ const validateField = (field) => {
 };
 
 // Format phone for display
-const formatPhone = (phoneNum) => {
+const formatPhone = (phoneNum: string) => {
   if (!phoneNum || phoneNum.length !== 11) return phoneNum;
   return `${phoneNum.slice(0, 4)} ${phoneNum.slice(4, 7)} ${phoneNum.slice(7)}`;
 };
@@ -445,7 +446,7 @@ const sendOtp = async () => {
         otpInputs.value[0].focus();
       }
     }, 300);
-  } catch (error) {
+  } catch (error: any) {
     const toast = await toastController.create({
       message: error.message || 'Failed to send code. Please try again.',
       duration: 3000,
@@ -491,7 +492,7 @@ const changeEmail = () => {
 };
 
 // OTP input handler
-const onOtpInput = (index) => {
+const onOtpInput = (index: any) => {
   // Only allow numbers
   otpDigits.value[index] = otpDigits.value[index].replace(/\D/g, '');
 
@@ -505,7 +506,7 @@ const onOtpInput = (index) => {
 };
 
 // OTP keydown handler
-const onOtpKeydown = (event, index) => {
+const onOtpKeydown = (event: any, index: any) => {
   // Backspace handling
   if (event.key === 'Backspace' && !otpDigits.value[index] && index > 0) {
     otpInputs.value[index - 1]?.focus();
@@ -513,7 +514,7 @@ const onOtpKeydown = (event, index) => {
 };
 
 // OTP paste handler
-const onOtpPaste = (event) => {
+const onOtpPaste = (event: any) => {
   event.preventDefault();
   const pastedData = event.clipboardData.getData('text').replace(/\D/g, '');
 
@@ -571,7 +572,7 @@ const goBack = () => {
 const handleNext = () => {
   if (!isFormValid.value) return;
 
-  reg.setFields({
+  (reg as any).setFields({
     email: email.value,
     countryCode: countryCode.value,
     phone: phone.value,

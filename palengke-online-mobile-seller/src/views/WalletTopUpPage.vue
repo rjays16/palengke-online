@@ -101,12 +101,13 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonButtons, IonIcon } from '@ionic/vue';
 import { arrowBackOutline, walletOutline, checkmarkCircle, chevronForwardOutline } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
+import { type PaymentMethod } from '@/types';
 
 const router = useRouter();
 
@@ -116,14 +117,14 @@ function goToHistory() {
 
 const balance = ref(0);
 const amount = ref(100);
-const selectedPM = ref(null);
-const paymentMethods = ref([]);
+const selectedPM = ref<number | null>(null);
+const paymentMethods = ref([] as PaymentMethod[]);
 const processing = ref(false);
 const topUpSuccess = ref(false);
 const topUpAmount = ref(0);
 const topUpMethod = ref('');
 const newBalance = ref(0);
-const error = ref(null);
+const error = ref<string | null>(null);
 
 const quickAmounts = [100, 200, 500, 1000];
 
@@ -133,13 +134,13 @@ function getEmail() {
   return localStorage.getItem('userEmail');
 }
 
-function pmLogo(name) {
-  const logos = {
+function pmLogo(name: string) {
+  const logos: Record<string, string | undefined> = {
     GCash: '/assets/payment-methods-logo/gcash.png',
     PayPal: '/assets/payment-methods-logo/paypal.png',
     Stripe: '/assets/payment-methods-logo/cards.png',
   };
-  return logos[name] || null;
+  return logos[name];
 }
 
 async function fetchBalance() {
@@ -167,7 +168,7 @@ async function fetchPaymentMethods() {
       const json = await res.json();
       const methods = Array.isArray(json) ? json : json.methods || [];
       const exclude = ['cash on delivery', 'cod', 'palengke wallet'];
-      paymentMethods.value = methods.filter((m) => !exclude.includes(m.name.toLowerCase()));
+      paymentMethods.value = methods.filter((m: any) => !exclude.includes(m.name.toLowerCase()));
     }
   } catch {
     paymentMethods.value = [
@@ -207,7 +208,7 @@ async function processTopUp() {
     balance.value = json.balance;
     topUpSuccess.value = true;
     processing.value = false;
-  } catch (e) {
+  } catch (e: any) {
     error.value = e.message || 'Network error.';
     processing.value = false;
   }

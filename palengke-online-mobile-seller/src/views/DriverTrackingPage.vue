@@ -143,7 +143,7 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import {
@@ -174,6 +174,7 @@ import {
   chevronUpOutline,
   chevronDownOutline,
 } from 'ionicons/icons';
+import { type DriverInfo, type OrderTrackingInfo, type TrackingMetrics, type DeliveryStep } from '@/types';
 
 // Import Leaflet
 import L from 'leaflet';
@@ -182,12 +183,12 @@ import 'leaflet/dist/leaflet.css';
 const router = useRouter();
 const route = useRoute();
 
-let map = null;
-let driverMarker = null;
-let sellerMarker = null;
-let customerMarker = null;
-let routeLine = null;
-let locationUpdateInterval = null;
+let map: any = null;
+let driverMarker: any = null;
+let sellerMarker: any = null;
+let customerMarker: any = null;
+let routeLine: any = null;
+let locationUpdateInterval: any = null;
 
 // UI State
 const cardsExpanded = ref(false);
@@ -202,7 +203,7 @@ const driverData = ref({
   status: 'on-route',
   statusText: 'On the way',
   currentLocation: [8.485, 124.6517],
-});
+} as DriverInfo);
 
 // Order Data
 const orderData = ref({
@@ -210,13 +211,13 @@ const orderData = ref({
   deliveryAddress: 'Brgy. Carmen, Cagayan de Oro City',
   eta: '15 minutes',
   customerName: 'Maria Santos',
-});
+} as OrderTrackingInfo);
 
 // Tracking Data
 const trackingData = ref({
   distance: '3.2 km',
   duration: '15 min',
-});
+} as TrackingMetrics);
 
 // Delivery Steps
 const deliverySteps = ref([
@@ -244,11 +245,11 @@ const deliverySteps = ref([
     completed: false,
     active: false,
   },
-]);
+] as DeliveryStep[]);
 
 // Locations
-const sellerLocation = [8.485, 124.6517];
-const customerLocation = [8.492, 124.66];
+const sellerLocation: [number, number] = [8.485, 124.6517];
+const customerLocation: [number, number] = [8.492, 124.66];
 
 // Toggle cards
 const toggleCards = () => {
@@ -383,7 +384,7 @@ const showLoadingModal = async (message = 'Loading...') => {
   setTimeout(() => alert.dismiss(), 1500);
 };
 
-const showSuccessModal = async (message) => {
+const showSuccessModal = async (message: string) => {
   const alert = await alertController.create({
     cssClass: 'success-modal',
     header: ' ',

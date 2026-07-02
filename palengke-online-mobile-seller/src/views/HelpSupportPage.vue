@@ -269,7 +269,7 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
@@ -309,24 +309,25 @@ import {
   shieldCheckmarkOutline,
 } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
+import { type FAQ, type ContactSupport, type Report } from '@/types';
 
 const router = useRouter();
 
 // State
 const searchQuery = ref('');
 const expandedFaq = ref(null);
-const contactSupports = ref([]);
+const contactSupports = ref([] as ContactSupport[]);
 const loadingContacts = ref(true);
-const myReports = ref([]);
+const myReports = ref([] as Report[]);
 const loadingReports = ref(false);
 
 // Helpers
-function formatDate(dateStr) {
+function formatDate(dateStr: string) {
   if (!dateStr) return '';
   return dateStr.slice(0, 10);
 }
 
-function statusLabel(status) {
+function statusLabel(status: string) {
   if (status === 'in_progress') return 'In Progress';
   return status.charAt(0).toUpperCase() + status.slice(1);
 }
@@ -349,7 +350,7 @@ const quickActions = [
 ];
 
 // FAQs Data
-const faqs = ref([]);
+const faqs = ref([] as FAQ[]);
 const loadingFaqs = ref(true);
 
 const loadFaqs = async () => {
@@ -377,7 +378,7 @@ const hasSearchQuery = computed(() => searchQuery.value.trim().length > 0);
 const searchResults = computed(() => {
   if (!hasSearchQuery.value) return [];
   const q = searchQuery.value.toLowerCase().trim();
-  const results = [];
+  const results: any[] = [];
 
   faqs.value.forEach((faq) => {
     if (faq.question.toLowerCase().includes(q) || faq.answer.toLowerCase().includes(q)) {
@@ -422,7 +423,7 @@ const showLoadingModal = async (message = 'Loading...') => {
 };
 
 // Success Modal Function
-const showSuccessModal = async (message) => {
+const showSuccessModal = async (message: string) => {
   const alert = await alertController.create({
     cssClass: 'success-modal',
     header: ' ',
@@ -487,13 +488,13 @@ async function fetchContactSupports() {
   }
 }
 
-function getDefaultContacts() {
+function getDefaultContacts(): ContactSupport[] {
   return [
     {
       key: 'live_chat',
       title: 'Live Chat',
       subtitle: 'Chat with our support team',
-      type: 'chat',
+      type: 'chat' as const,
       value: null,
       enabled: true,
     },
@@ -501,7 +502,7 @@ function getDefaultContacts() {
       key: 'call',
       title: 'Call Us',
       subtitle: '+63 912 345 6789',
-      type: 'phone',
+      type: 'phone' as const,
       value: '+639123456789',
       enabled: true,
     },
@@ -509,7 +510,7 @@ function getDefaultContacts() {
       key: 'email',
       title: 'Email Support',
       subtitle: 'support@palengke-online.com',
-      type: 'email',
+      type: 'email' as const,
       value: 'support@palengke-online.com',
       enabled: true,
     },
@@ -517,15 +518,15 @@ function getDefaultContacts() {
       key: 'facebook',
       title: 'Facebook',
       subtitle: 'Message us on Facebook',
-      type: 'facebook',
+      type: 'facebook' as const,
       value: 'https://facebook.com/PalengkeOnlinePH',
       enabled: true,
     },
   ];
 }
 
-function getIconForType(type) {
-  const icons = {
+function getIconForType(type: string) {
+  const icons: Record<string, any> = {
     chat: chatbubbleEllipsesOutline,
     phone: callOutline,
     email: mailOutline,
@@ -534,8 +535,8 @@ function getIconForType(type) {
   return icons[type] || chatbubbleEllipsesOutline;
 }
 
-function getIconClass(type) {
-  const classes = {
+function getIconClass(type: string) {
+  const classes: Record<string, any> = {
     chat: 'chat',
     phone: 'phone',
     email: 'email',
@@ -544,7 +545,7 @@ function getIconClass(type) {
   return classes[type] || 'chat';
 }
 
-function handleContactAction(contact) {
+function handleContactAction(contact: any) {
   switch (contact.type) {
     case 'chat':
       showLoadingModal('Opening live chat...');
@@ -563,7 +564,7 @@ function handleContactAction(contact) {
   }
 }
 
-function handleSearchResult(result) {
+function handleSearchResult(result: any) {
   if (result.type === 'faq') {
     const idx = faqs.value.indexOf(result.faq);
     if (idx !== -1) toggleFaq(idx);
@@ -579,7 +580,7 @@ function handleSearchResult(result) {
 }
 
 // Methods
-const toggleFaq = (index) => {
+const toggleFaq = (index: any) => {
   expandedFaq.value = expandedFaq.value === index ? null : index;
 };
 
@@ -768,8 +769,8 @@ const requestFeature = async () => {
   await alert.present();
 };
 
-const showTopic = async (topic) => {
-  const topics = {
+const showTopic = async (topic: any) => {
+  const topics: Record<string, any> = {
     'getting-started': 'Getting Started Guide',
     orders: 'Order Management Help',
     products: 'Product Management Help',
@@ -781,7 +782,7 @@ const showTopic = async (topic) => {
   await showLoadingModal(`Opening ${topics[topic]}...`);
 };
 
-const playVideo = async (video) => {
+const playVideo = async (video: any) => {
   await showLoadingModal('Loading video tutorial...');
 };
 

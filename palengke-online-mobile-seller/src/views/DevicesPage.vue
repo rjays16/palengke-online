@@ -54,7 +54,7 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { API_BASE } from '@/config/api';
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
@@ -72,10 +72,11 @@ import {
   alertController,
 } from '@ionic/vue';
 import { phonePortraitOutline, laptopOutline, logOutOutline } from 'ionicons/icons';
+import { type Device } from '@/types';
 
 const router = useRouter();
 
-const devices = ref([]);
+const devices = ref([] as Device[]);
 const loading = ref(true);
 
 const userEmail = ref(localStorage.getItem('userEmail') || '');
@@ -103,7 +104,7 @@ const fetchDevices = async () => {
   }
 };
 
-const confirmLogout = async (device) => {
+const confirmLogout = async (device: Device) => {
   const isCurrent = device.is_current;
   const msg = isCurrent
     ? 'Logout from this device? You will need to enter your email and PIN to sign in again.'
@@ -145,7 +146,7 @@ const logoutCurrent = async () => {
   router.replace('/login');
 };
 
-const removeDevice = async (device) => {
+const removeDevice = async (device: Device) => {
   try {
     const response = await fetch(`${API_BASE}/seller/devices/remove`, {
       method: 'POST',

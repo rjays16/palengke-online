@@ -130,7 +130,7 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon, toastController } from '@ionic/vue';
@@ -143,6 +143,7 @@ import {
 } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
 import { useRegistrationStore } from '@/stores/registration';
+import { type AccountSummary } from '@/types';
 
 const router = useRouter();
 const reg = useRegistrationStore();
@@ -154,7 +155,7 @@ const accountData = ref({
   phone: '',
   storeName: '',
   verificationStatus: 'not_verified',
-});
+} as AccountSummary);
 
 // Submission state
 const isSubmitting = ref(false);
@@ -180,10 +181,10 @@ const submitRegistration = async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: d.email,
-        country_code: d.countryCode,
+        country_code: (d as any).countryCode,
         phone: d.phone,
-        full_phone: d.fullPhone,
-        email_verified: d.emailVerified,
+        full_phone: (d as any).fullPhone,
+        email_verified: (d as any).emailVerified,
         first_name: d.firstName,
         middle_name: d.middleName || '',
         last_name: d.lastName,
@@ -198,12 +199,12 @@ const submitRegistration = async () => {
         store_place: d.storePlace,
         complete_address: d.completeAddress,
         verification_choice: d.verificationChoice,
-        verification_status: d.verificationStatus,
+        verification_status: (d as any).verificationStatus,
         id_type: d.idType || null,
-        id_type_name: d.idTypeName || null,
-        id_front_photo: d.idFrontPhoto || null,
-        id_back_photo: d.idBackPhoto || null,
-        selfie_photo: d.selfiePhoto || null,
+        id_type_name: (d as any).idTypeName || null,
+        id_front_photo: (d as any).idFrontPhoto || null,
+        id_back_photo: (d as any).idBackPhoto || null,
+        selfie_photo: (d as any).selfiePhoto || null,
       }),
     });
 
@@ -212,12 +213,12 @@ const submitRegistration = async () => {
       throw new Error(errorData.message || 'Registration failed.');
     }
 
-    reg.setFields({ verificationSubmittedAt: new Date().toISOString() });
+    (reg as any).setFields({ verificationSubmittedAt: new Date().toISOString() });
 
     isSubmitting.value = false;
 
     showSuccessToast();
-  } catch (error) {
+  } catch (error: any) {
     isSubmitting.value = false;
     submitError.value = error.message || 'Something went wrong. Please try again.';
   }
@@ -234,7 +235,7 @@ onMounted(() => {
   accountData.value.email = reg.data.email || '';
   accountData.value.phone = reg.data.phone || '';
   accountData.value.storeName = reg.data.storeName || '';
-  accountData.value.verificationStatus = reg.data.verificationStatus || 'not_verified';
+  accountData.value.verificationStatus = (reg.data as any).verificationStatus || 'not_verified';
 
   // If skipped verification, submit registration now
   if (reg.data.verificationChoice === 'skip') {

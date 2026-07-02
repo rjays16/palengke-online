@@ -254,7 +254,7 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { actionSheetController, alertController, toastController } from '@ionic/vue';
@@ -277,8 +277,8 @@ import {
   cubeOutline,
 } from 'ionicons/icons';
 import { API_BASE } from '@/config/api';
+import { type Conversation } from '@/types';
 import { useChatWebSocket } from '@/composables/useChatWebSocket';
-const QUICK_REPLIES = ['Yes, available po!', 'Out of stock po', 'On the way!', 'Thank you!'];
 
 const router = useRouter();
 
@@ -288,17 +288,17 @@ const chatWs = useChatWebSocket(userEmail, {
   onConversationsUpdate(list) {
     conversations.value = list;
     if (selectedChat.value) {
-      const updated = list.find((c) => c.id === selectedChat.value.id);
+      const updated = list.find((c: any) => c.id === selectedChat.value?.id);
       if (updated) {
         const prevMsgCount = selectedChat.value.messages.length;
         selectedChat.value = { ...selectedChat.value, ...updated };
-        if (updated.lastMessage !== selectedChat.value.lastMessage) {
+        if (updated.lastMessage !== selectedChat.value?.lastMessage) {
           if (!updated.muted) playMessageSound();
         }
       }
     }
   },
-  onMessagesUpdate(conversationId, messages) {
+  onMessagesUpdate(conversationId: any, messages: any) {
     if (selectedChat.value && selectedChat.value.id === conversationId) {
       const prevLen = selectedChat.value.messages.length;
       selectedChat.value.messages = messages;
@@ -317,15 +317,15 @@ const chatWs = useChatWebSocket(userEmail, {
 const showSearch = ref(false);
 const searchQuery = ref('');
 const activeFilter = ref('all');
-const selectedChat = ref(null);
+const selectedChat = ref(null as Conversation | null);
 const newMessage = ref('');
 const isTyping = ref(false);
-const chatContent = ref(null);
+const chatContent = ref(null as any);
 const loading = ref(false);
 const sendingMessage = ref(false);
 const loadingMessages = ref(false);
 
-const conversations = ref([]);
+const conversations = ref([] as Conversation[]);
 
 // Call Modal
 const showCallModal = ref(false);
@@ -333,16 +333,16 @@ const callName = ref('');
 const callAvatar = ref('');
 
 // Quick Replies
-const quickReplies = ref(QUICK_REPLIES);
+const quickReplies = ref([]);
 
-function isMuted(conversation) {
+function isMuted(conversation: any) {
   if (!conversation) return false;
   if (conversation.muted !== undefined) return conversation.muted;
   const found = conversations.value.find((c) => c.id === conversation.id);
   return found ? found.muted : false;
 }
 
-async function toggleMute(conversation) {
+async function toggleMute(conversation: any) {
   if (!conversation) return;
   try {
     const res = await fetch(`${API_BASE}/seller/conversations/${conversation.id}/toggle-mute`, {
@@ -413,7 +413,7 @@ async function loadConversations() {
   }
 }
 
-async function loadMessages(conversationId) {
+async function loadMessages(conversationId: any) {
   if (!userEmail) return;
   loadingMessages.value = true;
   try {
@@ -438,7 +438,7 @@ const filterConversations = () => {
   // Triggered on search input
 };
 
-const openChat = async (conversation) => {
+const openChat = async (conversation: any) => {
   selectedChat.value = { ...conversation, messages: [] };
 
   const messages = await loadMessages(conversation.id);
@@ -473,8 +473,8 @@ const closeChat = () => {
 };
 
 // Audio notification
-const messageAudio = ref(null);
-const callAudio = ref(null);
+const messageAudio = ref(null as HTMLAudioElement | null);
+const callAudio = ref(null as HTMLAudioElement | null);
 let audioUnlocked = false;
 
 const unlockAudio = () => {
@@ -484,12 +484,12 @@ const unlockAudio = () => {
     messageAudio.value
       .play()
       .then(() => {
-        messageAudio.value.pause();
-        messageAudio.value.currentTime = 0;
-        messageAudio.value.volume = 0.7;
+        messageAudio.value?.pause();
+        messageAudio.value!.currentTime = 0;
+        messageAudio.value!.volume = 0.7;
         audioUnlocked = true;
       })
-      .catch((e) => console.warn('Audio unlock failed:', e));
+      .catch((e: any) => console.warn('Audio unlock failed:', e));
   }
 };
 
@@ -498,7 +498,7 @@ const playMessageSound = () => {
   try {
     if (messageAudio.value) {
       messageAudio.value.currentTime = 0;
-      messageAudio.value.play().catch((e) => console.warn('Play msg sound:', e));
+      messageAudio.value.play().catch((e: any) => console.warn('Play msg sound:', e));
     }
   } catch {}
 };
@@ -508,7 +508,7 @@ const playCallSound = () => {
   try {
     if (callAudio.value) {
       callAudio.value.currentTime = 0;
-      callAudio.value.play().catch((e) => console.warn('Play call sound:', e));
+      callAudio.value.play().catch((e: any) => console.warn('Play call sound:', e));
     }
   } catch {}
 };
@@ -532,7 +532,7 @@ const sendMessage = async () => {
     text,
     sent: true,
     time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
-    status: 'delivered',
+    status: 'delivered' as const,
   };
 
   selectedChat.value.messages.push(tempMessage);
@@ -563,7 +563,7 @@ const sendMessage = async () => {
   }
 };
 
-const sendQuickReply = (reply) => {
+const sendQuickReply = (reply: any) => {
   newMessage.value = reply;
   sendMessage();
 };
@@ -573,26 +573,26 @@ const attachImage = async () => {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/png,image/jpg,image/jpeg,image/webp';
-  input.onchange = async (e) => {
-    const file = e.target.files[0];
+  input.onchange = async (e: any) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
     if (!file) return;
 
     sendingMessage.value = true;
     const formData = new FormData();
     formData.append('image', file);
-    formData.append('email', userEmail);
+    formData.append('email', userEmail || '');
 
     try {
-      const res = await fetch(`${API_BASE}/seller/conversations/${selectedChat.value.id}/upload-image`, {
+      const res = await fetch(`${API_BASE}/seller/conversations/${selectedChat.value?.id}/upload-image`, {
         method: 'POST',
         headers: { Accept: 'application/json' },
         body: formData,
       });
       const data = await res.json();
       if (res.ok && data.data) {
-        selectedChat.value.messages.push(data.data);
-        selectedChat.value.lastMessage = 'Sent an image';
-        selectedChat.value.time = 'Just now';
+        selectedChat.value?.messages.push(data.data);
+        selectedChat.value!.lastMessage = 'Sent an image';
+        selectedChat.value!.time = 'Just now';
         nextTick(() => {
           scrollToBottom();
         });
@@ -624,7 +624,7 @@ const endCall = () => {
   showCallModal.value = false;
 };
 
-const showToast = async (message, color = 'dark') => {
+const showToast = async (message: string, color = 'dark') => {
   const toast = await toastController.create({
     message,
     duration: 2000,
@@ -635,6 +635,7 @@ const showToast = async (message, color = 'dark') => {
 };
 
 const showChatInfo = async () => {
+  if (!selectedChat.value) return;
   const alert = await alertController.create({
     header: selectedChat.value.name,
     message: `Type: ${selectedChat.value.type === 'customer' ? 'Customer' : 'Driver'}
@@ -686,7 +687,7 @@ const deleteChat = async () => {
         handler: async () => {
           try {
             await fetch(
-              `${API_BASE}/seller/conversations/${selectedChat.value.id}?email=${encodeURIComponent(userEmail)}`,
+              `${API_BASE}/seller/conversations/${selectedChat.value?.id}?email=${encodeURIComponent(userEmail || '')}`,
               {
                 method: 'DELETE',
                 headers: { Accept: 'application/json' },
@@ -695,7 +696,7 @@ const deleteChat = async () => {
           } catch (e) {
             console.error('Failed to delete conversation:', e);
           }
-          const index = conversations.value.findIndex((c) => c.id === selectedChat.value.id);
+          const index = conversations.value.findIndex((c) => c.id === selectedChat.value?.id);
           if (index > -1) {
             conversations.value.splice(index, 1);
           }
@@ -707,7 +708,7 @@ const deleteChat = async () => {
   await alert.present();
 };
 
-const confirmDeleteMessage = async (message) => {
+const confirmDeleteMessage = async (message: any) => {
   if (!selectedChat.value) return;
   const alert = await alertController.create({
     header: 'Delete Message',
@@ -736,11 +737,11 @@ const showDeleteLoading = async () => {
   return loading;
 };
 
-const deleteMessage = async (message) => {
+const deleteMessage = async (message: any) => {
   if (!message.id) return;
   const loading = await showDeleteLoading();
   try {
-    await fetch(`${API_BASE}/seller/messages/${message.id}?email=${encodeURIComponent(userEmail)}`, {
+    await fetch(`${API_BASE}/seller/messages/${message.id}?email=${encodeURIComponent(userEmail || '')}`, {
       method: 'DELETE',
       headers: { Accept: 'application/json' },
     });
@@ -760,6 +761,16 @@ const deleteMessage = async (message) => {
 const goHome = () => {
   window.location.href = '/home';
 };
+
+function handleBackButton(event: any) {
+  event.detail.register(0, () => {
+    if (showSearch.value) {
+      showSearch.value = false;
+    } else {
+      router.back();
+    }
+  });
+}
 
 onMounted(() => {
   document.addEventListener('ionBackButton', handleBackButton);

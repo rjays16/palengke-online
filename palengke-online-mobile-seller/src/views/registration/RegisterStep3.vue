@@ -165,7 +165,7 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon } from '@ionic/vue';
@@ -181,12 +181,13 @@ import {
   informationCircleOutline,
 } from 'ionicons/icons';
 import { useRegistrationStore } from '@/stores/registration';
+import { type StoreInfoForm } from '@/types';
 
 const router = useRouter();
 const reg = useRegistrationStore();
 
 // Cities by region
-const citiesByRegion = {
+const citiesByRegion: Record<string, string[]> = {
   luzon: [
     'Manila',
     'Quezon City',
@@ -277,7 +278,7 @@ const citiesByRegion = {
 };
 
 // Barangays by city (major cities)
-const barangaysByCity = {
+const barangaysByCity: Record<string, string[]> = {
   'Cagayan de Oro': [
     'Agusan',
     'Baikingon',
@@ -751,7 +752,7 @@ const formData = ref({
   barangay: '',
   storePlace: '',
   completeAddress: '',
-});
+} as StoreInfoForm);
 
 // Error states
 const errors = ref({
@@ -811,7 +812,7 @@ const onCityChange = () => {
 };
 
 // Field validation
-const validateField = (fieldName) => {
+const validateField = (fieldName: string) => {
   switch (fieldName) {
     case 'storeName':
       if (!formData.value.storeName.trim()) {

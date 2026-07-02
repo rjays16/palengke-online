@@ -86,7 +86,7 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { API_BASE } from '@/config/api';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
@@ -122,11 +122,12 @@ import {
   warningOutline,
   closeCircleOutline,
 } from 'ionicons/icons';
+import { type Notification } from '@/types';
 const router = useRouter();
 
 // State
 const selectedFilter = ref('all');
-const notifications = ref([]);
+const notifications = ref([] as Notification[]);
 const loading = ref(true);
 
 const loadNotifications = async () => {
@@ -170,7 +171,7 @@ const filteredNotifications = computed(() => {
 });
 
 // Success Modal Function
-const showSuccessModal = async (message) => {
+const showSuccessModal = async (message: string) => {
   const alert = await alertController.create({
     cssClass: 'success-modal',
     header: ' ',
@@ -243,12 +244,12 @@ const showLoadingModal = async (message = 'Loading...') => {
 };
 
 // Methods
-const handleFilterChange = (event) => {
+const handleFilterChange = (event: any) => {
   selectedFilter.value = event.detail.value;
 };
 
-const getNotificationIcon = (type) => {
-  const icons = {
+const getNotificationIcon = (type: string) => {
+  const icons: Record<string, any> = {
     order: cartOutline,
     message: chatbubbleEllipsesOutline,
     payment: cashOutline,
@@ -260,10 +261,10 @@ const getNotificationIcon = (type) => {
   return icons[type] || informationCircleOutline;
 };
 
-const formatTime = (dateString) => {
+const formatTime = (dateString: string) => {
   const date = new Date(dateString);
   const now = new Date();
-  const diff = now - date;
+  const diff = now.getTime() - date.getTime();
   const minutes = Math.floor(diff / 60000);
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
@@ -281,7 +282,7 @@ const formatTime = (dateString) => {
   }
 };
 
-const handleNotificationClick = async (notification) => {
+const handleNotificationClick = async (notification: any) => {
   notification.read = true;
 
   const email = localStorage.getItem('userEmail');

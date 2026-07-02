@@ -163,7 +163,7 @@
   </ion-page>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon, alertController } from '@ionic/vue';
@@ -177,15 +177,17 @@ import {
   personOutline,
   lockClosedOutline,
 } from 'ionicons/icons';
+import { useRegistrationStore } from '@/stores/registration';
 
 const router = useRouter();
+const reg = useRegistrationStore();
 
 const isLoggedIn = ref(!!localStorage.getItem('token') && !!localStorage.getItem('userEmail'));
 
 // Form data
 const formData = ref({
   idType: '',
-});
+} as { idType: string });
 
 // Error states
 const errors = ref({
@@ -220,8 +222,8 @@ onMounted(() => {
 });
 
 // Get ID name
-const getIdName = (idType) => {
-  return idTypeNames[idType] || idType;
+const getIdName = (idType: string) => {
+  return idTypeNames[idType as keyof typeof idTypeNames] || idType;
 };
 
 // ID type change handler
@@ -230,7 +232,7 @@ const onIdTypeChange = () => {
 };
 
 // Field validation
-const validateField = (fieldName) => {
+const validateField = (fieldName: string) => {
   if (fieldName === 'idType') {
     if (!formData.value.idType) {
       errors.value.idType = 'Please select an ID type';
