@@ -49,6 +49,27 @@
           </div>
         </div>
 
+        <!-- Palengke Licence Banner -->
+        <div class="licence-banner" :class="licenceBannerClass" v-if="!licenceStore.state.isPaid">
+          <div class="licence-banner-left">
+            <ion-icon :icon="licenceBannerIcon" class="licence-banner-icon"></ion-icon>
+            <div>
+              <p class="licence-banner-title">{{ licenceBannerTitle }}</p>
+              <p class="licence-banner-sub">{{ licenceBannerSub }}</p>
+            </div>
+          </div>
+          <ion-button
+            v-if="licenceStore.trialExpired.value"
+            size="small"
+            color="danger"
+            fill="solid"
+            class="licence-banner-btn"
+            @click="goToLicencePayment"
+          >
+            Pay Now
+          </ion-button>
+        </div>
+
         <!-- Stats Cards -->
         <div class="stats-section">
           <div class="stat-card green">
@@ -244,7 +265,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
@@ -257,13 +278,40 @@ import {
   trendingUpOutline, cubeOutline, chatbubblesOutline,
   receiptOutline, homeOutline, personOutline, locationOutline,
   navigateOutline, storefrontOutline, logOutOutline,
-  helpCircleOutline, informationCircleOutline
+  helpCircleOutline, informationCircleOutline,
+  closeCircleOutline, cardOutline
 } from 'ionicons/icons';
 import { mockActiveDelivery, mockRecentDeliveries } from '@/mock/home';
+import { useLicenceStore } from '@/composables/useLicenceStore';
+import { mockLicencePrice } from '@/mock/licence';
 
 const router = useRouter();
+const licenceStore = useLicenceStore();
 
 // Driver Data
+const licenceBannerClass = computed(() => {
+  if (licenceStore.trialExpired.value) return 'expired'
+  if (licenceStore.trialDaysRemaining.value <= 5) return 'warning'
+  return ''
+})
+
+const licenceBannerIcon = computed(() => {
+  if (licenceStore.trialExpired.value) return closeCircleOutline
+  return timeOutline
+})
+
+const licenceBannerTitle = computed(() => {
+  if (licenceStore.trialExpired.value) return 'Trial Expired'
+  return `${licenceStore.trialDaysRemaining.value} days trial remaining`
+})
+
+const licenceBannerSub = computed(() => {
+  if (licenceStore.trialExpired.value) return `Pay ₱${mockLicencePrice.toLocaleString()} to continue delivering`
+  return `Pay ₱${mockLicencePrice.toLocaleString()} after trial to keep delivering`
+})
+
+const goToLicencePayment = () => router.push('/licence-payment')
+
 const driverName = ref('Juan Dela Cruz');
 const driverRating = ref(4.9);
 const totalTrips = ref(142);
@@ -288,6 +336,39 @@ const recentDeliveries = ref(mockRecentDeliveries);
 
 // Toggle Active/Inactive
 const toggleActiveStatus = async () => {
+  // Check licence before going active
+  if (!isActive.value && !licenceStore.canDeliver.value) {
+    const alert = await alertController.create({
+      cssClass: 'alert-licence',
+      header: ' ',
+      message: '',
+      buttons: [
+        {
+          text: 'Pay Now',
+          cssClass: 'alert-button-primary',
+          handler: () => router.push('/licence-payment')
+        },
+        { text: 'Later', role: 'cancel', cssClass: 'alert-button-cancel' }
+      ]
+    });
+    await alert.present();
+    const alertEl = document.querySelector('.alert-licence');
+    if (alertEl) {
+      const msgEl = alertEl.querySelector('.alert-message');
+      if (msgEl) {
+        msgEl.innerHTML = `
+          <div class="custom-alert-body">
+            <div class="custom-alert-icon icon-error">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+            </div>
+            <div class="custom-alert-title">Licence Expired</div>
+            <div class="custom-alert-text">Your 30-day trial has ended. Pay ₱${mockLicencePrice.toLocaleString()} to continue delivering.</div>
+          </div>`;
+      }
+    }
+    return;
+  }
+
   if (isActive.value) {
     // Going inactive - confirm
     const alert = await alertController.create({
@@ -748,6 +829,49 @@ ion-header ion-toolbar ion-buttons ion-button {
 .empty-state { text-align: center; padding: 40px 20px; }
 .empty-icon { font-size: 64px; color: var(--color-text-tertiary); margin-bottom: 16px; }
 .empty-state p { color: var(--color-text-secondary); margin-bottom: 16px; }
+
+/* ─── Licence Banner ──────────────────────────── */
+.licence-banner {
+  margin: 0 20px 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #E8F5E9;
+  border: 1px solid #4CAF50;
+}
+
+.licence-banner.warning {
+  background: #FFF8E1;
+  border-color: #FF9800;
+}
+
+.licence-banner.expired {
+  background: #FFEBEE;
+  border-color: #f44336;
+}
+
+.licence-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.licence-banner-icon { font-size: 24px; color: #4CAF50; flex-shrink: 0; }
+.licence-banner.warning .licence-banner-icon { color: #FF9800; }
+.licence-banner.expired .licence-banner-icon { color: #f44336; }
+
+.licence-banner-title { font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 0 0 2px 0; }
+.licence-banner-sub { font-size: 12px; color: #666; margin: 0; }
+
+.licence-banner-btn {
+  --border-radius: 10px; height: 34px;
+  font-size: 12px; font-weight: 700; text-transform: none;
+  flex-shrink: 0;
+}
 
 /* ─── Bottom Navigation ───────────────────────── */
 .bottom-nav {

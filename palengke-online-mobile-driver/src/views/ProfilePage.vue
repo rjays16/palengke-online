@@ -199,6 +199,47 @@
         </div>
       </div>
 
+      <!-- Palengke Licence -->
+      <div class="section">
+        <h3 class="section-title">Palengke Licence</h3>
+        <div class="licence-card" :style="{ borderColor: licenceStatusColor }">
+          <div class="licence-header">
+            <ion-icon :icon="licenceStatusIcon" class="licence-icon" :style="{ color: licenceStatusColor }"></ion-icon>
+            <div class="licence-info">
+              <p class="licence-id">{{ licenceStore.getLicenceDisplay() }}</p>
+              <p class="licence-status" :style="{ color: licenceStatusColor }">{{ licenceStore.getStatusText() }}</p>
+            </div>
+          </div>
+          <div class="licence-details">
+            <div class="licence-detail-item">
+              <span class="licence-detail-label">Days Active</span>
+              <span class="licence-detail-value">{{ licenceStore.getDaysUsed() }} / 30</span>
+            </div>
+            <div class="licence-detail-item">
+              <span class="licence-detail-label">Amount</span>
+              <span class="licence-detail-value">₱{{ mockLicencePrice.toLocaleString() }}</span>
+            </div>
+          </div>
+          <div class="licence-bar-track">
+            <div class="licence-bar-fill" :style="{ width: licenceBarPercent + '%', background: licenceStatusColor }"></div>
+          </div>
+          <div class="licence-footer-text">
+            <span v-if="licenceStore.state.isPaid">Licence is active until further notice</span>
+            <span v-else-if="licenceStore.trialExpired.value">Trial ended — pay ₱1,000 to continue delivering</span>
+            <span v-else>{{ licenceStore.trialDaysRemaining.value }} days remaining in trial</span>
+          </div>
+          <ion-button
+            v-if="licenceStore.trialExpired.value && !licenceStore.state.isPaid"
+            expand="block"
+            color="success"
+            class="licence-pay-btn"
+            @click="goToLicencePayment"
+          >
+            Pay ₱1,000 to Continue
+          </ion-button>
+        </div>
+      </div>
+
       <!-- Documents Status -->
       <div class="section" @click="goToDocuments">
         <div class="section-header-row">
@@ -272,7 +313,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
@@ -293,10 +334,35 @@ import {
   mockProfileData, mockRatingCounts, mockBadges,
   mockImprovements, mockDocumentsPreview
 } from '@/mock/profile';
+import { mockLicencePrice } from '@/mock/licence';
+import { useLicenceStore } from '@/composables/useLicenceStore';
+import {
+  checkmarkCircleOutline as checkmarkIcon,
+  timeOutline as timeIcon,
+  closeCircleOutline as closeIcon,
+  cardOutline as cardIcon,
+} from 'ionicons/icons';
 
 const router = useRouter();
 const activeTab = ref('achievements');
 const cityAvgRating = ref(4.70);
+
+const licenceStore = useLicenceStore();
+
+const licenceStatusIcon = computed(() => {
+  if (licenceStore.state.isPaid) return checkmarkIcon
+  if (licenceStore.trialExpired.value) return closeIcon
+  return timeIcon
+})
+
+const licenceStatusColor = computed(() => {
+  return licenceStore.getStatusColor()
+})
+
+const licenceBarPercent = computed(() => {
+  const used = licenceStore.getDaysUsed()
+  return Math.min(100, (used / 30) * 100)
+})
 
 const profileData = ref(mockProfileData);
 
@@ -479,6 +545,7 @@ const goToEarnings = () => router.push('/earnings');
 const goToDocuments = () => router.push('/documents');
 const goToSettings = () => router.push('/settings');
 const goToHelp = () => router.push('/help');
+const goToLicencePayment = () => router.push('/licence-payment');
 </script>
 
 <style scoped>
@@ -649,6 +716,52 @@ const goToHelp = () => router.push('/help');
 .info-label { font-size: 12px; color: #999; margin: 0 0 2px 0; }
 .info-value { font-size: 14px; font-weight: 600; color: #1a1a1a; margin: 0; }
 .info-arrow { font-size: 18px; color: #ccc; }
+
+/* Palengke Licence */
+.licence-card {
+  background: #f8f9fa; border-radius: 14px;
+  padding: 16px; border: 2px solid #4CAF50;
+  margin-top: 8px;
+}
+
+.licence-header {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 14px;
+}
+
+.licence-icon { font-size: 32px; }
+
+.licence-info { flex: 1; }
+.licence-id { font-size: 16px; font-weight: 700; color: #1a1a1a; margin: 0 0 2px 0; font-family: monospace; letter-spacing: 0.5px; }
+.licence-status { font-size: 13px; font-weight: 600; margin: 0; }
+
+.licence-details {
+  display: flex; gap: 16px; margin-bottom: 12px;
+}
+
+.licence-detail-item {
+  flex: 1; display: flex; flex-direction: column; gap: 2px;
+}
+
+.licence-detail-label { font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600; }
+.licence-detail-value { font-size: 14px; font-weight: 700; color: #1a1a1a; }
+
+.licence-bar-track {
+  width: 100%; height: 6px; background: #e0e0e0;
+  border-radius: 3px; overflow: hidden; margin-bottom: 8px;
+}
+
+.licence-bar-fill {
+  height: 100%; border-radius: 3px; transition: width 0.5s;
+}
+
+.licence-footer-text { font-size: 12px; color: #666; margin-bottom: 8px; }
+
+.licence-pay-btn {
+  --border-radius: 10px; height: 40px;
+  font-size: 14px; font-weight: 700; text-transform: none;
+  margin-top: 4px;
+}
 
 /* Documents Preview */
 .docs-preview { display: flex; flex-direction: column; gap: 8px; }

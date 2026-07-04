@@ -19,6 +19,7 @@ import EarningsPage from '@/views/EarningsPage.vue';
 import HistoryPage from '@/views/HistoryPage.vue';
 import TipReceivedPage from '@/views/TipReceivedPage.vue';
 import ProfilePage from '@/views/ProfilePage.vue';
+import LicencePaymentPage from '@/views/LicencePaymentPage.vue';
 import DocumentsPage from '@/views/DocumentsPage.vue';
 import SettingsPage from '@/views/SettingsPage.vue';
 import ServiceTypePage from '@/views/ServiceTypePage.vue';
@@ -207,6 +208,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/profile',
     name: 'Profile',
     component: ProfilePage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/licence-payment',
+    name: 'LicencePayment',
+    component: LicencePaymentPage,
     meta: { requiresAuth: true }
   },
   {
