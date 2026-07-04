@@ -86,8 +86,8 @@
           <!-- Quick Topics -->
           <div class="topics-section">
             <h3 class="section-title">Quick Topics</h3>
-            <div class="topics-grid">
-              <div v-if="loadingTopics" class="loading-state">Loading topics...</div>
+            <div v-if="loadingTopics" class="loading-state">Loading topics...</div>
+            <div v-else class="topics-grid">
               <div class="topic-chip" v-for="topic in topics" :key="topic.key"
                 :class="{ active: selectedTopic === topic.key }"
                 @click="filterByTopic(topic.key)">
