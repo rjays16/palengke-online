@@ -103,7 +103,8 @@
               {{ selectedTopic === 'all' ? 'Frequently Asked Questions' : topics.find(t => t.key === selectedTopic)?.name }}
             </h3>
 
-            <div v-if="filteredFaqs.length === 0" class="no-results">
+            <div v-if="loadingFaqs" class="loading-state">Loading FAQs...</div>
+            <div v-else-if="filteredFaqs.length === 0" class="no-results">
               <ion-icon :icon="searchOutline"></ion-icon>
               <p>No FAQs found for this topic.</p>
             </div>
