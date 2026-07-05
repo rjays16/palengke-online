@@ -38,6 +38,7 @@ use App\Http\Controllers\Api\RestrictionCodeController;
 use App\Http\Controllers\Api\DriverRegistrationController;
 use App\Http\Controllers\Api\DriverAuthController;
 use App\Http\Controllers\Api\DriverDeviceController;
+use App\Http\Controllers\Api\DriverDocumentController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -74,6 +75,12 @@ Route::post('/seller/verify', [SellerRegistrationController::class, 'verify']);
 Route::post('/driver/upload-photo', [DriverRegistrationController::class, 'uploadPhoto']);
 Route::post('/driver/register', [DriverRegistrationController::class, 'register']);
 Route::post('/driver/check-email', [DriverRegistrationController::class, 'checkEmail']);
+
+// Driver documents
+Route::get('/driver/documents', [DriverDocumentController::class, 'index']);
+Route::get('/driver/documents/types', [DriverDocumentController::class, 'types']);
+Route::post('/driver/documents/upload', [DriverDocumentController::class, 'upload']);
+Route::post('/driver/documents/seed', [DriverDocumentController::class, 'seed']);
 
 // Driver login
 Route::post('/driver/login', [DriverAuthController::class, 'login']);

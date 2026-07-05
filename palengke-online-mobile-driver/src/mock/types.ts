@@ -106,6 +106,8 @@ export interface Faq {
 export interface DocumentItem {
   id: number
   name: string
+  type: string
+  photo_url: string | null
   expiry: string | null
   status: string
 }

@@ -1,59 +1,167 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Palengke Online — Backend Setup
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Prerequisites
 
-## About Laravel
+- **Docker** + **Docker Compose** (for running the backend)
+- **Git**
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Step 1: Clone the Repository
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+```bash
+git clone <repository-url>
+cd palengke-online/palengke-online-backend
+```
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Step 2: Environment Configuration
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```bash
+cp .env.example .env
+```
 
-## Laravel Sponsors
+Default settings (no changes needed):
+```
+DB_DATABASE=palengke_db
+DB_USERNAME=palengke_user
+DB_PASSWORD=palengke_password
+DB_ROOT_PASSWORD=root_password
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## Step 3: Start Docker Containers
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```bash
+./run docker compose up -d
+```
 
-## Contributing
+This starts three containers:
+- **palengke-app** — PHP-FPM (Laravel application)
+- **palengke-nginx** — Nginx web server (serves on port **8000**)
+- **palengke-mysql** — MySQL database (port **3307**)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Verify:
+```bash
+./run docker compose ps
+```
 
-## Code of Conduct
+---
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Step 4: Install PHP Dependencies
 
-## Security Vulnerabilities
+```bash
+./run composer install
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## Step 5: Generate Application Key
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+./run php artisan key:generate
+```
+
+---
+
+## Step 6: Create Storage Symlink
+
+```bash
+./run php artisan storage:link
+```
+
+---
+
+## Step 7: Run Database Migrations
+
+```bash
+./run php artisan migrate
+```
+
+---
+
+## Step 8: Seed the Database
+
+```bash
+./run php artisan db:seed
+```
+
+---
+
+## Step 9: Verify Backend is Running
+
+```bash
+curl http://localhost:8000
+```
+
+Test a public endpoint:
+```bash
+curl http://localhost:8000/api/countries
+```
+
+Expected: a JSON array of available countries.
+
+---
+
+## Common Commands
+
+| Command | Description |
+|---------|-------------|
+| `./run docker compose up -d` | Start all containers |
+| `./run docker compose down` | Stop all containers |
+| `./run docker compose ps` | Check container status |
+| `./run docker compose logs` | View container logs |
+| `./run php artisan migrate` | Run migrations |
+| `./run php artisan db:seed` | Seed database |
+| `./run php artisan migrate:rollback` | Rollback last migration |
+| `./run composer install` | Install PHP dependencies |
+| `./run composer require <package>` | Add a Composer package |
+| `./run bash` | Open bash shell inside container |
+| `./run php artisan tinker` | Open Laravel tinker |
+
+---
+
+## Troubleshooting
+
+### Port 8000 already in use
+Edit `docker-compose.yml` and change the port mapping:
+```yaml
+ports:
+  - "8001:80"   # use any available port
+```
+
+### Permission errors
+```bash
+./run bash -c "chmod -R 777 storage bootstrap/cache"
+```
+
+### Migration fails ("table already exists")
+```bash
+./run php artisan migrate --force
+```
+
+### MySQL connection refused
+The app container may have started before MySQL was ready:
+```bash
+./run docker compose restart app
+```
+
+---
+
+## Importing a Database Dump
+
+If you receive an updated `.sql` dump:
+
+```bash
+./run docker compose exec -T mysql mysql -u root -proot_password palengke_db < dump.sql
+```
+
+---
+
+## Accessing the Backend
+
+- **API Base URL:** `http://localhost:8000`
+- **MySQL (external):** `localhost:3307` / user: `palengke_user` / pass: `palengke_password` / db: `palengke_db`
+- **MySQL (inside Docker):** hostname `mysql`, port `3306`

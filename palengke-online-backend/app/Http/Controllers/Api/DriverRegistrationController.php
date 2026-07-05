@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\DriverRegistrationConfirmationMail;
 use App\Mail\DriverAccountApprovedMail;
 use App\Mail\DriverAccountRejectedMail;
+use App\Models\DriverDocument;
 use App\Models\DriverRegistration;
 use App\Models\Notification;
 use Illuminate\Http\Request;
@@ -140,6 +141,8 @@ class DriverRegistrationController extends Controller
         $photoPath = $this->saveBase64Image($validated['photo'], $validated['photo_type']);
         $registration->update([$validated['photo_type'] => $photoPath]);
 
+        $this->syncDocumentRecord($registration->email, $validated['photo_type'], $photoPath);
+
         return response()->json([
             'message' => 'Photo uploaded successfully.',
             'photo_url' => $photoPath,
@@ -241,6 +244,38 @@ class DriverRegistrationController extends Controller
         return response()->json([
             'registration' => $this->formatForAdmin($registration),
         ]);
+    }
+
+    private function syncDocumentRecord(string $email, string $photoType, string $photoPath): void
+    {
+        $docTypeMap = [
+            'license_front_photo' => 'drivers_license',
+            'license_back_photo' => 'drivers_license',
+            'vehicle_reg_photo' => 'vehicle_registration',
+            'nbi_clearance_photo' => 'nbi_clearance',
+            'birth_cert_photo' => 'birth_certificate',
+            'selfie_photo' => 'selfie_photo',
+        ];
+
+        $docType = $docTypeMap[$photoType] ?? null;
+        if (!$docType) return;
+
+        $docNames = [
+            'drivers_license' => "Driver's License",
+            'vehicle_registration' => 'Vehicle Registration (OR/CR)',
+            'nbi_clearance' => 'NBI or Police Clearance',
+            'birth_certificate' => 'Birth Certificate',
+            'selfie_photo' => 'Selfie Photo',
+        ];
+
+        DriverDocument::updateOrCreate(
+            ['driver_email' => $email, 'type' => $docType],
+            [
+                'name' => $docNames[$docType] ?? $docType,
+                'file_path' => $photoPath,
+                'status' => 'pending',
+            ]
+        );
     }
 
     private function saveBase64Image(string $dataUrl, string $fieldName): string

@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             HelpTopicSeeder::class,
             FaqSeeder::class,
             CountryRegionSeeder::class,
+            DriverDocumentSeeder::class,
         ]);
     }
 }
