@@ -254,7 +254,10 @@ const isEmailValid = computed(() => {
   return email.value && emailRegex.test(email.value);
 });
 
+const defaultCountry = { code: '+63', country: 'Philippines', abbr: 'PH', digits: 10 };
+
 const currentCountry = computed(() => {
+  if (countryCodes.value.length === 0) return defaultCountry;
   return countryCodes.value.find((c) => c.code === countryCode.value) || countryCodes.value[0];
 });
 
