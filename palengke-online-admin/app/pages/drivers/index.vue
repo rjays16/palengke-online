@@ -21,7 +21,13 @@
       </div>
     </div>
 
-    <div class="table-card">
+    <div v-if="driversStore.loading" class="loading-state">
+      Loading drivers...
+    </div>
+    <div v-else-if="driversStore.error" class="error-state">
+      {{ driversStore.error }}
+    </div>
+    <div v-else class="table-card">
       <table class="data-table">
         <thead>
           <tr>
@@ -217,6 +223,8 @@
 definePageMeta({ layout: "default" });
 const driversStore = useDriversStore();
 
+onMounted(() => driversStore.fetchDrivers());
+
 const search = ref("");
 
 const filteredDrivers = computed(() => {
@@ -334,6 +342,19 @@ function handleDelete() {
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+}
+.loading-state,
+.error-state {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 14px;
+  color: #6b7280;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+}
+.error-state {
+  color: #dc2626;
 }
 .search-box {
   display: flex;

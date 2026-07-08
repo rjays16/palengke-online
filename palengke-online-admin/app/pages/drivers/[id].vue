@@ -81,11 +81,7 @@
               <div class="doc-info">
                 <span class="doc-name">{{ doc.name }}</span>
                 <span class="doc-status" :class="doc.status">{{
-                  doc.status === "verified"
-                    ? "Verified"
-                    : doc.status === "pending"
-                      ? "Pending"
-                      : "Rejected"
+                  doc.status === "verified" ? "Verified" : "Missing"
                 }}</span>
               </div>
               <button
@@ -95,9 +91,7 @@
               >
                 View
               </button>
-              <button v-else class="doc-btn" @click="reviewDoc(doc)">
-                Review
-              </button>
+              <button v-else class="doc-btn" disabled>N/A</button>
             </div>
           </div>
         </div>
@@ -199,7 +193,7 @@
       v-if="viewingDoc"
       @click.self="viewingDoc = null"
     >
-      <div class="modal-card modal-sm" @click.stop>
+      <div class="modal-card" @click.stop>
         <div class="modal-top">
           <span class="modal-title">{{ viewingDoc?.name }}</span>
           <button class="modal-close" @click="viewingDoc = null">
@@ -216,7 +210,13 @@
         </div>
         <div class="modal-body">
           <div class="doc-preview">
-            <div class="doc-preview-icon">
+            <img
+              v-if="viewingDoc?.url"
+              :src="viewingDoc.url"
+              :alt="viewingDoc.name"
+              class="doc-image"
+            />
+            <div v-else class="doc-preview-icon">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -232,77 +232,13 @@
               </svg>
             </div>
             <span class="doc-preview-name">{{ viewingDoc?.name }}</span>
-            <span class="doc-preview-status" :class="viewingDoc?.status">
-              {{
-                viewingDoc?.status === "verified"
-                  ? "Verified"
-                  : viewingDoc?.status === "pending"
-                    ? "Pending"
-                    : "Rejected"
-              }}
-            </span>
-            <p class="doc-preview-note">
-              This document has been verified and approved.
-            </p>
+            <span class="doc-preview-status verified">Verified</span>
           </div>
         </div>
         <div class="modal-actions">
           <button class="modal-btn secondary" @click="viewingDoc = null">
             Close
           </button>
-        </div>
-      </div>
-    </div>
-
-    <div
-      class="modal-overlay bottom"
-      v-if="reviewingDoc"
-      @click.self="reviewingDoc = null"
-    >
-      <div class="modal-card" @click.stop>
-        <div class="modal-top">
-          <span class="modal-title">Review: {{ reviewingDoc?.name }}</span>
-          <button class="modal-close" @click="reviewingDoc = null">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="review-status">
-            <span class="review-label">Current Status</span>
-            <span class="doc-preview-status" :class="reviewingDoc?.status">
-              {{
-                reviewingDoc?.status === "verified"
-                  ? "Verified"
-                  : reviewingDoc?.status === "pending"
-                    ? "Pending"
-                    : "Rejected"
-              }}
-            </span>
-          </div>
-          <div class="form-group" style="margin-top: 16px">
-            <label>Review Notes</label>
-            <textarea
-              v-model="reviewNotes"
-              class="form-input"
-              rows="3"
-              placeholder="Add notes about this document..."
-            ></textarea>
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button class="modal-btn secondary" @click="reviewingDoc = null">
-            Cancel
-          </button>
-          <button class="modal-btn danger" @click="rejectDoc">Reject</button>
-          <button class="modal-btn primary" @click="approveDoc">Approve</button>
         </div>
       </div>
     </div>
@@ -315,7 +251,7 @@ const route = useRoute();
 const driversStore = useDriversStore();
 
 const driver = computed(() =>
-  driversStore.getDriverById(Number(route.params.id)),
+  driversStore.getDriverById(route.params.id),
 );
 const activeTab = ref("earnings");
 
@@ -326,33 +262,15 @@ const monthlyEarnings = computed(() =>
   Math.round((driver.value?.earnings || 0) * 0.45),
 );
 
-const docs = ref(driversStore.getDocuments());
+const docs = computed(() => {
+  if (!driver.value) return [];
+  return driversStore.getDocuments(driver.value);
+});
 
 const viewingDoc = ref(null);
-const reviewingDoc = ref(null);
-const reviewNotes = ref("");
 
 function viewDoc(doc) {
   viewingDoc.value = doc;
-}
-
-function reviewDoc(doc) {
-  reviewingDoc.value = doc;
-  reviewNotes.value = "";
-}
-
-function approveDoc() {
-  if (!reviewingDoc.value) return;
-  const d = docs.value.find((d) => d.name === reviewingDoc.value.name);
-  if (d) d.status = "verified";
-  reviewingDoc.value = null;
-}
-
-function rejectDoc() {
-  if (!reviewingDoc.value) return;
-  const d = docs.value.find((d) => d.name === reviewingDoc.value.name);
-  if (d) d.status = "rejected";
-  reviewingDoc.value = null;
 }
 
 const deliveryHistory = computed(() => {
@@ -721,10 +639,11 @@ const goBack = () => navigateTo("/drivers");
   background: #fef2f2;
   color: #dc2626;
 }
-.doc-preview-note {
-  font-size: 13px;
-  color: #9ca3af;
-  margin-top: 4px;
+.doc-image {
+  max-width: 100%;
+  max-height: 50vh;
+  border-radius: 8px;
+  object-fit: contain;
 }
 .review-status {
   display: flex;

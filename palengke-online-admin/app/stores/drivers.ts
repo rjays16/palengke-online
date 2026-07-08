@@ -1,105 +1,94 @@
 export const useDriversStore = defineStore("drivers", () => {
-  const drivers = ref([
-    {
-      id: 1,
-      name: "Mark Reyes",
-      phone: "0917-123-4567",
-      vehicle: "Honda Click 125",
-      plate: "ABC-1234",
-      deliveries: 342,
-      rating: 4.9,
-      earnings: 45800,
-      status: "active",
-      joined: "2024-01-10",
-    },
-    {
-      id: 2,
-      name: "Lisa Gonzales",
-      phone: "0918-234-5678",
-      vehicle: "Yamaha Mio i125",
-      plate: "DEF-5678",
-      deliveries: 289,
-      rating: 4.7,
-      earnings: 38200,
-      status: "active",
-      joined: "2024-02-15",
-    },
-    {
-      id: 3,
-      name: "Tommy Cruz",
-      phone: "0919-345-6789",
-      vehicle: "Suzuki Skydrive",
-      plate: "GHI-9012",
-      deliveries: 156,
-      rating: 4.5,
-      earnings: 21400,
-      status: "idle",
-      joined: "2024-04-20",
-    },
-    {
-      id: 4,
-      name: "Nina Santos",
-      phone: "0920-456-7890",
-      vehicle: "Honda Beat",
-      plate: "JKL-3456",
-      deliveries: 421,
-      rating: 4.8,
-      earnings: 52100,
-      status: "active",
-      joined: "2023-11-05",
-    },
-    {
-      id: 5,
-      name: "Ramon Diaz",
-      phone: "0921-567-8901",
-      vehicle: "Yamaha Nmax",
-      plate: "MNO-7890",
-      deliveries: 198,
-      rating: 4.6,
-      earnings: 27500,
-      status: "offline",
-      joined: "2024-03-12",
-    },
-    {
-      id: 6,
-      name: "Cathy Lim",
-      phone: "0922-678-9012",
-      vehicle: "Honda PCX160",
-      plate: "PQR-1234",
-      deliveries: 367,
-      rating: 4.9,
-      earnings: 49300,
-      status: "active",
-      joined: "2024-01-22",
-    },
-    {
-      id: 7,
-      name: "Dennis Alcantara",
-      phone: "0923-789-0123",
-      vehicle: "Suzuki Burgman",
-      plate: "STU-5678",
-      deliveries: 112,
-      rating: 4.3,
-      earnings: 15800,
-      status: "idle",
-      joined: "2024-06-01",
-    },
-  ]);
-
-  function getDriverById(id: number) {
-    return drivers.value.find((d) => d.id === id);
+  function getApiBaseUrl() {
+    const config = useRuntimeConfig();
+    return config.public.apiBaseUrl || "http://localhost:8000";
   }
 
-  function getDocuments() {
-    return [
-      { name: "Driver's License", status: "verified" },
-      { name: "OR/CR", status: "verified" },
-      { name: "NBI Clearance", status: "pending" },
-      { name: "Birth Certificate", status: "rejected" },
+  function getToken() {
+    if (typeof localStorage === "undefined") return null;
+    return localStorage.getItem("palengke_auth_token");
+  }
+
+  function mapDriver(raw: any) {
+    return {
+      id: raw.id,
+      name: [raw.firstName, raw.middleName, raw.lastName].filter(Boolean).join(" ") || "—",
+      phone: raw.contact || "",
+      vehicle: [raw.vehicleType, raw.vehicleModel].filter(Boolean).join(" ") || "—",
+      plate: raw.plateNumber || "",
+      deliveries: 0,
+      rating: 0,
+      earnings: 0,
+      status: raw.status === "approved" ? "active" : raw.status === "pending" ? "idle" : "offline",
+      joined: raw.submittedAt || "",
+      email: raw.email || "",
+      licenseNumber: raw.licenseNumber || "",
+      licenseType: raw.licenseType || "",
+      restrictionCode: raw.restrictionCode || "",
+      expiryDate: raw.expiryDate || "",
+      vehicleType: raw.vehicleType || "",
+      vehicleModel: raw.vehicleModel || "",
+      vehicleColor: raw.vehicleColor || "",
+      birthdate: raw.birthdate || "",
+      birthplace: raw.birthplace || "",
+      currentAddress: raw.currentAddress || "",
+      country: raw.country || "",
+      licenseFrontPhoto: raw.licenseFrontPhoto || "",
+      licenseBackPhoto: raw.licenseBackPhoto || "",
+      vehicleRegPhoto: raw.vehicleRegPhoto || "",
+      nbiClearancePhoto: raw.nbiClearancePhoto || "",
+      birthCertPhoto: raw.birthCertPhoto || "",
+      selfiePhoto: raw.selfiePhoto || "",
+      rejectReason: raw.rejectReason || null,
+    };
+  }
+
+  const drivers = ref<any[]>([]);
+  const loading = ref(false);
+  const error = ref<string | null>(null);
+
+  async function fetchDrivers() {
+    const token = getToken();
+    if (!token) return;
+    loading.value = true;
+    error.value = null;
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/api/admin/drivers`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error(`Failed to load drivers (${res.status})`);
+      const json = await res.json();
+      drivers.value = (json.drivers || []).map(mapDriver);
+    } catch (e: any) {
+      error.value = e.message || "Unknown error";
+      drivers.value = [];
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  function getDriverById(id: number | string) {
+    const key = String(id);
+    return drivers.value.find((d) => String(d.id) === key);
+  }
+
+  function getDocuments(driver: any) {
+    const docs = [
+      { key: "licenseFrontPhoto", name: "Driver's License (Front)" },
+      { key: "licenseBackPhoto", name: "Driver's License (Back)" },
+      { key: "vehicleRegPhoto", name: "Vehicle Registration (OR/CR)" },
+      { key: "nbiClearancePhoto", name: "NBI Clearance" },
+      { key: "birthCertPhoto", name: "Birth Certificate" },
+      { key: "selfiePhoto", name: "Selfie Photo" },
     ];
+    return docs.map((d) => ({
+      name: d.name,
+      status: driver[d.key] ? "verified" : "missing",
+      url: driver[d.key] || null,
+    }));
   }
 
-  let nextId = 8;
+  let nextId = 1;
 
   function addDriver(data: {
     name: string;
@@ -108,7 +97,7 @@ export const useDriversStore = defineStore("drivers", () => {
     plate: string;
   }) {
     drivers.value.push({
-      id: nextId++,
+      id: `TEMP-${nextId++}`,
       name: data.name,
       phone: data.phone,
       vehicle: data.vehicle,
@@ -122,7 +111,7 @@ export const useDriversStore = defineStore("drivers", () => {
   }
 
   function updateDriver(
-    id: number,
+    id: number | string,
     data: {
       name: string;
       phone: string;
@@ -131,7 +120,7 @@ export const useDriversStore = defineStore("drivers", () => {
       status: string;
     },
   ) {
-    const d = drivers.value.find((d) => d.id === id);
+    const d = drivers.value.find((d) => String(d.id) === String(id));
     if (!d) return;
     d.name = data.name;
     d.phone = data.phone;
@@ -140,12 +129,12 @@ export const useDriversStore = defineStore("drivers", () => {
     d.status = data.status;
   }
 
-  function deleteDriver(id: number) {
-    drivers.value = drivers.value.filter((d) => d.id !== id);
+  function deleteDriver(id: number | string) {
+    drivers.value = drivers.value.filter((d) => String(d.id) !== String(id));
   }
 
-  function getDeliveryHistory(id: number) {
-    const allHistory = [
+  function getDeliveryHistory(_id: number | string) {
+    return [
       {
         id: "ORD-1042",
         customer: "Maria Santos",
@@ -187,11 +176,13 @@ export const useDriversStore = defineStore("drivers", () => {
         date: "2026-05-11",
       },
     ];
-    return allHistory;
   }
 
   return {
     drivers,
+    loading,
+    error,
+    fetchDrivers,
     getDriverById,
     getDocuments,
     getDeliveryHistory,
