@@ -179,6 +179,28 @@ export const useDriversStore = defineStore("drivers", () => {
     }
   }
 
+  async function fetchDriver(id: number | string) {
+    const token = getToken();
+    if (!token) return;
+    error.value = null;
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/api/admin/drivers/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error(`Failed to load driver (${res.status})`);
+      const json = await res.json();
+      const mapped = mapDriver(json.registration);
+      const idx = drivers.value.findIndex((d) => String(d.id) === String(id));
+      if (idx !== -1) {
+        drivers.value[idx] = mapped;
+      } else {
+        drivers.value.push(mapped);
+      }
+    } catch (e: any) {
+      error.value = e.message || "Unknown error";
+    }
+  }
+
   async function fetchDeliveryHistory(id: number | string) {
     const token = getToken();
     if (!token) return;
@@ -201,6 +223,7 @@ export const useDriversStore = defineStore("drivers", () => {
     error,
     deliveries,
     fetchDrivers,
+    fetchDriver,
     fetchDeliveryHistory,
     getDriverById,
     getDocuments,

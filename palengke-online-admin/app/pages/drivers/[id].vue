@@ -255,6 +255,17 @@ const driver = computed(() =>
   driversStore.getDriverById(route.params.id),
 );
 
+onMounted(async () => {
+  if (!driver.value) {
+    if (driversStore.drivers.length === 0) {
+      await driversStore.fetchDrivers();
+    }
+    if (!driver.value) {
+      await driversStore.fetchDriver(route.params.id);
+    }
+  }
+});
+
 const docs = computed(() => {
   if (!driver.value) return [];
   return driversStore.getDocuments(driver.value);

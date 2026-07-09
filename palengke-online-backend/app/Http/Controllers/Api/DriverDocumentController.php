@@ -19,6 +19,69 @@ class DriverDocumentController extends Controller
             return response()->json(['documents' => []]);
         }
 
+        $photoMap = [
+            'drivers_license' => 'license_front_photo',
+            'drivers_license_back' => 'license_back_photo',
+            'vehicle_registration' => 'vehicle_reg_photo',
+            'nbi_clearance' => 'nbi_clearance_photo',
+            'birth_certificate' => 'birth_cert_photo',
+            'selfie_photo' => 'selfie_photo',
+        ];
+
+        $docTypes = collect($this->getDocumentTypes());
+        $validTypes = $docTypes->pluck('type');
+
+        $existing = DriverDocument::where('driver_email', $validated['email'])->get();
+        $existingTypes = $existing->pluck('type');
+
+        DriverDocument::where('driver_email', $validated['email'])
+            ->whereNotIn('type', $validTypes)
+            ->delete();
+
+        foreach ($docTypes as $typeInfo) {
+            $type = $typeInfo['type'];
+            if (!$existingTypes->contains($type)) {
+                $dbField = $photoMap[$type] ?? null;
+                $hasPhoto = $dbField && $registration->{$dbField};
+                DriverDocument::create([
+                    'driver_email' => $validated['email'],
+                    'type' => $type,
+                    'name' => $typeInfo['name'],
+                    'file_path' => $hasPhoto ? $registration->{$dbField} : null,
+                    'status' => $hasPhoto ? 'verified' : 'missing',
+                ]);
+            }
+        }
+
+        $documents = DriverDocument::where('driver_email', $validated['email'])->get();
+
+        foreach ($documents as $doc) {
+            $dbField = $photoMap[$doc->type] ?? null;
+            if ($doc->status === 'pending' && $dbField && $registration->{$dbField}) {
+                $doc->update(['status' => 'verified', 'file_path' => $registration->{$dbField}]);
+            }
+        }
+
+        $documents = DriverDocument::where('driver_email', $validated['email'])->get();
+
+        $docToRegMap = [
+            'drivers_license' => 'license_front_photo',
+            'drivers_license_back' => 'license_back_photo',
+            'vehicle_registration' => 'vehicle_reg_photo',
+            'nbi_clearance' => 'nbi_clearance_photo',
+            'birth_certificate' => 'birth_cert_photo',
+            'selfie_photo' => 'selfie_photo',
+        ];
+
+        foreach ($documents as $doc) {
+            if ($doc->file_path) {
+                $regField = $docToRegMap[$doc->type] ?? null;
+                if ($regField && !$registration->{$regField}) {
+                    $registration->update([$regField => $doc->file_path]);
+                }
+            }
+        }
+
         $documents = DriverDocument::where('driver_email', $validated['email'])->get();
 
         return response()->json([
@@ -67,6 +130,20 @@ class DriverDocumentController extends Controller
                 'status' => 'pending',
             ]
         );
+
+        $docToRegMap = [
+            'drivers_license' => 'license_front_photo',
+            'drivers_license_back' => 'license_back_photo',
+            'vehicle_registration' => 'vehicle_reg_photo',
+            'nbi_clearance' => 'nbi_clearance_photo',
+            'birth_certificate' => 'birth_cert_photo',
+            'selfie_photo' => 'selfie_photo',
+        ];
+
+        $regField = $docToRegMap[$validated['type']] ?? null;
+        if ($regField && !$registration->{$regField}) {
+            $registration->update([$regField => $photoPath]);
+        }
 
         return response()->json([
             'message' => 'Document uploaded successfully.',
@@ -121,6 +198,7 @@ class DriverDocumentController extends Controller
     {
         $photoMap = [
             'license_front_photo' => 'drivers_license',
+            'license_back_photo' => 'drivers_license_back',
             'vehicle_reg_photo' => 'vehicle_registration',
             'nbi_clearance_photo' => 'nbi_clearance',
             'birth_cert_photo' => 'birth_certificate',
@@ -190,14 +268,12 @@ class DriverDocumentController extends Controller
     private function getDocumentTypes(): array
     {
         return [
-            ['type' => 'drivers_license', 'name' => "Driver's License"],
+            ['type' => 'drivers_license', 'name' => "Driver's License (Front)"],
+            ['type' => 'drivers_license_back', 'name' => "Driver's License (Back)"],
             ['type' => 'vehicle_registration', 'name' => 'Vehicle Registration (OR/CR)'],
             ['type' => 'nbi_clearance', 'name' => 'NBI or Police Clearance'],
             ['type' => 'birth_certificate', 'name' => 'Birth Certificate'],
             ['type' => 'selfie_photo', 'name' => 'Selfie Photo'],
-            ['type' => 'official_receipt', 'name' => 'Official Receipt (OR)'],
-            ['type' => 'business_permit', 'name' => 'Business or Delivery Permit'],
-            ['type' => 'identity_card', 'name' => 'Identity Card'],
         ];
     }
 }

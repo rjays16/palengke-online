@@ -400,7 +400,7 @@ class DriverRegistrationController extends Controller
     {
         $docTypeMap = [
             'license_front_photo' => 'drivers_license',
-            'license_back_photo' => 'drivers_license',
+            'license_back_photo' => 'drivers_license_back',
             'vehicle_reg_photo' => 'vehicle_registration',
             'nbi_clearance_photo' => 'nbi_clearance',
             'birth_cert_photo' => 'birth_certificate',
@@ -411,7 +411,8 @@ class DriverRegistrationController extends Controller
         if (!$docType) return;
 
         $docNames = [
-            'drivers_license' => "Driver's License",
+            'drivers_license' => "Driver's License (Front)",
+            'drivers_license_back' => "Driver's License (Back)",
             'vehicle_registration' => 'Vehicle Registration (OR/CR)',
             'nbi_clearance' => 'NBI or Police Clearance',
             'birth_certificate' => 'Birth Certificate',
