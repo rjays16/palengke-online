@@ -11,16 +11,6 @@ class ContactSupportSeeder extends Seeder
     {
         $contacts = [
             [
-                'key' => 'live_chat',
-                'title' => 'Live Chat',
-                'subtitle' => 'Chat with our support team',
-                'type' => 'chat',
-                'value' => null,
-                'icon' => 'chat',
-                'enabled' => true,
-                'sort_order' => 1,
-            ],
-            [
                 'key' => 'call',
                 'title' => 'Call Us',
                 'subtitle' => '+63 912 345 6789',

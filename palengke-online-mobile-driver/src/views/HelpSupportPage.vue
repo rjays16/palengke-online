@@ -130,33 +130,6 @@
             </div>
           </div>
 
-          <!-- Useful Links -->
-          <div class="links-section">
-            <h3 class="section-title">Useful Links</h3>
-            <div class="links-list">
-              <div class="link-item" @click="openLink('terms')">
-                <ion-icon :icon="documentTextOutline"></ion-icon>
-                <span>Terms & Conditions</span>
-                <ion-icon :icon="chevronForwardOutline" class="link-arrow"></ion-icon>
-              </div>
-              <div class="link-item" @click="openLink('privacy')">
-                <ion-icon :icon="shieldCheckmarkOutline"></ion-icon>
-                <span>Privacy Policy</span>
-                <ion-icon :icon="chevronForwardOutline" class="link-arrow"></ion-icon>
-              </div>
-              <div class="link-item" @click="openLink('safety')">
-                <ion-icon :icon="alertCircleOutline"></ion-icon>
-                <span>Safety Guidelines</span>
-                <ion-icon :icon="chevronForwardOutline" class="link-arrow"></ion-icon>
-              </div>
-              <div class="link-item" @click="rateApp">
-                <ion-icon :icon="starOutline"></ion-icon>
-                <span>Rate Our App</span>
-                <ion-icon :icon="chevronForwardOutline" class="link-arrow"></ion-icon>
-              </div>
-            </div>
-          </div>
-
         </template>
       </div>
     </ion-content>
@@ -168,15 +141,14 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
-  IonButtons, IonBackButton, IonButton, IonIcon,
-  alertController, toastController
+  IonButtons, IonBackButton, IonIcon,
+  toastController
 } from '@ionic/vue';
 import {
-  searchOutline, closeCircleOutline, chatbubbleOutline,
-  callOutline, mailOutline, warningOutline,
+  searchOutline, closeCircleOutline,
+  callOutline, mailOutline,
   chevronUpOutline, chevronDownOutline, chevronForwardOutline,
-  documentTextOutline, shieldCheckmarkOutline, alertCircleOutline,
-  starOutline, cashOutline, bicycleOutline, personOutline,
+  cashOutline, bicycleOutline, personOutline,
   cubeOutline, helpCircleOutline, chatbubbleEllipsesOutline,
   logoFacebook, rocketOutline, storefrontOutline, alertCircle,
 } from 'ionicons/icons';
@@ -275,14 +247,6 @@ async function fetchContactSupports() {
 function getDefaultContacts() {
   return [
     {
-      key: 'live_chat',
-      title: 'Live Chat',
-      subtitle: 'Chat with our support team',
-      type: 'chat',
-      value: null,
-      enabled: true,
-    },
-    {
       key: 'call',
       title: 'Call Us',
       subtitle: '+63 912 345 6789',
@@ -331,9 +295,6 @@ function getIconClass(type) {
 
 function handleContactAction(contact) {
   switch (contact.type) {
-    case 'chat':
-      showLoadingModal('Opening live chat...');
-      break;
     case 'phone':
       if (contact.value) window.location.href = `tel:${contact.value}`;
       break;
@@ -399,27 +360,6 @@ onMounted(() => {
   fetchFaqs();
 });
 
-const openLink = async (type) => {
-  const titles = { terms: 'Terms & Conditions', privacy: 'Privacy Policy', safety: 'Safety Guidelines' };
-  const alert = await alertController.create({
-    header: titles[type],
-    message: `Opening ${titles[type]}...`,
-    buttons: ['Close']
-  });
-  await alert.present();
-};
-
-const rateApp = async () => {
-  const alert = await alertController.create({
-    header: 'Rate Our App',
-    message: 'Thank you for using Palengke Online Driver! Your feedback helps us improve.',
-    buttons: [
-      { text: 'Maybe Later', role: 'cancel' },
-      { text: 'Rate Now', handler: () => {} }
-    ]
-  });
-  await alert.present();
-};
 </script>
 
 <style scoped>
@@ -503,21 +443,6 @@ const rateApp = async () => {
 .no-results { text-align: center; padding: 40px 20px; }
 .no-results ion-icon { font-size: 48px; color: #ddd; margin-bottom: 12px; }
 .no-results p { font-size: 14px; color: #999; margin: 0; }
-
-/* Links */
-.links-section { margin-bottom: 20px; }
-.links-list { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-
-.link-item {
-  display: flex; align-items: center; gap: 14px;
-  padding: 16px 20px; border-bottom: 1px solid #f0f0f0;
-  cursor: pointer; transition: background 0.2s;
-}
-.link-item:last-child { border-bottom: none; }
-.link-item:active { background: #f8f9fa; }
-.link-item > ion-icon:first-child { font-size: 22px; color: #4CAF50; }
-.link-item span { flex: 1; font-size: 15px; font-weight: 600; color: #1a1a1a; }
-.link-arrow { font-size: 18px; color: #ccc; }
 
 /* Search Results */
 .search-results-section { margin-bottom: 20px; }

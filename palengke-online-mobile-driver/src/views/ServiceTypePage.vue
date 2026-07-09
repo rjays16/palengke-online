@@ -101,6 +101,10 @@ onMounted(async () => {
       if (expressService) {
         expressService.enabled = data.express_enabled;
       }
+      const bulkyService = services.value.find(s => s.name === 'Bulky Item Delivery');
+      if (bulkyService) {
+        bulkyService.enabled = data.bulky_enabled;
+      }
     }
   } catch {}
   if (!expressGloballyEnabled.value) {
@@ -109,18 +113,24 @@ onMounted(async () => {
 });
 
 const onServiceToggle = async (service) => {
-  if (service.name === 'Palengke Express Delivery') {
-    try {
+  try {
+      const payload = {};
+    if (service.name === 'Palengke Express Delivery') {
+      payload.express_enabled = service.enabled;
+    } else if (service.name === 'Bulky Item Delivery') {
+      payload.bulky_enabled = service.enabled;
+    }
+    if (Object.keys(payload).length) {
       await fetch(`${API_BASE}/api/driver/settings`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${getToken()}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ express_enabled: service.enabled }),
+        body: JSON.stringify(payload),
       });
-    } catch {}
-  }
+    }
+  } catch {}
   const toast = await toastController.create({
     message: `${service.name} ${service.enabled ? 'enabled' : 'disabled'}`,
     duration: 2000, color: 'medium', position: 'top'

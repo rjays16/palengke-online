@@ -127,14 +127,6 @@
         <div class="settings-section">
           <h3 class="settings-group-title">Support & Legal</h3>
 
-          <div class="settings-item" @click="goToHelp">
-            <div class="item-left">
-              <div class="item-icon green"><ion-icon :icon="helpCircleOutline"></ion-icon></div>
-              <div class="item-info"><h4>Help & Support</h4></div>
-            </div>
-            <ion-icon :icon="chevronForwardOutline" class="item-arrow"></ion-icon>
-          </div>
-
           <div class="settings-item" @click="showTerms">
             <div class="item-left">
               <div class="item-icon blue"><ion-icon :icon="documentTextOutline"></ion-icon></div>
@@ -187,7 +179,7 @@ import {
 import {
   personOutline, documentTextOutline, linkOutline,
   notificationsOutline, flashOutline, bicycleOutline, cubeOutline,
-  locationOutline, helpCircleOutline,
+  locationOutline,
   shieldCheckmarkOutline, informationCircleOutline,
   logOutOutline, chevronForwardOutline
 } from 'ionicons/icons';
@@ -199,7 +191,6 @@ const driverName = ref('Juan Dela Cruz');
 const driverId = ref('DRV-2024-001234');
 const autoAccept = ref(false);
 const bulkyEnabled = ref(false);
-const navProvider = ref('Google Maps');
 
 function getToken() {
   return localStorage.getItem('token') || '';
@@ -250,19 +241,6 @@ const onBulkyToggle = async () => {
     duration: 2000, color: 'medium', position: 'top'
   });
   await toast.present();
-};
-
-const changeNavProvider = async () => {
-  const actionSheet = await actionSheetController.create({
-    header: 'Navigation Provider',
-    buttons: [
-      { text: 'Google Maps', handler: () => { navProvider.value = 'Google Maps'; } },
-      { text: 'Waze', handler: () => { navProvider.value = 'Waze'; } },
-      { text: 'Apple Maps', handler: () => { navProvider.value = 'Apple Maps'; } },
-      { text: 'Cancel', role: 'cancel' }
-    ]
-  });
-  await actionSheet.present();
 };
 
 const linkedAccounts = async () => {
@@ -317,7 +295,6 @@ const editProfile = () => router.push('/profile');
 const goToDocuments = () => router.push('/documents');
 const goToServiceType = () => router.push('/service-type');
 const goToMyDestination = () => router.push('/my-destination');
-const goToHelp = () => router.push('/help');
 const goToAbout = () => router.push('/about');
 </script>
 

@@ -201,6 +201,15 @@ const defaults = {
   nightSurcharge: 25,
 };
 
+const FEE_KEYS = {
+  base: 'delivery_base_fee',
+  perKm: 'delivery_per_km',
+  expressMultiplier: 'delivery_express_multiplier',
+  freeThreshold: 'delivery_free_threshold',
+  maxRadius: 'delivery_max_radius',
+  nightSurcharge: 'delivery_night_surcharge',
+};
+
 function loadFees() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -213,6 +222,7 @@ const fees = ref(loadFees());
 const expressEnabled = ref(false);
 const success = ref(false);
 const saving = ref(false);
+const loading = ref(true);
 
 function getApiBaseUrl() {
   const config = useRuntimeConfig();
@@ -232,8 +242,21 @@ onMounted(async () => {
     if (res.ok) {
       const data = await res.json();
       expressEnabled.value = data.express_delivery_enabled === "true";
+      const backendFees = {};
+      let hasFeeData = false;
+      for (const [field, key] of Object.entries(FEE_KEYS)) {
+        if (data[key] !== undefined && data[key] !== null) {
+          backendFees[field] = parseFloat(data[key]);
+          hasFeeData = true;
+        }
+      }
+      if (hasFeeData) {
+        fees.value = { ...defaults, ...backendFees };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(fees.value));
+      }
     }
   } catch {}
+  loading.value = false;
 });
 
 const errors = reactive({
@@ -308,17 +331,19 @@ const saveFees = async () => {
   saving.value = true;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(fees.value));
   try {
+    const settings = {
+      express_delivery_enabled: expressEnabled.value ? "true" : "false",
+    };
+    for (const [field, key] of Object.entries(FEE_KEYS)) {
+      settings[key] = String(fees.value[field]);
+    }
     await fetch(`${getApiBaseUrl()}/api/admin/settings`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${getToken()}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        settings: {
-          express_delivery_enabled: expressEnabled.value ? "true" : "false",
-        },
-      }),
+      body: JSON.stringify({ settings }),
     });
   } catch {}
   saving.value = false;
