@@ -360,15 +360,18 @@ class DriverRegistrationController extends Controller
             'auto_accept' => (bool) $driver->auto_accept,
             'bulky_enabled' => (bool) $driver->bulky_enabled,
             'express_enabled' => (bool) $driver->express_enabled,
+            'preferred_locations' => $driver->preferred_locations ?? [],
         ]);
     }
 
     public function updateSettings(Request $request)
     {
         $validated = $request->validate([
-            'auto_accept' => 'required|boolean',
-            'bulky_enabled' => 'required|boolean',
+            'auto_accept' => 'sometimes|boolean',
+            'bulky_enabled' => 'sometimes|boolean',
             'express_enabled' => 'sometimes|boolean',
+            'preferred_locations' => 'sometimes|array',
+            'preferred_locations.*' => 'string',
         ]);
 
         $driver = $request->user();
@@ -379,6 +382,7 @@ class DriverRegistrationController extends Controller
             'auto_accept' => (bool) $driver->auto_accept,
             'bulky_enabled' => (bool) $driver->bulky_enabled,
             'express_enabled' => (bool) $driver->express_enabled,
+            'preferred_locations' => $driver->preferred_locations ?? [],
         ]);
     }
 

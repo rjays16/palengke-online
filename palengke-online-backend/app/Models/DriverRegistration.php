@@ -15,12 +15,13 @@ class DriverRegistration extends Model
         'vehicle_type', 'plate_number', 'vehicle_model', 'vehicle_color',
         'license_front_photo', 'license_back_photo', 'vehicle_reg_photo',
         'nbi_clearance_photo', 'birth_cert_photo', 'selfie_photo',
-        'pin', 'auto_accept', 'bulky_enabled', 'express_enabled', 'status', 'rejection_reason', 'reviewed_by', 'reviewed_at',
+        'pin', 'auto_accept', 'bulky_enabled', 'express_enabled', 'preferred_locations', 'status', 'rejection_reason', 'reviewed_by', 'reviewed_at',
     ];
 
     protected $casts = [
         'email_verified' => 'boolean',
         'reviewed_at' => 'datetime',
+        'preferred_locations' => 'array',
     ];
 
     public function reviewedBy()
