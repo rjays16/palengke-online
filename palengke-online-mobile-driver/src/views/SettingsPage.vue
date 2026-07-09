@@ -49,16 +49,6 @@
             <ion-icon :icon="chevronForwardOutline" class="item-arrow"></ion-icon>
           </div>
 
-          <div class="settings-item" @click="communications">
-            <div class="item-left">
-              <div class="item-icon orange"><ion-icon :icon="notificationsOutline"></ion-icon></div>
-              <div class="item-info">
-                <h4>Communications</h4>
-                <p>Notification preferences</p>
-              </div>
-            </div>
-            <ion-icon :icon="chevronForwardOutline" class="item-arrow"></ion-icon>
-          </div>
         </div>
 
         <!-- Job Settings Section -->
@@ -178,7 +168,7 @@ import {
 } from '@ionic/vue';
 import {
   personOutline, documentTextOutline, linkOutline,
-  notificationsOutline, flashOutline, bicycleOutline, cubeOutline,
+  flashOutline, bicycleOutline, cubeOutline,
   locationOutline,
   shieldCheckmarkOutline, informationCircleOutline,
   logOutOutline, chevronForwardOutline
@@ -247,15 +237,6 @@ const linkedAccounts = async () => {
   const alert = await alertController.create({
     header: 'Linked Accounts',
     message: 'Connect your Google or Facebook account for easier sign in.',
-    buttons: ['Close']
-  });
-  await alert.present();
-};
-
-const communications = async () => {
-  const alert = await alertController.create({
-    header: 'Communications',
-    message: 'Manage your notification and communication preferences.',
     buttons: ['Close']
   });
   await alert.present();
