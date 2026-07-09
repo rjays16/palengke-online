@@ -27,4 +27,9 @@ class DriverRegistration extends Model
     {
         return $this->belongsTo(User::class, 'reviewed_by');
     }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'driver_registration_id');
+    }
 }

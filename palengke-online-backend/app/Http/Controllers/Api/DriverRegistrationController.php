@@ -9,6 +9,7 @@ use App\Mail\DriverAccountRejectedMail;
 use App\Models\DriverDocument;
 use App\Models\DriverRegistration;
 use App\Models\Notification;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -248,10 +249,27 @@ class DriverRegistrationController extends Controller
 
     public function deliveries($id)
     {
-        DriverRegistration::findOrFail($this->resolveId($id));
+        $driver = DriverRegistration::findOrFail($this->resolveId($id));
+
+        $orders = Order::where('driver_registration_id', $driver->id)
+            ->with('seller')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($order) {
+                return [
+                    'id' => $order->id,
+                    'customer' => $order->customer_name,
+                    'pickup' => $order->seller
+                        ? ($order->seller->store_name ?: $order->seller->city ?: 'Store')
+                        : 'Store',
+                    'delivery' => $order->delivery_address,
+                    'status' => $order->status,
+                    'date' => $order->created_at ? $order->created_at->format('Y-m-d') : null,
+                ];
+            });
 
         return response()->json([
-            'deliveries' => [],
+            'deliveries' => $orders,
         ]);
     }
 

@@ -8,6 +8,7 @@ class Order extends Model
 {
     protected $fillable = [
         'seller_registration_id',
+        'driver_registration_id',
         'customer_name',
         'customer_phone',
         'delivery_address',
@@ -27,5 +28,10 @@ class Order extends Model
     public function seller()
     {
         return $this->belongsTo(SellerRegistration::class, 'seller_registration_id');
+    }
+
+    public function driver()
+    {
+        return $this->belongsTo(DriverRegistration::class, 'driver_registration_id');
     }
 }
