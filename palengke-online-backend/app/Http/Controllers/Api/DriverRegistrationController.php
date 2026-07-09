@@ -246,6 +246,15 @@ class DriverRegistrationController extends Controller
         ]);
     }
 
+    public function deliveries($id)
+    {
+        DriverRegistration::findOrFail($this->resolveId($id));
+
+        return response()->json([
+            'deliveries' => [],
+        ]);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([

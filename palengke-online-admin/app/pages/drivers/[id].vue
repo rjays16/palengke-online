@@ -152,7 +152,7 @@
 
         <div v-if="activeTab === 'history'" class="tab-content">
           <div class="table-card">
-            <table class="data-table">
+            <table class="data-table" v-if="driversStore.deliveries.length">
               <thead>
                 <tr>
                   <th>Order ID</th>
@@ -164,7 +164,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="d in deliveryHistory" :key="d.id">
+                <tr v-for="d in driversStore.deliveries" :key="d.id">
                   <td class="id-cell">#{{ d.id }}</td>
                   <td>{{ d.customer }}</td>
                   <td>{{ d.pickup }}</td>
@@ -178,6 +178,7 @@
                 </tr>
               </tbody>
             </table>
+            <div v-else class="empty-state">No delivery history available.</div>
           </div>
         </div>
       </div>
@@ -253,6 +254,12 @@ const driversStore = useDriversStore();
 const driver = computed(() =>
   driversStore.getDriverById(route.params.id),
 );
+
+const docs = computed(() => {
+  if (!driver.value) return [];
+  return driversStore.getDocuments(driver.value);
+});
+
 const activeTab = ref("earnings");
 
 const weeklyEarnings = computed(() =>
@@ -262,21 +269,15 @@ const monthlyEarnings = computed(() =>
   Math.round((driver.value?.earnings || 0) * 0.45),
 );
 
-const docs = computed(() => {
-  if (!driver.value) return [];
-  return driversStore.getDocuments(driver.value);
-});
+watch(driver, (d) => {
+  if (d) driversStore.fetchDeliveryHistory(d.id);
+}, { immediate: true });
 
 const viewingDoc = ref(null);
 
 function viewDoc(doc) {
   viewingDoc.value = doc;
 }
-
-const deliveryHistory = computed(() => {
-  if (!driver.value) return [];
-  return driversStore.getDeliveryHistory(driver.value.id);
-});
 
 const goBack = () => navigateTo("/drivers");
 </script>
@@ -638,6 +639,12 @@ const goBack = () => navigateTo("/drivers");
 .doc-preview-status.rejected {
   background: #fef2f2;
   color: #dc2626;
+}
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #9ca3af;
+  font-size: 13px;
 }
 .doc-image {
   max-width: 100%;

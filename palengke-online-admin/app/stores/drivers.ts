@@ -54,6 +54,7 @@ export const useDriversStore = defineStore("drivers", () => {
   const loading = ref(false);
   const saving = ref(false);
   const error = ref<string | null>(null);
+  const deliveries = ref<any[]>([]);
 
   async function fetchDrivers() {
     const token = getToken();
@@ -178,14 +179,19 @@ export const useDriversStore = defineStore("drivers", () => {
     }
   }
 
-  function getDeliveryHistory(_id: number | string) {
-    return [
-      { id: "ORD-1042", customer: "Maria Santos", pickup: "Juan's Farm", delivery: "Brgy. San Isidro", status: "delivered", date: "2026-05-14" },
-      { id: "ORD-1040", customer: "Ana Cruz", pickup: "Maria's Produce", delivery: "Brgy. Maligaya", status: "delivered", date: "2026-05-13" },
-      { id: "ORD-1038", customer: "Luisa Tan", pickup: "Meat Shop Inc.", delivery: "Brgy. Bagong Silang", status: "delivered", date: "2026-05-12" },
-      { id: "ORD-1036", customer: "Ben Torres", pickup: "Fresh Fish Co.", delivery: "Brgy. Poblacion", status: "delivered", date: "2026-05-12" },
-      { id: "ORD-1033", customer: "Tina Rivera", pickup: "Fresh Fish Co.", delivery: "Brgy. Sampa", status: "delivered", date: "2026-05-11" },
-    ];
+  async function fetchDeliveryHistory(id: number | string) {
+    const token = getToken();
+    if (!token) return;
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/api/admin/drivers/${id}/deliveries`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error(`Failed to load delivery history (${res.status})`);
+      const json = await res.json();
+      deliveries.value = json.deliveries || [];
+    } catch {
+      deliveries.value = [];
+    }
   }
 
   return {
@@ -193,10 +199,11 @@ export const useDriversStore = defineStore("drivers", () => {
     loading,
     saving,
     error,
+    deliveries,
     fetchDrivers,
+    fetchDeliveryHistory,
     getDriverById,
     getDocuments,
-    getDeliveryHistory,
     addDriver,
     updateDriver,
     deleteDriver,
