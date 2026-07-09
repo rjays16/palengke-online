@@ -222,6 +222,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/drivers/pending', [DriverRegistrationController::class, 'pending']);
     Route::get('/admin/drivers/history', [DriverRegistrationController::class, 'history']);
     Route::get('/admin/drivers/{id}', [DriverRegistrationController::class, 'show']);
+    Route::post('/admin/drivers', [DriverRegistrationController::class, 'store']);
+    Route::put('/admin/drivers/{id}', [DriverRegistrationController::class, 'update']);
+    Route::delete('/admin/drivers/{id}', [DriverRegistrationController::class, 'destroy']);
     Route::post('/admin/drivers/{id}/approve', [DriverRegistrationController::class, 'approve']);
     Route::post('/admin/drivers/{id}/reject', [DriverRegistrationController::class, 'reject']);
 

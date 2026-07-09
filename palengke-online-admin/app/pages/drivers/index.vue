@@ -169,13 +169,14 @@
         </div>
         <div class="modal-actions">
           <button class="modal-btn secondary" @click="closeForm">Cancel</button>
-          <button
-            class="modal-btn primary"
-            :disabled="!formValid"
-            @click="saveDriver"
-          >
-            {{ editing ? "Update" : "Add" }} Driver
-          </button>
+            <button
+              class="modal-btn primary"
+              :disabled="!formValid || driversStore.saving"
+              @click="saveDriver"
+            >
+              <span v-if="driversStore.saving">Saving...</span>
+              <span v-else>{{ editing ? "Update" : "Add" }} Driver</span>
+            </button>
         </div>
       </div>
     </div>
@@ -209,10 +210,21 @@
           <p class="confirm-hint">This action cannot be undone.</p>
         </div>
         <div class="modal-actions">
-          <button class="modal-btn secondary" @click="showDelete = false">
+          <button
+            class="modal-btn secondary"
+            :disabled="driversStore.saving"
+            @click="showDelete = false"
+          >
             Cancel
           </button>
-          <button class="modal-btn danger" @click="handleDelete">Delete</button>
+          <button
+            class="modal-btn danger"
+            :disabled="driversStore.saving"
+            @click="handleDelete"
+          >
+            <span v-if="driversStore.saving">Deleting...</span>
+            <span v-else>Delete</span>
+          </button>
         </div>
       </div>
     </div>
@@ -301,14 +313,15 @@ const formValid = computed(() => {
   );
 });
 
-function saveDriver() {
+async function saveDriver() {
   if (!formValid.value) return;
+  let ok;
   if (editing.value) {
-    driversStore.updateDriver(editing.value.id, form.value);
+    ok = await driversStore.updateDriver(editing.value.id, form.value);
   } else {
-    driversStore.addDriver(form.value);
+    ok = await driversStore.addDriver(form.value);
   }
-  closeForm();
+  if (ok) closeForm();
 }
 
 const showDelete = ref(false);
@@ -317,10 +330,13 @@ function confirmDelete(d) {
   deleteTarget.value = d;
   showDelete.value = true;
 }
-function handleDelete() {
-  if (deleteTarget.value) driversStore.deleteDriver(deleteTarget.value.id);
-  showDelete.value = false;
-  deleteTarget.value = null;
+async function handleDelete() {
+  if (!deleteTarget.value) return;
+  const ok = await driversStore.deleteDriver(deleteTarget.value.id);
+  if (ok) {
+    showDelete.value = false;
+    deleteTarget.value = null;
+  }
 }
 </script>
 
@@ -660,7 +676,9 @@ select.form-input {
 .modal-btn.primary:hover {
   background: #047857;
 }
-.modal-btn.primary:disabled {
+.modal-btn.primary:disabled,
+.modal-btn.danger:disabled,
+.modal-btn.secondary:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }

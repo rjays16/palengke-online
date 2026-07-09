@@ -246,6 +246,95 @@ class DriverRegistrationController extends Controller
         ]);
     }
 
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|min:2',
+            'phone' => 'required|string',
+            'vehicle' => 'required|string',
+            'plate' => 'required|string',
+        ]);
+
+        $nameParts = explode(' ', $validated['name'], 2);
+        $firstName = $nameParts[0];
+        $lastName = $nameParts[1] ?? '';
+
+        $registration = DriverRegistration::create([
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'phone' => $validated['phone'],
+            'full_phone' => $validated['phone'],
+            'vehicle_type' => $validated['vehicle'],
+            'plate_number' => $validated['plate'],
+            'email' => 'driver-' . uniqid() . '@temp.com',
+            'country_code' => '+63',
+            'country' => 'PH',
+            'birthdate' => now()->toDateString(),
+            'birthplace' => '',
+            'current_address' => '',
+            'license_number' => '',
+            'license_type' => '',
+            'restriction_code' => '',
+            'expiry_date' => now()->toDateString(),
+            'vehicle_model' => '',
+            'vehicle_color' => '',
+            'status' => 'approved',
+        ]);
+
+        return response()->json([
+            'message' => 'Driver created successfully.',
+            'driver' => $this->formatForAdmin($registration),
+        ], 201);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $registration = DriverRegistration::findOrFail($this->resolveId($id));
+
+        $validated = $request->validate([
+            'name' => 'required|string|min:2',
+            'phone' => 'required|string',
+            'vehicle' => 'required|string',
+            'plate' => 'required|string',
+            'status' => 'required|string|in:active,idle,offline',
+        ]);
+
+        $nameParts = explode(' ', $validated['name'], 2);
+        $firstName = $nameParts[0];
+        $lastName = $nameParts[1] ?? '';
+
+        $statusMap = [
+            'active' => 'approved',
+            'idle' => 'pending',
+            'offline' => 'rejected',
+        ];
+
+        $registration->update([
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'phone' => $validated['phone'],
+            'full_phone' => $validated['phone'],
+            'vehicle_type' => $validated['vehicle'],
+            'plate_number' => $validated['plate'],
+            'status' => $statusMap[$validated['status']] ?? 'approved',
+        ]);
+
+        return response()->json([
+            'message' => 'Driver updated successfully.',
+            'driver' => $this->formatForAdmin($registration->fresh()),
+        ]);
+    }
+
+    public function destroy($id)
+    {
+        $registration = DriverRegistration::findOrFail($this->resolveId($id));
+        $registration->delete();
+
+        return response()->json([
+            'message' => 'Driver deleted successfully.',
+        ]);
+    }
+
     private function syncDocumentRecord(string $email, string $photoType, string $photoPath): void
     {
         $docTypeMap = [

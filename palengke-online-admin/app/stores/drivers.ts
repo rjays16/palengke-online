@@ -9,6 +9,13 @@ export const useDriversStore = defineStore("drivers", () => {
     return localStorage.getItem("palengke_auth_token");
   }
 
+  function getHeaders() {
+    return {
+      Authorization: `Bearer ${getToken()}`,
+      "Content-Type": "application/json",
+    };
+  }
+
   function mapDriver(raw: any) {
     return {
       id: raw.id,
@@ -45,6 +52,7 @@ export const useDriversStore = defineStore("drivers", () => {
 
   const drivers = ref<any[]>([]);
   const loading = ref(false);
+  const saving = ref(false);
   const error = ref<string | null>(null);
 
   async function fetchDrivers() {
@@ -88,29 +96,36 @@ export const useDriversStore = defineStore("drivers", () => {
     }));
   }
 
-  let nextId = 1;
-
-  function addDriver(data: {
+  async function addDriver(data: {
     name: string;
     phone: string;
     vehicle: string;
     plate: string;
   }) {
-    drivers.value.push({
-      id: `TEMP-${nextId++}`,
-      name: data.name,
-      phone: data.phone,
-      vehicle: data.vehicle,
-      plate: data.plate,
-      deliveries: 0,
-      rating: 0,
-      earnings: 0,
-      status: "active",
-      joined: new Date().toISOString().slice(0, 10),
-    });
+    saving.value = true;
+    error.value = null;
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/api/admin/drivers`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || `Failed to create driver (${res.status})`);
+      }
+      const json = await res.json();
+      drivers.value.unshift(mapDriver(json.driver));
+      return true;
+    } catch (e: any) {
+      error.value = e.message || "Unknown error";
+      return false;
+    } finally {
+      saving.value = false;
+    }
   }
 
-  function updateDriver(
+  async function updateDriver(
     id: number | string,
     data: {
       name: string;
@@ -120,67 +135,63 @@ export const useDriversStore = defineStore("drivers", () => {
       status: string;
     },
   ) {
-    const d = drivers.value.find((d) => String(d.id) === String(id));
-    if (!d) return;
-    d.name = data.name;
-    d.phone = data.phone;
-    d.vehicle = data.vehicle;
-    d.plate = data.plate;
-    d.status = data.status;
+    saving.value = true;
+    error.value = null;
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/api/admin/drivers/${id}`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.message || `Failed to update driver (${res.status})`);
+      }
+      const json = await res.json();
+      const idx = drivers.value.findIndex((d) => String(d.id) === String(id));
+      if (idx !== -1) drivers.value[idx] = mapDriver(json.driver);
+      return true;
+    } catch (e: any) {
+      error.value = e.message || "Unknown error";
+      return false;
+    } finally {
+      saving.value = false;
+    }
   }
 
-  function deleteDriver(id: number | string) {
-    drivers.value = drivers.value.filter((d) => String(d.id) !== String(id));
+  async function deleteDriver(id: number | string) {
+    saving.value = true;
+    error.value = null;
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/api/admin/drivers/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (!res.ok) throw new Error(`Failed to delete driver (${res.status})`);
+      drivers.value = drivers.value.filter((d) => String(d.id) !== String(id));
+      return true;
+    } catch (e: any) {
+      error.value = e.message || "Unknown error";
+      return false;
+    } finally {
+      saving.value = false;
+    }
   }
 
   function getDeliveryHistory(_id: number | string) {
     return [
-      {
-        id: "ORD-1042",
-        customer: "Maria Santos",
-        pickup: "Juan's Farm",
-        delivery: "Brgy. San Isidro",
-        status: "delivered",
-        date: "2026-05-14",
-      },
-      {
-        id: "ORD-1040",
-        customer: "Ana Cruz",
-        pickup: "Maria's Produce",
-        delivery: "Brgy. Maligaya",
-        status: "delivered",
-        date: "2026-05-13",
-      },
-      {
-        id: "ORD-1038",
-        customer: "Luisa Tan",
-        pickup: "Meat Shop Inc.",
-        delivery: "Brgy. Bagong Silang",
-        status: "delivered",
-        date: "2026-05-12",
-      },
-      {
-        id: "ORD-1036",
-        customer: "Ben Torres",
-        pickup: "Fresh Fish Co.",
-        delivery: "Brgy. Poblacion",
-        status: "delivered",
-        date: "2026-05-12",
-      },
-      {
-        id: "ORD-1033",
-        customer: "Tina Rivera",
-        pickup: "Fresh Fish Co.",
-        delivery: "Brgy. Sampa",
-        status: "delivered",
-        date: "2026-05-11",
-      },
+      { id: "ORD-1042", customer: "Maria Santos", pickup: "Juan's Farm", delivery: "Brgy. San Isidro", status: "delivered", date: "2026-05-14" },
+      { id: "ORD-1040", customer: "Ana Cruz", pickup: "Maria's Produce", delivery: "Brgy. Maligaya", status: "delivered", date: "2026-05-13" },
+      { id: "ORD-1038", customer: "Luisa Tan", pickup: "Meat Shop Inc.", delivery: "Brgy. Bagong Silang", status: "delivered", date: "2026-05-12" },
+      { id: "ORD-1036", customer: "Ben Torres", pickup: "Fresh Fish Co.", delivery: "Brgy. Poblacion", status: "delivered", date: "2026-05-12" },
+      { id: "ORD-1033", customer: "Tina Rivera", pickup: "Fresh Fish Co.", delivery: "Brgy. Sampa", status: "delivered", date: "2026-05-11" },
     ];
   }
 
   return {
     drivers,
     loading,
+    saving,
     error,
     fetchDrivers,
     getDriverById,
