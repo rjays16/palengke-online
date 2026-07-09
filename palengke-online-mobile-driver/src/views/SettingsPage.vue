@@ -105,17 +105,6 @@
             <ion-icon :icon="chevronForwardOutline" class="item-arrow"></ion-icon>
           </div>
 
-          <!-- Navigation Provider -->
-          <div class="settings-item" @click="changeNavProvider">
-            <div class="item-left">
-              <div class="item-icon purple"><ion-icon :icon="navigateOutline"></ion-icon></div>
-              <div class="item-info">
-                <h4>Navigation Provider</h4>
-                <p>{{ navProvider }}</p>
-              </div>
-            </div>
-            <ion-icon :icon="chevronForwardOutline" class="item-arrow"></ion-icon>
-          </div>
         </div>
 
         <!-- Support Section -->
@@ -182,7 +171,7 @@ import {
 import {
   personOutline, documentTextOutline, linkOutline,
   notificationsOutline, flashOutline, bicycleOutline,
-  locationOutline, navigateOutline, helpCircleOutline,
+  locationOutline, helpCircleOutline,
   shieldCheckmarkOutline, informationCircleOutline,
   logOutOutline, chevronForwardOutline
 } from 'ionicons/icons';
