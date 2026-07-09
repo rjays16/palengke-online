@@ -46,7 +46,7 @@
         </div>
 
         <!-- Earnings Info -->
-        <div v-if="expressEnabled" class="earnings-info-card">
+        <div v-if="expressGloballyEnabled" class="earnings-info-card">
           <ion-icon :icon="cashOutline"></ion-icon>
           <div>
             <h4>Earn More with Express!</h4>
@@ -75,23 +75,52 @@ import { mockServices } from '@/mock/services';
 
 const router = useRouter();
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
-const expressEnabled = ref(false);
+
+function getToken() {
+  return localStorage.getItem('token') || '';
+}
+
+const expressGloballyEnabled = ref(false);
 const services = ref(mockServices);
 
 onMounted(async () => {
   try {
-    const res = await fetch(`${API_BASE}/api/settings`);
-    if (res.ok) {
-      const data = await res.json();
-      expressEnabled.value = data.express_delivery_enabled === 'true';
+    const [settingsRes, driverRes] = await Promise.all([
+      fetch(`${API_BASE}/api/settings`),
+      fetch(`${API_BASE}/api/driver/settings`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      }),
+    ]);
+    if (settingsRes.ok) {
+      const data = await settingsRes.json();
+      expressGloballyEnabled.value = data.express_delivery_enabled === 'true';
+    }
+    if (driverRes.ok) {
+      const data = await driverRes.json();
+      const expressService = services.value.find(s => s.name === 'Palengke Express Delivery');
+      if (expressService) {
+        expressService.enabled = data.express_enabled;
+      }
     }
   } catch {}
-  if (!expressEnabled.value) {
+  if (!expressGloballyEnabled.value) {
     services.value = services.value.filter(s => s.name !== 'Palengke Express Delivery');
   }
 });
 
 const onServiceToggle = async (service) => {
+  if (service.name === 'Palengke Express Delivery') {
+    try {
+      await fetch(`${API_BASE}/api/driver/settings`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ express_enabled: service.enabled }),
+      });
+    } catch {}
+  }
   const toast = await toastController.create({
     message: `${service.name} ${service.enabled ? 'enabled' : 'disabled'}`,
     duration: 2000, color: 'medium', position: 'top'

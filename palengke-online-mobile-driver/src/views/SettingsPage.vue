@@ -81,6 +81,18 @@
             ></ion-toggle>
           </div>
 
+          <!-- Service Type -->
+          <div class="settings-item" @click="goToServiceType">
+            <div class="item-left">
+              <div class="item-icon blue"><ion-icon :icon="bicycleOutline"></ion-icon></div>
+              <div class="item-info">
+                <h4>Service Type</h4>
+                <p>Manage your delivery services</p>
+              </div>
+            </div>
+            <ion-icon :icon="chevronForwardOutline" class="item-arrow"></ion-icon>
+          </div>
+
           <!-- Bulky Item Delivery Toggle -->
           <div class="settings-item toggle-item">
             <div class="item-left">
@@ -174,7 +186,7 @@ import {
 } from '@ionic/vue';
 import {
   personOutline, documentTextOutline, linkOutline,
-  notificationsOutline, flashOutline, cubeOutline,
+  notificationsOutline, flashOutline, bicycleOutline, cubeOutline,
   locationOutline, helpCircleOutline,
   shieldCheckmarkOutline, informationCircleOutline,
   logOutOutline, chevronForwardOutline
@@ -303,6 +315,7 @@ const handleLogout = async () => {
 
 const editProfile = () => router.push('/profile');
 const goToDocuments = () => router.push('/documents');
+const goToServiceType = () => router.push('/service-type');
 const goToMyDestination = () => router.push('/my-destination');
 const goToHelp = () => router.push('/help');
 const goToAbout = () => router.push('/about');

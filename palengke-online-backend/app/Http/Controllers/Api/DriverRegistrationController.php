@@ -359,6 +359,7 @@ class DriverRegistrationController extends Controller
         return response()->json([
             'auto_accept' => (bool) $driver->auto_accept,
             'bulky_enabled' => (bool) $driver->bulky_enabled,
+            'express_enabled' => (bool) $driver->express_enabled,
         ]);
     }
 
@@ -367,6 +368,7 @@ class DriverRegistrationController extends Controller
         $validated = $request->validate([
             'auto_accept' => 'required|boolean',
             'bulky_enabled' => 'required|boolean',
+            'express_enabled' => 'sometimes|boolean',
         ]);
 
         $driver = $request->user();
@@ -376,6 +378,7 @@ class DriverRegistrationController extends Controller
             'message' => 'Settings updated successfully.',
             'auto_accept' => (bool) $driver->auto_accept,
             'bulky_enabled' => (bool) $driver->bulky_enabled,
+            'express_enabled' => (bool) $driver->express_enabled,
         ]);
     }
 

@@ -167,7 +167,10 @@
     </div>
 
     <div class="settings-actions">
-      <button class="save-btn" @click="saveFees">Save Changes</button>
+      <button class="save-btn" :disabled="saving" @click="saveFees">
+        <span v-if="saving" class="spinner"></span>
+        {{ saving ? 'Saving...' : 'Save Changes' }}
+      </button>
       <button class="reset-btn" @click="resetFees">Reset to Default</button>
     </div>
   </div>
@@ -209,6 +212,7 @@ function loadFees() {
 const fees = ref(loadFees());
 const expressEnabled = ref(false);
 const success = ref(false);
+const saving = ref(false);
 
 function getApiBaseUrl() {
   const config = useRuntimeConfig();
@@ -301,6 +305,7 @@ function validate() {
 
 const saveFees = async () => {
   if (!validate()) return;
+  saving.value = true;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(fees.value));
   try {
     await fetch(`${getApiBaseUrl()}/api/admin/settings`, {
@@ -316,6 +321,7 @@ const saveFees = async () => {
       }),
     });
   } catch {}
+  saving.value = false;
   success.value = true;
   setTimeout(() => {
     success.value = false;
@@ -508,10 +514,22 @@ const resetFees = () => {
   cursor: pointer;
   font-family: "Inter", sans-serif;
   transition: all 0.15s;
+  display: inline-flex; align-items: center; gap: 8px;
 }
-.save-btn:hover {
+.save-btn:hover:not(:disabled) {
   background: #047857;
 }
+.save-btn:disabled {
+  opacity: 0.6; cursor: not-allowed;
+}
+.spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 .reset-btn {
   padding: 12px 24px;
   background: #fff;
