@@ -38,17 +38,6 @@
             <ion-icon :icon="chevronForwardOutline" class="item-arrow"></ion-icon>
           </div>
 
-          <div class="settings-item" @click="linkedAccounts">
-            <div class="item-left">
-              <div class="item-icon purple"><ion-icon :icon="linkOutline"></ion-icon></div>
-              <div class="item-info">
-                <h4>Linked Accounts</h4>
-                <p>Use third-party accounts to sign in</p>
-              </div>
-            </div>
-            <ion-icon :icon="chevronForwardOutline" class="item-arrow"></ion-icon>
-          </div>
-
         </div>
 
         <!-- Job Settings Section -->
@@ -167,7 +156,7 @@ import {
   alertController, actionSheetController, toastController
 } from '@ionic/vue';
 import {
-  personOutline, documentTextOutline, linkOutline,
+  personOutline, documentTextOutline,
   flashOutline, bicycleOutline, cubeOutline,
   locationOutline,
   shieldCheckmarkOutline, informationCircleOutline,
@@ -231,15 +220,6 @@ const onBulkyToggle = async () => {
     duration: 2000, color: 'medium', position: 'top'
   });
   await toast.present();
-};
-
-const linkedAccounts = async () => {
-  const alert = await alertController.create({
-    header: 'Linked Accounts',
-    message: 'Connect your Google or Facebook account for easier sign in.',
-    buttons: ['Close']
-  });
-  await alert.present();
 };
 
 const showTerms = async () => {
