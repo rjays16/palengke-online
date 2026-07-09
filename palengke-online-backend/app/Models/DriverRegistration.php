@@ -15,7 +15,7 @@ class DriverRegistration extends Model
         'vehicle_type', 'plate_number', 'vehicle_model', 'vehicle_color',
         'license_front_photo', 'license_back_photo', 'vehicle_reg_photo',
         'nbi_clearance_photo', 'birth_cert_photo', 'selfie_photo',
-        'pin', 'status', 'rejection_reason', 'reviewed_by', 'reviewed_at',
+        'pin', 'auto_accept', 'bulky_enabled', 'status', 'rejection_reason', 'reviewed_by', 'reviewed_at',
     ];
 
     protected $casts = [

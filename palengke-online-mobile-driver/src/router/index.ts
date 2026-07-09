@@ -22,7 +22,6 @@ import ProfilePage from '@/views/ProfilePage.vue';
 import LicencePaymentPage from '@/views/LicencePaymentPage.vue';
 import DocumentsPage from '@/views/DocumentsPage.vue';
 import SettingsPage from '@/views/SettingsPage.vue';
-import ServiceTypePage from '@/views/ServiceTypePage.vue';
 import MyDestinationPage from '@/views/MyDestinationPage.vue';
 import MessagesPage from '@/views/MessagesPage.vue';
 import NotificationsPage from '@/views/NotificationsPage.vue';
@@ -226,12 +225,6 @@ const routes: Array<RouteRecordRaw> = [
     path: '/settings',
     name: 'Settings',
     component: SettingsPage,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/service-type',
-    name: 'ServiceType',
-    component: ServiceTypePage,
     meta: { requiresAuth: true }
   },
   {

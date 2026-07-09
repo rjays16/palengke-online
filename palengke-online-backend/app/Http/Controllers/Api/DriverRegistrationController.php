@@ -352,6 +352,33 @@ class DriverRegistrationController extends Controller
         ]);
     }
 
+    public function settings(Request $request)
+    {
+        $driver = $request->user();
+
+        return response()->json([
+            'auto_accept' => (bool) $driver->auto_accept,
+            'bulky_enabled' => (bool) $driver->bulky_enabled,
+        ]);
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $validated = $request->validate([
+            'auto_accept' => 'required|boolean',
+            'bulky_enabled' => 'required|boolean',
+        ]);
+
+        $driver = $request->user();
+        $driver->update($validated);
+
+        return response()->json([
+            'message' => 'Settings updated successfully.',
+            'auto_accept' => (bool) $driver->auto_accept,
+            'bulky_enabled' => (bool) $driver->bulky_enabled,
+        ]);
+    }
+
     public function destroy($id)
     {
         $registration = DriverRegistration::findOrFail($this->resolveId($id));

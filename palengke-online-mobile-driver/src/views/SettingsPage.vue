@@ -81,16 +81,20 @@
             ></ion-toggle>
           </div>
 
-          <!-- Service Type -->
-          <div class="settings-item" @click="goToServiceType">
+          <!-- Bulky Item Delivery Toggle -->
+          <div class="settings-item toggle-item">
             <div class="item-left">
-              <div class="item-icon blue"><ion-icon :icon="bicycleOutline"></ion-icon></div>
+              <div class="item-icon orange"><ion-icon :icon="cubeOutline"></ion-icon></div>
               <div class="item-info">
-                <h4>Service Type</h4>
-                <p>Manage your delivery services</p>
+                <h4>Bulky Item Delivery</h4>
+                <p>{{ bulkyEnabled ? 'You can accept large or heavy orders' : 'Large or heavy orders will be filtered out' }}</p>
               </div>
             </div>
-            <ion-icon :icon="chevronForwardOutline" class="item-arrow"></ion-icon>
+            <ion-toggle
+              v-model="bulkyEnabled"
+              color="success"
+              @ionChange="onBulkyToggle"
+            ></ion-toggle>
           </div>
 
           <!-- My Destination -->
@@ -161,7 +165,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
@@ -170,22 +174,67 @@ import {
 } from '@ionic/vue';
 import {
   personOutline, documentTextOutline, linkOutline,
-  notificationsOutline, flashOutline, bicycleOutline,
+  notificationsOutline, flashOutline, cubeOutline,
   locationOutline, helpCircleOutline,
   shieldCheckmarkOutline, informationCircleOutline,
   logOutOutline, chevronForwardOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
 const driverName = ref('Juan Dela Cruz');
 const driverId = ref('DRV-2024-001234');
-const autoAccept = ref(true);
+const autoAccept = ref(false);
+const bulkyEnabled = ref(false);
 const navProvider = ref('Google Maps');
 
+function getToken() {
+  return localStorage.getItem('token') || '';
+}
+
+onMounted(async () => {
+  try {
+    const res = await fetch(`${API_BASE}/api/driver/settings`, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      autoAccept.value = data.auto_accept;
+      bulkyEnabled.value = data.bulky_enabled;
+    }
+  } catch {}
+});
+
+async function saveSettings() {
+  try {
+    await fetch(`${API_BASE}/api/driver/settings`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        auto_accept: autoAccept.value,
+        bulky_enabled: bulkyEnabled.value,
+      }),
+    });
+  } catch {}
+}
+
 const onAutoAcceptChange = async () => {
+  await saveSettings();
   const toast = await toastController.create({
     message: autoAccept.value ? 'Auto Accept is ON' : 'Auto Accept is OFF',
+    duration: 2000, color: 'medium', position: 'top'
+  });
+  await toast.present();
+};
+
+const onBulkyToggle = async () => {
+  await saveSettings();
+  const toast = await toastController.create({
+    message: bulkyEnabled.value ? 'Bulky orders enabled' : 'Bulky orders disabled',
     duration: 2000, color: 'medium', position: 'top'
   });
   await toast.present();
@@ -254,7 +303,6 @@ const handleLogout = async () => {
 
 const editProfile = () => router.push('/profile');
 const goToDocuments = () => router.push('/documents');
-const goToServiceType = () => router.push('/service-type');
 const goToMyDestination = () => router.push('/my-destination');
 const goToHelp = () => router.push('/help');
 const goToAbout = () => router.push('/about');

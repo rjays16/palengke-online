@@ -13,6 +13,18 @@
       <div class="settings-section">
         <h3>Delivery Fee Configuration</h3>
         <div class="settings-form">
+          <div class="form-row toggle-row">
+            <div class="form-group toggle-group">
+              <label class="toggle-label">
+                <span>Enable Express Delivery</span>
+                <label class="switch">
+                  <input type="checkbox" v-model="expressEnabled" />
+                  <span class="slider"></span>
+                </label>
+              </label>
+              <span class="form-hint">When disabled, Express Delivery is hidden from the driver app</span>
+            </div>
+          </div>
           <div class="form-row">
             <div class="form-group" :class="{ hasError: errors.base }">
               <label>Base Delivery Fee (₱) <span class="req">*</span></label>
@@ -136,7 +148,7 @@
               >₱{{ (fees.base + fees.perKm * 2).toFixed(0) }}</span
             >
           </div>
-          <div class="preview-card">
+          <div v-if="expressEnabled" class="preview-card">
             <span class="preview-label">Express (3km)</span>
             <span class="preview-value"
               >₱{{ (fees.base * fees.expressMultiplier).toFixed(0) }}</span
@@ -195,7 +207,30 @@ function loadFees() {
 }
 
 const fees = ref(loadFees());
+const expressEnabled = ref(false);
 const success = ref(false);
+
+function getApiBaseUrl() {
+  const config = useRuntimeConfig();
+  return config.public.apiBaseUrl || "http://localhost:8000";
+}
+
+function getToken() {
+  if (typeof localStorage === "undefined") return null;
+  return localStorage.getItem("palengke_auth_token");
+}
+
+onMounted(async () => {
+  try {
+    const res = await fetch(`${getApiBaseUrl()}/api/admin/settings`, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      expressEnabled.value = data.express_delivery_enabled === "true";
+    }
+  } catch {}
+});
 
 const errors = reactive({
   base: "",
@@ -264,9 +299,23 @@ function validate() {
   return valid;
 }
 
-const saveFees = () => {
+const saveFees = async () => {
   if (!validate()) return;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(fees.value));
+  try {
+    await fetch(`${getApiBaseUrl()}/api/admin/settings`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        settings: {
+          express_delivery_enabled: expressEnabled.value ? "true" : "false",
+        },
+      }),
+    });
+  } catch {}
   success.value = true;
   setTimeout(() => {
     success.value = false;
@@ -478,6 +527,27 @@ const resetFees = () => {
 .reset-btn:hover {
   border-color: #9ca3af;
 }
+.toggle-row { display: flex; }
+.toggle-group { width: 100%; }
+.toggle-label {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 14px; font-weight: 600; color: #374151; cursor: pointer;
+}
+.switch {
+  position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute; cursor: pointer; inset: 0;
+  background: #e5e7eb; border-radius: 24px; transition: 0.2s;
+}
+.slider::before {
+  content: ""; position: absolute; height: 18px; width: 18px;
+  left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.2s;
+}
+.switch input:checked + .slider { background: #059669; }
+.switch input:checked + .slider::before { transform: translateX(20px); }
+
 @media (max-width: 600px) {
   .form-row,
   .preview-grid {

@@ -92,6 +92,12 @@ Route::post('/driver/device/verify-pin', [DriverDeviceController::class, 'verify
 Route::post('/driver/device/change-pin', [DriverDeviceController::class, 'changePin']);
 Route::post('/driver/device/status', [DriverDeviceController::class, 'status']);
 
+// Driver settings (authenticated)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/driver/settings', [DriverRegistrationController::class, 'settings']);
+    Route::put('/driver/settings', [DriverRegistrationController::class, 'updateSettings']);
+});
+
 // Seller app login
 Route::post('/seller/login', [AuthController::class, 'login']);
 Route::post('/seller/forgot-pin', [AuthController::class, 'forgotPin']);

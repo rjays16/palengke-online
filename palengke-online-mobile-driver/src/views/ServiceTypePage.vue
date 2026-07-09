@@ -46,7 +46,7 @@
         </div>
 
         <!-- Earnings Info -->
-        <div class="earnings-info-card">
+        <div v-if="expressEnabled" class="earnings-info-card">
           <ion-icon :icon="cashOutline"></ion-icon>
           <div>
             <h4>Earn More with Express!</h4>
@@ -60,7 +60,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
@@ -69,12 +69,27 @@ import {
 } from '@ionic/vue';
 import {
   informationCircleOutline, bicycleOutline, flashOutline,
-  cubeOutline, timeOutline, cashOutline, carOutline
+  cubeOutline, cashOutline
 } from 'ionicons/icons';
 import { mockServices } from '@/mock/services';
 
 const router = useRouter();
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+const expressEnabled = ref(false);
 const services = ref(mockServices);
+
+onMounted(async () => {
+  try {
+    const res = await fetch(`${API_BASE}/api/settings`);
+    if (res.ok) {
+      const data = await res.json();
+      expressEnabled.value = data.express_delivery_enabled === 'true';
+    }
+  } catch {}
+  if (!expressEnabled.value) {
+    services.value = services.value.filter(s => s.name !== 'Palengke Express Delivery');
+  }
+});
 
 const onServiceToggle = async (service) => {
   const toast = await toastController.create({
