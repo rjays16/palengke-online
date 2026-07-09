@@ -166,8 +166,8 @@ import {
 const router = useRouter();
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
-const driverName = ref('Juan Dela Cruz');
-const driverId = ref('DRV-2024-001234');
+const driverName = ref('');
+const driverId = ref('');
 const autoAccept = ref(false);
 const bulkyEnabled = ref(false);
 
@@ -182,6 +182,8 @@ onMounted(async () => {
     });
     if (res.ok) {
       const data = await res.json();
+      driverName.value = data.name || 'Driver';
+      driverId.value = data.driver_id || '';
       autoAccept.value = data.auto_accept;
       bulkyEnabled.value = data.bulky_enabled;
     }

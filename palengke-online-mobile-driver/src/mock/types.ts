@@ -112,18 +112,6 @@ export interface DocumentItem {
   status: string
 }
 
-export interface ServiceItem {
-  id: number
-  name: string
-  description: string | null
-  icon: unknown
-  color: string
-  enabled: boolean
-  tag: string | null
-  tagType?: string
-  alwaysOn: boolean
-}
-
 export interface TipData {
   amount: number
   customerName: string

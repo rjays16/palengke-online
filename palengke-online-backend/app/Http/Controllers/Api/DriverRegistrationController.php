@@ -357,6 +357,8 @@ class DriverRegistrationController extends Controller
         $driver = $request->user();
 
         return response()->json([
+            'name' => trim(implode(' ', array_filter([$driver->first_name, $driver->middle_name, $driver->last_name]))),
+            'driver_id' => $this->formatId($driver),
             'auto_accept' => (bool) $driver->auto_accept,
             'bulky_enabled' => (bool) $driver->bulky_enabled,
             'express_enabled' => (bool) $driver->express_enabled,
