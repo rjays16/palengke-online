@@ -124,19 +124,6 @@ export interface ServiceItem {
   alwaysOn: boolean
 }
 
-export interface SavedDestination {
-  id: number
-  name: string
-  address: string
-  type: string
-}
-
-export interface RecentDestination {
-  id: number
-  name: string
-  address: string
-}
-
 export interface TipData {
   amount: number
   customerName: string
