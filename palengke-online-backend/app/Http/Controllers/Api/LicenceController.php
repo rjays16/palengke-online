@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Licence;
 use App\Models\DriverRegistration;
+use App\Models\Notification;
 use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 
@@ -162,8 +163,20 @@ class LicenceController extends Controller
             ]);
         }
 
+        $isFree = $licence->fresh()->is_free;
+        $name = trim($driver->firstName . ' ' . $driver->lastName) ?: 'Driver #' . $driver->id;
+
+        Notification::create([
+            'type' => 'licence_free_toggle',
+            'title' => $isFree ? 'Free Licence Enabled' : 'Free Licence Disabled',
+            'message' => $isFree
+                ? "{$name} is now marked as Free Licence — no payment needed."
+                : "{$name} is no longer Free Licence — standard payment applies.",
+            'link' => "/drivers/DRIVER-{$driver->id}",
+        ]);
+
         return response()->json([
-            'isFree' => $licence->fresh()->is_free,
+            'isFree' => $isFree,
         ]);
     }
 }

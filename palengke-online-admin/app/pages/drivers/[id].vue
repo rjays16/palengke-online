@@ -1,5 +1,9 @@
 <template>
   <div class="detail-page">
+    <div class="notification" v-if="notification" @click="notification = null">
+      {{ notification }}
+    </div>
+
     <button class="back-btn" @click="goBack">
       <svg
         viewBox="0 0 24 24"
@@ -280,6 +284,7 @@ function getToken() {
   return localStorage.getItem("palengke_auth_token");
 }
 
+const notification = ref("");
 const driverFree = ref(false);
 const driverLic = ref(null);
 
@@ -292,8 +297,9 @@ async function fetchDriverLicence() {
     });
     if (res.ok) {
       const data = await res.json();
-      driverLic.value = data.licence;
-      driverFree.value = data.licence?.isFree || false;
+      const lic = data.licence;
+      driverLic.value = lic;
+      driverFree.value = lic?.isFree || false;
     }
   } catch {}
 }
@@ -310,6 +316,11 @@ async function toggleDriverFree() {
       const data = await res.json();
       driverFree.value = data.isFree;
       if (driverLic.value) driverLic.value.isFree = data.isFree;
+      const name = driver.value?.name || "Driver";
+      notification.value = data.isFree
+        ? `${name} is now marked as Free Licence`
+        : `${name} is no longer Free Licence`;
+      setTimeout(() => { notification.value = ""; }, 4000);
     }
   } catch {}
 }
@@ -738,6 +749,26 @@ const goBack = () => navigateTo("/drivers");
   font-size: 13px;
   font-weight: 600;
   color: #374151;
+}
+.notification {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #059669;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 2000;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  cursor: pointer;
+  animation: slideDown 0.3s ease;
+}
+@keyframes slideDown {
+  from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+  to { transform: translateX(-50%) translateY(0); opacity: 1; }
 }
 .toggle-hint {
   font-size: 11px;

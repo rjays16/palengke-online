@@ -1977,6 +1977,9 @@ const vClickOutside = {
 .notif-dot.system {
   background: #9ca3af;
 }
+.notif-dot.licence_free_toggle {
+  background: #8b5cf6;
+}
 
 .notif-body {
   flex: 1;
