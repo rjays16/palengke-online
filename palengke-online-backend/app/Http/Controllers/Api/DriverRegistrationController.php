@@ -352,6 +352,25 @@ class DriverRegistrationController extends Controller
         ]);
     }
 
+    public function profile(Request $request)
+    {
+        $driver = $request->user();
+
+        return response()->json([
+            'name' => trim(implode(' ', array_filter([$driver->first_name, $driver->middle_name, $driver->last_name]))),
+            'email' => $driver->email,
+            'phone' => $driver->full_phone,
+            'avatar' => $driver->selfie_photo,
+            'vehicleType' => $driver->vehicle_type,
+            'vehicleModel' => $driver->vehicle_model,
+            'vehicleColor' => $driver->vehicle_color,
+            'plateNumber' => $driver->plate_number,
+            'totalTrips' => 0,
+            'rating' => 0,
+            'joinedDays' => 0,
+        ]);
+    }
+
     public function settings(Request $request)
     {
         $driver = $request->user();

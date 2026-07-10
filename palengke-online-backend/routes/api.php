@@ -101,6 +101,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Driver settings & licence (authenticated)
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/driver/profile', [DriverRegistrationController::class, 'profile']);
     Route::get('/driver/settings', [DriverRegistrationController::class, 'settings']);
     Route::put('/driver/settings', [DriverRegistrationController::class, 'updateSettings']);
     Route::get('/driver/licence', [LicenceController::class, 'show']);

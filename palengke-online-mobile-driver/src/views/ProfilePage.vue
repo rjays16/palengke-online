@@ -192,8 +192,15 @@
           <div class="info-item">
             <div class="info-icon"><ion-icon :icon="colorPaletteOutline"></ion-icon></div>
             <div class="info-content">
-              <p class="info-label">Vehicle Model & Color</p>
-              <p class="info-value">{{ profileData.vehicleModel }} · {{ profileData.vehicleColor }}</p>
+              <p class="info-label">Vehicle Model</p>
+              <p class="info-value">{{ profileData.vehicleModel }}</p>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="info-icon"><ion-icon :icon="colorPaletteOutline"></ion-icon></div>
+            <div class="info-content">
+              <p class="info-label">Vehicle Color</p>
+              <p class="info-value">{{ profileData.vehicleColor }}</p>
             </div>
           </div>
         </div>
@@ -348,10 +355,35 @@ const activeTab = ref('achievements');
 const cityAvgRating = ref(4.70);
 
 const licenceStore = useLicenceStore();
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+
+function getToken() {
+  if (typeof localStorage === 'undefined') return null;
+  return localStorage.getItem('token');
+}
+
+const profileData = ref({ ...mockProfileData });
+
+async function fetchProfile() {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/driver/profile`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      profileData.value = { ...profileData.value, ...data };
+    }
+  } catch {}
+}
 
 onMounted(async () => {
-  await licenceStore.checkLicenceEnabled();
-  licenceStore.fetchLicence();
+  await Promise.all([
+    fetchProfile(),
+    licenceStore.checkLicenceEnabled(),
+    licenceStore.fetchLicence(),
+  ]);
 });
 
 const licenceStatusIcon = computed(() => {
@@ -368,8 +400,6 @@ const licenceBarPercent = computed(() => {
   const used = licenceStore.getDaysUsed()
   return Math.min(100, (used / 30) * 100)
 })
-
-const profileData = ref(mockProfileData);
 
 // Rating distribution
 const ratingCounts = mockRatingCounts;

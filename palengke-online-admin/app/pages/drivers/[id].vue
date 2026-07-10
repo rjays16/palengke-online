@@ -27,7 +27,7 @@
         <div class="detail-title">
           <h1>{{ driver.name }}</h1>
           <span class="detail-subtitle"
-            >{{ driver.vehicle }} · {{ driver.plate }}</span
+            >{{ [driver.vehicleColor, driver.vehicleType, driver.vehicleModel].filter(Boolean).join(" ") || driver.vehicle }} · {{ driver.plate }}</span
           >
         </div>
         <div class="detail-actions">
@@ -50,12 +50,20 @@
               ><span class="info-value">{{ driver.phone }}</span>
             </div>
             <div class="info-row">
-              <span class="info-label">Vehicle</span
-              ><span class="info-value">{{ driver.vehicle }}</span>
+              <span class="info-label">Vehicle Type</span
+              ><span class="info-value">{{ driver.vehicleType || driver.vehicle }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Vehicle Model</span
+              ><span class="info-value">{{ driver.vehicleModel || "—" }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Vehicle Color</span
+              ><span class="info-value">{{ driver.vehicleColor || "—" }}</span>
             </div>
             <div class="info-row">
               <span class="info-label">Plate #</span
-              ><span class="info-value">{{ driver.plate }}</span>
+              ><span class="info-value">{{ driver.plate || "—" }}</span>
             </div>
             <div class="info-row">
               <span class="info-label">Deliveries</span
