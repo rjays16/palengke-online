@@ -71,7 +71,6 @@ import {
   informationCircleOutline, bicycleOutline, flashOutline,
   cubeOutline, cashOutline
 } from 'ionicons/icons';
-import { mockServices } from '@/mock/services';
 
 const router = useRouter();
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';

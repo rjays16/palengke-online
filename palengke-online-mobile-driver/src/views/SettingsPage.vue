@@ -12,34 +12,6 @@
     <ion-content :fullscreen="true" class="settings-content">
       <div class="settings-container">
 
-        <!-- Account Section -->
-        <div class="settings-section">
-          <h3 class="settings-group-title">Account</h3>
-
-          <div class="settings-item" @click="editProfile">
-            <div class="item-left">
-              <div class="item-icon green"><ion-icon :icon="personOutline"></ion-icon></div>
-              <div class="item-info">
-                <h4>{{ driverName }}</h4>
-                <p>{{ driverId }}</p>
-              </div>
-            </div>
-            <ion-icon :icon="chevronForwardOutline" class="item-arrow"></ion-icon>
-          </div>
-
-          <div class="settings-item" @click="goToDocuments">
-            <div class="item-left">
-              <div class="item-icon blue"><ion-icon :icon="documentTextOutline"></ion-icon></div>
-              <div class="item-info">
-                <h4>Documents</h4>
-                <p>View & update your documents</p>
-              </div>
-            </div>
-            <ion-icon :icon="chevronForwardOutline" class="item-arrow"></ion-icon>
-          </div>
-
-        </div>
-
         <!-- Job Settings Section -->
         <div class="settings-section">
           <h3 class="settings-group-title">Job Settings</h3>
@@ -153,10 +125,9 @@ import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonButtons, IonBackButton, IonButton, IonIcon, IonToggle,
-  alertController, actionSheetController, toastController
+  alertController, toastController
 } from '@ionic/vue';
 import {
-  personOutline, documentTextOutline,
   flashOutline, bicycleOutline, cubeOutline,
   locationOutline,
   shieldCheckmarkOutline, informationCircleOutline,
@@ -166,8 +137,6 @@ import {
 const router = useRouter();
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
-const driverName = ref('');
-const driverId = ref('');
 const autoAccept = ref(false);
 const bulkyEnabled = ref(false);
 
@@ -182,8 +151,6 @@ onMounted(async () => {
     });
     if (res.ok) {
       const data = await res.json();
-      driverName.value = data.name || 'Driver';
-      driverId.value = data.driver_id || '';
       autoAccept.value = data.auto_accept;
       bulkyEnabled.value = data.bulky_enabled;
     }
@@ -254,8 +221,6 @@ const handleLogout = async () => {
   await alert.present();
 };
 
-const editProfile = () => router.push('/profile');
-const goToDocuments = () => router.push('/documents');
 const goToServiceType = () => router.push('/service-type');
 const goToMyDestination = () => router.push('/my-destination');
 const goToAbout = () => router.push('/about');
