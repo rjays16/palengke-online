@@ -17,7 +17,7 @@
       </div>
       <div class="toolbar-right">
         <span class="result-count">{{ filteredSellers.length }} sellers</span>
-        <button class="add-btn" @click="openAdd">+ Add Seller</button>
+        <button class="add-btn" disabled title="Sellers register through the seller app">+ Add Seller</button>
       </div>
     </div>
 
@@ -580,6 +580,11 @@ function verHint(s) {
 }
 .add-btn:hover {
   background: #047857;
+}
+.add-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 .row-actions {
   display: flex;
