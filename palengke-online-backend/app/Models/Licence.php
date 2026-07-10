@@ -8,7 +8,7 @@ class Licence extends Model
 {
     protected $fillable = [
         'driver_registration_id', 'licence_id', 'trial_started_at',
-        'trial_ends_at', 'is_paid', 'paid_at', 'amount',
+        'trial_ends_at', 'is_paid', 'paid_at', 'amount', 'is_free',
     ];
 
     protected $casts = [
@@ -16,6 +16,7 @@ class Licence extends Model
         'trial_ends_at' => 'datetime',
         'paid_at' => 'datetime',
         'is_paid' => 'boolean',
+        'is_free' => 'boolean',
     ];
 
     public function driver()

@@ -200,7 +200,7 @@
       </div>
 
       <!-- Palengke Licence -->
-      <div class="section">
+      <div class="section" v-if="licenceStore.showLicenceFeature.value">
         <h3 class="section-title">Palengke Online Licence</h3>
         <div class="licence-card" :style="{ borderColor: licenceStatusColor }">
           <div class="licence-header">
@@ -211,25 +211,26 @@
             </div>
           </div>
           <div class="licence-details">
-            <div class="licence-detail-item">
+            <div class="licence-detail-item" v-if="!licenceStore.state.isFree">
               <span class="licence-detail-label">Days Active</span>
               <span class="licence-detail-value">{{ licenceStore.getDaysUsed() }} / 30</span>
             </div>
-            <div class="licence-detail-item">
+            <div class="licence-detail-item" v-if="!licenceStore.state.isFree">
               <span class="licence-detail-label">Amount</span>
               <span class="licence-detail-value">₱{{ licenceStore.state.amount.toLocaleString() }}</span>
             </div>
           </div>
-          <div class="licence-bar-track">
+          <div class="licence-bar-track" v-if="!licenceStore.state.isFree">
             <div class="licence-bar-fill" :style="{ width: licenceBarPercent + '%', background: licenceStatusColor }"></div>
           </div>
           <div class="licence-footer-text">
-            <span v-if="licenceStore.state.isPaid">Licence is active until further notice</span>
+            <span v-if="licenceStore.state.isFree">Licence is free — no payment needed</span>
+            <span v-else-if="licenceStore.state.isPaid">Licence is active until further notice</span>
             <span v-else-if="licenceStore.trialExpired.value">Trial ended — pay ₱{{ licenceStore.state.amount.toLocaleString() }} to continue delivering</span>
             <span v-else>{{ licenceStore.trialDaysRemaining.value }} days remaining in trial</span>
           </div>
           <ion-button
-            v-if="licenceStore.trialExpired.value && !licenceStore.state.isPaid"
+            v-if="!licenceStore.state.isFree && licenceStore.trialExpired.value && !licenceStore.state.isPaid"
             expand="block"
             color="success"
             class="licence-pay-btn"
@@ -348,7 +349,8 @@ const cityAvgRating = ref(4.70);
 
 const licenceStore = useLicenceStore();
 
-onMounted(() => {
+onMounted(async () => {
+  await licenceStore.checkLicenceEnabled();
   licenceStore.fetchLicence();
 });
 

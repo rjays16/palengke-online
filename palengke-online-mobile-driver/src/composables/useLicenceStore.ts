@@ -1,4 +1,4 @@
-import { reactive, computed } from 'vue'
+import { reactive, computed, ref } from 'vue'
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000'
 
@@ -13,6 +13,7 @@ export interface LicenceState {
   isPaid: boolean
   paidDate: string | null
   amount: number
+  isFree: boolean
 }
 
 const defaults = {
@@ -22,10 +23,11 @@ const defaults = {
   isPaid: false,
   paidDate: null,
   amount: 1000,
+  isFree: false,
 }
 
 const state = reactive<LicenceState>({ ...defaults })
-let loaded = false
+const licenceEnabled = ref(true)
 
 export function useLicenceStore() {
   const trialDaysRemaining = computed(() => {
@@ -41,13 +43,31 @@ export function useLicenceStore() {
   })
 
   const canDeliver = computed(() => {
+    if (!licenceEnabled.value) return true
+    if (state.isFree) return true
     if (state.isPaid) return true
     return !trialExpired.value
   })
 
   const isOnTrial = computed(() => {
+    if (!licenceEnabled.value) return false
+    if (state.isFree) return false
     return !state.isPaid && trialDaysRemaining.value > 0
   })
+
+  const showLicenceFeature = computed(() => {
+    return licenceEnabled.value
+  })
+
+  async function checkLicenceEnabled() {
+    try {
+      const res = await fetch(`${API_BASE}/api/settings`)
+      if (res.ok) {
+        const data = await res.json()
+        licenceEnabled.value = data.licence_enabled !== "false"
+      }
+    } catch {}
+  }
 
   async function fetchLicence() {
     const token = getToken()
@@ -65,7 +85,7 @@ export function useLicenceStore() {
         state.isPaid = l.isPaid
         state.paidDate = l.paidDate
         state.amount = l.amount
-        loaded = true
+        state.isFree = l.isFree || false
       }
     } catch {}
   }
@@ -92,7 +112,7 @@ export function useLicenceStore() {
 
   function resetLicence() {
     Object.assign(state, { ...defaults })
-    loaded = false
+    licenceEnabled.value = true
   }
 
   function getLicenceDisplay(): string {
@@ -107,12 +127,16 @@ export function useLicenceStore() {
   }
 
   function getStatusText(): string {
+    if (!licenceEnabled.value) return 'Not Required'
+    if (state.isFree) return 'Free'
     if (state.isPaid) return 'Paid'
     if (trialExpired.value) return `Expired — Pay ₱${state.amount.toLocaleString()} to continue`
     return `Trial — ${trialDaysRemaining.value} days left`
   }
 
   function getStatusColor(): string {
+    if (!licenceEnabled.value) return '#9ca3af'
+    if (state.isFree) return '#3b82f6'
     if (state.isPaid) return '#4CAF50'
     if (trialExpired.value) return '#f44336'
     return '#FF9800'
@@ -120,11 +144,13 @@ export function useLicenceStore() {
 
   return {
     state,
-    loaded,
+    licenceEnabled,
     trialDaysRemaining,
     trialExpired,
     canDeliver,
     isOnTrial,
+    showLicenceFeature,
+    checkLicenceEnabled,
     fetchLicence,
     payLicence,
     resetLicence,

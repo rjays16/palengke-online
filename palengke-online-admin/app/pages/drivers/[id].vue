@@ -75,6 +75,28 @@
         </div>
 
         <div class="info-card">
+          <h3>Palengke Online Licence</h3>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <span class="toggle-label">Free Licence</span>
+              <span class="toggle-hint">Mark this driver as free — no payment required</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" :checked="driverFree" @change="toggleDriverFree" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="licence-status-row" v-if="!driverFree">
+            <span class="status-label">Status</span>
+            <span class="status-value">
+              <span v-if="driverLic?.isPaid" style="color:#059669;">Paid</span>
+              <span v-else-if="driverLic?.isFree" style="color:#9ca3af;">Free</span>
+              <span v-else style="color:#d97706;">Trial</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="info-card">
           <h3>Documents</h3>
           <div class="doc-list">
             <div v-for="doc in docs" :key="doc.name" class="doc-row">
@@ -250,19 +272,63 @@
 definePageMeta({ layout: "default" });
 const route = useRoute();
 const driversStore = useDriversStore();
+const config = useRuntimeConfig();
+const apiBase = config.public.apiBaseUrl || "http://localhost:8000";
+
+function getToken() {
+  if (typeof localStorage === "undefined") return null;
+  return localStorage.getItem("palengke_auth_token");
+}
+
+const driverFree = ref(false);
+const driverLic = ref(null);
+
+async function fetchDriverLicence() {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${apiBase}/api/admin/drivers/${route.params.id}/licence`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      driverLic.value = data.licence;
+      driverFree.value = data.licence?.isFree || false;
+    }
+  } catch {}
+}
+
+async function toggleDriverFree() {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${apiBase}/api/admin/drivers/${route.params.id}/licence/toggle-free`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      driverFree.value = data.isFree;
+      if (driverLic.value) driverLic.value.isFree = data.isFree;
+    }
+  } catch {}
+}
 
 const driver = computed(() =>
   driversStore.getDriverById(route.params.id),
 );
 
 onMounted(async () => {
+  await Promise.all([
+    fetchDriverLicence(),
+    !driver.value
+      ? driversStore.drivers.length === 0
+        ? driversStore.fetchDrivers()
+        : Promise.resolve()
+      : Promise.resolve(),
+  ]);
   if (!driver.value) {
-    if (driversStore.drivers.length === 0) {
-      await driversStore.fetchDrivers();
-    }
-    if (!driver.value) {
-      await driversStore.fetchDriver(route.params.id);
-    }
+    await driversStore.fetchDriver(route.params.id);
   }
 });
 
@@ -656,6 +722,79 @@ const goBack = () => navigateTo("/drivers");
   padding: 40px 20px;
   color: #9ca3af;
   font-size: 13px;
+}
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.toggle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.toggle-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+.toggle-hint {
+  font-size: 11px;
+  color: #9ca3af;
+}
+.licence-status-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0 0;
+  margin-top: 12px;
+  border-top: 1px solid #f3f4f6;
+  font-size: 13px;
+}
+.status-label {
+  color: #9ca3af;
+  font-weight: 500;
+}
+.status-value {
+  font-weight: 600;
+  color: #111827;
+}
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: #e5e7eb;
+  border-radius: 24px;
+  transition: 0.2s;
+}
+.slider::before {
+  content: "";
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+.switch input:checked + .slider {
+  background: #059669;
+}
+.switch input:checked + .slider::before {
+  transform: translateX(20px);
 }
 .doc-image {
   max-width: 100%;

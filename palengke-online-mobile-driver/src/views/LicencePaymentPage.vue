@@ -46,8 +46,15 @@
           </div>
         </div>
 
+        <!-- Free Licence Message -->
+        <div class="free-card" v-if="licenceStore.state.isFree">
+          <ion-icon :icon="checkmarkCircleOutline" style="font-size: 40px; color: #3b82f6;"></ion-icon>
+          <h3 style="margin: 10px 0 4px; color: #111827;">Licence is Free</h3>
+          <p style="font-size: 13px; color: #6b7280; margin: 0;">This driver has been marked as free. No payment needed.</p>
+        </div>
+
         <!-- Payment Plan Card -->
-        <div class="plan-card" v-if="!licenceStore.state.isPaid">
+        <div class="plan-card" v-if="!licenceStore.state.isPaid && !licenceStore.state.isFree">
           <div class="plan-header">
             <h3>Licence Fee</h3>
             <span class="plan-badge">Required</span>
@@ -154,7 +161,8 @@ const licenceStore = useLicenceStore();
 const selectedPayment = ref(null);
 const isPaying = ref(false);
 
-onMounted(() => {
+onMounted(async () => {
+  await licenceStore.checkLicenceEnabled();
   licenceStore.fetchLicence();
 });
 
@@ -240,6 +248,13 @@ const handlePayment = async () => {
 .status-value { font-size: 14px; font-weight: 600; margin: 0; }
 
 /* Plan Card */
+.free-card {
+  background: #eff6ff;
+  border: 1.5px solid #93c5fd;
+  border-radius: 12px;
+  padding: 24px 20px;
+  text-align: center;
+}
 .plan-card {
   background: white; border-radius: 16px;
   padding: 20px; margin-bottom: 16px;

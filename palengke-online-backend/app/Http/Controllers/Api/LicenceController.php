@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Licence;
+use App\Models\DriverRegistration;
 use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 
@@ -50,6 +51,7 @@ class LicenceController extends Controller
                 'isPaid' => $licence->is_paid,
                 'paidDate' => $licence->paid_at?->toISOString(),
                 'amount' => (float) $licence->amount,
+                'isFree' => $licence->is_free,
             ],
         ]);
     }
@@ -66,6 +68,10 @@ class LicenceController extends Controller
 
         if (!$licence) {
             return response()->json(['message' => 'No licence found. Please try again.'], 404);
+        }
+
+        if ($licence->is_free) {
+            return response()->json(['message' => 'Licence is free — no payment needed.'], 400);
         }
 
         if ($licence->is_paid) {
@@ -85,7 +91,79 @@ class LicenceController extends Controller
                 'isPaid' => $licence->is_paid,
                 'paidDate' => $licence->paid_at?->toISOString(),
                 'amount' => (float) $licence->amount,
+                'isFree' => $licence->is_free,
             ],
+        ]);
+    }
+
+    private function resolveDriverId($id): int
+    {
+        if (is_numeric($id)) {
+            return (int) $id;
+        }
+        if (str_starts_with($id, 'DRIVER-')) {
+            return hexdec(substr($id, 7));
+        }
+        return (int) $id;
+    }
+
+    public function adminShow(Request $request, $id)
+    {
+        $driver = DriverRegistration::find($this->resolveDriverId($id));
+        if (!$driver) {
+            return response()->json(['message' => 'Driver not found.'], 404);
+        }
+
+        $licence = Licence::where('driver_registration_id', $driver->id)->first();
+
+        if (!$licence) {
+            return response()->json(['licence' => null]);
+        }
+
+        return response()->json([
+            'licence' => [
+                'id' => $licence->id,
+                'licenceId' => $licence->licence_id,
+                'trialStartDate' => $licence->trial_started_at?->toISOString(),
+                'trialEndDate' => $licence->trial_ends_at?->toISOString(),
+                'isPaid' => $licence->is_paid,
+                'paidDate' => $licence->paid_at?->toISOString(),
+                'amount' => (float) $licence->amount,
+                'isFree' => $licence->is_free,
+            ],
+        ]);
+    }
+
+    public function toggleFree(Request $request, $id)
+    {
+        $driver = DriverRegistration::find($this->resolveDriverId($id));
+        if (!$driver) {
+            return response()->json(['message' => 'Driver not found.'], 404);
+        }
+
+        $licence = Licence::where('driver_registration_id', $driver->id)->first();
+
+        if (!$licence) {
+            $fee = $this->getLicenceFee();
+            $now = now();
+            $licence = Licence::create([
+                'driver_registration_id' => $driver->id,
+                'licence_id' => 'PL-2026-' . strtoupper(dechex($driver->id)),
+                'trial_started_at' => $now,
+                'trial_ends_at' => $now->copy()->addDays(30),
+                'is_paid' => false,
+                'paid_at' => null,
+                'amount' => $fee,
+                'is_free' => true,
+            ]);
+        } else {
+            $licence->update([
+                'is_free' => !$licence->is_free,
+            ]);
+        }
+
+        return response()->json([
+            'isFree' => $licence->fresh()->is_free,
         ]);
     }
 }

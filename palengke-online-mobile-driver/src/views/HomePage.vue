@@ -50,7 +50,7 @@
         </div>
 
         <!-- Palengke Licence Banner -->
-        <div class="licence-banner" :class="licenceBannerClass" v-if="!licenceStore.state.isPaid">
+        <div class="licence-banner" :class="licenceBannerClass" v-if="licenceStore.showLicenceFeature.value && !licenceStore.state.isPaid && !licenceStore.state.isFree">
           <div class="licence-banner-left">
             <ion-icon :icon="licenceBannerIcon" class="licence-banner-icon"></ion-icon>
             <div>
@@ -288,7 +288,8 @@ import { useLicenceStore } from '@/composables/useLicenceStore';
 const router = useRouter();
 const licenceStore = useLicenceStore();
 
-onMounted(() => {
+onMounted(async () => {
+  await licenceStore.checkLicenceEnabled();
   licenceStore.fetchLicence();
 });
 

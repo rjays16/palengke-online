@@ -93,6 +93,12 @@ Route::post('/driver/device/verify-pin', [DriverDeviceController::class, 'verify
 Route::post('/driver/device/change-pin', [DriverDeviceController::class, 'changePin']);
 Route::post('/driver/device/status', [DriverDeviceController::class, 'status']);
 
+// Admin — driver licence
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/admin/drivers/{id}/licence', [LicenceController::class, 'adminShow']);
+    Route::post('/admin/drivers/{id}/licence/toggle-free', [LicenceController::class, 'toggleFree']);
+});
+
 // Driver settings & licence (authenticated)
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/driver/settings', [DriverRegistrationController::class, 'settings']);
