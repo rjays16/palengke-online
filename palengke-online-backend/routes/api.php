@@ -39,6 +39,7 @@ use App\Http\Controllers\Api\DriverRegistrationController;
 use App\Http\Controllers\Api\DriverAuthController;
 use App\Http\Controllers\Api\DriverDeviceController;
 use App\Http\Controllers\Api\DriverDocumentController;
+use App\Http\Controllers\Api\LicenceController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -92,10 +93,12 @@ Route::post('/driver/device/verify-pin', [DriverDeviceController::class, 'verify
 Route::post('/driver/device/change-pin', [DriverDeviceController::class, 'changePin']);
 Route::post('/driver/device/status', [DriverDeviceController::class, 'status']);
 
-// Driver settings (authenticated)
+// Driver settings & licence (authenticated)
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/driver/settings', [DriverRegistrationController::class, 'settings']);
     Route::put('/driver/settings', [DriverRegistrationController::class, 'updateSettings']);
+    Route::get('/driver/licence', [LicenceController::class, 'show']);
+    Route::post('/driver/licence/pay', [LicenceController::class, 'pay']);
 });
 
 // Seller app login

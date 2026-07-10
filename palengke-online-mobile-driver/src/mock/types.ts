@@ -119,12 +119,3 @@ export interface TipData {
   orderId: string
   deliveryFee: number
 }
-
-export interface LicenceData {
-  licenceId: string
-  trialStartDate: string
-  trialEndDate: string
-  isPaid: boolean
-  paidDate: string | null
-  amount: number
-}

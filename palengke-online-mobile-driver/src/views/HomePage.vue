@@ -265,7 +265,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
@@ -283,10 +283,14 @@ import {
 } from 'ionicons/icons';
 import { mockActiveDelivery, mockRecentDeliveries } from '@/mock/home';
 import { useLicenceStore } from '@/composables/useLicenceStore';
-import { mockLicencePrice } from '@/mock/licence';
+
 
 const router = useRouter();
 const licenceStore = useLicenceStore();
+
+onMounted(() => {
+  licenceStore.fetchLicence();
+});
 
 // Driver Data
 const licenceBannerClass = computed(() => {
@@ -306,8 +310,8 @@ const licenceBannerTitle = computed(() => {
 })
 
 const licenceBannerSub = computed(() => {
-  if (licenceStore.trialExpired.value) return `Pay ₱${mockLicencePrice.toLocaleString()} to continue delivering`
-  return `Pay ₱${mockLicencePrice.toLocaleString()} after trial to keep delivering`
+  if (licenceStore.trialExpired.value) return `Pay ₱${licenceStore.state.amount.toLocaleString()} to continue delivering`
+  return `Pay ₱${licenceStore.state.amount.toLocaleString()} after trial to keep delivering`
 })
 
 const goToLicencePayment = () => router.push('/licence-payment')
@@ -362,7 +366,7 @@ const toggleActiveStatus = async () => {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
             </div>
             <div class="custom-alert-title">Licence Expired</div>
-            <div class="custom-alert-text">Your 30-day trial has ended. Pay ₱${mockLicencePrice.toLocaleString()} to continue delivering.</div>
+            <div class="custom-alert-text">Your 30-day trial has ended. Pay ₱${licenceStore.state.amount.toLocaleString()} to continue delivering.</div>
           </div>`;
       }
     }

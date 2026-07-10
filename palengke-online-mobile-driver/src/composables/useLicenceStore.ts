@@ -1,6 +1,10 @@
 import { reactive, computed } from 'vue'
 
-const STORAGE_KEY = 'palengkeLicenceData'
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000'
+
+function getToken(): string | null {
+  return localStorage.getItem('token')
+}
 
 export interface LicenceState {
   licenceId: string
@@ -8,34 +12,20 @@ export interface LicenceState {
   trialEndDate: string | null
   isPaid: boolean
   paidDate: string | null
+  amount: number
 }
 
-function defaults(): LicenceState {
-  const now = new Date()
-  const trialEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
-
-  return {
-    licenceId: 'PL-2026-' + String(Math.floor(100000 + Math.random() * 900000)),
-    trialStartDate: now.toISOString(),
-    trialEndDate: trialEnd.toISOString(),
-    isPaid: false,
-    paidDate: null,
-  }
+const defaults = {
+  licenceId: '',
+  trialStartDate: null,
+  trialEndDate: null,
+  isPaid: false,
+  paidDate: null,
+  amount: 1000,
 }
 
-function load(): LicenceState {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return { ...defaults(), ...JSON.parse(raw) }
-  } catch { /* ignore */ }
-  return defaults()
-}
-
-function saveToStorage(state: LicenceState) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...state }))
-}
-
-const state = reactive<LicenceState>(load())
+const state = reactive<LicenceState>({ ...defaults })
+let loaded = false
 
 export function useLicenceStore() {
   const trialDaysRemaining = computed(() => {
@@ -59,16 +49,50 @@ export function useLicenceStore() {
     return !state.isPaid && trialDaysRemaining.value > 0
   })
 
-  function payLicence() {
-    state.isPaid = true
-    state.paidDate = new Date().toISOString()
-    saveToStorage(state)
+  async function fetchLicence() {
+    const token = getToken()
+    if (!token) return
+    try {
+      const res = await fetch(`${API_BASE}/api/driver/licence`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (res.ok) {
+        const data = await res.json()
+        const l = data.licence
+        state.licenceId = l.licenceId
+        state.trialStartDate = l.trialStartDate
+        state.trialEndDate = l.trialEndDate
+        state.isPaid = l.isPaid
+        state.paidDate = l.paidDate
+        state.amount = l.amount
+        loaded = true
+      }
+    } catch {}
+  }
+
+  async function payLicence() {
+    const token = getToken()
+    if (!token) return
+    try {
+      const res = await fetch(`${API_BASE}/api/driver/licence/pay`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+      if (res.ok) {
+        const data = await res.json()
+        const l = data.licence
+        state.isPaid = l.isPaid
+        state.paidDate = l.paidDate
+      }
+    } catch {}
   }
 
   function resetLicence() {
-    const d = defaults()
-    Object.assign(state, d)
-    saveToStorage(state)
+    Object.assign(state, { ...defaults })
+    loaded = false
   }
 
   function getLicenceDisplay(): string {
@@ -84,7 +108,7 @@ export function useLicenceStore() {
 
   function getStatusText(): string {
     if (state.isPaid) return 'Paid'
-    if (trialExpired.value) return 'Expired — Pay ₱1,000 to continue'
+    if (trialExpired.value) return `Expired — Pay ₱${state.amount.toLocaleString()} to continue`
     return `Trial — ${trialDaysRemaining.value} days left`
   }
 
@@ -96,10 +120,12 @@ export function useLicenceStore() {
 
   return {
     state,
+    loaded,
     trialDaysRemaining,
     trialExpired,
     canDeliver,
     isOnTrial,
+    fetchLicence,
     payLicence,
     resetLicence,
     getLicenceDisplay,

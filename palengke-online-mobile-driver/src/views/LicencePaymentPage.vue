@@ -5,7 +5,7 @@
         <ion-buttons slot="start">
           <ion-back-button default-href="/home"></ion-back-button>
         </ion-buttons>
-        <ion-title>Palengke Licence</ion-title>
+        <ion-title>Palengke Online Licence</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -17,7 +17,7 @@
           <div class="header-icon">
             <ion-icon :icon="cardOutline"></ion-icon>
           </div>
-          <h1 class="header-title">Palengke Licence</h1>
+          <h1 class="header-title">Palengke Online Licence</h1>
           <p class="header-sub">Pay to continue delivering with Palengke Online</p>
         </div>
 
@@ -54,7 +54,7 @@
           </div>
           <div class="plan-price">
             <span class="plan-currency">₱</span>
-            <span class="plan-amount">{{ mockLicencePrice.toLocaleString() }}</span>
+            <span class="plan-amount">{{ licenceStore.state.amount.toLocaleString() }}</span>
           </div>
           <p class="plan-desc">One-time payment to continue delivering after 30-day trial period.</p>
           <ul class="plan-features">
@@ -83,7 +83,7 @@
             <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
           </div>
           <h3>Licence is Active</h3>
-          <p>Your Palengke Licence is paid and active. You can continue delivering without interruption.</p>
+          <p>Your Palengke Online Licence is paid and active. You can continue delivering without interruption.</p>
         </div>
 
         <!-- Payment Methods -->
@@ -115,7 +115,7 @@
             :disabled="!selectedPayment || isPaying"
             @click="handlePayment"
           >
-            <span v-if="!isPaying">Pay ₱{{ mockLicencePrice.toLocaleString() }}</span>
+            <span v-if="!isPaying">Pay ₱{{ licenceStore.state.amount.toLocaleString() }}</span>
             <ion-spinner v-else name="crescent"></ion-spinner>
           </ion-button>
 
@@ -131,7 +131,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
@@ -141,19 +141,22 @@ import {
 import {
   cardOutline, timeOutline, calendarOutline,
   checkmarkCircleOutline, lockClosedOutline,
-  walletOutline, chevronForwardOutline,
+  walletOutline,
   checkmarkCircleOutline as checkIcon,
   timeOutline as timeIcon,
   closeCircleOutline as closeIcon,
 } from 'ionicons/icons';
 import { useLicenceStore } from '@/composables/useLicenceStore';
-import { mockLicencePrice } from '@/mock/licence';
 
 const router = useRouter();
 const licenceStore = useLicenceStore();
 
 const selectedPayment = ref(null);
 const isPaying = ref(false);
+
+onMounted(() => {
+  licenceStore.fetchLicence();
+});
 
 const licenceStatusIcon = computed(() => {
   if (licenceStore.state.isPaid) return checkIcon
@@ -197,7 +200,7 @@ const handlePayment = async () => {
       <div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:8px 0;">
         <img src="/assets/images/checkmark_success.png" style="width:80px;height:80px;margin:0 auto 16px auto;display:block;" />
         <div style="font-size:18px;font-weight:600;color:#1a1a1a;margin-bottom:8px;">Payment Successful!</div>
-        <div style="font-size:14px;color:#666;">Your Palengke Licence is now active. You can continue delivering.</div>
+        <div style="font-size:14px;color:#666;">Your Palengke Online Licence is now active. You can continue delivering.</div>
         <div style="margin-top:12px;padding:10px 16px;background:#E8F5E9;border-radius:10px;font-size:14px;font-weight:600;color:#4CAF50;font-family:monospace;">${licenceStore.getLicenceDisplay()}</div>
       </div>`;
   }

@@ -8,4 +8,3 @@ export { mockWeekDays, mockWeekList, mockMiniChartData, mockAllJobs } from './hi
 export { mockTopics, mockFaqs } from './help'
 export { mockDocuments } from './documents'
 export { mockTipData, mockTotalTipsToday, mockConfettiColors } from './tips'
-export { mockLicenceData, mockTrialDaysTotal, mockLicencePrice } from './licence'

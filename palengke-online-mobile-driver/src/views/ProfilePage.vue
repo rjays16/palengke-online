@@ -201,7 +201,7 @@
 
       <!-- Palengke Licence -->
       <div class="section">
-        <h3 class="section-title">Palengke Licence</h3>
+        <h3 class="section-title">Palengke Online Licence</h3>
         <div class="licence-card" :style="{ borderColor: licenceStatusColor }">
           <div class="licence-header">
             <ion-icon :icon="licenceStatusIcon" class="licence-icon" :style="{ color: licenceStatusColor }"></ion-icon>
@@ -217,7 +217,7 @@
             </div>
             <div class="licence-detail-item">
               <span class="licence-detail-label">Amount</span>
-              <span class="licence-detail-value">₱{{ mockLicencePrice.toLocaleString() }}</span>
+              <span class="licence-detail-value">₱{{ licenceStore.state.amount.toLocaleString() }}</span>
             </div>
           </div>
           <div class="licence-bar-track">
@@ -225,7 +225,7 @@
           </div>
           <div class="licence-footer-text">
             <span v-if="licenceStore.state.isPaid">Licence is active until further notice</span>
-            <span v-else-if="licenceStore.trialExpired.value">Trial ended — pay ₱1,000 to continue delivering</span>
+            <span v-else-if="licenceStore.trialExpired.value">Trial ended — pay ₱{{ licenceStore.state.amount.toLocaleString() }} to continue delivering</span>
             <span v-else>{{ licenceStore.trialDaysRemaining.value }} days remaining in trial</span>
           </div>
           <ion-button
@@ -235,7 +235,7 @@
             class="licence-pay-btn"
             @click="goToLicencePayment"
           >
-            Pay ₱1,000 to Continue
+            Pay ₱{{ licenceStore.state.amount.toLocaleString() }} to Continue
           </ion-button>
         </div>
       </div>
@@ -313,7 +313,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
@@ -334,7 +334,6 @@ import {
   mockProfileData, mockRatingCounts, mockBadges,
   mockImprovements, mockDocumentsPreview
 } from '@/mock/profile';
-import { mockLicencePrice } from '@/mock/licence';
 import { useLicenceStore } from '@/composables/useLicenceStore';
 import {
   checkmarkCircleOutline as checkmarkIcon,
@@ -348,6 +347,10 @@ const activeTab = ref('achievements');
 const cityAvgRating = ref(4.70);
 
 const licenceStore = useLicenceStore();
+
+onMounted(() => {
+  licenceStore.fetchLicence();
+});
 
 const licenceStatusIcon = computed(() => {
   if (licenceStore.state.isPaid) return checkmarkIcon
