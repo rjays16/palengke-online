@@ -14,7 +14,7 @@ export const useSellersStore = defineStore("sellers", () => {
       id: raw.id,
       name: raw.storeName || "",
       owner: [raw.firstName, raw.lastName].filter(Boolean).join(" ") || "—",
-      category: raw.category || "",
+
       location: [raw.barangay, raw.city].filter(Boolean).join(", ") || raw.completeAddress || "",
       products: raw.productCount || 0,
       revenue: 0,
@@ -110,11 +110,11 @@ export const useSellersStore = defineStore("sellers", () => {
     seller.subscription.status = "cancelled";
   }
 
-  function addSeller(_data: { name: string; owner: string; category: string; location: string; phone: string; email: string }) {
+  function addSeller(_data: { name: string; owner: string; location: string; phone: string; email: string }) {
     // Backend endpoint not yet implemented
   }
 
-  function updateSeller(_id: number | string, _data: { name: string; owner: string; category: string; location: string; phone: string; email: string }) {
+  function updateSeller(_id: number | string, _data: { name: string; owner: string; location: string; phone: string; email: string }) {
     // Backend endpoint not yet implemented
   }
 

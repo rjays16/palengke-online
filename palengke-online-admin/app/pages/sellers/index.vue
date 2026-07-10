@@ -33,7 +33,6 @@
           <tr>
             <th>Store</th>
             <th>Owner</th>
-            <th>Category</th>
             <th>Products</th>
             <th>Revenue</th>
             <th>Rating</th>
@@ -56,7 +55,6 @@
               </div>
             </td>
             <td>{{ s.owner }}</td>
-            <td>{{ s.category }}</td>
             <td>{{ s.products }}</td>
             <td>₱{{ s.revenue.toLocaleString() }}</td>
             <td><span class="stars">★</span> {{ s.rating }}</td>
@@ -157,17 +155,6 @@
           </div>
           <div class="form-row">
             <div class="form-group flex-1">
-              <label>Category <span class="req">*</span></label>
-              <select v-model="form.category" class="form-input">
-                <option value="">Select category...</option>
-                <option value="Vegetables">Vegetables</option>
-                <option value="Fruits">Fruits</option>
-                <option value="Seafood">Seafood</option>
-                <option value="Meat & Poultry">Meat & Poultry</option>
-                <option value="Bundles">Bundles</option>
-              </select>
-            </div>
-            <div class="form-group flex-1">
               <label>Location <span class="req">*</span></label>
               <input
                 v-model="form.location"
@@ -264,8 +251,7 @@ const filteredSellers = computed(() => {
   return sellersStore.sellers.filter(
     (s) =>
       s.name.toLowerCase().includes(q) ||
-      s.owner.toLowerCase().includes(q) ||
-      s.category.toLowerCase().includes(q),
+      s.owner.toLowerCase().includes(q),
   );
 });
 
@@ -286,7 +272,6 @@ const editing = ref(null);
 const form = ref({
   name: "",
   owner: "",
-  category: "",
   location: "",
   phone: "",
   email: "",
@@ -296,7 +281,6 @@ function resetForm() {
   form.value = {
     name: "",
     owner: "",
-    category: "",
     location: "",
     phone: "",
     email: "",
@@ -314,7 +298,6 @@ function openEdit(s) {
   form.value = {
     name: s.name,
     owner: s.owner,
-    category: s.category,
     location: s.location,
     phone: s.contact?.phone || "",
     email: s.contact?.email || "",
@@ -332,7 +315,6 @@ const formValid = computed(() => {
   return (
     form.value.name &&
     form.value.owner &&
-    form.value.category &&
     form.value.location
   );
 });
