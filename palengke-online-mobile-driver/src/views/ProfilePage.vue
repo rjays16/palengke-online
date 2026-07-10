@@ -338,10 +338,6 @@ import {
   starOutline, flashOutline, thumbsUpOutline, heartOutline,
   timeOutline, closeCircleOutline, warningOutline
 } from 'ionicons/icons';
-import {
-  mockProfileData, mockRatingCounts, mockBadges,
-  mockImprovements, mockDocumentsPreview
-} from '@/mock/profile';
 import { useLicenceStore } from '@/composables/useLicenceStore';
 import {
   checkmarkCircleOutline as checkmarkIcon,
@@ -362,7 +358,19 @@ function getToken() {
   return localStorage.getItem('token');
 }
 
-const profileData = ref({ ...mockProfileData });
+const profileData = ref({
+  name: '',
+  phone: '',
+  email: '',
+  vehicleType: '',
+  plateNumber: '',
+  vehicleModel: '',
+  vehicleColor: '',
+  avatar: '',
+  totalTrips: 0,
+  rating: 0,
+  joinedDays: 0,
+});
 
 async function fetchProfile() {
   const token = getToken();
@@ -402,16 +410,13 @@ const licenceBarPercent = computed(() => {
 })
 
 // Rating distribution
-const ratingCounts = mockRatingCounts;
+const ratingCounts = {};
 const getRatingCount = (star) => ratingCounts[star] || 0;
-const getRatingWidth = (star) => {
-  const total = Object.values(ratingCounts).reduce((a, b) => a + b, 0);
-  return total > 0 ? (ratingCounts[star] / total) * 100 : 0;
-};
+const getRatingWidth = () => 0;
 
-const badges = ref(mockBadges);
-const improvements = ref(mockImprovements);
-const documentsPreview = ref(mockDocumentsPreview);
+const badges = ref([]);
+const improvements = ref([]);
+const documentsPreview = ref([]);
 
 // Methods
 const editProfile = async () => {
