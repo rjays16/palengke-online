@@ -1008,6 +1008,9 @@ onMounted(() => {
   registrationsStore.fetchPending();
   registrationsStore.fetchHistory();
   notificationsStore.fetchNotifications();
+  setInterval(() => {
+    notificationsStore.fetchNotifications();
+  }, 10000);
 });
 
 function handleNotifClick(n) {
