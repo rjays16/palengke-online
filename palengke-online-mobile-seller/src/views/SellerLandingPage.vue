@@ -113,11 +113,12 @@
           <h2 class="section-title">Quick Actions</h2>
 
           <div class="actions-grid">
-            <div class="action-card" @click="addProduct">
+            <div class="action-card" :class="{ disabled: expired }" @click="addProduct">
               <div class="action-icon add">
                 <ion-icon :icon="addCircleOutline"></ion-icon>
               </div>
               <div class="action-text">Add Product</div>
+              <div v-if="expired" class="action-expired-tag">Expired</div>
             </div>
 
             <div class="action-card" @click="openChat">
@@ -177,7 +178,7 @@
           <div class="empty-state" v-if="recentOrders.length === 0">
             <ion-icon :icon="cartOutline" class="empty-icon"></ion-icon>
             <p>No orders yet</p>
-            <ion-button size="small" @click="addProduct">Add Products</ion-button>
+            <ion-button size="small" @click="addProduct" :disabled="expired">Add Products</ion-button>
           </div>
         </div>
 
@@ -659,7 +660,18 @@ const showSuccessLogout = async () => {
   }, 1500);
 };
 
-const addProduct = () => {
+const addProduct = async () => {
+  if (expired.value) {
+    const toast = await toastController.create({
+      message: 'Your plan has expired. Subscribe to a plan to add products.',
+      duration: 3000,
+      color: 'warning',
+      position: 'top',
+    });
+    await toast.present();
+    router.push('/plans');
+    return;
+  }
   router.push('/products/add');
 };
 
@@ -1178,6 +1190,22 @@ ion-header ion-toolbar ion-buttons ion-button {
 
 .action-card:active .action-icon {
   transform: scale(0.95);
+}
+
+.action-card.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.action-expired-tag {
+  font-size: 10px;
+  font-weight: 700;
+  color: #c62828;
+  background: #ffebee;
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-top: 4px;
+  display: inline-block;
 }
 
 .action-icon.add {

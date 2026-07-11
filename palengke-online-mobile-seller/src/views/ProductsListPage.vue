@@ -4,7 +4,7 @@
       <ion-toolbar color="success">
         <ion-title>My Products</ion-title>
         <ion-buttons slot="end">
-          <ion-button @click="goToAddProduct">
+          <ion-button @click="goToAddProduct" :disabled="expired">
             <ion-icon :icon="addOutline"></ion-icon>
           </ion-button>
         </ion-buttons>
@@ -134,9 +134,9 @@
             <p v-if="searchQuery">Try adjusting your search</p>
             <p v-else-if="selectedFilter !== 'all'">No products in this filter</p>
             <p v-else>Start adding products to your store</p>
-            <ion-button @click="goToAddProduct" v-if="!searchQuery && selectedFilter === 'all'">
+            <ion-button @click="goToAddProduct" v-if="!searchQuery && selectedFilter === 'all'" :disabled="expired">
               <ion-icon slot="start" :icon="addOutline"></ion-icon>
-              Add Your First Product
+              {{ expired ? 'Plan Expired' : 'Add Your First Product' }}
             </ion-button>
           </div>
         </div>
@@ -200,9 +200,12 @@ import BottomNav from '@/components/BottomNav.vue';
 import { api } from '@/utils/apiClient';
 import { type Product } from '@/types';
 import { useSuccessModal } from '@/composables/useSuccessModal';
+import { getSubscription, isExpired } from '@/services/subscriptionService';
 
 const router = useRouter();
 const { showSuccessModal } = useSuccessModal();
+
+const expired = computed(() => isExpired(getSubscription()));
 
 const userEmail = localStorage.getItem('userEmail');
 const loading = ref(false);
@@ -269,7 +272,18 @@ const inactiveProducts = computed(() => products.value.filter((p) => p.status ==
 const lowStockProducts = computed(() => products.value.filter((p) => p.stock < 10).length);
 
 // Methods
-const goToAddProduct = () => {
+const goToAddProduct = async () => {
+  if (expired.value) {
+    const toast = await toastController.create({
+      message: 'Your plan has expired. Subscribe to a plan to add products.',
+      duration: 3000,
+      color: 'warning',
+      position: 'top',
+    });
+    await toast.present();
+    router.push('/plans');
+    return;
+  }
   router.push('/products/add');
 };
 
