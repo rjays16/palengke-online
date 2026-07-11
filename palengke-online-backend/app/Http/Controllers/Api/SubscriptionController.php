@@ -166,6 +166,7 @@ class SubscriptionController extends Controller
             if ($seller->plan_ends_at && now()->greaterThan($seller->plan_ends_at)) {
                 $seller->subscription_status = 'expired';
                 $seller->save();
+                $this->createExpiryNotification($seller, 'plan', $seller->plan_ends_at);
                 return 'expired';
             }
             return 'active';
@@ -175,11 +176,39 @@ class SubscriptionController extends Controller
             if ($seller->trial_ends_at && now()->greaterThan($seller->trial_ends_at)) {
                 $seller->subscription_status = 'expired';
                 $seller->save();
+                $this->createExpiryNotification($seller, 'trial', $seller->trial_ends_at);
                 return 'expired';
             }
             return 'trial';
         }
 
         return $seller->subscription_status ?? 'expired';
+    }
+
+    private function createExpiryNotification($seller, string $type, $expiredAt): void
+    {
+        $alreadyNotified = Notification::where('seller_registration_id', $seller->id)
+            ->where('type', 'expiry')
+            ->where('data->expired_type', $type)
+            ->where('data->expired_at', $expiredAt->toDateString())
+            ->exists();
+
+        if ($alreadyNotified) {
+            return;
+        }
+
+        $label = $type === 'plan' ? 'Subscription' : 'Trial';
+        Notification::create([
+            'seller_registration_id' => $seller->id,
+            'type' => 'expiry',
+            'title' => $label . ' Expired',
+            'message' => "Your {$label} expired on {$expiredAt->toDateString()}. Subscribe to a plan to continue selling.",
+            'link' => '/plans',
+            'data' => [
+                'expired_type' => $type,
+                'expired_at' => $expiredAt->toDateString(),
+            ],
+            'is_read' => false,
+        ]);
     }
 }
