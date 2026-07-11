@@ -13,6 +13,9 @@ class AdminWalletController extends Controller
 {
     public function topUp(Request $request, $id)
     {
+        if ($request->user()?->role !== 'superadmin') {
+            return response()->json(['message' => 'Super admin access required.'], 403);
+        }
         $validated = $request->validate([
             'amount' => 'required|numeric|min:1',
         ]);

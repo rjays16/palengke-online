@@ -18,8 +18,18 @@ class AdminSubscriptionController extends Controller
         '8m' => ['name' => '8 Months', 'months' => 8, 'price' => 4000],
     ];
 
+    private function requireSuperAdmin(Request $request)
+    {
+        if ($request->user()?->role !== 'superadmin') {
+            return response()->json(['message' => 'Super admin access required.'], 403);
+        }
+        return null;
+    }
+
     public function changePlan(Request $request, $id)
     {
+        $denied = $this->requireSuperAdmin($request);
+        if ($denied) return $denied;
         $validated = $request->validate([
             'plan_id' => 'required|string|in:1m,2m,4m,8m',
         ]);
@@ -79,6 +89,8 @@ class AdminSubscriptionController extends Controller
 
     public function extend(Request $request, $id)
     {
+        $denied = $this->requireSuperAdmin($request);
+        if ($denied) return $denied;
         $validated = $request->validate([
             'days' => 'required|integer|min:1|max:365',
         ]);
@@ -128,6 +140,8 @@ class AdminSubscriptionController extends Controller
 
     public function cancel(Request $request, $id)
     {
+        $denied = $this->requireSuperAdmin($request);
+        if ($denied) return $denied;
         $sellerId = $this->resolveSellerId($id);
         $seller = SellerRegistration::findOrFail($sellerId);
 
@@ -148,6 +162,19 @@ class AdminSubscriptionController extends Controller
             'data' => [
                 'seller_id' => $seller->id,
                 'action' => 'cancel',
+            ],
+            'is_read' => false,
+        ]);
+
+        Notification::create([
+            'seller_registration_id' => $seller->id,
+            'type' => 'expiry',
+            'title' => 'Subscription Cancelled',
+            'message' => 'Your subscription has been cancelled by an administrator. Subscribe to a plan to continue selling.',
+            'link' => '/plans',
+            'data' => [
+                'expired_type' => 'plan',
+                'cancelled_by' => 'admin',
             ],
             'is_read' => false,
         ]);

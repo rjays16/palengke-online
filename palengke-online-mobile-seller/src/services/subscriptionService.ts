@@ -58,7 +58,7 @@ export interface Subscription {
   planId: string | null;
   planStart: string | null;
   planEnd: string | null;
-  status: 'trial' | 'active' | 'expired';
+  status: 'trial' | 'active' | 'expired' | 'cancelled';
 }
 
 function defaultSub(): Subscription {
@@ -107,6 +107,7 @@ export async function refreshSubscription(): Promise<Subscription> {
 }
 
 export function daysLeft(sub: Subscription): number {
+  if (sub.status === 'cancelled') return 0;
   const end = sub.status === 'trial' ? new Date(sub.trialEnd) : new Date(sub.planEnd!);
   const now = new Date();
   const diff = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
@@ -114,7 +115,7 @@ export function daysLeft(sub: Subscription): number {
 }
 
 export function isExpired(sub: Subscription): boolean {
-  return daysLeft(sub) === 0;
+  return sub.status === 'cancelled' || sub.status === 'expired' || daysLeft(sub) === 0;
 }
 
 export async function subscribePlan(planId: string, paymentMethodId?: number | null): Promise<Subscription> {

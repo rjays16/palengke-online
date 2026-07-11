@@ -115,7 +115,7 @@
             <span class="wallet-amount">₱{{ seller.walletBalance.toLocaleString() }}</span>
             <span class="wallet-label">Current Balance</span>
           </div>
-          <div class="info-card-actions">
+          <div v-if="auth.isSuperAdmin" class="info-card-actions">
             <button class="ghost-btn" @click="openTopUpModal">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
                 <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -158,7 +158,7 @@
             </div>
           </div>
 
-          <div v-if="subAction === null" class="info-card-actions">
+          <div v-if="subAction === null && auth.isSuperAdmin" class="info-card-actions">
             <button class="ghost-btn" @click="subAction = 'change'">
               <svg
                 viewBox="0 0 24 24"
@@ -500,6 +500,7 @@
 definePageMeta({ layout: "default" });
 const route = useRoute();
 const sellersStore = useSellersStore();
+const auth = useAuthStore();
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBaseUrl || "http://localhost:8000";
 

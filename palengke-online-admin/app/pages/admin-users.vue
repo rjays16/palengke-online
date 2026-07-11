@@ -158,6 +158,7 @@
             :disabled="!formValid || isSaving"
             @click="saveUser"
           >
+            <span v-if="isSaving" class="btn-spinner"></span>
             {{ isSaving ? "Saving..." : (editing ? "Update" : "Add") }} Admin
           </button>
         </div>
@@ -202,6 +203,7 @@
         </div>
       </div>
     </div>
+    <div class="save-toast" v-if="successMsg">{{ successMsg }}</div>
   </div>
 </template>
 
@@ -296,10 +298,12 @@ const formValid = computed(() => {
 });
 
 const isSaving = ref(false);
+const successMsg = ref('');
 
 async function saveUser() {
   if (!formValid.value) return;
   isSaving.value = true;
+  successMsg.value = '';
 
   let success = false;
   if (editing.value) {
@@ -311,6 +315,7 @@ async function saveUser() {
     };
     if (form.value.password) data.password = form.value.password;
     success = await store.updateAdmin(editing.value.id, data);
+    if (success) successMsg.value = 'Admin updated successfully';
   } else {
     success = await store.addAdmin({
       name: form.value.name,
@@ -318,10 +323,12 @@ async function saveUser() {
       password: form.value.password,
       role: form.value.role,
     });
+    if (success) successMsg.value = 'Admin added successfully';
   }
 
   isSaving.value = false;
   if (success) {
+    await new Promise((r) => setTimeout(r, 600));
     closeForm();
   }
 }
@@ -667,6 +674,17 @@ select.form-input {
   opacity: 0.4;
   cursor: not-allowed;
 }
+.btn-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin-right: 6px;
+  vertical-align: middle;
+}
 .modal-btn.secondary {
   background: #f3f4f6;
   color: #6b7280;
@@ -701,6 +719,39 @@ select.form-input {
 }
 .error-state {
   color: #dc2626;
+}
+.save-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 12px 20px;
+  background: #f0fdf4;
+  color: #059669;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 2000;
+  animation: slideInToast 0.3s ease;
+}
+.save-toast::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 10px;
+  border: solid #059669;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-right: 8px;
+  margin-bottom: 2px;
+  flex-shrink: 0;
+}
+@keyframes slideInToast {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 @media (max-width: 768px) {
   .data-table {
