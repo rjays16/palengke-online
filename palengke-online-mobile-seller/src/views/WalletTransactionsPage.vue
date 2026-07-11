@@ -73,7 +73,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonButtons, IonIcon } from '@ionic/vue';
 import { arrowBackOutline, walletOutline, addCircleOutline, removeCircleOutline, receiptOutline } from 'ionicons/icons';
-import { API_BASE } from '@/config/api';
+import { api } from '@/utils/apiClient';
 import { type Transaction } from '@/types';
 
 const router = useRouter();
@@ -124,14 +124,9 @@ async function fetchTransactions() {
   if (!email) return;
   loading.value = true;
   try {
-    const res = await fetch(`${API_BASE}/seller/wallet/transactions?email=${encodeURIComponent(email)}`, {
-      headers: { Accept: 'application/json' },
-    });
-    if (res.ok) {
-      const data = await res.json();
-      transactions.value = data.transactions || [];
-      balance.value = data.balance || 0;
-    }
+    const data = await api.get(`/seller/wallet/transactions?email=${encodeURIComponent(email)}`);
+    transactions.value = data.transactions || [];
+    balance.value = data.balance || 0;
   } catch {
     transactions.value = [];
   } finally {

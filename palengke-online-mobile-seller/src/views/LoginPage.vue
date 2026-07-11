@@ -51,36 +51,19 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon, IonSpinner, alertController } from '@ionic/vue';
 import { mailOutline } from 'ionicons/icons';
-import { API_BASE } from '@/config/api';
+import { api, ApiError } from '@/utils/apiClient';
 import { useAuthStore } from '@/stores/auth';
 import { useRegistrationStore } from '@/stores/registration';
+import { useModals } from '@/composables/useModals';
 
 const router = useRouter();
 const auth = useAuthStore();
 const reg = useRegistrationStore();
+const { showLoadingModal } = useModals();
 
 // Form data
 const email = ref('');
 const isLoading = ref(false);
-
-// Loading Modal Function
-const showLoadingModal = async (message = 'Loading...', autoDismiss = true) => {
-  const alert = await alertController.create({
-    cssClass: 'loading-modal-simple',
-    message: message,
-    buttons: [],
-  });
-
-  await alert.present();
-
-  if (autoDismiss) {
-    setTimeout(() => {
-      alert.dismiss();
-    }, 1500);
-  }
-
-  return alert;
-};
 
 // Check if user's country / region / area is available
 const checkAvailability = async () => {
@@ -92,8 +75,7 @@ const checkAvailability = async () => {
   if (!userCountry) return { available: true };
 
   try {
-    const response = await fetch(`${API_BASE}/countries`);
-    const data = await response.json();
+    const data = await api.get('/countries');
 
     if (!data.countries || data.countries.length === 0) {
       return { available: false, reason: 'country' };
@@ -104,8 +86,7 @@ const checkAvailability = async () => {
       return { available: false, reason: 'country' };
     }
 
-    const locResponse = await fetch(`${API_BASE}/locations`);
-    const locData = await locResponse.json();
+    const locData = await api.get('/locations');
 
     if (locData.locations && locData.locations.length > 0) {
       let foundRegion = null;
@@ -150,66 +131,30 @@ const handleLogin = async () => {
   isLoading.value = true;
 
   try {
-    const response = await fetch(`${API_BASE}/seller/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.value }),
-    });
+    let data;
+    try {
+      data = await api.post('/seller/login', { email: email.value }, { skipAuth: true });
+    } catch (apiError) {
+      if (apiError instanceof ApiError) {
+        isLoading.value = false;
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      isLoading.value = false;
-
-      if (response.status === 404) {
-        const alert = await alertController.create({
-          cssClass: 'alert-login',
-          header: ' ',
-          message: '',
-          buttons: [
-            {
-              text: 'Cancel',
-              role: 'cancel',
-              cssClass: 'alert-button-cancel',
-            },
-            {
-              text: 'Sign Up',
-              cssClass: 'alert-button-primary',
-              handler: () => {
-                router.push('/welcome');
-              },
-            },
-          ],
-        });
-        await alert.present();
-        const alertEl = document.querySelector('.alert-login');
-        if (alertEl) {
-          const msgEl = alertEl.querySelector('.alert-message');
-          if (msgEl) {
-            msgEl.innerHTML = `
-              <div class="custom-alert-body">
-                <div class="custom-alert-icon icon-warning">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                </div>
-                <div class="custom-alert-title">Account Not Found</div>
-                <div class="custom-alert-text">No account found with <strong>${email.value}</strong>. Would you like to sign up instead?</div>
-              </div>`;
-          }
-        }
-        return;
-      }
-
-      if (response.status === 403) {
-        if (data.status === 'rejected') {
+        if (apiError.status === 404) {
           const alert = await alertController.create({
             cssClass: 'alert-login',
             header: ' ',
             message: '',
             buttons: [
               {
-                text: 'Register Again',
+                text: 'Cancel',
+                role: 'cancel',
+                cssClass: 'alert-button-cancel',
+              },
+              {
+                text: 'Sign Up',
                 cssClass: 'alert-button-primary',
-                handler: () => router.push('/welcome'),
+                handler: () => {
+                  router.push('/welcome');
+                },
               },
             ],
           });
@@ -220,22 +165,56 @@ const handleLogin = async () => {
             if (msgEl) {
               msgEl.innerHTML = `
                 <div class="custom-alert-body">
-                  <div class="custom-alert-icon icon-error">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+                  <div class="custom-alert-icon icon-warning">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                   </div>
-                  <div class="custom-alert-title">Registration Not Approved</div>
-                  <div class="custom-alert-text">Your previous registration was not approved. Please register again with updated information.</div>
+                  <div class="custom-alert-title">Account Not Found</div>
+                  <div class="custom-alert-text">No account found with <strong>${email.value}</strong>. Would you like to sign up instead?</div>
                 </div>`;
             }
           }
-        } else {
-          localStorage.setItem('userEmail', email.value);
-          router.push('/account-pending');
+          return;
         }
-        return;
-      }
 
-      throw new Error(data.message || 'Login failed.');
+        if (apiError.status === 403) {
+          if (apiError.data?.status === 'rejected') {
+            const alert = await alertController.create({
+              cssClass: 'alert-login',
+              header: ' ',
+              message: '',
+              buttons: [
+                {
+                  text: 'Register Again',
+                  cssClass: 'alert-button-primary',
+                  handler: () => router.push('/welcome'),
+                },
+              ],
+            });
+            await alert.present();
+            const alertEl = document.querySelector('.alert-login');
+            if (alertEl) {
+              const msgEl = alertEl.querySelector('.alert-message');
+              if (msgEl) {
+                msgEl.innerHTML = `
+                  <div class="custom-alert-body">
+                    <div class="custom-alert-icon icon-error">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+                    </div>
+                    <div class="custom-alert-title">Registration Not Approved</div>
+                    <div class="custom-alert-text">Your previous registration was not approved. Please register again with updated information.</div>
+                  </div>`;
+              }
+            }
+          } else {
+            localStorage.setItem('userEmail', email.value);
+            router.push('/account-pending');
+          }
+          return;
+        }
+
+        throw new Error(apiError.data?.message || 'Login failed.');
+      }
+      throw apiError;
     }
 
     auth.setHasPin(data.hasPin);
@@ -269,14 +248,10 @@ const handleLogin = async () => {
           text: 'Send Code',
           cssClass: 'alert-button-confirm',
           handler: async () => {
-            const loading = await showLoadingModal('Sending verification code...', false);
+            const loading = await showLoadingModal('Sending verification code...');
 
             try {
-              await fetch(`${API_BASE}/send-otp`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email.value }),
-              });
+              await api.post('/send-otp', { email: email.value }, { skipAuth: true });
             } catch (e) {
               // Silent — OTP may already have been sent
             }
@@ -333,12 +308,7 @@ onMounted(async () => {
   const devId = auth.deviceId;
   if (email && devId) {
     try {
-      const res = await fetch(`${API_BASE}/seller/device/status`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, device_id: devId }),
-      });
-      const data = await res.json();
+      const data = await api.post('/seller/device/status', { email, device_id: devId }, { skipAuth: true });
       if (data.hasPin) {
         auth.setHasPin(true);
         router.replace('/pin-login');
@@ -546,55 +516,6 @@ onMounted(async () => {
   .title {
     font-size: 24px;
   }
-}
-
-/* Loading Modal Styling */
-:deep(.loading-modal-simple .alert-wrapper) {
-  border-radius: 20px;
-  text-align: center;
-  max-width: 280px;
-  padding: 50px 30px;
-  background: var(--color-modal-bg);
-}
-
-:deep(.loading-modal-simple .alert-head) {
-  display: none;
-}
-
-:deep(.loading-modal-simple .alert-message) {
-  padding: 0;
-  position: relative;
-  padding-top: 70px;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--color-modal-text);
-}
-
-:deep(.loading-modal-simple .alert-message::before) {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  margin-left: -25px;
-  width: 50px;
-  height: 50px;
-  border: 5px solid var(--color-bg-tertiary);
-  border-top: 5px solid var(--color-primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-:deep(.loading-modal-simple .alert-button-group) {
-  display: none;
 }
 
 /* Dark Mode: OTP Confirm Alert */

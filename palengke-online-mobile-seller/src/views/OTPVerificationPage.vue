@@ -27,21 +27,7 @@
         </div>
 
         <!-- OTP Input Boxes -->
-        <div class="otp-inputs">
-          <input
-            v-for="(digit, index) in otpDigits"
-            :key="index"
-            :ref="(el) => (otpRefs[index] = el)"
-            v-model="otpDigits[index]"
-            type="tel"
-            maxlength="1"
-            class="otp-box"
-            :class="{ filled: otpDigits[index] }"
-            @input="handleInput(index, $event)"
-            @keydown="handleKeydown(index, $event)"
-            @paste="handlePaste"
-          />
-        </div>
+        <OtpInput ref="otpInputRef" v-model="otpCode" :length="6" type="otp" @complete="onComplete" />
 
         <!-- Resend Code -->
         <div class="resend-section">
@@ -80,12 +66,15 @@ import {
   toastController,
 } from '@ionic/vue';
 import { mailOpenOutline, shieldCheckmarkOutline } from 'ionicons/icons';
-import { API_BASE } from '@/config/api';
+import { api, ApiError } from '@/utils/apiClient';
 import { useAuthStore } from '@/stores/auth';
+import { useSuccessModal } from '@/composables/useSuccessModal';
+import OtpInput from '@/components/OtpInput.vue';
 
 const router = useRouter();
 const route = useRoute();
 const auth = useAuthStore();
+const { showSuccessModal } = useSuccessModal();
 
 // Get email from route params or store
 const userEmail = ref(route.params.email || auth.userEmail || '');
@@ -113,69 +102,19 @@ const maskedEmail = computed(() => {
 });
 
 // OTP State
-const otpDigits = ref(['', '', '', '', '', '']);
-const otpRefs = ref([]);
+const otpInputRef = ref();
+const otpCode = ref('');
 const isVerifying = ref(false);
 const countdown = ref(60);
 let countdownInterval = null;
 let isMounted = true;
 
 // Computed
-const isCodeComplete = computed(() => {
-  return otpDigits.value.every((digit) => digit !== '');
-});
-
-const otpCode = computed(() => {
-  return otpDigits.value.join('');
-});
+const isCodeComplete = computed(() => otpInputRef.value?.isComplete ?? false);
 
 // Methods
-const handleInput = (index, event) => {
-  const value = event.target.value;
-
-  // Only allow numbers
-  if (!/^\d*$/.test(value)) {
-    otpDigits.value[index] = '';
-    return;
-  }
-
-  // Move to next input if digit entered
-  if (value && index < 5) {
-    otpRefs.value[index + 1]?.focus();
-  }
-};
-
-const handleKeydown = (index, event) => {
-  // Handle backspace
-  if (event.key === 'Backspace' && !otpDigits.value[index] && index > 0) {
-    otpRefs.value[index - 1]?.focus();
-  }
-
-  // Handle arrow keys
-  if (event.key === 'ArrowLeft' && index > 0) {
-    otpRefs.value[index - 1]?.focus();
-  }
-  if (event.key === 'ArrowRight' && index < 5) {
-    otpRefs.value[index + 1]?.focus();
-  }
-};
-
-const handlePaste = (event) => {
-  event.preventDefault();
-  const pastedData = event.clipboardData.getData('text').slice(0, 6);
-
-  if (!/^\d+$/.test(pastedData)) return;
-
-  const digits = pastedData.split('');
-  digits.forEach((digit, index) => {
-    if (index < 6) {
-      otpDigits.value[index] = digit;
-    }
-  });
-
-  // Focus last filled or first empty box
-  const nextEmpty = digits.length < 6 ? digits.length : 5;
-  otpRefs.value[nextEmpty]?.focus();
+const onComplete = (value) => {
+  otpCode.value = value;
 };
 
 const startCountdown = (autoResend = false) => {
@@ -194,16 +133,7 @@ const resendCode = async () => {
   if (!isMounted) return;
   isVerifying.value = true;
   try {
-    const res = await fetch(`${API_BASE}/send-otp`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: userEmail.value }),
-    });
-
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.message || 'Failed to resend code');
-    }
+    await api.post('/send-otp', { email: userEmail.value }, { skipAuth: true });
 
     const toast = await toastController.create({
       message: 'Verification code sent!',
@@ -213,13 +143,13 @@ const resendCode = async () => {
     });
     await toast.present();
 
-    otpDigits.value = ['', '', '', '', '', ''];
-    otpRefs.value[0]?.focus();
+    otpInputRef.value?.reset();
 
     startCountdown(true);
   } catch (e) {
+    const message = e instanceof ApiError ? (e.data?.message || e.message) : e.message;
     const toast = await toastController.create({
-      message: e.message || 'Failed to resend code',
+      message: message || 'Failed to resend code',
       duration: 2000,
       color: 'danger',
       position: 'top',
@@ -236,17 +166,7 @@ const verifyCode = async () => {
   isVerifying.value = true;
 
   try {
-    const response = await fetch(`${API_BASE}/verify-otp`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: userEmail.value, otp: otpCode.value }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Invalid code.');
-    }
+    const data = await api.post('/verify-otp', { email: userEmail.value, otp: otpCode.value }, { skipAuth: true });
 
     if (countdownInterval) clearInterval(countdownInterval);
 
@@ -254,7 +174,7 @@ const verifyCode = async () => {
 
     auth.initFromStorage();
 
-    await showSuccessModal('Verification successful!');
+    await showSuccessModal({ message: 'Verification successful!', awaitDismiss: true });
 
     // Check if this is a forgot-pin flow
     const mode = route.query.mode;
@@ -270,68 +190,26 @@ const verifyCode = async () => {
       router.push('/create-pin');
     }
   } catch (error) {
+    const message = error instanceof ApiError ? (error.data?.message || error.message) : error.message;
     const alert = await alertController.create({
       header: 'Verification Failed',
-      message: error.message || 'Invalid code. Please try again.',
+      message: message || 'Invalid code. Please try again.',
       buttons: ['OK'],
     });
     await alert.present();
 
-    otpDigits.value = ['', '', '', '', '', ''];
-    otpRefs.value[0]?.focus();
+    otpInputRef.value?.reset();
   } finally {
     isVerifying.value = false;
   }
 };
 
-const showSuccessModal = async (message) => {
-  const alert = await alertController.create({
-    cssClass: 'success-modal',
-    header: ' ',
-    message: message,
-    buttons: ['OK'],
-  });
-
-  await alert.present();
-
-  // Add the image after modal is presented
-  setTimeout(() => {
-    const alertElement = document.querySelector('.success-modal .alert-message');
-    if (alertElement) {
-      // Clear the text content
-      const textContent = alertElement.textContent;
-      alertElement.innerHTML = '';
-
-      // Create and add the image
-      const img = document.createElement('img');
-      img.src = '/assets/images/checkmark_success.png';
-      img.style.width = '80px';
-      img.style.height = '80px';
-      img.style.margin = '0 auto 16px auto';
-      img.style.display = 'block';
-
-      // Create and add the text
-      const textDiv = document.createElement('div');
-      textDiv.textContent = textContent;
-      textDiv.style.fontSize = '18px';
-      textDiv.style.fontWeight = '600';
-      textDiv.style.color = '#1a1a1a';
-
-      // Append both
-      alertElement.appendChild(img);
-      alertElement.appendChild(textDiv);
-    }
-  }, 50);
-
-  // Wait for modal to close
-  await alert.onDidDismiss();
-};
 
 // Lifecycle
 onMounted(() => {
   // Focus first input
   setTimeout(() => {
-    otpRefs.value[0]?.focus();
+    otpInputRef.value?.focus();
   }, 300);
 
   // Start countdown
@@ -413,39 +291,6 @@ onUnmounted(() => {
   margin: 0;
 }
 
-/* OTP Input Boxes */
-.otp-inputs {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 32px;
-}
-
-.otp-box {
-  width: 48px;
-  height: 56px;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
-  font-size: 24px;
-  font-weight: 700;
-  text-align: center;
-  color: #1a1a1a;
-  background: white;
-  transition: all 0.2s;
-  font-family: inherit;
-}
-
-.otp-box:focus {
-  outline: none;
-  border-color: #4caf50;
-  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
-}
-
-.otp-box.filled {
-  border-color: #4caf50;
-  background: #e8f5e9;
-}
-
 /* Resend Section */
 .resend-section {
   text-align: center;
@@ -496,38 +341,6 @@ onUnmounted(() => {
   --color: #999;
 }
 
-/* Success Modal */
-:deep(.success-modal .alert-wrapper) {
-  border-radius: 20px;
-  text-align: center;
-  max-width: 320px;
-  padding: 30px 20px;
-}
-
-:deep(.success-modal .alert-head) {
-  padding: 0;
-  min-height: 0;
-}
-
-:deep(.success-modal .alert-message) {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1a1a1a;
-  padding: 20px 10px;
-}
-
-:deep(.success-modal .alert-button-group) {
-  padding: 10px 0 0 0;
-}
-
-:deep(.success-modal button) {
-  background: #4caf50;
-  color: white;
-  font-weight: 600;
-  border-radius: 12px;
-  height: 44px;
-}
-
 /* Responsive */
 @media (max-width: 480px) {
   .otp-container {
@@ -545,24 +358,6 @@ onUnmounted(() => {
 
   .otp-title {
     font-size: 20px;
-  }
-
-  .otp-box {
-    width: 42px;
-    height: 50px;
-    font-size: 20px;
-  }
-}
-
-@media (max-width: 360px) {
-  .otp-inputs {
-    gap: 6px;
-  }
-
-  .otp-box {
-    width: 38px;
-    height: 46px;
-    font-size: 18px;
   }
 }
 </style>

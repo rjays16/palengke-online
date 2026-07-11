@@ -106,7 +106,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonButtons, IonIcon } from '@ionic/vue';
 import { arrowBackOutline, walletOutline, checkmarkCircle, chevronForwardOutline } from 'ionicons/icons';
-import { API_BASE } from '@/config/api';
+import { api } from '@/utils/apiClient';
 import { type PaymentMethod } from '@/types';
 
 const router = useRouter();
@@ -147,13 +147,8 @@ async function fetchBalance() {
   const email = getEmail();
   if (!email) return;
   try {
-    const res = await fetch(`${API_BASE}/seller/wallet/balance?email=${encodeURIComponent(email)}`, {
-      headers: { Accept: 'application/json' },
-    });
-    if (res.ok) {
-      const data = await res.json();
-      balance.value = data.balance || 0;
-    }
+    const data = await api.get(`/seller/wallet/balance?email=${encodeURIComponent(email)}`);
+    balance.value = data.balance || 0;
   } catch {
     /* silent */
   }
@@ -161,15 +156,10 @@ async function fetchBalance() {
 
 async function fetchPaymentMethods() {
   try {
-    const res = await fetch(`${API_BASE}/payment-methods`, {
-      headers: { Accept: 'application/json' },
-    });
-    if (res.ok) {
-      const json = await res.json();
-      const methods = Array.isArray(json) ? json : json.methods || [];
-      const exclude = ['cash on delivery', 'cod', 'palengke wallet'];
-      paymentMethods.value = methods.filter((m: any) => !exclude.includes(m.name.toLowerCase()));
-    }
+    const json = await api.get('/payment-methods');
+    const methods = Array.isArray(json) ? json : json.methods || [];
+    const exclude = ['cash on delivery', 'cod', 'palengke wallet'];
+    paymentMethods.value = methods.filter((m: any) => !exclude.includes(m.name.toLowerCase()));
   } catch {
     paymentMethods.value = [
       { id: 1, name: 'GCash', color: '#059669' },
@@ -187,21 +177,11 @@ async function processTopUp() {
   error.value = null;
 
   try {
-    const res = await fetch(`${API_BASE}/seller/wallet/top-up`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({
-        email,
-        amount: amount.value,
-        payment_method_id: selectedPM.value,
-      }),
+    const json = await api.post('/seller/wallet/top-up', {
+      email,
+      amount: amount.value,
+      payment_method_id: selectedPM.value,
     });
-    const json = await res.json();
-    if (!res.ok) {
-      error.value = json.message || 'Top up failed.';
-      processing.value = false;
-      return;
-    }
     topUpAmount.value = json.amount_added;
     topUpMethod.value = json.payment_method;
     newBalance.value = json.balance;

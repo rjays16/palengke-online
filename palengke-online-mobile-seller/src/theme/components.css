@@ -1,0 +1,196 @@
+/* ========================================
+   Shared Component Styles
+   ======================================== */
+
+/* Success Modal */
+:deep(.success-modal .alert-wrapper) {
+  border-radius: 20px;
+  text-align: center;
+  max-width: 320px;
+  padding: 30px 20px;
+}
+
+:deep(.success-modal .alert-head) {
+  padding: 0;
+  min-height: 0;
+}
+
+:deep(.success-modal .alert-message) {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  padding: 20px 10px;
+}
+
+:deep(.success-modal .alert-button-group) {
+  padding: 10px 0 0 0;
+}
+
+:deep(.success-modal button) {
+  background: #4caf50;
+  color: white;
+  font-weight: 600;
+  border-radius: 12px;
+  height: 44px;
+}
+
+/* Loading Modal Simple */
+:deep(.loading-modal-simple .alert-wrapper) {
+  border-radius: 20px;
+  text-align: center;
+  max-width: 280px;
+  padding: 50px 30px;
+  background: var(--color-modal-bg, white);
+}
+
+:deep(.loading-modal-simple .alert-head) {
+  display: none;
+}
+
+:deep(.loading-modal-simple .alert-message) {
+  padding: 0;
+  position: relative;
+  padding-top: 70px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-modal-text, #1a1a1a);
+}
+
+:deep(.loading-modal-simple .alert-message::before) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: -25px;
+  width: 50px;
+  height: 50px;
+  border: 5px solid var(--color-bg-tertiary, #f3f3f3);
+  border-top: 5px solid var(--color-primary, #1877f2);
+  border-radius: 50%;
+  animation: loading-spin 1s linear infinite;
+}
+
+@keyframes loading-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+:deep(.loading-modal-simple .alert-button-group) {
+  display: none;
+}
+
+/* OTP/PIN Input Boxes */
+.otp-inputs,
+.pin-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.otp-box,
+.pin-box {
+  width: 48px;
+  height: 56px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  color: #1a1a1a;
+  background: white;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.otp-box:focus,
+.pin-box:focus {
+  outline: none;
+  border-color: #4caf50;
+  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
+}
+
+.otp-box.filled,
+.pin-box.filled {
+  border-color: #4caf50;
+  background: #e8f5e9;
+}
+
+.otp-box.error,
+.pin-box.error {
+  border-color: #f44336;
+  box-shadow: 0 0 0 4px rgba(244, 67, 54, 0.1);
+}
+
+/* Verify Button (OTP/PIN pages) */
+.verify-button {
+  --background: #4caf50;
+  --background-hover: #45a049;
+  --border-radius: 12px;
+  height: 56px;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: none;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.verify-button[disabled] {
+  --background: #e0e0e0;
+  --color: #999;
+}
+
+/* Account Status Card (AccountPendingPage, AreaNotAvailablePage) */
+.status-card {
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  border-radius: 24px;
+  padding: 40px 32px;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.status-card .title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 12px;
+}
+
+.status-card .desc {
+  font-size: 15px;
+  color: #6b7280;
+  line-height: 1.6;
+  margin: 0 0 24px;
+}
+
+.status-card .icon-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+
+.status-card .info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.status-card .action-btn {
+  --border-radius: 12px;
+  height: 50px;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: none;
+}

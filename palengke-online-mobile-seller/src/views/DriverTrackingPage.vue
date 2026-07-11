@@ -175,6 +175,8 @@ import {
   chevronDownOutline,
 } from 'ionicons/icons';
 import { type DriverInfo, type OrderTrackingInfo, type TrackingMetrics, type DeliveryStep } from '@/types';
+import { useSuccessModal } from '@/composables/useSuccessModal';
+import { useModals } from '@/composables/useModals';
 
 // Import Leaflet
 import L from 'leaflet';
@@ -182,6 +184,8 @@ import 'leaflet/dist/leaflet.css';
 
 const router = useRouter();
 const route = useRoute();
+const { showSuccessModal } = useSuccessModal();
+const { showLoadingModal } = useModals();
 
 let map: any = null;
 let driverMarker: any = null;
@@ -370,63 +374,6 @@ const refreshLocation = async () => {
   await showLoadingModal('Updating location...');
   drawRoute();
   fitMapToMarkers();
-};
-
-// Modals
-const showLoadingModal = async (message = 'Loading...') => {
-  const alert = await alertController.create({
-    cssClass: 'loading-modal-simple',
-    message: message,
-    buttons: [],
-  });
-
-  await alert.present();
-  setTimeout(() => alert.dismiss(), 1500);
-};
-
-const showSuccessModal = async (message: string) => {
-  const alert = await alertController.create({
-    cssClass: 'success-modal',
-    header: ' ',
-    message: message,
-    buttons: ['OK'],
-  });
-
-  await alert.present();
-
-  setTimeout(() => {
-    const alertElement = document.querySelector('.success-modal .alert-message');
-    if (alertElement) {
-      const textContent = alertElement.textContent;
-      alertElement.innerHTML = '';
-
-      const wrapper = document.createElement('div');
-      wrapper.style.display = 'flex';
-      wrapper.style.flexDirection = 'column';
-      wrapper.style.alignItems = 'center';
-      wrapper.style.textAlign = 'center';
-
-      const img = document.createElement('img');
-      img.src = '/assets/images/checkmark_success.png';
-      img.style.width = '80px';
-      img.style.height = '80px';
-      img.style.margin = '0 auto 16px auto';
-      img.style.display = 'block';
-
-      const textDiv = document.createElement('div');
-      textDiv.textContent = textContent;
-      textDiv.style.fontSize = '18px';
-      textDiv.style.fontWeight = '600';
-      textDiv.style.color = '#1a1a1a';
-      textDiv.style.textAlign = 'center';
-
-      wrapper.appendChild(img);
-      wrapper.appendChild(textDiv);
-      alertElement.appendChild(wrapper);
-    }
-  }, 50);
-
-  setTimeout(() => alert.dismiss(), 2000);
 };
 
 // Actions
@@ -878,83 +825,6 @@ onUnmounted(() => {
 /* Action Section */
 .action-section {
   margin-top: 16px;
-}
-
-/* Loading Modal */
-:deep(.loading-modal-simple .alert-wrapper) {
-  border-radius: 20px;
-  text-align: center;
-  max-width: 280px;
-  padding: 50px 30px;
-  background: white;
-}
-
-:deep(.loading-modal-simple .alert-head) {
-  display: none;
-}
-
-:deep(.loading-modal-simple .alert-message) {
-  padding: 0;
-  position: relative;
-  padding-top: 70px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #1a1a1a;
-}
-
-:deep(.loading-modal-simple .alert-message::before) {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  margin-left: -25px;
-  width: 50px;
-  height: 50px;
-  border: 5px solid #f3f3f3;
-  border-top: 5px solid #4caf50;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-:deep(.loading-modal-simple .alert-button-group) {
-  display: none;
-}
-
-/* Success Modal */
-:deep(.success-modal .alert-wrapper) {
-  border-radius: 20px;
-  text-align: center;
-  max-width: 320px;
-  padding: 30px 20px;
-}
-
-:deep(.success-modal .alert-head) {
-  padding: 0;
-  min-height: 0;
-}
-
-:deep(.success-modal .alert-message) {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1a1a1a;
-  padding: 20px 10px;
-}
-
-:deep(.success-modal button) {
-  background: #4caf50;
-  color: white;
-  font-weight: 600;
-  border-radius: 12px;
-  height: 44px;
 }
 
 /* Responsive */

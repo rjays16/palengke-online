@@ -1,4 +1,4 @@
-import { API_BASE } from '@/config/api';
+import { api, ApiError } from '@/utils/apiClient';
 const SUB_KEY = 'palengke_subscription';
 
 export interface Plan {
@@ -89,22 +89,17 @@ export async function refreshSubscription(): Promise<Subscription> {
   const email = localStorage.getItem('userEmail');
   if (!email) return getSubscription();
   try {
-    const res = await fetch(`${API_BASE}/seller/subscription?email=${encodeURIComponent(email)}`, {
-      headers: { Accept: 'application/json' },
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const sub: Subscription = {
-        trialStart: data.trial_start,
-        trialEnd: data.trial_end,
-        planId: data.plan_id,
-        planStart: data.plan_start,
-        planEnd: data.plan_end,
-        status: data.status,
-      };
-      localStorage.setItem(SUB_KEY, JSON.stringify(sub));
-      return sub;
-    }
+    const data = await api.get(`/seller/subscription?email=${encodeURIComponent(email)}`);
+    const sub: Subscription = {
+      trialStart: data.trial_start,
+      trialEnd: data.trial_end,
+      planId: data.plan_id,
+      planStart: data.plan_start,
+      planEnd: data.plan_end,
+      status: data.status,
+    };
+    localStorage.setItem(SUB_KEY, JSON.stringify(sub));
+    return sub;
   } catch {
     // silent — use cached
   }
@@ -127,22 +122,21 @@ export async function subscribePlan(planId: string, paymentMethodId?: number | n
   if (!email) throw new Error('User not logged in');
   const body: Record<string, any> = { email, plan_id: planId };
   if (paymentMethodId) body.payment_method_id = paymentMethodId;
-  const res = await fetch(`${API_BASE}/seller/subscription/subscribe`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const data = await res.json();
-    if (data.error === 'insufficient_balance') {
-      const err = new Error(data.message || 'Insufficient balance');
+  try {
+    await api.post('/seller/subscription/subscribe', body);
+  } catch (error) {
+    if (error instanceof ApiError && error.data?.error === 'insufficient_balance') {
+      const err = new Error((error.data.message as string) || 'Insufficient balance');
       (err as any).code = 'insufficient_balance';
-      (err as any).balance = data.balance;
-      (err as any).required = data.required;
-      (err as any).shortfall = data.shortfall;
+      (err as any).balance = error.data.balance;
+      (err as any).required = error.data.required;
+      (err as any).shortfall = error.data.shortfall;
       throw err;
     }
-    throw new Error(data.message || 'Subscription failed');
+    if (error instanceof ApiError) {
+      throw new Error((error.data.message as string) || 'Subscription failed');
+    }
+    throw error;
   }
   return refreshSubscription();
 }

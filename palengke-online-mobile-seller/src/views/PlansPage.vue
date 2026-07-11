@@ -185,9 +185,34 @@
                 <span class="success-price">₱{{ selectedPlan?.price.toLocaleString() }}</span>
               </div>
               <div class="success-row">
+                <span>Payment Method</span>
+                <span class="success-pm">
+                  <img v-if="pmLogo(selectedPM?.name)" :src="pmLogo(selectedPM?.name)" class="success-pm-img" />
+                  {{ selectedPM?.name }}
+                </span>
+              </div>
+              <div class="success-row">
+                <span>Transaction ID</span>
+                <span class="success-txn">{{ transactionId }}</span>
+              </div>
+              <div class="success-row">
+                <span>Date</span>
+                <span>{{ paymentDate }}</span>
+              </div>
+              <div class="success-row">
                 <span>Valid Until</span>
                 <span>{{ sub.planEnd || sub.trialEnd }}</span>
               </div>
+            </div>
+            <div class="receipt-actions">
+              <button class="receipt-btn download" @click="handleDownloadReceipt">
+                <ion-icon :icon="downloadOutline"></ion-icon>
+                Download Receipt
+              </button>
+              <button class="receipt-btn share" @click="handleShareReceipt">
+                <ion-icon :icon="shareSocialOutline"></ion-icon>
+                Share Receipt
+              </button>
             </div>
             <button class="done-btn" @click="goHome">Done</button>
           </div>
@@ -251,9 +276,13 @@ import {
   lockClosedOutline,
   logOutOutline,
   checkmarkCircle,
+  downloadOutline,
+  shareSocialOutline,
 } from 'ionicons/icons';
 import { PLANS, getSubscription, daysLeft, refreshSubscription, subscribePlan } from '@/services/subscriptionService';
-import { API_BASE } from '@/config/api';
+import { api } from '@/utils/apiClient';
+import { downloadReceipt, shareReceipt, type ReceiptData } from '@/utils/receiptGenerator';
+import { actionSheetController } from '@ionic/vue';
 import { type PaymentMethod } from '@/types';
 
 const router = useRouter();
@@ -277,13 +306,8 @@ async function fetchWalletBalance() {
   const email = localStorage.getItem('userEmail');
   if (!email) return;
   try {
-    const res = await fetch(`${API_BASE}/seller/wallet/balance?email=${encodeURIComponent(email)}`, {
-      headers: { Accept: 'application/json' },
-    });
-    if (res.ok) {
-      const data = await res.json();
-      walletBalance.value = data.balance || 0;
-    }
+    const data = await api.get(`/seller/wallet/balance?email=${encodeURIComponent(email)}`);
+    walletBalance.value = data.balance || 0;
   } catch {
     /* silent */
   }
@@ -298,15 +322,10 @@ refreshSubscription().then((s) => {
 
 onMounted(async () => {
   try {
-    const res = await fetch(`${API_BASE}/payment-methods`, {
-      headers: { Accept: 'application/json' },
-    });
-    if (res.ok) {
-      const all: any[] = await res.json();
-      paymentMethods.value = all.filter((p: any) => p.name !== 'Cash on Delivery');
-      const first = paymentMethods.value.find((p) => !p.coming_soon);
-      if (first) selectedPayment.value = first.id;
-    }
+    const all: any[] = await api.get('/payment-methods');
+    paymentMethods.value = all.filter((p: any) => p.name !== 'Cash on Delivery');
+    const first = paymentMethods.value.find((p) => !p.coming_soon);
+    if (first) selectedPayment.value = first.id;
   } catch {
     /* silent */
   }
@@ -365,6 +384,8 @@ const processPayment = async () => {
     sub.value = await refreshSubscription();
     remaining.value = daysLeft(sub.value);
     walletBalance.value = sub.value.planId ? 0 : walletBalance.value;
+    transactionId.value = 'TXN' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
+    paymentDate.value = new Date().toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     paymentStep.value = 'success';
   } catch (err: any) {
     if (err && err.code === 'insufficient_balance') {
@@ -391,6 +412,121 @@ const goHome = () => {
   router.push('/home');
 };
 
+// Receipt
+const transactionId = ref('');
+const paymentDate = ref('');
+
+const receiptData = computed<ReceiptData | null>(() => {
+  if (paymentStep.value !== 'success' || !selectedPlan.value || !selectedPM.value) return null;
+  return {
+    transactionId: transactionId.value,
+    planName: selectedPlan.value.name,
+    amount: selectedPlan.value.price,
+    paymentMethod: selectedPM.value.name,
+    date: paymentDate.value,
+    validUntil: sub.value.planEnd || sub.value.trialEnd || '',
+    sellerEmail: localStorage.getItem('userEmail') || '',
+  };
+});
+
+const handleDownloadReceipt = async () => {
+  if (!receiptData.value) return;
+  try {
+    await downloadReceipt(receiptData.value);
+    const toast = await toastController.create({
+      message: 'Receipt downloaded!',
+      duration: 2000,
+      color: 'success',
+      position: 'top',
+    });
+    await toast.present();
+  } catch {
+    const toast = await toastController.create({
+      message: 'Failed to download receipt.',
+      duration: 2000,
+      color: 'danger',
+      position: 'top',
+    });
+    await toast.present();
+  }
+};
+
+const handleShareReceipt = async () => {
+  if (!receiptData.value) return;
+  const shared = await shareReceipt(receiptData.value);
+  if (shared) return;
+
+  // Fallback: action sheet with direct share links
+  const text = `Palengke Online Payment Receipt\n\nPlan: ${receiptData.value.planName}\nAmount: ₱${receiptData.value.amount.toLocaleString()}\nPayment: ${receiptData.value.paymentMethod}\nDate: ${receiptData.value.date}\nValid Until: ${receiptData.value.validUntil}\nTransaction ID: ${receiptData.value.transactionId}`;
+
+  const actionSheet = await actionSheetController.create({
+    header: 'Share Receipt',
+    buttons: [
+      {
+        text: 'Share via WhatsApp',
+        handler: () => {
+          window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+        },
+      },
+      {
+        text: 'Share via Messenger',
+        handler: () => {
+          window.open(
+            `https://www.facebook.com/dialog/send?link=${encodeURIComponent(window.location.href)}&app_id=&redirect_uri=${encodeURIComponent(window.location.href)}`,
+            '_blank',
+          );
+        },
+      },
+      {
+        text: 'Share via Viber',
+        handler: () => {
+          window.open(`viber://forward?text=${encodeURIComponent(text)}`, '_blank');
+        },
+      },
+      {
+        text: 'Share via Facebook',
+        handler: () => {
+          window.open(
+            `https://www.facebook.com/sharer/sharer.php?quote=${encodeURIComponent(text)}`,
+            '_blank',
+          );
+        },
+      },
+      {
+        text: 'Copy Receipt Text',
+        handler: async () => {
+          try {
+            await navigator.clipboard.writeText(text);
+            const toast = await toastController.create({
+              message: 'Receipt text copied!',
+              duration: 2000,
+              color: 'success',
+              position: 'top',
+            });
+            await toast.present();
+          } catch {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            const toast = await toastController.create({
+              message: 'Receipt text copied!',
+              duration: 2000,
+              color: 'success',
+              position: 'top',
+            });
+            await toast.present();
+          }
+        },
+      },
+      { text: 'Cancel', role: 'cancel' },
+    ],
+  });
+  await actionSheet.present();
+};
+
 const handleLogout = async () => {
   const alert = await alertController.create({
     header: 'Logout',
@@ -403,11 +539,7 @@ const handleLogout = async () => {
         handler: async () => {
           const email = localStorage.getItem('userEmail');
           try {
-            await fetch(`${API_BASE}/seller/devices/logout-current`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email }),
-            });
+            await api.post('/seller/devices/logout-current', { email });
           } catch {
             /* silent */
           }
@@ -924,6 +1056,18 @@ ion-toolbar ion-button {
   font-weight: 700;
   color: #059669;
 }
+.success-pm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.success-pm-img {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  object-fit: contain;
+}
 .done-btn {
   width: 100%;
   padding: 16px;
@@ -934,6 +1078,54 @@ ion-toolbar ion-button {
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
+}
+
+/* Receipt Actions */
+.receipt-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.receipt-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+.receipt-btn:active {
+  transform: scale(0.97);
+}
+.receipt-btn.download {
+  background: #f0fdf4;
+  color: #059669;
+  border: 2px solid #d1fae5;
+}
+.receipt-btn.download:hover {
+  background: #dcfce7;
+}
+.receipt-btn.share {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 2px solid #dbeafe;
+}
+.receipt-btn.share:hover {
+  background: #dbeafe;
+}
+.receipt-btn ion-icon {
+  font-size: 18px;
+}
+.success-txn {
+  font-family: 'Courier New', monospace;
+  font-size: 12px !important;
+  letter-spacing: 0.5px;
 }
 
 /* Insufficient Balance State */
@@ -1138,6 +1330,16 @@ ion-toolbar ion-button {
   }
   .shortfall-row {
     background: rgba(220, 38, 38, 0.1);
+  }
+  .receipt-btn.download {
+    background: rgba(76, 175, 80, 0.1);
+    border-color: rgba(76, 175, 80, 0.3);
+    color: #4caf50;
+  }
+  .receipt-btn.share {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #60a5fa;
   }
 }
 </style>

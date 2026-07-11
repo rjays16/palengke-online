@@ -276,7 +276,7 @@ import {
   volumeHighOutline,
   cubeOutline,
 } from 'ionicons/icons';
-import { API_BASE } from '@/config/api';
+import { api } from '@/utils/apiClient';
 import { type Conversation } from '@/types';
 import { useChatWebSocket } from '@/composables/useChatWebSocket';
 
@@ -345,17 +345,10 @@ function isMuted(conversation: any) {
 async function toggleMute(conversation: any) {
   if (!conversation) return;
   try {
-    const res = await fetch(`${API_BASE}/seller/conversations/${conversation.id}/toggle-mute`, {
-      method: 'POST',
-      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: userEmail }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      conversation.muted = data.muted;
-      const found = conversations.value.find((c) => c.id === conversation.id);
-      if (found) found.muted = data.muted;
-    }
+    const data = await api.post(`/seller/conversations/${conversation.id}/toggle-mute`, { email: userEmail });
+    conversation.muted = data.muted;
+    const found = conversations.value.find((c) => c.id === conversation.id);
+    if (found) found.muted = data.muted;
   } catch (e) {
     console.error('Failed to toggle mute:', e);
   }
@@ -401,10 +394,7 @@ async function loadConversations() {
   if (!userEmail) return;
   loading.value = true;
   try {
-    const res = await fetch(`${API_BASE}/seller/conversations?email=${encodeURIComponent(userEmail)}`, {
-      headers: { Accept: 'application/json' },
-    });
-    const data = await res.json();
+    const data = await api.get(`/seller/conversations?email=${encodeURIComponent(userEmail)}`);
     conversations.value = data.conversations || [];
   } catch (e) {
     console.error('Failed to load conversations:', e);
@@ -417,13 +407,7 @@ async function loadMessages(conversationId: any) {
   if (!userEmail) return;
   loadingMessages.value = true;
   try {
-    const res = await fetch(
-      `${API_BASE}/seller/conversations/${conversationId}?email=${encodeURIComponent(userEmail)}`,
-      {
-        headers: { Accept: 'application/json' },
-      },
-    );
-    const data = await res.json();
+    const data = await api.get(`/seller/conversations/${conversationId}?email=${encodeURIComponent(userEmail)}`);
     return data.messages || [];
   } catch (e) {
     console.error('Failed to load messages:', e);
@@ -450,11 +434,7 @@ const openChat = async (conversation: any) => {
 
   // Mark as read on server
   try {
-    await fetch(`${API_BASE}/seller/conversations/${conversation.id}/read`, {
-      method: 'POST',
-      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: userEmail }),
-    });
+    await api.post(`/seller/conversations/${conversation.id}/read`, { email: userEmail });
   } catch (e) {
     console.error('Failed to mark as read:', e);
   }
@@ -545,13 +525,8 @@ const sendMessage = async () => {
 
   sendingMessage.value = true;
   try {
-    const res = await fetch(`${API_BASE}/seller/conversations/${selectedChat.value.id}/messages`, {
-      method: 'POST',
-      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: userEmail, message: text }),
-    });
-    const data = await res.json();
-    if (res.ok && data.data) {
+    const data = await api.post(`/seller/conversations/${selectedChat.value.id}/messages`, { email: userEmail, message: text });
+    if (data.data) {
       tempMessage.id = data.data.id;
       tempMessage.time = data.data.time;
       tempMessage.status = data.data.status;
@@ -583,13 +558,8 @@ const attachImage = async () => {
     formData.append('email', userEmail || '');
 
     try {
-      const res = await fetch(`${API_BASE}/seller/conversations/${selectedChat.value?.id}/upload-image`, {
-        method: 'POST',
-        headers: { Accept: 'application/json' },
-        body: formData,
-      });
-      const data = await res.json();
-      if (res.ok && data.data) {
+      const data = await api.post(`/seller/conversations/${selectedChat.value?.id}/upload-image`, formData);
+      if (data.data) {
         selectedChat.value?.messages.push(data.data);
         selectedChat.value!.lastMessage = 'Sent an image';
         selectedChat.value!.time = 'Just now';
@@ -686,13 +656,7 @@ const deleteChat = async () => {
         role: 'destructive',
         handler: async () => {
           try {
-            await fetch(
-              `${API_BASE}/seller/conversations/${selectedChat.value?.id}?email=${encodeURIComponent(userEmail || '')}`,
-              {
-                method: 'DELETE',
-                headers: { Accept: 'application/json' },
-              },
-            );
+            await api.delete(`/seller/conversations/${selectedChat.value?.id}?email=${encodeURIComponent(userEmail || '')}`);
           } catch (e) {
             console.error('Failed to delete conversation:', e);
           }
@@ -741,10 +705,7 @@ const deleteMessage = async (message: any) => {
   if (!message.id) return;
   const loading = await showDeleteLoading();
   try {
-    await fetch(`${API_BASE}/seller/messages/${message.id}?email=${encodeURIComponent(userEmail || '')}`, {
-      method: 'DELETE',
-      headers: { Accept: 'application/json' },
-    });
+    await api.delete(`/seller/messages/${message.id}?email=${encodeURIComponent(userEmail || '')}`);
     if (selectedChat.value) {
       const idx = selectedChat.value.messages.findIndex((m) => m.id === message.id);
       if (idx > -1) {
@@ -1412,48 +1373,5 @@ onUnmounted(() => {
   }
 }
 
-/* Loading Modal */
-:deep(.loading-modal-simple .alert-wrapper) {
-  border-radius: 20px;
-  text-align: center;
-  max-width: 280px;
-  padding: 50px 30px;
-  background: white;
-}
-:deep(.loading-modal-simple .alert-head) {
-  display: none;
-}
-:deep(.loading-modal-simple .alert-message) {
-  padding: 0;
-  position: relative;
-  padding-top: 56px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #1a1a1a;
-}
-:deep(.loading-modal-simple .alert-message::before) {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  margin-left: -20px;
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #4caf50;
-  border-radius: 50%;
-  animation: loadingSpin 1s linear infinite;
-}
-:deep(.loading-modal-simple .alert-button-group) {
-  display: none;
-}
 
-@keyframes loadingSpin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
 </style>

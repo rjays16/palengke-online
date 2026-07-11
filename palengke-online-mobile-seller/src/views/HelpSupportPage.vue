@@ -308,10 +308,14 @@ import {
   documentTextOutline,
   shieldCheckmarkOutline,
 } from 'ionicons/icons';
-import { API_BASE } from '@/config/api';
+import { api } from '@/utils/apiClient';
 import { type FAQ, type ContactSupport, type Report } from '@/types';
+import { useSuccessModal } from '@/composables/useSuccessModal';
+import { useModals } from '@/composables/useModals';
 
 const router = useRouter();
+const { showSuccessModal } = useSuccessModal();
+const { showLoadingModal } = useModals();
 
 // State
 const searchQuery = ref('');
@@ -356,11 +360,8 @@ const loadingFaqs = ref(true);
 const loadFaqs = async () => {
   loadingFaqs.value = true;
   try {
-    const response = await fetch(`${API_BASE}/faqs?role=seller`, {
-      headers: { Accept: 'application/json' },
-    });
-    const data = await response.json();
-    if (response.ok && data.faqs) {
+    const data = await api.get('/faqs?role=seller');
+    if (data.faqs) {
       faqs.value = data.faqs;
     }
   } catch {
@@ -407,75 +408,10 @@ const searchResults = computed(() => {
   return results;
 });
 
-// Loading Modal Function
-const showLoadingModal = async (message = 'Loading...') => {
-  const alert = await alertController.create({
-    cssClass: 'loading-modal-simple',
-    message: message,
-    buttons: [],
-  });
-
-  await alert.present();
-
-  setTimeout(() => {
-    alert.dismiss();
-  }, 1500);
-};
-
-// Success Modal Function
-const showSuccessModal = async (message: string) => {
-  const alert = await alertController.create({
-    cssClass: 'success-modal',
-    header: ' ',
-    message: message,
-    buttons: ['OK'],
-  });
-
-  await alert.present();
-
-  // Add the image after modal is presented
-  setTimeout(() => {
-    const alertElement = document.querySelector('.success-modal .alert-message');
-    if (alertElement) {
-      const textContent = alertElement.textContent;
-      alertElement.innerHTML = '';
-
-      const wrapper = document.createElement('div');
-      wrapper.style.display = 'flex';
-      wrapper.style.flexDirection = 'column';
-      wrapper.style.alignItems = 'center';
-      wrapper.style.textAlign = 'center';
-
-      const img = document.createElement('img');
-      img.src = '/assets/images/checkmark_success.png';
-      img.style.width = '80px';
-      img.style.height = '80px';
-      img.style.margin = '0 auto 16px auto';
-      img.style.display = 'block';
-
-      const textDiv = document.createElement('div');
-      textDiv.textContent = textContent;
-      textDiv.style.fontSize = '18px';
-      textDiv.style.fontWeight = '600';
-      textDiv.style.color = '#1a1a1a';
-      textDiv.style.textAlign = 'center';
-
-      wrapper.appendChild(img);
-      wrapper.appendChild(textDiv);
-      alertElement.appendChild(wrapper);
-    }
-  }, 50);
-
-  setTimeout(() => {
-    alert.dismiss();
-  }, 2000);
-};
-
 // Fetch contact supports from backend
 async function fetchContactSupports() {
   try {
-    const response = await fetch(`${API_BASE}/contact-supports`);
-    const data = await response.json();
+    const data = await api.get('/contact-supports');
     contactSupports.value = data.contacts || [];
     // Fallback to defaults if API returns empty
     if (contactSupports.value.length === 0) {
@@ -589,8 +525,7 @@ async function fetchMyReports() {
   if (!email) return;
   loadingReports.value = true;
   try {
-    const response = await fetch(`${API_BASE}/reports?email=${encodeURIComponent(email)}`);
-    const data = await response.json();
+    const data = await api.get(`/reports?email=${encodeURIComponent(email)}`);
     myReports.value = data.reports || [];
   } catch {
     myReports.value = [];
@@ -629,18 +564,13 @@ const reportProblem = async () => {
         handler: async (data) => {
           if (data.subject && data.description) {
             try {
-              const response = await fetch(`${API_BASE}/reports`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  type: 'seller',
-                  submitted_by: localStorage.getItem('userEmail') || 'Seller',
-                  subject: data.subject,
-                  description: data.description,
-                  priority: 'medium',
-                }),
+              await api.post('/reports', {
+                type: 'seller',
+                submitted_by: localStorage.getItem('userEmail') || 'Seller',
+                subject: data.subject,
+                description: data.description,
+                priority: 'medium',
               });
-              if (!response.ok) throw new Error('Failed to submit report');
               await showSuccessModal('Problem report submitted!');
             } catch {
               const failAlert = await alertController.create({
@@ -685,15 +615,10 @@ const giveFeedback = async () => {
             });
             await loading.present();
             try {
-              const response = await fetch(`${API_BASE}/feedbacks`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  submitted_by: localStorage.getItem('userEmail') || 'Seller',
-                  message: data.feedback,
-                }),
+              await api.post('/feedbacks', {
+                submitted_by: localStorage.getItem('userEmail') || 'Seller',
+                message: data.feedback,
               });
-              if (!response.ok) throw new Error('Failed to submit feedback');
               await loading.dismiss();
               await showSuccessModal('Thank you for your feedback!');
             } catch {
@@ -740,16 +665,11 @@ const requestFeature = async () => {
             });
             await loading.present();
             try {
-              const response = await fetch(`${API_BASE}/feedbacks`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  type: 'feature_request',
-                  submitted_by: localStorage.getItem('userEmail') || 'Seller',
-                  message: data.feature,
-                }),
+              await api.post('/feedbacks', {
+                type: 'feature_request',
+                submitted_by: localStorage.getItem('userEmail') || 'Seller',
+                message: data.feature,
               });
-              if (!response.ok) throw new Error('Failed to submit feature request');
               await loading.dismiss();
               await showSuccessModal('Feature request submitted!');
             } catch {
@@ -1392,84 +1312,5 @@ const viewPrivacy = async () => {
   }
 }
 
-/* Success Modal Styling */
-:deep(.success-modal .alert-wrapper) {
-  border-radius: 20px;
-  text-align: center;
-  max-width: 320px;
-  padding: 30px 20px;
-}
 
-:deep(.success-modal .alert-head) {
-  padding: 0;
-  min-height: 0;
-}
-
-:deep(.success-modal .alert-message) {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1a1a1a;
-  padding: 20px 10px;
-}
-
-:deep(.success-modal .alert-button-group) {
-  padding: 10px 0 0 0;
-}
-
-:deep(.success-modal button) {
-  background: #4caf50;
-  color: white;
-  font-weight: 600;
-  border-radius: 12px;
-  height: 44px;
-}
-
-/* Loading Modal Styling */
-:deep(.loading-modal-simple .alert-wrapper) {
-  border-radius: 20px;
-  text-align: center;
-  max-width: 280px;
-  padding: 50px 30px;
-  background: white;
-}
-
-:deep(.loading-modal-simple .alert-head) {
-  display: none;
-}
-
-:deep(.loading-modal-simple .alert-message) {
-  padding: 0;
-  position: relative;
-  padding-top: 70px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #1a1a1a;
-}
-
-:deep(.loading-modal-simple .alert-message::before) {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  margin-left: -25px;
-  width: 50px;
-  height: 50px;
-  border: 5px solid #f3f3f3;
-  border-top: 5px solid #1877f2;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-:deep(.loading-modal-simple .alert-button-group) {
-  display: none;
-}
 </style>

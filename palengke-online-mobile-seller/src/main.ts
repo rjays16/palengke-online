@@ -38,6 +38,9 @@ import '@fortawesome/fontawesome-svg-core/styles.css';
 /* Theme variables */
 import './theme/variables.css';
 
+/* Shared component styles */
+import './theme/components.css';
+
 /* Font Awesome Configuration */
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';

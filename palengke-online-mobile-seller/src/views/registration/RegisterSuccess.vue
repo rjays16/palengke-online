@@ -141,7 +141,7 @@ import {
   refreshOutline,
   timeOutline,
 } from 'ionicons/icons';
-import { API_BASE } from '@/config/api';
+import { api } from '@/utils/apiClient';
 import { useRegistrationStore } from '@/stores/registration';
 import { type AccountSummary } from '@/types';
 
@@ -176,10 +176,7 @@ const submitRegistration = async () => {
   submitError.value = '';
 
   try {
-    const response = await fetch(`${API_BASE}/seller/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    await api.post('/seller/register', {
         email: d.email,
         country_code: (d as any).countryCode,
         phone: d.phone,
@@ -205,13 +202,7 @@ const submitRegistration = async () => {
         id_front_photo: (d as any).idFrontPhoto || null,
         id_back_photo: (d as any).idBackPhoto || null,
         selfie_photo: (d as any).selfiePhoto || null,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Registration failed.');
-    }
+      }, { skipAuth: true });
 
     (reg as any).setFields({ verificationSubmittedAt: new Date().toISOString() });
 

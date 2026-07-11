@@ -160,28 +160,7 @@
     </ion-content>
 
     <!-- Bottom Navigation -->
-    <ion-footer>
-      <ion-toolbar>
-        <div class="bottom-nav">
-          <div class="nav-item" @click="goToHome">
-            <ion-icon :icon="homeOutline"></ion-icon>
-            <span>Home</span>
-          </div>
-          <div class="nav-item active" @click="goToProducts">
-            <ion-icon :icon="cubeOutline"></ion-icon>
-            <span>Products</span>
-          </div>
-          <div class="nav-item" @click="goToOrders">
-            <ion-icon :icon="receiptOutline"></ion-icon>
-            <span>Orders</span>
-          </div>
-          <div class="nav-item" @click="goToProfile">
-            <ion-icon :icon="personOutline"></ion-icon>
-            <span>Profile</span>
-          </div>
-        </div>
-      </ion-toolbar>
-    </ion-footer>
+    <BottomNav active="products" />
   </ion-page>
 </template>
 
@@ -217,10 +196,13 @@ import {
   receiptOutline,
   personOutline,
 } from 'ionicons/icons';
-import { API_BASE } from '@/config/api';
+import BottomNav from '@/components/BottomNav.vue';
+import { api } from '@/utils/apiClient';
 import { type Product } from '@/types';
+import { useSuccessModal } from '@/composables/useSuccessModal';
 
 const router = useRouter();
+const { showSuccessModal } = useSuccessModal();
 
 const userEmail = localStorage.getItem('userEmail');
 const loading = ref(false);
@@ -237,10 +219,7 @@ async function loadProducts() {
   if (!userEmail) return;
   loading.value = true;
   try {
-    const res = await fetch(`${API_BASE}/seller/products?email=${encodeURIComponent(userEmail)}`, {
-      headers: { Accept: 'application/json' },
-    });
-    const data = await res.json();
+    const data = await api.get(`/seller/products?email=${encodeURIComponent(userEmail)}`);
     products.value = (data.products || []).map((p: any) => ({
       ...p,
       image: p.images?.[0] || '/assets/images/product-placeholder.svg',
@@ -314,18 +293,10 @@ const toggleProductStatus = async (product: any) => {
         handler: async () => {
           toggling.value = true;
           try {
-            const res = await fetch(`${API_BASE}/seller/products/${product.id}`, {
-              method: 'POST',
-              headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email: userEmail, is_active: newIsActive }),
-            });
-            if (res.ok) {
-              product.is_active = newIsActive;
-              product.status = newIsActive ? 'active' : 'inactive';
-              showToast(`Product ${newIsActive ? 'activated' : 'deactivated'}`, 'success');
-            } else {
-              showToast('Failed to update status', 'danger');
-            }
+            await api.post(`/seller/products/${product.id}`, { email: userEmail, is_active: newIsActive });
+            product.is_active = newIsActive;
+            product.status = newIsActive ? 'active' : 'inactive';
+            showToast(`Product ${newIsActive ? 'activated' : 'deactivated'}`, 'success');
           } catch (e) {
             showToast('Failed to update status', 'danger');
           } finally {
@@ -351,20 +322,10 @@ const deleteProduct = async (product: any) => {
         handler: async () => {
           deleting.value = true;
           try {
-            const res = await fetch(
-              `${API_BASE}/seller/products/${product.id}?email=${encodeURIComponent(userEmail || '')}`,
-              {
-                method: 'DELETE',
-                headers: { Accept: 'application/json' },
-              },
-            );
-            if (res.ok) {
-              const index = products.value.findIndex((p) => p.id === product.id);
-              if (index > -1) products.value.splice(index, 1);
-              await showSuccessModal('Product successfully deleted');
-            } else {
-              showToast('Failed to delete product', 'danger');
-            }
+            await api.delete(`/seller/products/${product.id}?email=${encodeURIComponent(userEmail || '')}`);
+            const index = products.value.findIndex((p) => p.id === product.id);
+            if (index > -1) products.value.splice(index, 1);
+            await showSuccessModal('Product successfully deleted');
           } catch (e) {
             showToast('Failed to delete product', 'danger');
           } finally {
@@ -388,67 +349,7 @@ const showToast = async (message: string, color: string = 'success') => {
   await toast.present();
 };
 
-const showSuccessModal = async (message: string) => {
-  const alert = await alertController.create({
-    cssClass: 'success-modal',
-    header: ' ',
-    message: message,
-    buttons: ['OK'],
-  });
 
-  await alert.present();
-
-  // Add the image after modal is presented
-  setTimeout(() => {
-    const alertElement = document.querySelector('.success-modal .alert-message');
-    if (alertElement) {
-      // Clear the text content
-      const textContent = alertElement.textContent;
-      alertElement.innerHTML = '';
-
-      // Create and add the image
-      const img = document.createElement('img');
-      img.src = '/assets/images/checkmark_success.png';
-      img.style.width = '80px';
-      img.style.height = '80px';
-      img.style.margin = '0 auto 16px auto';
-      img.style.display = 'block';
-
-      // Create and add the text
-      const textDiv = document.createElement('div');
-      textDiv.textContent = textContent;
-      textDiv.style.fontSize = '18px';
-      textDiv.style.fontWeight = '600';
-      textDiv.style.color = '#1a1a1a';
-
-      // Append both
-      alertElement.appendChild(img);
-      alertElement.appendChild(textDiv);
-    }
-  }, 50);
-
-  // Auto dismiss after 2 seconds
-  setTimeout(() => {
-    alert.dismiss();
-  }, 2000);
-};
-
-// Bottom Navigation
-const goToHome = () => {
-  router.push('/home');
-};
-
-const goToProducts = () => {
-  // Already on products page
-};
-
-const goToOrders = () => {
-  router.push('/orders');
-};
-
-const goToProfile = () => {
-  router.push('/profile');
-};
 </script>
 
 <style scoped>
@@ -760,41 +661,6 @@ const goToProfile = () => {
   margin: 0 0 24px 0;
 }
 
-/* Bottom Navigation */
-.bottom-nav {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  height: 60px;
-}
-
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  cursor: pointer;
-  color: #999;
-  transition: color 0.2s;
-}
-
-.nav-item ion-icon {
-  font-size: 24px;
-}
-
-.nav-item span {
-  font-size: 11px;
-  font-weight: 500;
-}
-
-.nav-item.active {
-  color: #4caf50;
-}
-
-.nav-item:active {
-  transform: scale(0.95);
-}
-
 /* Responsive */
 @media (max-width: 360px) {
   .product-card {
@@ -816,35 +682,5 @@ const goToProfile = () => {
   }
 }
 
-/* Success Modal Styling */
-:deep(.success-modal .alert-wrapper) {
-  border-radius: 20px;
-  text-align: center;
-  max-width: 320px;
-  padding: 30px 20px;
-}
-
-:deep(.success-modal .alert-head) {
-  padding: 0;
-  min-height: 0;
-}
-
-:deep(.success-modal .alert-message) {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1a1a1a;
-  padding: 20px 10px;
-}
-
-:deep(.success-modal .alert-button-group) {
-  padding: 10px 0 0 0;
-}
-
-:deep(.success-modal button) {
-  background: #4caf50;
-  color: white;
-  font-weight: 600;
-  border-radius: 12px;
-  height: 44px;
-}
+/* Responsive */
 </style>

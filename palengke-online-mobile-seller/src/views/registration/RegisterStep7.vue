@@ -232,7 +232,7 @@
 </template>
 
 <script setup>
-import { API_BASE } from '@/config/api';
+import { api } from '@/utils/apiClient';
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { Capacitor } from '@capacitor/core';
@@ -531,7 +531,7 @@ const submitVerification = async () => {
     });
 
     const email = reg.data.email || auth.userEmail;
-    const endpoint = isLoggedIn.value ? `${API_BASE}/seller/verify` : `${API_BASE}/seller/register`;
+    const endpoint = isLoggedIn.value ? '/seller/verify' : '/seller/register';
     const body = isLoggedIn.value ? {
       email,
       id_type: reg.data.idType || null,
@@ -567,16 +567,7 @@ const submitVerification = async () => {
       selfie_photo: existingData.selfiePhoto || null,
     };
 
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Registration failed.');
-    }
+    await api.post(endpoint, body, { skipAuth: true });
 
     await loading.dismiss();
 

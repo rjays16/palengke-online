@@ -261,11 +261,13 @@ import {
   toastController,
 } from '@ionic/vue';
 import { trashOutline, closeCircle, addOutline, cloudUploadOutline, checkmarkCircle, cubeOutline } from 'ionicons/icons';
-import { API_BASE } from '@/config/api';
+import { api } from '@/utils/apiClient';
 import { type Product } from '@/types';
+import { useSuccessModal } from '@/composables/useSuccessModal';
 
 const router = useRouter();
 const route = useRoute();
+const { showSuccessModal } = useSuccessModal();
 
 const userEmail = localStorage.getItem('userEmail');
 const loading = ref(true);
@@ -307,30 +309,19 @@ async function loadProduct() {
   if (!userEmail || !productId) return;
   loading.value = true;
   try {
-    const [profileRes, prodRes, locRes] = await Promise.all([
-      fetch(`${API_BASE}/seller/profile?email=${encodeURIComponent(userEmail || '')}`, {
-        headers: { Accept: 'application/json' },
-      }),
-      fetch(`${API_BASE}/seller/products/${productId}?email=${encodeURIComponent(userEmail || '')}`, {
-        headers: { Accept: 'application/json' },
-      }),
-      fetch(`${API_BASE}/locations`, {
-        headers: { Accept: 'application/json' },
-      }),
+    const [profileData, prodData, locData] = await Promise.all([
+      api.get(`/seller/profile?email=${encodeURIComponent(userEmail || '')}`),
+      api.get(`/seller/products/${productId}?email=${encodeURIComponent(userEmail || '')}`),
+      api.get('/locations'),
     ]);
 
-    const profileData = await profileRes.json();
     let cats = (profileData.user && profileData.user.categories) || [];
     if (!cats.length) {
-      const allRes = await fetch(`${API_BASE}/categories`, {
-        headers: { Accept: 'application/json' },
-      });
-      const allData = await allRes.json();
+      const allData = await api.get('/categories');
       cats = (Array.isArray(allData) ? allData : allData.categories || []).map((c: any) => c.name);
     }
     categories.value = cats;
 
-    const locData = await locRes.json();
     const locs = locData.locations || [];
     const cityNames: string[] = [];
     locs.forEach((region: any) => {
@@ -340,7 +331,6 @@ async function loadProduct() {
     });
     locations.value = cityNames;
 
-    const prodData = await prodRes.json();
     const p = prodData.product;
     if (p) {
       productData.value = {
@@ -400,15 +390,8 @@ const selectImage = () => {
     formData.append('image', file);
     formData.append('email', userEmail || '');
     try {
-      const res = await fetch(`${API_BASE}/seller/products/upload-image`, {
-        method: 'POST',
-        headers: { Accept: 'application/json' },
-        body: formData,
-      });
-      const data = await res.json();
-      if (res.ok) {
-        productImage.value = data.url;
-      }
+      const data = await api.post('/seller/products/upload-image', formData);
+      productImage.value = data.url;
     } catch (e: any) {
       console.error('Upload failed:', e);
     }
@@ -429,36 +412,27 @@ const updateProduct = async () => {
 
   saving.value = true;
   try {
-    const res = await fetch(`${API_BASE}/seller/products/${productData.value.id}`, {
-      method: 'POST',
-      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: userEmail || '',
-        name: productData.value.name,
-        category: productData.value.category,
-        description: productData.value.description,
-        selling_unit: productData.value.unit,
-        price: productData.value.price,
-        minimum_order: productData.value.minOrder,
-        has_discount: productData.value.hasDiscount,
-        discount_price: productData.value.hasDiscount ? productData.value.discountPrice : null,
-        stock_quantity: productData.value.stock,
-        sku: productData.value.sku,
-        track_inventory: productData.value.trackInventory,
-        origin: productData.value.origin,
-        brand: productData.value.brand,
-        is_featured: productData.value.isFeatured,
-        is_active: productData.value.isActive,
-        images: productImage.value ? [productImage.value] : [],
-      }),
+    await api.post(`/seller/products/${productData.value.id}`, {
+      email: userEmail || '',
+      name: productData.value.name,
+      category: productData.value.category,
+      description: productData.value.description,
+      selling_unit: productData.value.unit,
+      price: productData.value.price,
+      minimum_order: productData.value.minOrder,
+      has_discount: productData.value.hasDiscount,
+      discount_price: productData.value.hasDiscount ? productData.value.discountPrice : null,
+      stock_quantity: productData.value.stock,
+      sku: productData.value.sku,
+      track_inventory: productData.value.trackInventory,
+      origin: productData.value.origin,
+      brand: productData.value.brand,
+      is_featured: productData.value.isFeatured,
+      is_active: productData.value.isActive,
+      images: productImage.value ? [productImage.value] : [],
     });
 
-    if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.message || 'Failed to update product');
-    }
-
-    await showSuccessModal('Product updated successfully!');
+    await showSuccessModal({ message: 'Product updated successfully!', onDismiss: () => router.push('/products') });
   } catch (e: any) {
     const alert = await alertController.create({
       header: 'Error',
@@ -469,63 +443,6 @@ const updateProduct = async () => {
   } finally {
     saving.value = false;
   }
-};
-
-const showSuccessModal = async (message: string) => {
-  const alert = await alertController.create({
-    cssClass: 'success-modal',
-    header: ' ',
-    message: message,
-    buttons: ['OK'],
-  });
-
-  await alert.present();
-
-  // Add the image after modal is presented
-  setTimeout(() => {
-    const alertElement = document.querySelector('.success-modal .alert-message');
-    if (alertElement) {
-      // Clear the text content
-      const textContent = alertElement.textContent;
-      alertElement.innerHTML = '';
-
-      // Create wrapper for centering
-      const wrapper = document.createElement('div');
-      wrapper.style.display = 'flex';
-      wrapper.style.flexDirection = 'column';
-      wrapper.style.alignItems = 'center';
-      wrapper.style.textAlign = 'center';
-
-      // Create and add the image
-      const img = document.createElement('img');
-      img.src = '/assets/images/checkmark_success.png';
-      img.style.width = '80px';
-      img.style.height = '80px';
-      img.style.margin = '0 auto 16px auto';
-      img.style.display = 'block';
-
-      // Create and add the text
-      const textDiv = document.createElement('div');
-      textDiv.textContent = textContent;
-      textDiv.style.fontSize = '18px';
-      textDiv.style.fontWeight = '600';
-      textDiv.style.color = '#1a1a1a';
-      textDiv.style.textAlign = 'center';
-
-      // Append to wrapper
-      wrapper.appendChild(img);
-      wrapper.appendChild(textDiv);
-
-      // Append wrapper to alert
-      alertElement.appendChild(wrapper);
-    }
-  }, 50);
-
-  // Auto dismiss after 2 seconds
-  setTimeout(() => {
-    alert.dismiss();
-    router.push('/products');
-  }, 2000);
 };
 
 const deleteProduct = async () => {
@@ -540,15 +457,8 @@ const deleteProduct = async () => {
         handler: async () => {
           saving.value = true;
           try {
-            const res = await fetch(
-              `${API_BASE}/seller/products/${productData.value.id}?email=${encodeURIComponent(userEmail || '')}`,
-              {
-                method: 'DELETE',
-                headers: { Accept: 'application/json' },
-              },
-            );
-            if (!res.ok) throw new Error('Failed to delete product');
-            await showSuccessModal('Product successfully deleted');
+            await api.delete(`/seller/products/${productData.value.id}?email=${encodeURIComponent(userEmail || '')}`);
+            await showSuccessModal({ message: 'Product successfully deleted', onDismiss: () => router.push('/products') });
           } catch (e: any) {
             const alert = await alertController.create({
               header: 'Error',
@@ -987,37 +897,5 @@ input:checked + .slider:before {
 
 :deep(.custom-toast::part(message)) {
   font-size: 15px;
-}
-
-/* Success Modal Styling */
-:deep(.success-modal .alert-wrapper) {
-  border-radius: 20px;
-  text-align: center;
-  max-width: 320px;
-  padding: 30px 20px;
-}
-
-:deep(.success-modal .alert-head) {
-  padding: 0;
-  min-height: 0;
-}
-
-:deep(.success-modal .alert-message) {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1a1a1a;
-  padding: 20px 10px;
-}
-
-:deep(.success-modal .alert-button-group) {
-  padding: 10px 0 0 0;
-}
-
-:deep(.success-modal button) {
-  background: #4caf50;
-  color: white;
-  font-weight: 600;
-  border-radius: 12px;
-  height: 44px;
 }
 </style>

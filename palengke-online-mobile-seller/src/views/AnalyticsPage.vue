@@ -368,7 +368,7 @@
 </template>
 
 <script setup lang="ts">
-import { API_BASE } from '@/config/api';
+import { api } from '@/utils/apiClient';
 import { ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import {
@@ -449,27 +449,22 @@ const loadAnalytics = async () => {
   const email = localStorage.getItem('userEmail');
   if (!email) return;
   try {
-    let url = `${API_BASE}/seller/analytics?email=${encodeURIComponent(email)}`;
+    let url = `/seller/analytics?email=${encodeURIComponent(email)}`;
     if (startDate.value && endDate.value) {
       url += `&start_date=${startDate.value}&end_date=${endDate.value}`;
     } else {
       url += `&period=${selectedPeriod.value}`;
     }
-    const response = await fetch(url, {
-      headers: { Accept: 'application/json' },
-    });
-    const data = await response.json();
-    if (response.ok) {
-      currentStats.value = data.stats;
-      salesData.value = data.chartData;
-      topProducts.value = data.topProducts;
-      categories.value = data.categorySales;
-      recentActivity.value = data.recentActivity.map((a: any) => ({
-        ...a,
-        icon: getActivityIcon(a.type as string),
-      }));
-      monthlyGoals.value = data.monthlyGoals;
-    }
+    const data = await api.get(url);
+    currentStats.value = data.stats;
+    salesData.value = data.chartData;
+    topProducts.value = data.topProducts;
+    categories.value = data.categorySales;
+    recentActivity.value = data.recentActivity.map((a: any) => ({
+      ...a,
+      icon: getActivityIcon(a.type as string),
+    }));
+    monthlyGoals.value = data.monthlyGoals;
   } catch {
     // silent
   } finally {
@@ -611,21 +606,15 @@ const editGoal = async (type: string) => {
             ? { email, monthly_sales_target: val, monthly_orders_target: monthlyGoals.value.ordersTarget }
             : { email, monthly_sales_target: monthlyGoals.value.salesTarget, monthly_orders_target: val };
           try {
-            const res = await fetch(`${API_BASE}/seller/goals`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-              body: JSON.stringify(body),
+            await api.post('/seller/goals', body);
+            const toast = await toastController.create({
+              message: 'Goals updated successfully!',
+              duration: 2000,
+              color: 'success',
+              position: 'top',
             });
-            if (res.ok) {
-              const toast = await toastController.create({
-                message: 'Goals updated successfully!',
-                duration: 2000,
-                color: 'success',
-                position: 'top',
-              });
-              await toast.present();
-              await loadAnalytics();
-            }
+            await toast.present();
+            await loadAnalytics();
           } catch {
             // silent
           }

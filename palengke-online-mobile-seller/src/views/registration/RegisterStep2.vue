@@ -211,7 +211,7 @@ import {
   shieldCheckmarkOutline,
   globeOutline,
 } from 'ionicons/icons';
-import { API_BASE } from '@/config/api';
+import { api } from '@/utils/apiClient';
 import { useRegistrationStore } from '@/stores/registration';
 import { type Country, type PersonalInfoForm } from '@/types';
 
@@ -223,8 +223,7 @@ const isLoadingCountries = ref(true);
 
 onMounted(async () => {
   try {
-    const res = await fetch(`${API_BASE}/countries`);
-    const data = await res.json();
+    const data = await api.get<{ countries: any[] }>('/countries');
     countries.value = data.countries.filter((c: any) => c.enabled).map((c: any) => ({ code: c.code, name: c.name }));
   } catch {
     countries.value = [];

@@ -25,18 +25,7 @@
         </div>
 
         <div class="pin-inputs">
-          <input
-            v-for="(digit, index) in pinDigits"
-            :key="index"
-            :ref="(el) => (pinRefs[index] = el)"
-            v-model="pinDigits[index]"
-            type="tel"
-            maxlength="1"
-            class="pin-box"
-            :class="{ filled: pinDigits[index] }"
-            @input="handleInput(index, $event)"
-            @keydown="handleKeydown(index, $event)"
-          />
+          <OtpInput ref="pinInputRef" v-model="pinCodeStr" :length="5" type="pin" @complete="onPinComplete" :error="!!errorMessage" />
         </div>
 
         <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
@@ -67,52 +56,29 @@ import {
   alertController,
 } from '@ionic/vue';
 import { keyOutline, shieldCheckmarkOutline } from 'ionicons/icons';
-import { API_BASE } from '@/config/api';
+import { api, ApiError } from '@/utils/apiClient';
 import { useAuthStore } from '@/stores/auth';
+import OtpInput from '@/components/OtpInput.vue';
 
 const router = useRouter();
 const auth = useAuthStore();
 
 const step = ref('create');
-const pinDigits = ref(['', '', '', '', '']);
 const savedPin = ref('');
-const pinRefs = ref([]);
 const isSaving = ref(false);
 const errorMessage = ref('');
+const pinInputRef = ref();
+const pinCodeStr = ref('');
 
 const userEmail = ref(auth.userEmail || '');
 const deviceId = ref(auth.deviceId || '');
 
-const isCodeComplete = computed(() => {
-  return pinDigits.value.every((digit) => digit !== '');
-});
+const isCodeComplete = computed(() => pinInputRef.value?.isComplete ?? false);
 
-const pinCode = computed(() => {
-  return pinDigits.value.join('');
-});
+const pinCode = computed(() => pinInputRef.value?.code ?? pinCodeStr.value);
 
-const handleInput = (index, event) => {
-  const value = event.target.value;
-  if (!/^\d*$/.test(value)) {
-    pinDigits.value[index] = '';
-    return;
-  }
-  errorMessage.value = '';
-  if (value && index < pinDigits.value.length - 1) {
-    pinRefs.value[index + 1]?.focus();
-  }
-};
-
-const handleKeydown = (index, event) => {
-  if (event.key === 'Backspace' && !pinDigits.value[index] && index > 0) {
-    pinRefs.value[index - 1]?.focus();
-  }
-  if (event.key === 'ArrowLeft' && index > 0) {
-    pinRefs.value[index - 1]?.focus();
-  }
-  if (event.key === 'ArrowRight' && index < pinDigits.value.length - 1) {
-    pinRefs.value[index + 1]?.focus();
-  }
+const onPinComplete = () => {
+  handleNext();
 };
 
 const handleNext = async () => {
@@ -120,39 +86,29 @@ const handleNext = async () => {
 
   if (step.value === 'create') {
     savedPin.value = pinCode.value;
-    pinDigits.value = ['', '', '', '', ''];
     step.value = 'confirm';
     errorMessage.value = '';
-    setTimeout(() => pinRefs.value[0]?.focus(), 300);
+    pinCodeStr.value = '';
+    pinInputRef.value?.reset();
     return;
   }
 
   if (pinCode.value !== savedPin.value) {
     errorMessage.value = 'PIN does not match. Please try again.';
-    pinDigits.value = ['', '', '', '', ''];
-    setTimeout(() => pinRefs.value[0]?.focus(), 300);
+    pinCodeStr.value = '';
+    pinInputRef.value?.reset();
     return;
   }
 
   isSaving.value = true;
 
   try {
-    const response = await fetch(`${API_BASE}/seller/device/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: userEmail.value,
-        device_id: deviceId.value,
-        pin: savedPin.value,
-        device_name: navigator.userAgent,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to save PIN.');
-    }
+    const data = await api.post('/seller/device/register', {
+      email: userEmail.value,
+      device_id: deviceId.value,
+      pin: savedPin.value,
+      device_name: navigator.userAgent,
+    }, { skipAuth: true });
 
     auth.setSession(userEmail.value, data.token || '', true, deviceId.value);
 
@@ -167,15 +123,17 @@ const handleNext = async () => {
 
     router.push('/home');
   } catch (error) {
+    const message = error instanceof ApiError ? (error.data?.message || error.message) : error.message;
     const alert = await alertController.create({
       header: 'Error',
-      message: error.message || 'Failed to save PIN. Please try again.',
+      message: message || 'Failed to save PIN. Please try again.',
       buttons: ['OK'],
     });
     await alert.present();
     step.value = 'create';
     savedPin.value = '';
-    pinDigits.value = ['', '', '', '', ''];
+    pinCodeStr.value = '';
+    pinInputRef.value?.reset();
   } finally {
     isSaving.value = false;
   }
@@ -188,7 +146,7 @@ onMounted(() => {
     deviceId.value = newId;
   }
   setTimeout(() => {
-    pinRefs.value[0]?.focus();
+    pinInputRef.value?.focus();
   }, 300);
 });
 </script>
@@ -252,31 +210,6 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
-.pin-box {
-  width: 48px;
-  height: 56px;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
-  font-size: 24px;
-  font-weight: 700;
-  text-align: center;
-  color: #1a1a1a;
-  background: white;
-  transition: all 0.2s;
-  font-family: inherit;
-}
-
-.pin-box:focus {
-  outline: none;
-  border-color: #4caf50;
-  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
-}
-
-.pin-box.filled {
-  border-color: #4caf50;
-  background: #e8f5e9;
-}
-
 .error-text {
   text-align: center;
   color: #e74c3c;
@@ -301,37 +234,6 @@ onMounted(() => {
   --color: #999;
 }
 
-:deep(.success-modal .alert-wrapper) {
-  border-radius: 20px;
-  text-align: center;
-  max-width: 320px;
-  padding: 30px 20px;
-}
-
-:deep(.success-modal .alert-head) {
-  padding: 0;
-  min-height: 0;
-}
-
-:deep(.success-modal .alert-message) {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1a1a1a;
-  padding: 20px 10px;
-}
-
-:deep(.success-modal .alert-button-group) {
-  padding: 10px 0 0 0;
-}
-
-:deep(.success-modal button) {
-  background: #4caf50;
-  color: white;
-  font-weight: 600;
-  border-radius: 12px;
-  height: 44px;
-}
-
 @media (max-width: 480px) {
   .pin-container {
     padding: 32px 20px;
@@ -346,21 +248,11 @@ onMounted(() => {
   .pin-title {
     font-size: 20px;
   }
-  .pin-box {
-    width: 42px;
-    height: 50px;
-    font-size: 20px;
-  }
 }
 
 @media (max-width: 360px) {
   .pin-inputs {
     gap: 6px;
-  }
-  .pin-box {
-    width: 38px;
-    height: 46px;
-    font-size: 18px;
   }
 }
 </style>

@@ -23,20 +23,7 @@
           <p class="email-address">{{ maskedEmail }}</p>
         </div>
 
-        <div class="pin-inputs">
-          <input
-            v-for="(digit, index) in pinDigits"
-            :key="index"
-            :ref="(el) => (pinRefs[index] = el)"
-            v-model="pinDigits[index]"
-            type="tel"
-            maxlength="1"
-            class="pin-box"
-            :class="{ filled: pinDigits[index] }"
-            @input="handleInput(index, $event)"
-            @keydown="handleKeydown(index, $event)"
-          />
-        </div>
+        <OtpInput ref="pinInputRef" v-model="pinCodeStr" :length="5" type="pin" @complete="onPinComplete" />
 
         <div class="options-section">
           <button class="switch-account-btn" @click="goToLogin">Sign in with different account</button>
@@ -69,23 +56,16 @@ import {
   alertController,
 } from '@ionic/vue';
 import { lockClosedOutline } from 'ionicons/icons';
-import { API_BASE } from '@/config/api';
+import { api, ApiError } from '@/utils/apiClient';
 import { useAuthStore } from '@/stores/auth';
 import { useRegistrationStore } from '@/stores/registration';
+import OtpInput from '@/components/OtpInput.vue';
+import { useModals } from '@/composables/useModals';
 
 const router = useRouter();
 const auth = useAuthStore();
 const reg = useRegistrationStore();
-
-const showLoadingModal = async (message = 'Loading...') => {
-  const alert = await alertController.create({
-    cssClass: 'loading-modal-simple',
-    message: message,
-    buttons: [],
-  });
-  await alert.present();
-  return alert;
-};
+const { showLoadingModal } = useModals();
 
 const userEmail = ref(auth.userEmail || '');
 const deviceId = ref(auth.deviceId || '');
@@ -99,8 +79,7 @@ const checkAvailability = async () => {
   if (!userCountry) return { available: true };
 
   try {
-    const response = await fetch(`${API_BASE}/countries`);
-    const data = await response.json();
+    const data = await api.get('/countries');
 
     if (!data.countries || data.countries.length === 0) {
       return { available: false, reason: 'country' };
@@ -111,8 +90,7 @@ const checkAvailability = async () => {
       return { available: false, reason: 'country' };
     }
 
-    const locResponse = await fetch(`${API_BASE}/locations`);
-    const locData = await locResponse.json();
+    const locData = await api.get('/locations');
 
     if (locData.locations && locData.locations.length > 0) {
       let foundRegion = null;
@@ -165,39 +143,16 @@ const maskedEmail = computed(() => {
   return '***' + domain;
 });
 
-const pinDigits = ref(['', '', '', '', '']);
-const pinRefs = ref([]);
+const pinInputRef = ref();
+const pinCodeStr = ref('');
 const isVerifying = ref(false);
 
-const isCodeComplete = computed(() => {
-  return pinDigits.value.every((digit) => digit !== '');
-});
+const isCodeComplete = computed(() => pinInputRef.value?.isComplete ?? false);
 
-const pinCode = computed(() => {
-  return pinDigits.value.join('');
-});
+const pinCode = computed(() => pinInputRef.value?.code ?? pinCodeStr.value);
 
-const handleInput = (index, event) => {
-  const value = event.target.value;
-  if (!/^\d*$/.test(value)) {
-    pinDigits.value[index] = '';
-    return;
-  }
-  if (value && index < pinDigits.value.length - 1) {
-    pinRefs.value[index + 1]?.focus();
-  }
-};
-
-const handleKeydown = (index, event) => {
-  if (event.key === 'Backspace' && !pinDigits.value[index] && index > 0) {
-    pinRefs.value[index - 1]?.focus();
-  }
-  if (event.key === 'ArrowLeft' && index > 0) {
-    pinRefs.value[index - 1]?.focus();
-  }
-  if (event.key === 'ArrowRight' && index < pinDigits.value.length - 1) {
-    pinRefs.value[index + 1]?.focus();
-  }
+const onPinComplete = () => {
+  verifyPin();
 };
 
 const verifyPin = async () => {
@@ -205,21 +160,11 @@ const verifyPin = async () => {
   isVerifying.value = true;
 
   try {
-    const response = await fetch(`${API_BASE}/seller/device/verify-pin`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: userEmail.value,
-        device_id: deviceId.value,
-        pin: pinCode.value,
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Invalid PIN.');
-    }
+    const data = await api.post('/seller/device/verify-pin', {
+      email: userEmail.value,
+      device_id: deviceId.value,
+      pin: pinCode.value,
+    }, { skipAuth: true });
 
     auth.setSession(userEmail.value, data.token, true, deviceId.value);
 
@@ -232,19 +177,20 @@ const verifyPin = async () => {
 
     router.push('/home');
   } catch (error) {
-    if (error.message && error.message.includes('No PIN set')) {
+    const message = error instanceof ApiError ? (error.data?.message || error.message) : error.message;
+    if (message && message.includes('No PIN set')) {
       auth.setHasPin(false);
       router.push('/login');
       return;
     }
     const alert = await alertController.create({
       header: 'Sign In Failed',
-      message: error.message || 'Invalid PIN. Please try again.',
+      message: message || 'Invalid PIN. Please try again.',
       buttons: ['OK'],
     });
     await alert.present();
-    pinDigits.value = ['', '', '', '', ''];
-    pinRefs.value[0]?.focus();
+    pinInputRef.value?.reset();
+    pinInputRef.value?.focus();
   } finally {
     isVerifying.value = false;
   }
@@ -270,19 +216,15 @@ const handleForgotPin = async () => {
           const loading = await showLoadingModal('Sending verification code...');
 
           try {
-            const res = await fetch(`${API_BASE}/seller/forgot-pin`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email: userEmail.value }),
-            });
-
-            const data = await res.json();
+            let data;
+            try {
+              data = await api.post('/seller/forgot-pin', { email: userEmail.value }, { skipAuth: true });
+            } catch (apiError) {
+              await loading.dismiss();
+              throw apiError;
+            }
 
             await loading.dismiss();
-
-            if (!res.ok) {
-              throw new Error(data.message || 'Failed to send code.');
-            }
 
             router.push({
               name: 'OTPVerification',
@@ -291,9 +233,10 @@ const handleForgotPin = async () => {
             });
           } catch (e) {
             await loading.dismiss();
+            const message = e instanceof ApiError ? (e.data?.message || e.message) : e.message;
             const errAlert = await alertController.create({
               header: 'Error',
-              message: e.message || 'Failed to send verification code.',
+              message: message || 'Failed to send verification code.',
               buttons: ['OK'],
             });
             await errAlert.present();
@@ -315,12 +258,7 @@ onMounted(async () => {
   }
   // Verify PIN exists on backend
   try {
-    const res = await fetch(`${API_BASE}/seller/device/status`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: userEmail.value, device_id: deviceId.value }),
-    });
-    const data = await res.json();
+    const data = await api.post('/seller/device/status', { email: userEmail.value, device_id: deviceId.value }, { skipAuth: true });
     if (!data.hasPin) {
       auth.setHasPin(false);
       router.replace('/login');
@@ -334,7 +272,7 @@ onMounted(async () => {
     }
   }
   setTimeout(() => {
-    pinRefs.value[0]?.focus();
+    pinInputRef.value?.focus();
   }, 300);
 });
 </script>
@@ -403,31 +341,6 @@ onMounted(async () => {
   justify-content: center;
   gap: 8px;
   margin-bottom: 32px;
-}
-
-.pin-box {
-  width: 48px;
-  height: 56px;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
-  font-size: 24px;
-  font-weight: 700;
-  text-align: center;
-  color: #1a1a1a;
-  background: white;
-  transition: all 0.2s;
-  font-family: inherit;
-}
-
-.pin-box:focus {
-  outline: none;
-  border-color: #4caf50;
-  box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
-}
-
-.pin-box.filled {
-  border-color: #4caf50;
-  background: #e8f5e9;
 }
 
 .options-section {
@@ -499,70 +412,13 @@ onMounted(async () => {
   .pin-title {
     font-size: 20px;
   }
-  .pin-box {
-    width: 42px;
-    height: 50px;
-    font-size: 20px;
-  }
 }
 
 @media (max-width: 360px) {
   .pin-inputs {
     gap: 6px;
   }
-  .pin-box {
-    width: 38px;
-    height: 46px;
-    font-size: 18px;
-  }
 }
 
-/* Loading Modal Styling */
-:deep(.loading-modal-simple .alert-wrapper) {
-  border-radius: 20px;
-  text-align: center;
-  max-width: 280px;
-  padding: 50px 30px;
-  background: var(--color-modal-bg);
-}
 
-:deep(.loading-modal-simple .alert-head) {
-  display: none;
-}
-
-:deep(.loading-modal-simple .alert-message) {
-  padding: 0;
-  position: relative;
-  padding-top: 70px;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--color-modal-text);
-}
-
-:deep(.loading-modal-simple .alert-message::before) {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  margin-left: -25px;
-  width: 50px;
-  height: 50px;
-  border: 5px solid var(--color-bg-tertiary);
-  border-top: 5px solid var(--color-primary);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-:deep(.loading-modal-simple .alert-button-group) {
-  display: none;
-}
 </style>

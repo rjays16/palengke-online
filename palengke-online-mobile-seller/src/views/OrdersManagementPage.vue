@@ -95,33 +95,12 @@
     </ion-content>
 
     <!-- Bottom Navigation -->
-    <ion-footer>
-      <ion-toolbar>
-        <div class="bottom-nav">
-          <div class="nav-item" @click="goToHome">
-            <ion-icon :icon="homeOutline"></ion-icon>
-            <span>Home</span>
-          </div>
-          <div class="nav-item" @click="goToProducts">
-            <ion-icon :icon="cubeOutline"></ion-icon>
-            <span>Products</span>
-          </div>
-          <div class="nav-item active" @click="goToOrders">
-            <ion-icon :icon="receiptOutline"></ion-icon>
-            <span>Orders</span>
-          </div>
-          <div class="nav-item" @click="goToProfile">
-            <ion-icon :icon="personOutline"></ion-icon>
-            <span>Profile</span>
-          </div>
-        </div>
-      </ion-toolbar>
-    </ion-footer>
+    <BottomNav active="orders" />
   </ion-page>
 </template>
 
 <script setup lang="ts">
-import { API_BASE } from '@/config/api';
+import { api } from '@/utils/apiClient';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { onIonViewWillEnter } from '@ionic/vue';
@@ -131,7 +110,6 @@ import {
   IonToolbar,
   IonTitle,
   IonContent,
-  IonFooter,
   IonButtons,
   IonButton,
   IonIcon,
@@ -152,12 +130,15 @@ import {
   checkmarkCircleOutline,
   timeOutline,
   closeCircleOutline,
-  homeOutline,
-  cubeOutline,
 } from 'ionicons/icons';
 import { type Order } from '@/types';
+import BottomNav from '@/components/BottomNav.vue';
+import { useSuccessModal } from '@/composables/useSuccessModal';
+import { useModals } from '@/composables/useModals';
 
 const router = useRouter();
+const { showSuccessModal } = useSuccessModal();
+const { showLoadingModal } = useModals();
 
 // State
 const selectedTab = ref('all');
@@ -171,11 +152,8 @@ const loadOrders = async () => {
   if (!email) return;
   loading.value = true;
   try {
-    const response = await fetch(`${API_BASE}/seller/orders?email=${encodeURIComponent(email)}`, {
-      headers: { Accept: 'application/json' },
-    });
-    const data = await response.json();
-    if (response.ok && data.orders) {
+    const data = await api.get(`/seller/orders?email=${encodeURIComponent(email)}`);
+    if (data.orders) {
       orders.value = data.orders.map((o: any) => ({
         id: o.id,
         customerName: o.customer_name,
@@ -313,85 +291,15 @@ const quickAction = async (order: any) => {
   }
 };
 
-const showLoadingModal = async () => {
-  const alert = await alertController.create({
-    cssClass: 'loading-modal',
-    message: 'Processing...',
-    buttons: [],
-  });
-  await alert.present();
-  return alert;
-};
-
 const updateOrderStatus = async (orderId: any, newStatus: any) => {
   const email = localStorage.getItem('userEmail');
   if (!email) return false;
   try {
-    const response = await fetch(`${API_BASE}/seller/orders/${orderId}/status`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ email, status: newStatus }),
-    });
-    return response.ok;
+    await api.post(`/seller/orders/${orderId}/status`, { email, status: newStatus });
+    return true;
   } catch {
     return false;
   }
-};
-
-const showSuccessModal = async (message: string) => {
-  const alert = await alertController.create({
-    cssClass: 'success-modal',
-    header: ' ',
-    message: message,
-    buttons: ['OK'],
-  });
-
-  await alert.present();
-
-  // Add the image after modal is presented
-  setTimeout(() => {
-    const alertElement = document.querySelector('.success-modal .alert-message');
-    if (alertElement) {
-      // Clear the text content
-      const textContent = alertElement.textContent;
-      alertElement.innerHTML = '';
-
-      // Create wrapper for centering
-      const wrapper = document.createElement('div');
-      wrapper.style.display = 'flex';
-      wrapper.style.flexDirection = 'column';
-      wrapper.style.alignItems = 'center';
-      wrapper.style.textAlign = 'center';
-
-      // Create and add the image
-      const img = document.createElement('img');
-      img.src = '/assets/images/checkmark_success.png';
-      img.style.width = '80px';
-      img.style.height = '80px';
-      img.style.margin = '0 auto 16px auto';
-      img.style.display = 'block';
-
-      // Create and add the text
-      const textDiv = document.createElement('div');
-      textDiv.textContent = textContent;
-      textDiv.style.fontSize = '18px';
-      textDiv.style.fontWeight = '600';
-      textDiv.style.color = '#1a1a1a';
-      textDiv.style.textAlign = 'center';
-
-      // Append to wrapper
-      wrapper.appendChild(img);
-      wrapper.appendChild(textDiv);
-
-      // Append wrapper to alert
-      alertElement.appendChild(wrapper);
-    }
-  }, 50);
-
-  // Auto dismiss after 2 seconds
-  setTimeout(() => {
-    alert.dismiss();
-  }, 2000);
 };
 
 const acceptOrder = async (order: any) => {
@@ -505,22 +413,7 @@ const showToast = async (message: string, color = 'dark') => {
   await toast.present();
 };
 
-// Bottom Navigation
-const goToHome = () => {
-  router.push('/home');
-};
 
-const goToProducts = () => {
-  router.push('/products');
-};
-
-const goToOrders = () => {
-  // Already on orders page
-};
-
-const goToProfile = () => {
-  router.push('/profile');
-};
 </script>
 
 <style scoped>
@@ -739,118 +632,6 @@ ion-segment-button {
 
   .order-total .amount {
     font-size: 16px;
-  }
-}
-
-/* Bottom Navigation */
-.bottom-nav {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  height: 60px;
-}
-
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  cursor: pointer;
-  color: #999;
-  transition: color 0.2s;
-}
-
-.nav-item ion-icon {
-  font-size: 24px;
-}
-
-.nav-item span {
-  font-size: 11px;
-  font-weight: 500;
-}
-
-.nav-item.active {
-  color: #4caf50;
-}
-
-.nav-item:active {
-  transform: scale(0.95);
-}
-
-/* Success Modal Styling */
-:deep(.success-modal .alert-wrapper) {
-  border-radius: 20px;
-  text-align: center;
-  max-width: 320px;
-  padding: 30px 20px;
-}
-
-:deep(.success-modal .alert-head) {
-  padding: 0;
-  min-height: 0;
-}
-
-:deep(.success-modal .alert-message) {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1a1a1a;
-  padding: 20px 10px;
-}
-
-:deep(.success-modal .alert-button-group) {
-  padding: 10px 0 0 0;
-}
-
-:deep(.success-modal button) {
-  background: #4caf50;
-  color: white;
-  font-weight: 600;
-  border-radius: 12px;
-  height: 44px;
-}
-
-/* Loading Modal */
-:deep(.loading-modal .alert-wrapper) {
-  border-radius: 20px;
-  text-align: center;
-  max-width: 260px;
-  padding: 40px 30px;
-  background: white;
-}
-:deep(.loading-modal .alert-head) {
-  display: none;
-}
-:deep(.loading-modal .alert-message) {
-  padding: 0;
-  position: relative;
-  padding-top: 56px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #1a1a1a;
-}
-:deep(.loading-modal .alert-message::before) {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  margin-left: -20px;
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #4caf50;
-  border-radius: 50%;
-  animation: loadingSpin 1s linear infinite;
-}
-:deep(.loading-modal .alert-button-group) {
-  display: none;
-}
-
-@keyframes loadingSpin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
   }
 }
 

@@ -294,10 +294,12 @@ import {
   checkmarkOutline,
   alertCircleOutline,
 } from 'ionicons/icons';
-import { API_BASE } from '@/config/api';
+import { api } from '@/utils/apiClient';
 import { type Product } from '@/types';
+import { useSuccessModal } from '@/composables/useSuccessModal';
 
 const router = useRouter();
+const { showSuccessModal } = useSuccessModal();
 
 const userEmail = localStorage.getItem('userEmail');
 const categories = ref([] as string[]);
@@ -357,15 +359,8 @@ const selectImage = () => {
     formData.append('image', file);
     formData.append('email', userEmail || '');
     try {
-      const res = await fetch(`${API_BASE}/seller/products/upload-image`, {
-        method: 'POST',
-        headers: { Accept: 'application/json' },
-        body: formData,
-      });
-      const data = await res.json();
-      if (res.ok) {
-        productImage.value = data.url;
-      }
+      const data = await api.post('/seller/products/upload-image', formData);
+      productImage.value = data.url;
     } catch (e: any) {
       console.error('Upload failed:', e);
     }
@@ -386,37 +381,28 @@ const saveWithStatus = async (status: string) => {
 
   saving.value = true;
   try {
-    const res = await fetch(`${API_BASE}/seller/products`, {
-      method: 'POST',
-      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: userEmail || '',
-        name: productName.value,
-        category: category.value,
-        description: description.value,
-        selling_unit: sellingUnit.value,
-        price: parseFloat(price.value),
-        minimum_order: minimumOrder.value ? parseFloat(minimumOrder.value) : null,
-        has_discount: hasDiscount.value,
-        discount_price: hasDiscount.value ? parseFloat(discountPrice.value) : null,
-        stock_quantity: parseFloat(stockQuantity.value),
-        sku: sku.value,
-        track_inventory: true,
-        origin: origin.value,
-        brand: brand.value,
-        is_featured: isFeatured.value,
-        is_active: isActive.value,
-        images: productImage.value ? [productImage.value] : [],
-        status,
-      }),
+    await api.post('/seller/products', {
+      email: userEmail || '',
+      name: productName.value,
+      category: category.value,
+      description: description.value,
+      selling_unit: sellingUnit.value,
+      price: parseFloat(price.value),
+      minimum_order: minimumOrder.value ? parseFloat(minimumOrder.value) : null,
+      has_discount: hasDiscount.value,
+      discount_price: hasDiscount.value ? parseFloat(discountPrice.value) : null,
+      stock_quantity: parseFloat(stockQuantity.value),
+      sku: sku.value,
+      track_inventory: true,
+      origin: origin.value,
+      brand: brand.value,
+      is_featured: isFeatured.value,
+      is_active: isActive.value,
+      images: productImage.value ? [productImage.value] : [],
+      status,
     });
 
-    if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.message || 'Failed to save product');
-    }
-
-    await showSuccessModal(status === 'draft' ? 'Draft saved!' : 'Product added successfully!');
+    await showSuccessModal({ message: status === 'draft' ? 'Draft saved!' : 'Product added successfully!', awaitDismiss: true });
     router.push('/products');
   } catch (e: any) {
     const alert = await alertController.create({
@@ -432,60 +418,6 @@ const saveWithStatus = async (status: string) => {
 
 const saveProduct = () => saveWithStatus('active');
 
-const showSuccessModal = async (message: string) => {
-  const alert = await alertController.create({
-    cssClass: 'success-modal',
-    header: ' ',
-    message: message,
-    buttons: ['OK'],
-  });
-
-  await alert.present();
-
-  // Add the image after modal is presented
-  setTimeout(() => {
-    const alertElement = document.querySelector('.success-modal .alert-message');
-    if (alertElement) {
-      // Clear the text content
-      const textContent = alertElement.textContent;
-      alertElement.innerHTML = '';
-
-      // Create wrapper for centering
-      const wrapper = document.createElement('div');
-      wrapper.style.display = 'flex';
-      wrapper.style.flexDirection = 'column';
-      wrapper.style.alignItems = 'center';
-      wrapper.style.textAlign = 'center';
-
-      // Create and add the image
-      const img = document.createElement('img');
-      img.src = '/assets/images/checkmark_success.png';
-      img.style.width = '80px';
-      img.style.height = '80px';
-      img.style.margin = '0 auto 16px auto';
-      img.style.display = 'block';
-
-      // Create and add the text
-      const textDiv = document.createElement('div');
-      textDiv.textContent = textContent;
-      textDiv.style.fontSize = '18px';
-      textDiv.style.fontWeight = '600';
-      textDiv.style.color = '#1a1a1a';
-      textDiv.style.textAlign = 'center';
-
-      // Append to wrapper
-      wrapper.appendChild(img);
-      wrapper.appendChild(textDiv);
-
-      // Append wrapper to alert
-      alertElement.appendChild(wrapper);
-    }
-  }, 50);
-
-  // Wait for modal to close
-  await alert.onDidDismiss();
-};
-
 const saveDraft = () => saveWithStatus('draft');
 
 onMounted(async () => {
@@ -494,20 +426,14 @@ onMounted(async () => {
     return;
   }
   try {
-    const [profileRes, locRes] = await Promise.all([
-      fetch(`${API_BASE}/seller/profile?email=${encodeURIComponent(userEmail || '')}`, {
-        headers: { Accept: 'application/json' },
-      }),
-      fetch(`${API_BASE}/locations`, {
-        headers: { Accept: 'application/json' },
-      }),
+    const [profileData, locData] = await Promise.all([
+      api.get(`/seller/profile?email=${encodeURIComponent(userEmail || '')}`),
+      api.get('/locations'),
     ]);
 
-    const profileData = await profileRes.json();
     verificationChoice.value = (profileData.user && profileData.user.verificationChoice) || '';
     categories.value = (profileData.user && profileData.user.categories) || [];
 
-    const locData = await locRes.json();
     const locs = locData.locations || [];
     const cityNames: string[] = [];
     locs.forEach((region: any) => {
@@ -922,38 +848,6 @@ onMounted(async () => {
   --border-radius: 12px;
   height: 48px;
   font-weight: 600;
-}
-
-/* Success Modal Styling */
-:deep(.success-modal .alert-wrapper) {
-  border-radius: 20px;
-  text-align: center;
-  max-width: 320px;
-  padding: 30px 20px;
-}
-
-:deep(.success-modal .alert-head) {
-  padding: 0;
-  min-height: 0;
-}
-
-:deep(.success-modal .alert-message) {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1a1a1a;
-  padding: 20px 10px;
-}
-
-:deep(.success-modal .alert-button-group) {
-  padding: 10px 0 0 0;
-}
-
-:deep(.success-modal button) {
-  background: #4caf50;
-  color: white;
-  font-weight: 600;
-  border-radius: 12px;
-  height: 44px;
 }
 
 /* Responsive */

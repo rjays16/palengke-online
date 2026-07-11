@@ -139,7 +139,7 @@ import {
   informationCircleOutline,
   shieldCheckmarkOutline,
 } from 'ionicons/icons';
-import { API_BASE } from '@/config/api';
+import { api } from '@/utils/apiClient';
 import { useRegistrationStore } from '@/stores/registration';
 
 const router = useRouter();
@@ -153,12 +153,9 @@ onMounted(async () => {
     router.replace(redirect);
   }
   try {
-    const res = await fetch(`${API_BASE}/settings`);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.allow_skip_verification !== undefined) {
-        allowSkip.value = data.allow_skip_verification === 'true';
-      }
+    const data = await api.get('/settings');
+    if (data.allow_skip_verification !== undefined) {
+      allowSkip.value = data.allow_skip_verification === 'true';
     }
   } catch {}
 });

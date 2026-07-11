@@ -87,7 +87,7 @@
 </template>
 
 <script setup lang="ts">
-import { API_BASE } from '@/config/api';
+import { api } from '@/utils/apiClient';
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import {
@@ -123,7 +123,11 @@ import {
   closeCircleOutline,
 } from 'ionicons/icons';
 import { type Notification } from '@/types';
+import { useSuccessModal } from '@/composables/useSuccessModal';
+import { useModals } from '@/composables/useModals';
 const router = useRouter();
+const { showSuccessModal } = useSuccessModal();
+const { showLoadingModal } = useModals();
 
 // State
 const selectedFilter = ref('all');
@@ -135,11 +139,8 @@ const loadNotifications = async () => {
   const email = localStorage.getItem('userEmail');
   if (!email) return;
   try {
-    const response = await fetch(`${API_BASE}/seller/notifications?email=${encodeURIComponent(email)}`, {
-      headers: { Accept: 'application/json' },
-    });
-    const data = await response.json();
-    if (response.ok && data.notifications) {
+    const data = await api.get(`/seller/notifications?email=${encodeURIComponent(email)}`);
+    if (data.notifications) {
       notifications.value = data.notifications;
     }
   } catch {
@@ -169,79 +170,6 @@ const filteredNotifications = computed(() => {
 
   return filtered;
 });
-
-// Success Modal Function
-const showSuccessModal = async (message: string) => {
-  const alert = await alertController.create({
-    cssClass: 'success-modal',
-    header: ' ',
-    message: message,
-    buttons: ['OK'],
-  });
-
-  await alert.present();
-
-  // Add the image after modal is presented
-  setTimeout(() => {
-    const alertElement = document.querySelector('.success-modal .alert-message');
-    if (alertElement) {
-      // Clear the text content
-      const textContent = alertElement.textContent;
-      alertElement.innerHTML = '';
-
-      // Create wrapper for centering
-      const wrapper = document.createElement('div');
-      wrapper.style.display = 'flex';
-      wrapper.style.flexDirection = 'column';
-      wrapper.style.alignItems = 'center';
-      wrapper.style.textAlign = 'center';
-
-      // Create and add the image
-      const img = document.createElement('img');
-      img.src = '/assets/images/checkmark_success.png';
-      img.style.width = '80px';
-      img.style.height = '80px';
-      img.style.margin = '0 auto 16px auto';
-      img.style.display = 'block';
-
-      // Create and add the text
-      const textDiv = document.createElement('div');
-      textDiv.textContent = textContent;
-      textDiv.style.fontSize = '18px';
-      textDiv.style.fontWeight = '600';
-      textDiv.style.color = '#1a1a1a';
-      textDiv.style.textAlign = 'center';
-
-      // Append to wrapper
-      wrapper.appendChild(img);
-      wrapper.appendChild(textDiv);
-
-      // Append wrapper to alert
-      alertElement.appendChild(wrapper);
-    }
-  }, 50);
-
-  // Auto dismiss after 2 seconds
-  setTimeout(() => {
-    alert.dismiss();
-  }, 2000);
-};
-
-// Loading Modal Function
-const showLoadingModal = async (message = 'Loading...') => {
-  const alert = await alertController.create({
-    cssClass: 'loading-modal-simple',
-    message: message,
-    buttons: [],
-  });
-
-  await alert.present();
-
-  // Auto dismiss after 1.5 seconds
-  setTimeout(() => {
-    alert.dismiss();
-  }, 1500);
-};
 
 // Methods
 const handleFilterChange = (event: any) => {
@@ -288,10 +216,7 @@ const handleNotificationClick = async (notification: any) => {
   const email = localStorage.getItem('userEmail');
   if (email) {
     try {
-      await fetch(`${API_BASE}/seller/notifications/${notification.id}/read?email=${encodeURIComponent(email)}`, {
-        method: 'POST',
-        headers: { Accept: 'application/json' },
-      });
+      await api.post(`/seller/notifications/${notification.id}/read?email=${encodeURIComponent(email)}`);
     } catch {
       // silent
     }
@@ -323,10 +248,7 @@ const markAllAsRead = async () => {
           const email = localStorage.getItem('userEmail');
           if (email) {
             try {
-              await fetch(`${API_BASE}/seller/notifications/read-all?email=${encodeURIComponent(email)}`, {
-                method: 'POST',
-                headers: { Accept: 'application/json' },
-              });
+              await api.post(`/seller/notifications/read-all?email=${encodeURIComponent(email)}`);
             } catch {
               // silent
             }
@@ -371,10 +293,7 @@ const showOptions = async () => {
                   const email = localStorage.getItem('userEmail');
                   if (email) {
                     try {
-                      await fetch(`${API_BASE}/seller/notifications?email=${encodeURIComponent(email)}`, {
-                        method: 'DELETE',
-                        headers: { Accept: 'application/json' },
-                      });
+                      await api.delete(`/seller/notifications?email=${encodeURIComponent(email)}`);
                     } catch {
                       // silent
                     }
@@ -614,84 +533,5 @@ ion-segment-button {
   }
 }
 
-/* Success Modal Styling */
-:deep(.success-modal .alert-wrapper) {
-  border-radius: 20px;
-  text-align: center;
-  max-width: 320px;
-  padding: 30px 20px;
-}
 
-:deep(.success-modal .alert-head) {
-  padding: 0;
-  min-height: 0;
-}
-
-:deep(.success-modal .alert-message) {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1a1a1a;
-  padding: 20px 10px;
-}
-
-:deep(.success-modal .alert-button-group) {
-  padding: 10px 0 0 0;
-}
-
-:deep(.success-modal button) {
-  background: #4caf50;
-  color: white;
-  font-weight: 600;
-  border-radius: 12px;
-  height: 44px;
-}
-
-/* Loading Modal Styling */
-:deep(.loading-modal-simple .alert-wrapper) {
-  border-radius: 20px;
-  text-align: center;
-  max-width: 280px;
-  padding: 50px 30px;
-  background: white;
-}
-
-:deep(.loading-modal-simple .alert-head) {
-  display: none;
-}
-
-:deep(.loading-modal-simple .alert-message) {
-  padding: 0;
-  position: relative;
-  padding-top: 70px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #1a1a1a;
-}
-
-:deep(.loading-modal-simple .alert-message::before) {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  margin-left: -25px;
-  width: 50px;
-  height: 50px;
-  border: 5px solid #f3f3f3;
-  border-top: 5px solid #1877f2;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-:deep(.loading-modal-simple .alert-button-group) {
-  display: none;
-}
 </style>

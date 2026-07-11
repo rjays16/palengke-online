@@ -348,28 +348,7 @@
     </div>
 
     <!-- Bottom Navigation -->
-    <ion-footer>
-      <ion-toolbar>
-        <div class="bottom-nav">
-          <div class="nav-item" @click="goToHome">
-            <ion-icon :icon="homeOutline"></ion-icon>
-            <span>Home</span>
-          </div>
-          <div class="nav-item" @click="goToProducts">
-            <ion-icon :icon="cubeOutline"></ion-icon>
-            <span>Products</span>
-          </div>
-          <div class="nav-item" @click="goToOrders">
-            <ion-icon :icon="receiptOutline"></ion-icon>
-            <span>Orders</span>
-          </div>
-          <div class="nav-item active" @click="goToProfile">
-            <ion-icon :icon="personOutline"></ion-icon>
-            <span>Profile</span>
-          </div>
-        </div>
-      </ion-toolbar>
-    </ion-footer>
+    <BottomNav active="profile" />
   </ion-page>
 </template>
 
@@ -428,11 +407,16 @@ import {
   businessOutline,
   checkmarkCircleOutline,
 } from 'ionicons/icons';
-import { API_BASE } from '@/config/api';
+import { api } from '@/utils/apiClient';
 import { useAuthStore } from '@/stores/auth';
 import { type SellerProfile, type OperatingHours, type PaymentMethod } from '@/types';
+import BottomNav from '@/components/BottomNav.vue';
+import { useSuccessModal } from '@/composables/useSuccessModal';
+import { useModals } from '@/composables/useModals';
 
 const router = useRouter();
+const { showSuccessModal } = useSuccessModal();
+const { showLoadingModal } = useModals();
 const auth = useAuthStore();
 
 // Profile Data
@@ -458,9 +442,8 @@ const loadProfile = async () => {
   if (!email) return;
 
   try {
-    const response = await fetch(`${API_BASE}/seller/profile?email=${encodeURIComponent(email)}`);
-    const data = await response.json();
-    if (response.ok && data.user) {
+    const data = await api.get(`/seller/profile?email=${encodeURIComponent(email)}`);
+    if (data.user) {
       const u = data.user;
       profileData.value = {
         ...profileData.value,
@@ -594,26 +577,17 @@ const saveOperatingHours = async () => {
   if (!email) return;
 
   showHoursModal.value = false;
-  await showLoadingModal('Saving operating hours...', false);
+  const loading = await showLoadingModal('Saving operating hours...');
 
   try {
-    const response = await fetch(`${API_BASE}/seller/profile`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, operating_hours: hoursString }),
-    });
+    await api.post('/seller/profile', { email, operating_hours: hoursString });
 
-    await dismissLoadingModal();
-
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.message || 'Failed to save');
-    }
+    await loading.dismiss();
 
     profileData.value.shopHours = hoursString;
     await showSuccessModal('Operating hours updated!');
   } catch (error: any) {
-    await dismissLoadingModal();
+    await loading.dismiss();
     const toast = await toastController.create({
       message: error.message || 'Failed to save operating hours',
       duration: 2000,
@@ -624,46 +598,15 @@ const saveOperatingHours = async () => {
   }
 };
 
-let loadingModalRef: any = null;
-
-// Loading Modal Function
-const showLoadingModal = async (message = 'Loading...', autoDismiss = true) => {
-  const alert = await alertController.create({
-    cssClass: 'loading-modal-simple',
-    message: message,
-    buttons: [],
-  });
-
-  await alert.present();
-  loadingModalRef = alert;
-
-  if (autoDismiss) {
-    setTimeout(() => {
-      alert.dismiss();
-      loadingModalRef = null;
-    }, 1500);
-  }
-};
-
-const dismissLoadingModal = async () => {
-  if (loadingModalRef) {
-    await loadingModalRef.dismiss();
-    loadingModalRef = null;
-  }
-};
-
 // Payment Methods
 const paymentMethods = ref([] as PaymentMethod[]);
 
 const loadSettings = async () => {
   try {
-    const response = await fetch(`${API_BASE}/settings`);
-    const data = await response.json();
-    if (response.ok) {
-      const val = data.enable_seller_payment_methods;
-      if (val !== undefined) {
-        paymentMethodsEnabled.value = val === 'true' || val === true;
-      }
+    const data = await api.get('/settings');
+    const val = data.enable_seller_payment_methods;
+    if (val !== undefined) {
+      paymentMethodsEnabled.value = val === 'true' || val === true;
     }
   } catch {
     // default to enabled on error
@@ -675,11 +618,8 @@ const loadPaymentMethods = async () => {
   if (!email) return;
 
   try {
-    const response = await fetch(`${API_BASE}/seller/payment-methods?email=${encodeURIComponent(email)}`);
-    const data = await response.json();
-    if (response.ok) {
-      paymentMethods.value = data.payment_methods || [];
-    }
+    const data = await api.get(`/seller/payment-methods?email=${encodeURIComponent(email)}`);
+    paymentMethods.value = data.payment_methods || [];
   } catch {
     // silent
   }
@@ -817,32 +757,22 @@ const showPaymentDetailsForm = async (selectedType: string) => {
           }
 
           alert.dismiss();
-          await showLoadingModal('Adding payment method...', false);
+          const loading = await showLoadingModal('Adding payment method...');
 
           try {
-            const response = await fetch(`${API_BASE}/seller/payment-methods`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                email: localStorage.getItem('userEmail') || '',
-                type: selectedType,
-                account_name: data.account_name,
-                account_number: data.account_number,
-                agreed: true,
-              }),
+            const result = await api.post('/seller/payment-methods', {
+              email: localStorage.getItem('userEmail') || '',
+              type: selectedType,
+              account_name: data.account_name,
+              account_number: data.account_number,
+              agreed: true,
             });
 
-            const result = await response.json();
-
-            if (!response.ok) {
-              throw new Error(result.message || 'Failed to add payment method');
-            }
-
-            await dismissLoadingModal();
+            await loading.dismiss();
             await showSuccessModal('Payment method added successfully!');
             await loadPaymentMethods();
           } catch (error: any) {
-            await dismissLoadingModal();
+            await loading.dismiss();
             const toast = await toastController.create({
               message: error.message || 'Failed to add payment method',
               duration: 2000,
@@ -868,22 +798,16 @@ const deletePaymentMethod = async (id: any) => {
         text: 'Remove',
         role: 'destructive',
         handler: async () => {
-          await showLoadingModal('Removing...', false);
+          const loading = await showLoadingModal('Removing...');
 
           try {
-            const response = await fetch(`${API_BASE}/seller/payment-methods/${id}`, {
-              method: 'DELETE',
-            });
+            await api.delete(`/seller/payment-methods/${id}`);
 
-            if (!response.ok) {
-              throw new Error('Failed to remove payment method');
-            }
-
-            await dismissLoadingModal();
+            await loading.dismiss();
             await showSuccessModal('Payment method removed successfully!');
             await loadPaymentMethods();
           } catch (error: any) {
-            await dismissLoadingModal();
+            await loading.dismiss();
             const toast = await toastController.create({
               message: error.message || 'Failed to remove payment method',
               duration: 2000,
@@ -897,63 +821,6 @@ const deletePaymentMethod = async (id: any) => {
     ],
   });
   await alert.present();
-};
-
-// Success Modal Function
-const showSuccessModal = async (message: string) => {
-  const alert = await alertController.create({
-    cssClass: 'success-modal',
-    header: ' ',
-    message: message,
-    buttons: ['OK'],
-  });
-
-  await alert.present();
-
-  // Add the image after modal is presented
-  setTimeout(() => {
-    const alertElement = document.querySelector('.success-modal .alert-message');
-    if (alertElement) {
-      // Clear the text content
-      const textContent = alertElement.textContent;
-      alertElement.innerHTML = '';
-
-      // Create wrapper for centering
-      const wrapper = document.createElement('div');
-      wrapper.style.display = 'flex';
-      wrapper.style.flexDirection = 'column';
-      wrapper.style.alignItems = 'center';
-      wrapper.style.textAlign = 'center';
-
-      // Create and add the image
-      const img = document.createElement('img');
-      img.src = '/assets/images/checkmark_success.png';
-      img.style.width = '80px';
-      img.style.height = '80px';
-      img.style.margin = '0 auto 16px auto';
-      img.style.display = 'block';
-
-      // Create and add the text
-      const textDiv = document.createElement('div');
-      textDiv.textContent = textContent;
-      textDiv.style.fontSize = '18px';
-      textDiv.style.fontWeight = '600';
-      textDiv.style.color = '#1a1a1a';
-      textDiv.style.textAlign = 'center';
-
-      // Append to wrapper
-      wrapper.appendChild(img);
-      wrapper.appendChild(textDiv);
-
-      // Append wrapper to alert
-      alertElement.appendChild(wrapper);
-    }
-  }, 50);
-
-  // Auto dismiss after 2 seconds
-  setTimeout(() => {
-    alert.dismiss();
-  }, 2000);
 };
 
 // Methods
@@ -1049,26 +916,17 @@ const changePhoto = async () => {
             return;
           }
 
-          await showLoadingModal('Removing photo...', false);
+          const loading = await showLoadingModal('Removing photo...');
 
           try {
-            const response = await fetch(`${API_BASE}/seller/profile`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-              body: JSON.stringify({ email, remove_avatar: true }),
-            });
+            await api.post('/seller/profile', { email, remove_avatar: true });
 
-            await dismissLoadingModal();
-
-            if (!response.ok) {
-              const err = await response.json();
-              throw new Error(err.message || 'Failed to remove photo');
-            }
+            await loading.dismiss();
 
             profileData.value.avatar = null;
             await showSuccessModal('Photo removed!');
           } catch (error: any) {
-            await dismissLoadingModal();
+            await loading.dismiss();
             const toast = await toastController.create({
               message: error.message || 'Failed to remove photo',
               duration: 2000,
@@ -1108,27 +966,17 @@ const uploadAvatar = async (dataUrl: string) => {
   const email = localStorage.getItem('userEmail');
   if (!email) return;
 
-  await showLoadingModal('Uploading photo...', false);
+  const loading = await showLoadingModal('Uploading photo...');
 
   try {
-    const response = await fetch(`${API_BASE}/seller/profile`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ email, avatar: dataUrl }),
-    });
+    const result = await api.post('/seller/profile', { email, avatar: dataUrl });
 
-    await dismissLoadingModal();
+    await loading.dismiss();
 
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.message || 'Failed to upload photo');
-    }
-
-    const result = await response.json();
     profileData.value.avatar = result.user?.avatar || null;
             await showSuccessModal('Photo updated!');
           } catch (error: any) {
-            await dismissLoadingModal();
+            await loading.dismiss();
             const toast = await toastController.create({
               message: error.message || 'Failed to upload photo',
       duration: 2000,
@@ -1184,7 +1032,7 @@ const editField = async (field: string) => {
             }
 
             alert.dismiss();
-            await showLoadingModal('Saving...', false);
+            const loading = await showLoadingModal('Saving...');
 
             try {
               const body: Record<string, any> = { email };
@@ -1196,24 +1044,15 @@ const editField = async (field: string) => {
               if (field === 'phone') body.phone = data.value;
               if (field === 'email') body.new_email = data.value;
 
-              const response = await fetch(`${API_BASE}/seller/profile`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-                body: JSON.stringify(body),
-              });
+              await api.post('/seller/profile', body);
 
-              await dismissLoadingModal();
-
-              if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.message || 'Failed to save');
-              }
+              await loading.dismiss();
 
               if (field === 'email') {
                 localStorage.setItem('userEmail', data.value);
               }
             } catch (error: any) {
-              await dismissLoadingModal();
+              await loading.dismiss();
               const toast = await toastController.create({
                 message: error.message || 'Failed to save',
                 duration: 2000,
@@ -1307,32 +1146,22 @@ const changePin = async () => {
           }
 
           alert.dismiss();
-          await showLoadingModal('Updating PIN...', false);
+          const loading = await showLoadingModal('Updating PIN...');
 
           try {
-            const response = await fetch(`${API_BASE}/seller/device/change-pin`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                email: localStorage.getItem('userEmail') || '',
-                device_id: localStorage.getItem('deviceId') || '',
-                current_pin: data.currentPin,
-                new_pin: data.newPin,
-              }),
+            await api.post('/seller/device/change-pin', {
+              email: localStorage.getItem('userEmail') || '',
+              device_id: localStorage.getItem('deviceId') || '',
+              current_pin: data.currentPin,
+              new_pin: data.newPin,
             });
 
-            const result = await response.json();
-
-            if (!response.ok) {
-              throw new Error(result.message || 'Failed to change PIN');
-            }
-
             // Dismiss loading before showing success
-            await dismissLoadingModal();
+            await loading.dismiss();
             await showSuccessModal('PIN changed successfully!');
           } catch (error: any) {
             // Dismiss loading before showing error
-            await dismissLoadingModal();
+            await loading.dismiss();
             const toast = await toastController.create({
               message: error.message || 'Failed to change PIN',
               duration: 2000,
@@ -1446,11 +1275,7 @@ const handleLogout = async () => {
           await loading.present();
 
           try {
-            await fetch(`${API_BASE}/seller/devices/logout-current`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email }),
-            });
+            await api.post('/seller/devices/logout-current', { email });
           } catch {
             // silent
           }
@@ -1525,23 +1350,6 @@ const showSuccessLogout = async () => {
   setTimeout(() => {
     alert.dismiss();
   }, 1500);
-};
-
-// Bottom Navigation
-const goToHome = () => {
-  router.push('/home');
-};
-
-const goToProducts = () => {
-  router.push('/products');
-};
-
-const goToOrders = () => {
-  router.push('/orders');
-};
-
-const goToProfile = () => {
-  // Already on profile page
 };
 
 onMounted(() => {
@@ -1833,122 +1641,6 @@ onMounted(() => {
   .stat-value {
     font-size: 20px;
   }
-}
-
-/* Bottom Navigation */
-.bottom-nav {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  height: 60px;
-}
-
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  cursor: pointer;
-  color: #999;
-  transition: color 0.2s;
-}
-
-.nav-item ion-icon {
-  font-size: 24px;
-}
-
-.nav-item span {
-  font-size: 11px;
-  font-weight: 500;
-}
-
-.nav-item.active {
-  color: #4caf50;
-}
-
-.nav-item:active {
-  transform: scale(0.95);
-}
-
-/* Success Modal Styling */
-:deep(.success-modal .alert-wrapper) {
-  border-radius: 20px;
-  text-align: center;
-  max-width: 320px;
-  padding: 30px 20px;
-}
-
-:deep(.success-modal .alert-head) {
-  padding: 0;
-  min-height: 0;
-}
-
-:deep(.success-modal .alert-message) {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1a1a1a;
-  padding: 20px 10px;
-}
-
-:deep(.success-modal .alert-button-group) {
-  padding: 10px 0 0 0;
-}
-
-:deep(.success-modal button) {
-  background: #4caf50;
-  color: white;
-  font-weight: 600;
-  border-radius: 12px;
-  height: 44px;
-}
-
-/* Loading Modal Styling */
-:deep(.loading-modal-simple .alert-wrapper) {
-  border-radius: 20px;
-  text-align: center;
-  max-width: 280px;
-  padding: 50px 30px;
-  background: white;
-}
-
-:deep(.loading-modal-simple .alert-head) {
-  display: none;
-}
-
-:deep(.loading-modal-simple .alert-message) {
-  padding: 0;
-  position: relative;
-  padding-top: 70px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #1a1a1a;
-}
-
-:deep(.loading-modal-simple .alert-message::before) {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 50%;
-  margin-left: -25px;
-  width: 50px;
-  height: 50px;
-  border: 5px solid #f3f3f3;
-  border-top: 5px solid #1877f2;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-:deep(.loading-modal-simple .alert-button-group) {
-  display: none;
 }
 
 /* Payment Methods */

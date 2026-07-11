@@ -120,21 +120,7 @@
               </div>
             </div>
 
-            <div class="otp-inputs">
-              <input
-                v-for="(digit, index) in otpDigits"
-                :key="index"
-                :ref="(el) => (otpInputs[index] = el)"
-                v-model="otpDigits[index]"
-                type="tel"
-                maxlength="1"
-                class="otp-input"
-                :class="{ error: otpError }"
-                @input="onOtpInput(index)"
-                @keydown="onOtpKeydown($event, index)"
-                @paste="onOtpPaste"
-              />
-            </div>
+            <OtpInput ref="otpInputRef" v-model="otpCodeStr" :length="6" type="otp" @complete="onOtpComplete" :error="!!otpError" />
 
             <div v-if="otpError" class="otp-error">
               <ion-icon :icon="alertCircleOutline"></ion-icon>
@@ -151,7 +137,7 @@
             <ion-button
               expand="block"
               class="verify-button"
-              :disabled="otpValue.length !== 6 || isVerifyingOtp"
+              :disabled="!isOtpComplete || isVerifyingOtp"
               @click="verifyOtp"
             >
               <span v-if="!isVerifyingOtp">Verify Code</span>
@@ -180,7 +166,7 @@
 </template>
 
 <script setup lang="ts">
-import { API_BASE } from '@/config/api';
+import { api } from '@/utils/apiClient';
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon, IonSpinner, toastController } from '@ionic/vue';
@@ -197,6 +183,7 @@ import {
 } from 'ionicons/icons';
 import { useRegistrationStore } from '@/stores/registration';
 import { type CountryCode } from '@/types';
+import OtpInput from '@/components/OtpInput.vue';
 
 const router = useRouter();
 const reg = useRegistrationStore();
@@ -208,8 +195,7 @@ const countryCode = ref('+63');
 
 onMounted(async () => {
   try {
-    const res = await fetch(`${API_BASE}/countries`);
-    const data = await res.json();
+    const data = await api.get<{ countries: any[] }>('/countries');
     countryCodes.value = data.countries.map((c: any) => ({
       code: c.dial_code,
       country: c.name,
@@ -236,8 +222,8 @@ const emailExistsError = ref('');
 
 // OTP data
 const showOtpSection = ref(false);
-const otpDigits = ref(['', '', '', '', '', '']);
-const otpInputs = ref([] as any[]);
+const otpInputRef = ref<InstanceType<typeof OtpInput>>();
+const otpCodeStr = ref('');
 const otpError = ref('');
 const resendTimer = ref(0);
 const isSendingOtp = ref(false);
@@ -278,8 +264,10 @@ const isPhoneValid = computed(() => {
 });
 
 const otpValue = computed(() => {
-  return otpDigits.value.join('');
+  return otpInputRef.value?.code ?? otpCodeStr.value;
 });
+
+const isOtpComplete = computed(() => otpInputRef.value?.isComplete ?? false);
 
 const isFormValid = computed(() => {
   return (
@@ -302,26 +290,19 @@ const checkEmailExists = async () => {
   emailExistsError.value = '';
 
   try {
-    const response = await fetch(`${API_BASE}/seller/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.value }),
-    });
+    const data = await api.post('/seller/login', { email: email.value }, { skipAuth: true });
 
-    if (response.status === 404) {
+    // If we got a 200-level response, the email is already registered
+    emailExistsError.value = 'This email is already registered.';
+  } catch (error: any) {
+    if (error.status === 404) {
       emailExistsError.value = '';
-    } else if (response.status === 200) {
-      emailExistsError.value = 'This email is already registered.';
+    } else if (error.status && error.data?.status === 'rejected') {
+      emailExistsError.value = '';
     } else {
-      const data = await response.json();
-      if (data.status === 'rejected') {
-        emailExistsError.value = '';
-      } else {
-        emailExistsError.value = 'This email is already registered.';
-      }
+      // Network or other error — treat as email not found
+      emailExistsError.value = '';
     }
-  } catch {
-    emailExistsError.value = '';
   } finally {
     isCheckingEmail.value = false;
   }
@@ -418,17 +399,7 @@ const sendOtp = async () => {
   isSendingOtp.value = true;
 
   try {
-    const response = await fetch(`${API_BASE}/send-otp`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.value }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to send code.');
-    }
+    const data = await api.post('/send-otp', { email: email.value }, { skipAuth: true });
 
     const toast = await toastController.create({
       message: `Verification code sent to ${maskedEmail.value}`,
@@ -442,9 +413,7 @@ const sendOtp = async () => {
     startResendTimer();
 
     setTimeout(() => {
-      if (otpInputs.value[0]) {
-        otpInputs.value[0].focus();
-      }
+      otpInputRef.value?.focus();
     }, 300);
   } catch (error: any) {
     const toast = await toastController.create({
@@ -464,7 +433,8 @@ const resendOtp = async () => {
   if (resendTimer.value > 0) return;
 
   // Clear OTP inputs
-  otpDigits.value = ['', '', '', '', '', ''];
+  otpCodeStr.value = '';
+  otpInputRef.value?.reset();
   otpError.value = '';
 
   // Resend
@@ -485,45 +455,15 @@ const startResendTimer = () => {
 // Change email
 const changeEmail = () => {
   showOtpSection.value = false;
-  otpDigits.value = ['', '', '', '', '', ''];
+  otpCodeStr.value = '';
+  otpInputRef.value?.reset();
   otpError.value = '';
   isEmailVerified.value = false;
   resendTimer.value = 0;
 };
 
-// OTP input handler
-const onOtpInput = (index: any) => {
-  // Only allow numbers
-  otpDigits.value[index] = otpDigits.value[index].replace(/\D/g, '');
-
-  // Clear error
-  otpError.value = '';
-
-  // Auto-focus next input
-  if (otpDigits.value[index] && index < 5) {
-    otpInputs.value[index + 1]?.focus();
-  }
-};
-
-// OTP keydown handler
-const onOtpKeydown = (event: any, index: any) => {
-  // Backspace handling
-  if (event.key === 'Backspace' && !otpDigits.value[index] && index > 0) {
-    otpInputs.value[index - 1]?.focus();
-  }
-};
-
-// OTP paste handler
-const onOtpPaste = (event: any) => {
-  event.preventDefault();
-  const pastedData = event.clipboardData.getData('text').replace(/\D/g, '');
-
-  if (pastedData.length === 6) {
-    for (let i = 0; i < 6; i++) {
-      otpDigits.value[i] = pastedData[i] || '';
-    }
-    otpInputs.value[5]?.focus();
-  }
+const onOtpComplete = () => {
+  verifyOtp();
 };
 
 // Verify OTP
@@ -534,18 +474,7 @@ const verifyOtp = async () => {
   otpError.value = '';
 
   try {
-    const response = await fetch(`${API_BASE}/verify-otp`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.value, otp: otpValue.value }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      otpError.value = data.message || 'Invalid code. Please try again.';
-      return;
-    }
+    const data = await api.post('/verify-otp', { email: email.value, otp: otpValue.value }, { skipAuth: true });
 
     isEmailVerified.value = true;
     showOtpSection.value = false;
@@ -953,37 +882,6 @@ const handleNext = () => {
   font-weight: 700;
 }
 
-/* OTP Inputs */
-.otp-inputs {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-
-.otp-input {
-  width: 48px;
-  height: 56px;
-  border: 2px solid var(--color-info);
-  border-radius: 12px;
-  text-align: center;
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--color-text-primary);
-  background: var(--color-input-bg);
-  transition: all 0.2s;
-}
-
-.otp-input:focus {
-  outline: none;
-  border-color: var(--color-info);
-  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.2);
-}
-
-.otp-input.error {
-  border-color: var(--color-error);
-}
-
 /* OTP Error */
 .otp-error {
   display: flex;
@@ -1104,12 +1002,6 @@ const handleNext = () => {
 
   .step-container {
     padding: 20px 16px 100px 16px;
-  }
-
-  .otp-input {
-    width: 44px;
-    height: 52px;
-    font-size: 22px;
   }
 }
 </style>

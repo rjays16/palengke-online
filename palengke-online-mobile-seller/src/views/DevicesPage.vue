@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { API_BASE } from '@/config/api';
+import { api } from '@/utils/apiClient';
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
@@ -85,18 +85,11 @@ const currentDeviceId = ref(localStorage.getItem('deviceId') || '');
 const fetchDevices = async () => {
   loading.value = true;
   try {
-    const response = await fetch(`${API_BASE}/seller/devices`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: userEmail.value,
-        current_device_id: currentDeviceId.value,
-      }),
+    const data = await api.post('/seller/devices', {
+      email: userEmail.value,
+      current_device_id: currentDeviceId.value,
     });
-    const data = await response.json();
-    if (response.ok) {
-      devices.value = data.devices || [];
-    }
+    devices.value = data.devices || [];
   } catch {
     // silent
   } finally {
@@ -133,11 +126,7 @@ const confirmLogout = async (device: Device) => {
 
 const logoutCurrent = async () => {
   try {
-    await fetch(`${API_BASE}/seller/devices/logout-current`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: userEmail.value }),
-    });
+    await api.post('/seller/devices/logout-current', { email: userEmail.value });
   } catch {
     // silent
   }
@@ -148,24 +137,17 @@ const logoutCurrent = async () => {
 
 const removeDevice = async (device: Device) => {
   try {
-    const response = await fetch(`${API_BASE}/seller/devices/remove`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: userEmail.value,
-        device_id: device.device_id,
-      }),
+    await api.post('/seller/devices/remove', {
+      email: userEmail.value,
+      device_id: device.device_id,
     });
-
-    if (response.ok) {
-      devices.value = devices.value.filter((d) => d.id !== device.id);
-      const toast = await alertController.create({
-        header: 'Removed',
-        message: 'Device logged out successfully.',
-        buttons: ['OK'],
-      });
-      await toast.present();
-    }
+    devices.value = devices.value.filter((d) => d.id !== device.id);
+    const toast = await alertController.create({
+      header: 'Removed',
+      message: 'Device logged out successfully.',
+      buttons: ['OK'],
+    });
+    await toast.present();
   } catch {
     // silent
   }

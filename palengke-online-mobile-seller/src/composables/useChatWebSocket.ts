@@ -1,5 +1,6 @@
 import { ref, onUnmounted } from 'vue'
 import { API_BASE } from '@/config/api'
+import { api } from '@/utils/apiClient'
 
 export interface ChatEvents {
   onConversationsUpdate?: (conversations: any[]) => void
@@ -122,10 +123,7 @@ export function useChatWebSocket(email: string | null, events: ChatEvents = {}) 
       if (!email) return
       const prev = conversationCount
       try {
-        const res = await fetch(`${API_BASE}/seller/conversations?email=${encodeURIComponent(email)}`, {
-          headers: { Accept: 'application/json' },
-        })
-        const data = await res.json()
+        const data = await api.get(`/seller/conversations?email=${encodeURIComponent(email)}`)
         const list = data.conversations || []
         if (list.length > prev && prev > 0) {
           const hasUnmutedNew = list.some((c: any) => !c.muted)
@@ -146,11 +144,7 @@ export function useChatWebSocket(email: string | null, events: ChatEvents = {}) 
     messagePollTimer = setInterval(async () => {
       if (!email) return
       try {
-        const res = await fetch(
-          `${API_BASE}/seller/conversations/${conversationId}?email=${encodeURIComponent(email)}`,
-          { headers: { Accept: 'application/json' } },
-        )
-        const data = await res.json()
+        const data = await api.get(`/seller/conversations/${conversationId}?email=${encodeURIComponent(email)}`)
         events.onMessagesUpdate?.(conversationId, data.messages || [])
       } catch { /* silent */ }
     }, 3000)
