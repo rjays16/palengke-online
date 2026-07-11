@@ -387,6 +387,25 @@ const processPayment = async () => {
     transactionId.value = 'TXN' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
     paymentDate.value = new Date().toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     paymentStep.value = 'success';
+
+    // Create a notification for the seller
+    const email = localStorage.getItem('userEmail');
+    if (email) {
+      api.post('/seller/notifications', {
+        email,
+        type: 'payment',
+        title: 'Subscription Activated',
+        message: `Your ${selectedPlan.value?.name} plan has been activated via ${selectedPM.value?.name}. Amount: ₱${selectedPlan.value?.price.toLocaleString()}`,
+        link: '/plans',
+        data: {
+          transaction_id: transactionId.value,
+          plan_id: selected.value,
+          plan_name: selectedPlan.value?.name,
+          amount: selectedPlan.value?.price,
+          payment_method: selectedPM.value?.name,
+        },
+      }).catch(() => {});
+    }
   } catch (err: any) {
     if (err && err.code === 'insufficient_balance') {
       shortfall.value = err.shortfall || 0;

@@ -71,6 +71,46 @@ class SellerNotificationController extends Controller
         return response()->json(['message' => 'Notification deleted.']);
     }
 
+    public function store(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'type' => 'required|string|max:255',
+            'title' => 'required|string|max:255',
+            'message' => 'required|string',
+            'link' => 'nullable|string|max:255',
+            'data' => 'nullable|array',
+        ]);
+
+        $seller = SellerRegistration::where('email', $request->email)->first();
+
+        if (!$seller) {
+            return response()->json(['message' => 'Seller not found.'], 404);
+        }
+
+        $notification = Notification::create([
+            'seller_registration_id' => $seller->id,
+            'type' => $request->type,
+            'title' => $request->title,
+            'message' => $request->message,
+            'link' => $request->link,
+            'data' => $request->data,
+            'is_read' => false,
+        ]);
+
+        return response()->json([
+            'message' => 'Notification created.',
+            'notification' => [
+                'id' => $notification->id,
+                'type' => $notification->type,
+                'title' => $notification->title,
+                'message' => $notification->message,
+                'time' => $notification->created_at->toIso8601String(),
+                'read' => false,
+            ],
+        ], 201);
+    }
+
     public function clearAll(Request $request)
     {
         $request->validate(['email' => 'required|email']);

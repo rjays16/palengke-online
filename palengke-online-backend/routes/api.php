@@ -174,6 +174,7 @@ Route::post('/seller/wallet/top-up', [WalletController::class, 'topUp']);
 
 // Seller app — notifications
 Route::get('/seller/notifications', [SellerNotificationController::class, 'index']);
+Route::post('/seller/notifications', [SellerNotificationController::class, 'store']);
 Route::delete('/seller/notifications', [SellerNotificationController::class, 'clearAll']);
 Route::post('/seller/notifications/read-all', [SellerNotificationController::class, 'markAllRead']);
 Route::post('/seller/notifications/{id}/read', [SellerNotificationController::class, 'markRead']);
