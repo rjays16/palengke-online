@@ -40,6 +40,8 @@ use App\Http\Controllers\Api\DriverAuthController;
 use App\Http\Controllers\Api\DriverDeviceController;
 use App\Http\Controllers\Api\DriverDocumentController;
 use App\Http\Controllers\Api\LicenceController;
+use App\Http\Controllers\Api\DriverBadgeController;
+use App\Http\Controllers\Api\DriverPerformanceController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -106,6 +108,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/driver/settings', [DriverRegistrationController::class, 'updateSettings']);
     Route::get('/driver/licence', [LicenceController::class, 'show']);
     Route::post('/driver/licence/pay', [LicenceController::class, 'pay']);
+    Route::get('/driver/badges', [DriverBadgeController::class, 'index']);
+    Route::post('/driver/badges/mark-read', [DriverBadgeController::class, 'markRead']);
+    Route::get('/driver/performance', [DriverPerformanceController::class, 'show']);
 });
 
 // Seller app login

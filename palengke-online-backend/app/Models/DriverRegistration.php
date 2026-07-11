@@ -33,4 +33,11 @@ class DriverRegistration extends Model
     {
         return $this->hasMany(Order::class, 'driver_registration_id');
     }
+
+    public function badges()
+    {
+        return $this->belongsToMany(Badge::class, 'driver_badge')
+            ->withPivot('is_new', 'awarded_at')
+            ->withTimestamps();
+    }
 }

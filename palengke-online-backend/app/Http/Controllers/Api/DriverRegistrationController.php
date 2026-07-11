@@ -276,22 +276,25 @@ class DriverRegistrationController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|min:2',
+            'firstName' => 'required|string|min:1',
+            'middleName' => 'nullable|string',
+            'lastName' => 'required|string|min:1',
             'phone' => 'required|string',
-            'vehicle' => 'required|string',
+            'vehicleType' => 'required|string',
+            'vehicleModel' => 'nullable|string',
+            'vehicleColor' => 'nullable|string',
             'plate' => 'required|string',
         ]);
 
-        $nameParts = explode(' ', $validated['name'], 2);
-        $firstName = $nameParts[0];
-        $lastName = $nameParts[1] ?? '';
-
         $registration = DriverRegistration::create([
-            'first_name' => $firstName,
-            'last_name' => $lastName,
+            'first_name' => $validated['firstName'],
+            'middle_name' => $validated['middleName'] ?? '',
+            'last_name' => $validated['lastName'],
             'phone' => $validated['phone'],
             'full_phone' => $validated['phone'],
-            'vehicle_type' => $validated['vehicle'],
+            'vehicle_type' => $validated['vehicleType'],
+            'vehicle_model' => $validated['vehicleModel'] ?? '',
+            'vehicle_color' => $validated['vehicleColor'] ?? '',
             'plate_number' => $validated['plate'],
             'email' => 'driver-' . uniqid() . '@temp.com',
             'country_code' => '+63',
@@ -303,8 +306,6 @@ class DriverRegistrationController extends Controller
             'license_type' => '',
             'restriction_code' => '',
             'expiry_date' => now()->toDateString(),
-            'vehicle_model' => '',
-            'vehicle_color' => '',
             'status' => 'approved',
         ]);
 
@@ -319,16 +320,16 @@ class DriverRegistrationController extends Controller
         $registration = DriverRegistration::findOrFail($this->resolveId($id));
 
         $validated = $request->validate([
-            'name' => 'required|string|min:2',
+            'firstName' => 'required|string|min:1',
+            'middleName' => 'nullable|string',
+            'lastName' => 'required|string|min:1',
             'phone' => 'required|string',
-            'vehicle' => 'required|string',
+            'vehicleType' => 'required|string',
+            'vehicleModel' => 'nullable|string',
+            'vehicleColor' => 'nullable|string',
             'plate' => 'required|string',
             'status' => 'required|string|in:active,idle,offline',
         ]);
-
-        $nameParts = explode(' ', $validated['name'], 2);
-        $firstName = $nameParts[0];
-        $lastName = $nameParts[1] ?? '';
 
         $statusMap = [
             'active' => 'approved',
@@ -337,11 +338,14 @@ class DriverRegistrationController extends Controller
         ];
 
         $registration->update([
-            'first_name' => $firstName,
-            'last_name' => $lastName,
+            'first_name' => $validated['firstName'],
+            'middle_name' => $validated['middleName'] ?? '',
+            'last_name' => $validated['lastName'],
             'phone' => $validated['phone'],
             'full_phone' => $validated['phone'],
-            'vehicle_type' => $validated['vehicle'],
+            'vehicle_type' => $validated['vehicleType'],
+            'vehicle_model' => $validated['vehicleModel'] ?? '',
+            'vehicle_color' => $validated['vehicleColor'] ?? '',
             'plate_number' => $validated['plate'],
             'status' => $statusMap[$validated['status']] ?? 'approved',
         ]);

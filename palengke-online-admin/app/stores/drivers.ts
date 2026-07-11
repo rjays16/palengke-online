@@ -19,6 +19,9 @@ export const useDriversStore = defineStore("drivers", () => {
   function mapDriver(raw: any) {
     return {
       id: raw.id,
+      firstName: raw.firstName || "",
+      middleName: raw.middleName || "",
+      lastName: raw.lastName || "",
       name: [raw.firstName, raw.middleName, raw.lastName].filter(Boolean).join(" ") || "—",
       phone: raw.contact || "",
       vehicle: [raw.vehicleType, raw.vehicleModel].filter(Boolean).join(" ") || "—",
@@ -98,9 +101,13 @@ export const useDriversStore = defineStore("drivers", () => {
   }
 
   async function addDriver(data: {
-    name: string;
+    firstName: string;
+    middleName?: string;
+    lastName: string;
     phone: string;
-    vehicle: string;
+    vehicleType: string;
+    vehicleModel?: string;
+    vehicleColor?: string;
     plate: string;
   }) {
     saving.value = true;
@@ -129,9 +136,13 @@ export const useDriversStore = defineStore("drivers", () => {
   async function updateDriver(
     id: number | string,
     data: {
-      name: string;
+      firstName: string;
+      middleName?: string;
+      lastName: string;
       phone: string;
-      vehicle: string;
+      vehicleType: string;
+      vehicleModel?: string;
+      vehicleColor?: string;
       plate: string;
       status: string;
     },

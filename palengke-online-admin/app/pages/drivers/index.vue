@@ -120,11 +120,31 @@
         <div class="modal-body form-body">
           <div class="form-row">
             <div class="form-group flex-1">
-              <label>Full Name <span class="req">*</span></label>
+              <label>First Name <span class="req">*</span></label>
               <input
-                v-model="form.name"
+                v-model="form.firstName"
                 type="text"
-                placeholder="e.g. Mark Reyes"
+                placeholder="e.g. Allan"
+                class="form-input"
+              />
+            </div>
+            <div class="form-group flex-1">
+              <label>Middle Name</label>
+              <input
+                v-model="form.middleName"
+                type="text"
+                placeholder="e.g. Tenchavez"
+                class="form-input"
+              />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>Last Name <span class="req">*</span></label>
+              <input
+                v-model="form.lastName"
+                type="text"
+                placeholder="e.g. Condiman"
                 class="form-input"
               />
             </div>
@@ -140,11 +160,31 @@
           </div>
           <div class="form-row">
             <div class="form-group flex-1">
-              <label>Vehicle <span class="req">*</span></label>
+              <label>Vehicle Type <span class="req">*</span></label>
               <input
-                v-model="form.vehicle"
+                v-model="form.vehicleType"
                 type="text"
-                placeholder="e.g. Honda Click 125"
+                placeholder="e.g. Motorcycle"
+                class="form-input"
+              />
+            </div>
+            <div class="form-group flex-1">
+              <label>Vehicle Model</label>
+              <input
+                v-model="form.vehicleModel"
+                type="text"
+                placeholder="e.g. Honda Click 125i"
+                class="form-input"
+              />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label>Vehicle Color</label>
+              <input
+                v-model="form.vehicleColor"
+                type="text"
+                placeholder="e.g. Black"
                 class="form-input"
               />
             </div>
@@ -263,18 +303,26 @@ const goToDriver = (id) => navigateTo("/drivers/" + id);
 const showForm = ref(false);
 const editing = ref(null);
 const form = ref({
-  name: "",
+  firstName: "",
+  middleName: "",
+  lastName: "",
   phone: "",
-  vehicle: "",
+  vehicleType: "",
+  vehicleModel: "",
+  vehicleColor: "",
   plate: "",
   status: "active",
 });
 
 function resetForm() {
   form.value = {
-    name: "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
     phone: "",
-    vehicle: "",
+    vehicleType: "",
+    vehicleModel: "",
+    vehicleColor: "",
     plate: "",
     status: "active",
   };
@@ -289,9 +337,13 @@ function openAdd() {
 function openEdit(d) {
   editing.value = d;
   form.value = {
-    name: d.name,
+    firstName: d.firstName || "",
+    middleName: d.middleName || "",
+    lastName: d.lastName || "",
     phone: d.phone,
-    vehicle: d.vehicle,
+    vehicleType: d.vehicleType || "",
+    vehicleModel: d.vehicleModel || "",
+    vehicleColor: d.vehicleColor || "",
     plate: d.plate,
     status: d.status,
   };
@@ -306,9 +358,10 @@ function closeForm() {
 
 const formValid = computed(() => {
   return (
-    form.value.name &&
+    form.value.firstName &&
+    form.value.lastName &&
     form.value.phone &&
-    form.value.vehicle &&
+    form.value.vehicleType &&
     form.value.plate
   );
 });

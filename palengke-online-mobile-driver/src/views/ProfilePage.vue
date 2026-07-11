@@ -4,9 +4,6 @@
       <ion-toolbar color="success">
         <ion-title>My Profile</ion-title>
         <ion-buttons slot="end">
-          <ion-button @click="editProfile">
-            <ion-icon :icon="createOutline"></ion-icon>
-          </ion-button>
           <ion-button @click="showHelp">
             <ion-icon :icon="helpCircleOutline"></ion-icon>
           </ion-button>
@@ -23,9 +20,6 @@
             <img v-if="profileData.avatar" :src="profileData.avatar" alt="Profile">
             <ion-icon v-else :icon="personOutline"></ion-icon>
           </div>
-          <ion-button class="change-photo-btn" fill="clear" size="small" @click="changePhoto">
-            <ion-icon :icon="cameraOutline"></ion-icon>
-          </ion-button>
         </div>
         <h2 class="profile-name">{{ profileData.name }}</h2>
         <p class="profile-type">{{ profileData.vehicleType }} Driver</p>
@@ -144,29 +138,26 @@
       <div class="section">
         <h3 class="section-title">Personal Information</h3>
         <div class="info-list">
-          <div class="info-item" @click="editField('name')">
+          <div class="info-item">
             <div class="info-icon"><ion-icon :icon="personOutline"></ion-icon></div>
             <div class="info-content">
               <p class="info-label">Full Name</p>
               <p class="info-value">{{ profileData.name }}</p>
             </div>
-            <ion-icon :icon="chevronForwardOutline" class="info-arrow"></ion-icon>
           </div>
-          <div class="info-item" @click="editField('phone')">
+          <div class="info-item">
             <div class="info-icon"><ion-icon :icon="callOutline"></ion-icon></div>
             <div class="info-content">
               <p class="info-label">Phone Number</p>
               <p class="info-value">{{ profileData.phone }}</p>
             </div>
-            <ion-icon :icon="chevronForwardOutline" class="info-arrow"></ion-icon>
           </div>
-          <div class="info-item" @click="editField('email')">
+          <div class="info-item">
             <div class="info-icon"><ion-icon :icon="mailOutline"></ion-icon></div>
             <div class="info-content">
               <p class="info-label">Email Address</p>
               <p class="info-value">{{ profileData.email }}</p>
             </div>
-            <ion-icon :icon="chevronForwardOutline" class="info-arrow"></ion-icon>
           </div>
         </div>
       </div>
@@ -326,11 +317,11 @@ import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonFooter, IonButton, IonButtons, IonIcon,
-  alertController, actionSheetController, toastController
+  alertController
 } from '@ionic/vue';
 import {
-  createOutline, helpCircleOutline, personOutline,
-  cameraOutline, shieldCheckmarkOutline, chevronForwardOutline,
+  helpCircleOutline, personOutline,
+  shieldCheckmarkOutline, chevronForwardOutline,
   happyOutline, callOutline, mailOutline, bicycleOutline,
   cardOutline, colorPaletteOutline, checkmarkCircleOutline,
   settingsOutline, logOutOutline,
@@ -389,6 +380,8 @@ async function fetchProfile() {
 onMounted(async () => {
   await Promise.all([
     fetchProfile(),
+    fetchBadges(),
+    fetchPerformance(),
     licenceStore.checkLicenceEnabled(),
     licenceStore.fetchLicence(),
   ]);
@@ -414,72 +407,63 @@ const ratingCounts = {};
 const getRatingCount = (star) => ratingCounts[star] || 0;
 const getRatingWidth = () => 0;
 
+const iconMap = {
+  trophyOutline,
+  flashOutline,
+  starOutline,
+  heartOutline,
+  checkmarkCircleOutline,
+  closeCircleOutline,
+  cubeOutline,
+  timeOutline,
+  warningOutline,
+  thumbsUpOutline,
+};
+
 const badges = ref([]);
 const improvements = ref([]);
 const documentsPreview = ref([]);
 
+async function fetchBadges() {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/driver/badges`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      badges.value = (data.badges || []).filter((b) => b.earned).map((b) => ({
+        id: b.id,
+        name: b.name,
+        icon: iconMap[b.icon] || helpCircleOutline,
+        color: b.color,
+        isNew: b.isNew,
+        count: b.isNew ? 1 : 0,
+      }));
+    }
+  } catch {}
+}
+
+async function fetchPerformance() {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/driver/performance`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      improvements.value = (data.improvements || []).map((item) => ({
+        ...item,
+        icon: iconMap[item.icon] || helpCircleOutline,
+      }));
+      profileData.value.totalTrips = data.totalTrips || 0;
+    }
+  } catch {}
+}
+
 // Methods
-const editProfile = async () => {
-  const alert = await alertController.create({
-    header: 'Edit Profile',
-    buttons: [
-      {
-        text: 'Personal Info',
-        handler: () => editField('name')
-      },
-      {
-        text: 'Vehicle Info',
-        handler: () => editVehicleInfo()
-      },
-      { text: 'Cancel', role: 'cancel' }
-    ]
-  });
-  await alert.present();
-};
-
-const editVehicleInfo = async () => {
-  const alert = await alertController.create({
-    header: 'Edit Vehicle Info',
-    inputs: [
-      { name: 'vehicleType', type: 'text', value: profileData.value.vehicleType, placeholder: 'Vehicle Type' },
-      { name: 'vehicleModel', type: 'text', value: profileData.value.vehicleModel, placeholder: 'Vehicle Model' },
-      { name: 'plateNumber', type: 'text', value: profileData.value.plateNumber, placeholder: 'Plate Number' },
-      { name: 'vehicleColor', type: 'text', value: profileData.value.vehicleColor, placeholder: 'Vehicle Color' }
-    ],
-    buttons: [
-      { text: 'Cancel', role: 'cancel' },
-      {
-        text: 'Save',
-        handler: async (data) => {
-          if (data.vehicleType) profileData.value.vehicleType = data.vehicleType;
-          if (data.vehicleModel) profileData.value.vehicleModel = data.vehicleModel;
-          if (data.plateNumber) profileData.value.plateNumber = data.plateNumber;
-          if (data.vehicleColor) profileData.value.vehicleColor = data.vehicleColor;
-          await showSuccessModal('Vehicle info updated!');
-        }
-      }
-    ]
-  });
-  await alert.present();
-};
-
-const changePhoto = async () => {
-  const actionSheet = await actionSheetController.create({
-    header: 'Change Profile Photo',
-    buttons: [
-      {
-        text: 'Use Default Photo',
-        icon: personOutline,
-        handler: () => {
-          profileData.value.avatar = 'https://randomuser.me/api/portraits/men/32.jpg';
-        }
-      },
-      { text: 'Cancel', role: 'cancel' }
-    ]
-  });
-  await actionSheet.present();
-};
-
 const showSafetyReport = async () => {
   const alert = await alertController.create({
     header: 'Driving Safety Report',
@@ -496,72 +480,6 @@ const showBadgeInfo = async (badge) => {
     buttons: ['Close']
   });
   await alert.present();
-};
-
-const editField = async (field) => {
-  const fieldNames = { name: 'Full Name', phone: 'Phone Number', email: 'Email Address' };
-  const alert = await alertController.create({
-    header: `Edit ${fieldNames[field]}`,
-    inputs: [{ name: 'value', type: field === 'email' ? 'email' : field === 'phone' ? 'tel' : 'text', value: profileData.value[field] }],
-    buttons: [
-      { text: 'Cancel', role: 'cancel' },
-      {
-        text: 'Save',
-        handler: async (data) => {
-          if (data.value) {
-            profileData.value[field] = data.value;
-            await showSuccessModal('Updated successfully!');
-          }
-        }
-      }
-    ]
-  });
-  await alert.present();
-};
-
-const showSuccessModal = async (message) => {
-  const alert = await alertController.create({
-    cssClass: 'success-modal',
-    header: ' ',
-    message: message,
-    buttons: ['OK']
-  });
-  
-  await alert.present();
-  
-  setTimeout(() => {
-    const alertElement = document.querySelector('.success-modal .alert-message');
-    if (alertElement) {
-      const textContent = alertElement.textContent;
-      alertElement.innerHTML = '';
-      
-      const wrapper = document.createElement('div');
-      wrapper.style.display = 'flex';
-      wrapper.style.flexDirection = 'column';
-      wrapper.style.alignItems = 'center';
-      wrapper.style.textAlign = 'center';
-      
-      const img = document.createElement('img');
-      img.src = '/assets/images/checkmark_success.png';
-      img.style.width = '80px';
-      img.style.height = '80px';
-      img.style.margin = '0 auto 16px auto';
-      img.style.display = 'block';
-      
-      const textDiv = document.createElement('div');
-      textDiv.textContent = textContent;
-      textDiv.style.fontSize = '18px';
-      textDiv.style.fontWeight = '600';
-      textDiv.style.color = '#1a1a1a';
-      textDiv.style.textAlign = 'center';
-      
-      wrapper.appendChild(img);
-      wrapper.appendChild(textDiv);
-      alertElement.appendChild(wrapper);
-    }
-  }, 50);
-  
-  await alert.onDidDismiss();
 };
 
 const handleLogout = async () => {
@@ -607,13 +525,6 @@ const goToLicencePayment = () => router.push('/licence-payment');
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-.change-photo-btn {
-  position: absolute; bottom: 0; right: 0;
-  --background: white; --color: #4CAF50;
-  --border-radius: 50%; width: 32px; height: 32px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
 
 .profile-name { font-size: 22px; font-weight: 700; margin: 0 0 4px 0; }
 .profile-type { font-size: 14px; margin: 0 0 20px 0; opacity: 0.9; }
@@ -755,8 +666,6 @@ const goToLicencePayment = () => router.push('/licence-payment');
 .info-content { flex: 1; }
 .info-label { font-size: 12px; color: #999; margin: 0 0 2px 0; }
 .info-value { font-size: 14px; font-weight: 600; color: #1a1a1a; margin: 0; }
-.info-arrow { font-size: 18px; color: #ccc; }
-
 /* Palengke Licence */
 .licence-card {
   background: #f8f9fa; border-radius: 14px;
