@@ -17,7 +17,7 @@
           <p class="form-subtitle">Sign in to your admin account</p>
         </div>
 
-        <form class="login-form" @submit.prevent="handleLogin">
+        <form class="login-form" @submit.prevent="handleLogin($event)">
           <div
             class="field-group"
             :class="{
@@ -253,15 +253,23 @@ const validatePassword = () => {
   return true;
 };
 
-const handleLogin = async () => {
+const handleLogin = async (event) => {
+  if (event) event.preventDefault();
   try {
     auth.loginError = "";
     const emailOk = validateEmail();
     const passOk = validatePassword();
     if (!emailOk || !passOk) return;
+    auth.isLoading = true;
+    const start = Date.now();
     const success = await auth.login(form.value.email, form.value.password);
-    const redirect = new URLSearchParams(window.location.search).get("redirect") || "/dashboard";
-    if (success) await navigateTo(redirect);
+    const elapsed = Date.now() - start;
+    if (elapsed < 500) await new Promise((r) => setTimeout(r, 500 - elapsed));
+    auth.isLoading = false;
+    if (success) {
+      const redirect = new URLSearchParams(window.location.search).get("redirect") || "/dashboard";
+      await navigateTo(redirect);
+    }
   } catch (e) {
     auth.loginError = "An unexpected error occurred. Please try again.";
     auth.isLoading = false;

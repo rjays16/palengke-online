@@ -35,7 +35,6 @@ export const useAuthStore = defineStore("auth", () => {
   const canAccessSettings = computed(() => isSuperAdmin.value);
 
   async function login(email: string, password: string) {
-    isLoading.value = true;
     loginError.value = "";
 
     try {
@@ -51,11 +50,9 @@ export const useAuthStore = defineStore("auth", () => {
         localStorage.setItem(AUTH_TOKEN_KEY, response.token);
       }
 
-      isLoading.value = false;
       return true;
     } catch (err: any) {
       loginError.value = err?.data?.message || err?.data?.email?.[0] || "Invalid email or password";
-      isLoading.value = false;
       return false;
     }
   }
