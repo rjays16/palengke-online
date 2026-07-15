@@ -789,6 +789,30 @@
     </div>
   </div>
 
+  <!-- Inactivity Modal -->
+  <div class="modal-overlay inactivity-overlay" v-if="showInactivityModal" @click.self="stayActive">
+    <div class="modal-card modal-sm inactivity-card">
+      <div class="inactivity-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="12 6 12 12 16 14" />
+        </svg>
+      </div>
+      <div class="modal-body inactivity-body">
+        <p class="inactivity-title">Are you still there?</p>
+        <p class="inactivity-desc">You've been inactive for a while. For security, you'll be logged out soon.</p>
+        <div class="inactivity-countdown">
+          <span class="countdown-num">{{ inactivityCountdown }}</span>
+          <span class="countdown-label">seconds remaining</span>
+        </div>
+      </div>
+      <div class="modal-actions inactivity-actions">
+        <button class="modal-btn secondary" @click="doInactivityLogout">Logout</button>
+        <button class="modal-btn primary" @click="stayActive">Stay Logged In</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Logout Loading Overlay -->
   <div class="logout-loading-overlay" v-if="loggingOut">
     <div class="logout-loading-card">
@@ -837,6 +861,53 @@ const showUserMenu = ref(false);
 const showNotifPanel = ref(false);
 const showLogoutModal = ref(false);
 const loggingOut = ref(false);
+
+// Inactivity tracking
+const showInactivityModal = ref(false);
+const inactivityCountdown = ref(30);
+let inactivityTimer = null;
+let countdownTimer = null;
+const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+const COUNTDOWN_SECONDS = 30;
+
+function resetInactivityTimer() {
+  if (import.meta.server) return;
+  clearTimeout(inactivityTimer);
+  clearInterval(countdownTimer);
+  showInactivityModal.value = false;
+  inactivityCountdown.value = COUNTDOWN_SECONDS;
+  inactivityTimer = setTimeout(() => {
+    showInactivityModal.value = true;
+    inactivityCountdown.value = COUNTDOWN_SECONDS;
+    countdownTimer = setInterval(() => {
+      inactivityCountdown.value--;
+      if (inactivityCountdown.value <= 0) {
+        clearInterval(countdownTimer);
+        doInactivityLogout();
+      }
+    }, 1000);
+  }, INACTIVITY_TIMEOUT);
+}
+
+function onUserActivity() {
+  if (!showInactivityModal.value) {
+    resetInactivityTimer();
+  }
+}
+
+function stayActive() {
+  showInactivityModal.value = false;
+  resetInactivityTimer();
+}
+
+async function doInactivityLogout() {
+  showInactivityModal.value = false;
+  clearTimeout(inactivityTimer);
+  clearInterval(countdownTimer);
+  loggingOut.value = true;
+  await auth.logout();
+  router.push("/login");
+}
 
 // Global search
 const searchQuery = ref("");
@@ -1011,6 +1082,18 @@ onMounted(() => {
   setInterval(() => {
     notificationsStore.fetchNotifications();
   }, 10000);
+
+  // Inactivity tracking
+  const activityEvents = ["mousedown", "mousemove", "keydown", "scroll", "touchstart", "click"];
+  activityEvents.forEach((evt) => document.addEventListener(evt, onUserActivity, { passive: true }));
+  resetInactivityTimer();
+});
+
+onUnmounted(() => {
+  clearTimeout(inactivityTimer);
+  clearInterval(countdownTimer);
+  const activityEvents = ["mousedown", "mousemove", "keydown", "scroll", "touchstart", "click"];
+  activityEvents.forEach((evt) => document.removeEventListener(evt, onUserActivity));
 });
 
 function handleNotifClick(n) {
@@ -3117,4 +3200,87 @@ html.dark-mode {
   border-color: rgba(5, 150, 105, 0.3) !important;
   color: #34d399 !important;
 }
+
+/* ── Inactivity Modal ─────────────────────── */
+.inactivity-overlay {
+  backdrop-filter: blur(4px);
+}
+.inactivity-card {
+  text-align: center;
+  max-width: 380px;
+  animation: modalIn 0.25s ease;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.inactivity-icon-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 28px 0 0;
+}
+.inactivity-icon-wrap svg {
+  width: 56px;
+  height: 56px;
+  color: #f59e0b;
+  animation: pulse-icon 2s ease-in-out infinite;
+}
+@keyframes pulse-icon {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.8; }
+}
+.inactivity-body {
+  padding: 16px 24px 0;
+}
+.inactivity-title {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 6px;
+}
+.inactivity-desc {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+.inactivity-countdown {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  padding: 10px 20px;
+}
+.countdown-num {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: #d97706;
+  line-height: 1;
+  min-width: 28px;
+  text-align: center;
+}
+.countdown-label {
+  font-size: 12px;
+  color: #92400e;
+  font-weight: 500;
+}
+.inactivity-actions {
+  padding: 16px 24px 24px;
+  border-top: 1px solid #f3f4f6;
+}
+
+/* Dark mode */
+.dark-mode .inactivity-title { color: #f1f5f9; }
+.dark-mode .inactivity-desc { color: #94a3b8; }
+.dark-mode .inactivity-countdown {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.25);
+}
+.dark-mode .countdown-num { color: #fbbf24; }
+.dark-mode .countdown-label { color: #d97706; }
+.dark-mode .inactivity-actions { border-top-color: #1e293b; }
 </style>
