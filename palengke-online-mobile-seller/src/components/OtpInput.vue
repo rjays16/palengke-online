@@ -1,22 +1,25 @@
 <template>
-  <div :class="`${type}-inputs`">
+  <form :class="`${type}-inputs`" autocomplete="off" @submit.prevent>
     <input
       v-for="(digit, index) in digits"
       :key="index"
       :ref="(el: any) => (inputRefs[index] = el)"
       v-model="digits[index]"
-      type="tel"
+      type="text"
+      inputmode="numeric"
       maxlength="1"
       :class="[`${type}-box`, { filled: digits[index], error }]"
+      autocomplete="one-time-code"
+      data-lpignore="true"
       @input="handleInput(index, $event)"
       @keydown="handleKeydown(index, $event)"
       @paste="handlePaste"
     />
-  </div>
+  </form>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 
 const props = withDefaults(
   defineProps<{
@@ -115,6 +118,14 @@ const focus = () => {
 };
 
 onMounted(() => {
+  // Clear any browser autofill after it happens
+  setTimeout(() => {
+    digits.value = Array(props.length).fill('');
+    emit('update:modelValue', '');
+    inputRefs.value.forEach((input) => {
+      if (input) input.value = '';
+    });
+  }, 100);
   if (props.autoFocus) {
     setTimeout(() => inputRefs.value[0]?.focus(), 300);
   }

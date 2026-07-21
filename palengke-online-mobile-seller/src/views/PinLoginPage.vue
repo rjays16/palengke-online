@@ -23,7 +23,7 @@
           <p class="email-address">{{ maskedEmail }}</p>
         </div>
 
-        <OtpInput ref="pinInputRef" v-model="pinCodeStr" :length="5" type="pin" @complete="onPinComplete" />
+        <OtpInput ref="pinInputRef" :key="otpKey" v-model="pinCodeStr" :length="5" type="pin" @complete="onPinComplete" />
 
         <div class="options-section">
           <button class="switch-account-btn" @click="goToLogin">Sign in with different account</button>
@@ -40,7 +40,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onActivated } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage,
@@ -146,6 +146,7 @@ const maskedEmail = computed(() => {
 const pinInputRef = ref();
 const pinCodeStr = ref('');
 const isVerifying = ref(false);
+const otpKey = ref(0);
 
 const isCodeComplete = computed(() => pinInputRef.value?.isComplete ?? false);
 
@@ -249,6 +250,9 @@ const handleForgotPin = async () => {
 };
 
 onMounted(async () => {
+  otpKey.value++;
+  pinCodeStr.value = '';
+
   auth.initFromStorage();
   userEmail.value = auth.userEmail || '';
   deviceId.value = auth.deviceId || '';
@@ -256,7 +260,6 @@ onMounted(async () => {
     router.replace('/login');
     return;
   }
-  // Verify PIN exists on backend
   try {
     const data = await api.post('/seller/device/status', { email: userEmail.value, device_id: deviceId.value }, { skipAuth: true });
     if (!data.hasPin) {
@@ -265,7 +268,6 @@ onMounted(async () => {
       return;
     }
   } catch {
-    // fallback — rely on store
     if (!auth.hasPin) {
       router.replace('/login');
       return;
@@ -274,6 +276,11 @@ onMounted(async () => {
   setTimeout(() => {
     pinInputRef.value?.focus();
   }, 300);
+});
+
+onActivated(() => {
+  otpKey.value++;
+  pinCodeStr.value = '';
 });
 </script>
 
