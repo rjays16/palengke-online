@@ -42,6 +42,7 @@ use App\Http\Controllers\Api\DriverDocumentController;
 use App\Http\Controllers\Api\LicenceController;
 use App\Http\Controllers\Api\DriverBadgeController;
 use App\Http\Controllers\Api\DriverPerformanceController;
+use App\Http\Controllers\Api\DriverNotificationController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -115,6 +116,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/driver/history', [DriverRegistrationController::class, 'driverHistory']);
     Route::get('/driver/orders', [DriverRegistrationController::class, 'orders']);
     Route::get('/driver/earnings', [DriverRegistrationController::class, 'earnings']);
+    Route::get('/driver/notifications', [DriverNotificationController::class, 'index']);
+    Route::get('/driver/notifications/unread-count', [DriverNotificationController::class, 'unreadCount']);
+    Route::post('/driver/notifications/read-all', [DriverNotificationController::class, 'markAllRead']);
+    Route::post('/driver/notifications/{id}/read', [DriverNotificationController::class, 'markRead']);
+    Route::delete('/driver/notifications/{id}', [DriverNotificationController::class, 'destroy']);
+    Route::delete('/driver/notifications', [DriverNotificationController::class, 'clearAll']);
+    Route::post('/driver/orders/{id}/accept', [DriverRegistrationController::class, 'acceptOrder']);
 });
 
 // Seller app login

@@ -289,18 +289,37 @@ const acceptOrder = async (order) => {
         text: 'Accept',
         handler: async () => {
           const token = getToken();
-          if (token) {
-            try {
-              await fetch(`${API_BASE}/api/driver/orders/${order.id}/accept`, {
-                method: 'POST',
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                  'Content-Type': 'application/json',
-                },
+          if (!token) return;
+          try {
+            const res = await fetch(`${API_BASE}/api/driver/orders/${order.id}/accept`, {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+            });
+            if (!res.ok) {
+              const toast = await toastController.create({
+                message: 'Failed to accept order. It may no longer be available.',
+                duration: 3000,
+                color: 'danger',
+                position: 'top',
               });
-            } catch {}
+              await toast.present();
+              await fetchOrders();
+              return;
+            }
+          } catch {
+            const toast = await toastController.create({
+              message: 'Network error. Please try again.',
+              duration: 3000,
+              color: 'danger',
+              position: 'top',
+            });
+            await toast.present();
+            return;
           }
-          order.status = 'active';
+          await fetchOrders();
           await showSuccessModal('Order accepted!\nHead to pickup location.');
           selectedTab.value = 'active';
           router.push('/active-delivery');

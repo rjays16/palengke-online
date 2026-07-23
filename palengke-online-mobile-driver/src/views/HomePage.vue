@@ -284,6 +284,7 @@ const router = useRouter();
 const licenceStore = useLicenceStore();
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 let activeDeliveryInterval = null;
+let notificationCountInterval = null;
 
 function getToken() {
   if (typeof localStorage === 'undefined') return null;
@@ -296,11 +297,14 @@ onMounted(async () => {
   fetchRecentDeliveries();
   fetchActiveDelivery();
   fetchDashboardStats();
+  fetchNotificationCount();
   activeDeliveryInterval = setInterval(fetchActiveDelivery, 30000);
+  notificationCountInterval = setInterval(fetchNotificationCount, 15000);
 });
 
 onUnmounted(() => {
   if (activeDeliveryInterval) clearInterval(activeDeliveryInterval);
+  if (notificationCountInterval) clearInterval(notificationCountInterval);
 });
 
 // Driver Data
@@ -414,6 +418,20 @@ const fetchRecentDeliveries = async () => {
     if (res.ok) {
       const data = await res.json();
       recentDeliveries.value = data.deliveries || [];
+    }
+  } catch {}
+};
+
+const fetchNotificationCount = async () => {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/driver/notifications/unread-count`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      notificationCount.value = data.unread_count || 0;
     }
   } catch {}
 };

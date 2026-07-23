@@ -8,7 +8,7 @@ use App\Models\SellerRegistration;
 class Notification extends Model
 {
     protected $fillable = [
-        'seller_registration_id', 'type', 'title', 'message', 'link', 'data', 'is_read',
+        'seller_registration_id', 'driver_registration_id', 'type', 'title', 'category', 'message', 'link', 'data', 'is_read',
     ];
 
     protected $casts = [
@@ -18,6 +18,11 @@ class Notification extends Model
 
     public function seller()
     {
-        $this->belongsTo(SellerRegistration::class, 'seller_registration_id');
+        return $this->belongsTo(SellerRegistration::class, 'seller_registration_id');
+    }
+
+    public function driver()
+    {
+        return $this->belongsTo(DriverRegistration::class, 'driver_registration_id');
     }
 }

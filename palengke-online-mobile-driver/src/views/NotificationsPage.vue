@@ -91,12 +91,11 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonButtons, IonBackButton, IonButton, IonIcon,
-  IonSegment, IonSegmentButton, IonLabel,
   alertController, actionSheetController, toastController
 } from '@ionic/vue';
 import {
@@ -105,12 +104,18 @@ import {
   warningOutline, informationCircleOutline, trophyOutline,
   starOutline, closeCircleOutline
 } from 'ionicons/icons';
-import { mockNotifications } from '@/mock/notifications';
 
 const router = useRouter();
-const selectedFilter = ref('all');
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+let pollInterval = null;
 
-const notifications = ref(mockNotifications);
+function getToken() {
+  if (typeof localStorage === 'undefined') return null;
+  return localStorage.getItem('token');
+}
+
+const selectedFilter = ref('all');
+const notifications = ref([]);
 
 const unreadCount = computed(() => notifications.value.filter(n => !n.read).length);
 
@@ -130,13 +135,47 @@ const getNotifIcon = (type) => {
   return icons[type] || informationCircleOutline;
 };
 
-const handleNotifClick = (notif) => {
-  notif.read = true;
+const fetchNotifications = async () => {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/driver/notifications`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      notifications.value = data.notifications || [];
+    }
+  } catch {}
+};
+
+const handleNotifClick = async (notif) => {
+  if (!notif.read) {
+    const token = getToken();
+    if (token) {
+      try {
+        await fetch(`${API_BASE}/api/driver/notifications/${notif.id}/read`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } catch {}
+    }
+    notif.read = true;
+  }
   if (notif.type === 'tip') router.push('/tip-received');
   if (notif.type === 'order') router.push('/orders');
 };
 
 const markAllRead = async () => {
+  const token = getToken();
+  if (token) {
+    try {
+      await fetch(`${API_BASE}/api/driver/notifications/read-all`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch {}
+  }
   notifications.value.forEach(n => n.read = true);
   const toast = await toastController.create({ message: 'All marked as read', duration: 2000, color: 'medium', position: 'top' });
   await toast.present();
@@ -148,6 +187,15 @@ const showOptions = async () => {
     buttons: [
       { text: 'Mark All as Read', handler: () => markAllRead() },
       { text: 'Clear All', role: 'destructive', handler: async () => {
+        const token = getToken();
+        if (token) {
+          try {
+            await fetch(`${API_BASE}/api/driver/notifications`, {
+              method: 'DELETE',
+              headers: { Authorization: `Bearer ${token}` },
+            });
+          } catch {}
+        }
         notifications.value = [];
         const toast = await toastController.create({ message: 'All notifications cleared', duration: 2000, color: 'medium', position: 'top' });
         await toast.present();
@@ -157,11 +205,18 @@ const showOptions = async () => {
   });
   await actionSheet.present();
 };
+
+onMounted(() => {
+  fetchNotifications();
+  pollInterval = setInterval(fetchNotifications, 15000);
+});
+
+onUnmounted(() => {
+  if (pollInterval) clearInterval(pollInterval);
+});
 </script>
 
 <style scoped>
-.notif-content { --background: #f8f9fa; }
-
 .notif-content { --background: #f8f9fa; }
 
 /* Custom Tabs */

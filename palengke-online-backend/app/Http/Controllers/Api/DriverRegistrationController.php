@@ -13,6 +13,7 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class DriverRegistrationController extends Controller
 {
@@ -511,8 +512,8 @@ class DriverRegistrationController extends Controller
         return [
             'id' => (string) $order->id,
             'status' => $driverStatus,
-            'sellerName' => $order->seller->store_name ?? $order->seller->first_name ?? 'Store',
-            'pickupAddress' => $order->seller->address ?? $order->seller->city ?? 'Pickup Location',
+            'sellerName' => $order->seller?->store_name ?? $order->seller?->first_name ?? 'Store',
+            'pickupAddress' => $order->seller?->address ?? $order->seller?->city ?? 'Pickup Location',
             'customerName' => $order->customer_name,
             'deliveryAddress' => $order->delivery_address,
             'distance' => 0,
@@ -652,6 +653,52 @@ class DriverRegistrationController extends Controller
             'week' => $buildStats($weekOrders),
             'month' => $buildStats($monthOrders),
             'chart' => $buildChart($weekStart, $now->copy()->endOfWeek()),
+        ]);
+    }
+
+    public function acceptOrder(Request $request, $id)
+    {
+        $driver = $request->user();
+
+        if ($driver->status !== 'approved') {
+            return response()->json(['message' => 'Your account is not approved.'], 403);
+        }
+
+        $order = DB::transaction(function () use ($id, $driver) {
+            $order = Order::whereNull('driver_registration_id')
+                ->where('status', 'pending')
+                ->where('id', $id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$order) {
+                return null;
+            }
+
+            $order->update([
+                'driver_registration_id' => $driver->id,
+                'status' => 'assigned',
+            ]);
+
+            return $order;
+        });
+
+        if (!$order) {
+            return response()->json(['message' => 'Order is no longer available.'], 404);
+        }
+
+        Notification::create([
+            'type' => 'order_accepted',
+            'title' => 'Order Accepted',
+            'message' => "You accepted Order #{$order->id}. Head to pickup.",
+            'category' => 'orders',
+            'driver_registration_id' => $driver->id,
+            'data' => ['order_id' => $order->id],
+        ]);
+
+        return response()->json([
+            'message' => 'Order accepted successfully.',
+            'order' => $this->formatOrderForDriver($order->fresh()->load('seller'), 'active'),
         ]);
     }
 
