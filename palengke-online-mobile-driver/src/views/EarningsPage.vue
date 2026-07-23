@@ -118,8 +118,8 @@
           <ion-icon :icon="chevronForwardOutline"></ion-icon>
         </div>
 
-        <!-- Weekly Chart (only for week/month view) -->
-        <div class="chart-card" v-if="selectedPeriod === 'week' || selectedPeriod === 'month'">
+        <!-- Earnings Chart -->
+        <div class="chart-card">
           <h3 class="chart-title">Earnings Chart</h3>
           <div class="bar-chart">
             <div
