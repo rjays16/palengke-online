@@ -265,7 +265,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
@@ -281,13 +281,13 @@ import {
   helpCircleOutline, informationCircleOutline,
   closeCircleOutline, cardOutline
 } from 'ionicons/icons';
-import { mockActiveDelivery } from '@/mock/home';
 import { useLicenceStore } from '@/composables/useLicenceStore';
 
 
 const router = useRouter();
 const licenceStore = useLicenceStore();
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+let activeDeliveryInterval = null;
 
 function getToken() {
   if (typeof localStorage === 'undefined') return null;
@@ -298,6 +298,12 @@ onMounted(async () => {
   await licenceStore.checkLicenceEnabled();
   licenceStore.fetchLicence();
   fetchRecentDeliveries();
+  fetchActiveDelivery();
+  activeDeliveryInterval = setInterval(fetchActiveDelivery, 30000);
+});
+
+onUnmounted(() => {
+  if (activeDeliveryInterval) clearInterval(activeDeliveryInterval);
 });
 
 // Driver Data
@@ -341,7 +347,33 @@ const activeHours = ref(3.5);
 const weekEarnings = ref(4250);
 
 // Active Delivery (null if no active delivery)
-const activeDelivery = ref(mockActiveDelivery);
+const activeDelivery = ref(null);
+
+const fetchActiveDelivery = async () => {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/driver/orders`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const activeOrders = data.active || [];
+      if (activeOrders.length > 0) {
+        const order = activeOrders[0];
+        activeDelivery.value = {
+          id: order.id,
+          customerName: order.customerName,
+          address: order.deliveryAddress,
+          amount: order.totalAmount,
+          status: 'delivering',
+        };
+      } else {
+        activeDelivery.value = null;
+      }
+    }
+  } catch {}
+};
 
 // Recent Deliveries
 const recentDeliveries = ref([]);
