@@ -2,21 +2,90 @@
   <ion-app>
     <SplashScreen />
     <ion-router-outlet />
+
+    <!-- Inactivity Modal -->
+    <div class="inactivity-overlay" v-if="showInactivityModal" @click.prevent>
+      <div class="inactivity-modal">
+        <h3 class="inactivity-title">Session Expired</h3>
+        <p class="inactivity-desc">
+          You have been inactive for 5 minutes. You will be logged out for security.
+        </p>
+        <button class="inactivity-ok-btn" @click="handleInactivityOk">OK</button>
+      </div>
+    </div>
   </ion-app>
 </template>
 
-<script>
+<script setup>
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { IonApp, IonRouterOutlet } from '@ionic/vue';
+import { useRouter } from 'vue-router';
 import SplashScreen from './components/SplashScreen.vue';
 
-export default {
-  name: 'App',
-  components: {
-    IonApp,
-    IonRouterOutlet,
-    SplashScreen
+const router = useRouter();
+
+const INACTIVITY_TIMEOUT = 5 * 60 * 1000;
+const showInactivityModal = ref(false);
+let inactivityTimer = null;
+
+function clearInactivityTimer() {
+  if (inactivityTimer) {
+    clearTimeout(inactivityTimer);
+    inactivityTimer = null;
   }
-};
+}
+
+function resetInactivityTimer() {
+  clearInactivityTimer();
+  if (!showInactivityModal.value) {
+    inactivityTimer = setTimeout(() => {
+      showInactivityModal.value = true;
+    }, INACTIVITY_TIMEOUT);
+  }
+}
+
+function onUserActivity() {
+  if (showInactivityModal.value) return;
+  resetInactivityTimer();
+}
+
+function handleInactivityOk() {
+  showInactivityModal.value = false;
+  localStorage.removeItem('isAuthenticated');
+  localStorage.removeItem('token');
+  router.push('/pin-login');
+}
+
+watch(() => localStorage.getItem('isAuthenticated') === 'true', (loggedIn) => {
+  if (loggedIn) {
+    showInactivityModal.value = false;
+    resetInactivityTimer();
+  } else {
+    clearInactivityTimer();
+    showInactivityModal.value = false;
+  }
+});
+
+onMounted(() => {
+  document.addEventListener('mousedown', onUserActivity);
+  document.addEventListener('touchstart', onUserActivity);
+  document.addEventListener('keydown', onUserActivity);
+  document.addEventListener('scroll', onUserActivity);
+  document.addEventListener('click', onUserActivity);
+
+  if (localStorage.getItem('isAuthenticated') === 'true') {
+    resetInactivityTimer();
+  }
+});
+
+onUnmounted(() => {
+  clearInactivityTimer();
+  document.removeEventListener('mousedown', onUserActivity);
+  document.removeEventListener('touchstart', onUserActivity);
+  document.removeEventListener('keydown', onUserActivity);
+  document.removeEventListener('scroll', onUserActivity);
+  document.removeEventListener('click', onUserActivity);
+});
 </script>
 
 <style>
@@ -185,5 +254,80 @@ export default {
   :deep(.success-modal .alert-wrapper) {
     background: #1a1a1a;
   }
+
+  .inactivity-modal {
+    background: #1a1a1a;
+  }
+
+  .inactivity-title {
+    color: white;
+  }
+}
+
+/* Inactivity Modal */
+.inactivity-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.inactivity-modal {
+  background: white;
+  border-radius: 20px;
+  padding: 32px 24px;
+  width: 85%;
+  max-width: 320px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: popIn 0.3s ease-out;
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.inactivity-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px;
+}
+
+.inactivity-desc {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.5;
+  margin: 0 0 24px;
+}
+
+.inactivity-ok-btn {
+  width: 100%;
+  padding: 14px;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.inactivity-ok-btn:active {
+  background: #43a047;
 }
 </style>

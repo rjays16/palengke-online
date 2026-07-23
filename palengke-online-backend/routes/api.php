@@ -111,6 +111,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/driver/badges', [DriverBadgeController::class, 'index']);
     Route::post('/driver/badges/mark-read', [DriverBadgeController::class, 'markRead']);
     Route::get('/driver/performance', [DriverPerformanceController::class, 'show']);
+    Route::get('/driver/recent-deliveries', [DriverRegistrationController::class, 'recentDeliveries']);
 });
 
 // Seller app login

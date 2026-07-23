@@ -9,7 +9,7 @@
       inputmode="numeric"
       maxlength="1"
       :class="[`${type}-box`, { filled: digits[index], error }]"
-      autocomplete="one-time-code"
+      autocomplete="off"
       data-lpignore="true"
       @input="handleInput(index, $event)"
       @keydown="handleKeydown(index, $event)"
@@ -118,14 +118,6 @@ const focus = () => {
 };
 
 onMounted(() => {
-  // Clear any browser autofill after it happens
-  setTimeout(() => {
-    digits.value = Array(props.length).fill('');
-    emit('update:modelValue', '');
-    inputRefs.value.forEach((input) => {
-      if (input) input.value = '';
-    });
-  }, 100);
   if (props.autoFocus) {
     setTimeout(() => inputRefs.value[0]?.focus(), 300);
   }

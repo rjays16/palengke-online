@@ -411,6 +411,48 @@ class DriverRegistrationController extends Controller
         ]);
     }
 
+    public function recentDeliveries(Request $request)
+    {
+        $driver = $request->user();
+
+        $orders = Order::where('driver_registration_id', $driver->id)
+            ->where('status', 'completed')
+            ->with('seller')
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($order) {
+                $createdAt = $order->created_at;
+                $diffInMinutes = $createdAt ? $createdAt->diffInMinutes(now()) : 0;
+
+                if ($diffInMinutes < 1) {
+                    $time = 'Just now';
+                } elseif ($diffInMinutes < 60) {
+                    $time = $diffInMinutes . ' min' . ($diffInMinutes > 1 ? 's' : '') . ' ago';
+                } elseif ($diffInMinutes < 1440) {
+                    $hours = (int) floor($diffInMinutes / 60);
+                    $time = $hours . ' hour' . ($hours > 1 ? 's' : '') . ' ago';
+                } else {
+                    $days = (int) floor($diffInMinutes / 1440);
+                    $time = $days . ' day' . ($days > 1 ? 's' : '') . ' ago';
+                }
+
+                return [
+                    'id' => (string) $order->id,
+                    'customerName' => $order->customer_name,
+                    'address' => $order->delivery_address,
+                    'amount' => $order->total,
+                    'time' => $time,
+                    'status' => $order->status,
+                    'tipped' => false,
+                ];
+            });
+
+        return response()->json([
+            'deliveries' => $orders,
+        ]);
+    }
+
     public function destroy($id)
     {
         $registration = DriverRegistration::findOrFail($this->resolveId($id));

@@ -281,16 +281,23 @@ import {
   helpCircleOutline, informationCircleOutline,
   closeCircleOutline, cardOutline
 } from 'ionicons/icons';
-import { mockActiveDelivery, mockRecentDeliveries } from '@/mock/home';
+import { mockActiveDelivery } from '@/mock/home';
 import { useLicenceStore } from '@/composables/useLicenceStore';
 
 
 const router = useRouter();
 const licenceStore = useLicenceStore();
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+
+function getToken() {
+  if (typeof localStorage === 'undefined') return null;
+  return localStorage.getItem('token');
+}
 
 onMounted(async () => {
   await licenceStore.checkLicenceEnabled();
   licenceStore.fetchLicence();
+  fetchRecentDeliveries();
 });
 
 // Driver Data
@@ -337,7 +344,21 @@ const weekEarnings = ref(4250);
 const activeDelivery = ref(mockActiveDelivery);
 
 // Recent Deliveries
-const recentDeliveries = ref(mockRecentDeliveries);
+const recentDeliveries = ref([]);
+
+const fetchRecentDeliveries = async () => {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/driver/recent-deliveries`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      recentDeliveries.value = data.deliveries || [];
+    }
+  } catch {}
+};
 
 // Toggle Active/Inactive
 const toggleActiveStatus = async () => {

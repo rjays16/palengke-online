@@ -6,7 +6,6 @@
     <!-- Inactivity Modal -->
     <div class="inactivity-overlay" v-if="showInactivityModal" @click.prevent>
       <div class="inactivity-modal">
-        <div class="inactivity-icon">⏰</div>
         <h3 class="inactivity-title">Session Expired</h3>
         <p class="inactivity-desc">
           You have been inactive for 5 minutes. You will be logged out for security.
@@ -117,11 +116,6 @@ onUnmounted(() => {
     opacity: 1;
     transform: scale(1);
   }
-}
-
-.inactivity-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
 }
 
 .inactivity-title {
