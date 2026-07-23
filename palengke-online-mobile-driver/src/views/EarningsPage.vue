@@ -230,7 +230,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
@@ -243,16 +243,27 @@ import {
   starOutline, flashOutline, bicycleOutline, walletOutline,
   homeOutline, cubeOutline, personOutline, arrowForwardOutline
 } from 'ionicons/icons';
-import { mockChartData, mockStatsData } from '@/mock/earnings';
 
 const router = useRouter();
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+
+function getToken() {
+  if (typeof localStorage === 'undefined') return null;
+  return localStorage.getItem('token');
+}
 
 const selectedPeriod = ref('today');
 const showBreakdown = ref(false);
-const cashWallet = ref(438.59);
+const cashWallet = ref(0);
 
-const statsData = mockStatsData;
-const currentStats = computed(() => statsData[selectedPeriod.value]);
+const statsData = ref({
+  today: { netEarnings: 0, jobs: 0, tips: 0, onlineHours: 0, avgPerJob: 0, deliveryFee: 0, commission: 0, completionRate: 0, rating: 0, acceptRate: 0, totalKm: 0 },
+  yesterday: { netEarnings: 0, jobs: 0, tips: 0, onlineHours: 0, avgPerJob: 0, deliveryFee: 0, commission: 0, completionRate: 0, rating: 0, acceptRate: 0, totalKm: 0 },
+  week: { netEarnings: 0, jobs: 0, tips: 0, onlineHours: 0, avgPerJob: 0, deliveryFee: 0, commission: 0, completionRate: 0, rating: 0, acceptRate: 0, totalKm: 0 },
+  month: { netEarnings: 0, jobs: 0, tips: 0, onlineHours: 0, avgPerJob: 0, deliveryFee: 0, commission: 0, completionRate: 0, rating: 0, acceptRate: 0, totalKm: 0 },
+});
+
+const currentStats = computed(() => statsData.value[selectedPeriod.value]);
 
 const periodLabel = computed(() => {
   if (selectedPeriod.value === 'today') return "Today's Earnings";
@@ -261,14 +272,38 @@ const periodLabel = computed(() => {
   return "This Month's Earnings";
 });
 
-const chartData = ref(mockChartData);
+const chartData = ref([]);
 
-const maxAmount = computed(() => Math.max(...chartData.value.map(d => d.amount)));
+const maxAmount = computed(() => Math.max(...chartData.value.map(d => d.amount), 0));
 
 const getBarHeight = (amount) => {
   if (maxAmount.value === 0) return 0;
   return Math.max((amount / maxAmount.value) * 100, amount > 0 ? 5 : 0);
 };
+
+onMounted(() => {
+  fetchEarnings();
+});
+
+async function fetchEarnings() {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/driver/earnings`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      statsData.value = {
+        today: data.today,
+        yesterday: data.yesterday,
+        week: data.week,
+        month: data.month,
+      };
+      chartData.value = data.chart || [];
+    }
+  } catch {}
+}
 
 // Methods
 const showHelp = async () => {

@@ -3,7 +3,6 @@ export { mockOrderData, driverStartLocation, vendorLocation, customerLocation } 
 export { mockNotifications } from './notifications'
 export { mockChatNotifications, mockChats } from './chats'
 export { mockProfileData, mockRatingCounts, mockBadges, mockImprovements, mockDocumentsPreview } from './profile'
-export { mockChartData, mockStatsData } from './earnings'
 export { mockTopics, mockFaqs } from './help'
 export { mockDocuments } from './documents'
 export { mockTipData, mockTotalTipsToday, mockConfettiColors } from './tips'

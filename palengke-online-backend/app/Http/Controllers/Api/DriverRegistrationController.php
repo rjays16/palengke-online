@@ -577,6 +577,84 @@ class DriverRegistrationController extends Controller
         ]);
     }
 
+    public function earnings(Request $request)
+    {
+        $driver = $request->user();
+
+        $completedOrders = Order::where('driver_registration_id', $driver->id)
+            ->where('status', 'completed')
+            ->get();
+
+        $now = now();
+        $todayStart = $now->copy()->startOfDay();
+        $yesterdayStart = $now->copy()->subDay()->startOfDay();
+        $yesterdayEnd = $now->copy()->subDay()->endOfDay();
+        $weekStart = $now->copy()->startOfWeek();
+        $monthStart = $now->copy()->startOfMonth();
+
+        $todayOrders = $completedOrders->filter(fn($o) => $o->created_at >= $todayStart);
+        $yesterdayOrders = $completedOrders->filter(fn($o) => $o->created_at >= $yesterdayStart && $o->created_at <= $yesterdayEnd);
+        $weekOrders = $completedOrders->filter(fn($o) => $o->created_at >= $weekStart);
+        $monthOrders = $completedOrders->filter(fn($o) => $o->created_at >= $monthStart);
+
+        $dailyEarnings = [];
+        foreach ($completedOrders as $order) {
+            $date = $order->created_at->format('Y-m-d');
+            if (!isset($dailyEarnings[$date])) {
+                $dailyEarnings[$date] = 0;
+            }
+            $dailyEarnings[$date] += $order->total;
+        }
+        ksort($dailyEarnings);
+
+        $buildStats = function ($orders) use ($now) {
+            $total = $orders->sum('total');
+            $jobs = $orders->count();
+            $netEarnings = round($total * 0.90, 2);
+            $commission = round($total * 0.10, 2);
+            $avgPerJob = $jobs > 0 ? round($netEarnings / $jobs, 2) : 0;
+
+            return [
+                'netEarnings' => $netEarnings,
+                'jobs' => $jobs,
+                'tips' => 0,
+                'onlineHours' => 0,
+                'avgPerJob' => $avgPerJob,
+                'deliveryFee' => $total,
+                'commission' => $commission,
+                'completionRate' => 100,
+                'rating' => 5.0,
+                'acceptRate' => 100,
+                'totalKm' => 0,
+            ];
+        };
+
+        $buildChart = function ($startDate, $endDate) use ($dailyEarnings) {
+            $dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            $today = now()->toDateString();
+            $chart = [];
+            $current = $startDate->copy();
+            while ($current <= $endDate) {
+                $dateStr = $current->format('Y-m-d');
+                $chart[] = [
+                    'label' => $dayNames[$current->dayOfWeek],
+                    'amount' => $dailyEarnings[$dateStr] ?? 0,
+                    'isToday' => $dateStr === $today,
+                ];
+                $current->addDay();
+            }
+            return $chart;
+        };
+
+        return response()->json([
+            'today' => $buildStats($todayOrders),
+            'yesterday' => $buildStats($yesterdayOrders),
+            'week' => $buildStats($weekOrders),
+            'month' => $buildStats($monthOrders),
+            'chart' => $buildChart($weekStart, $now->copy()->endOfWeek()),
+        ]);
+    }
+
     public function destroy($id)
     {
         $registration = DriverRegistration::findOrFail($this->resolveId($id));
