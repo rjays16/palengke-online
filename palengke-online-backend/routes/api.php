@@ -113,6 +113,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/driver/performance', [DriverPerformanceController::class, 'show']);
     Route::get('/driver/recent-deliveries', [DriverRegistrationController::class, 'recentDeliveries']);
     Route::get('/driver/history', [DriverRegistrationController::class, 'driverHistory']);
+    Route::get('/driver/orders', [DriverRegistrationController::class, 'orders']);
 });
 
 // Seller app login

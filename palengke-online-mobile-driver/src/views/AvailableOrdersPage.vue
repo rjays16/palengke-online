@@ -202,12 +202,11 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonFooter, IonButton, IonButtons, IonIcon,
-  IonSegment, IonSegmentButton, IonLabel,
   alertController, actionSheetController, toastController
 } from '@ionic/vue';
 import {
@@ -217,96 +216,39 @@ import {
 } from 'ionicons/icons';
 
 const router = useRouter();
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+
+function getToken() {
+  if (typeof localStorage === 'undefined') return null;
+  return localStorage.getItem('token');
+}
 
 const selectedTab = ref('available');
 const isActive = ref(true);
 
-// Orders Data - Load from localStorage (bridged from Seller App) + static fallback
-const loadOrders = () => {
-  try {
-    const savedOrders = localStorage.getItem('driverOrders');
-    if (savedOrders) {
-      const parsed = JSON.parse(savedOrders);
-      if (parsed.length > 0) return parsed;
-    }
-  } catch (e) {
-    console.log('No driver orders in localStorage');
-  }
-  
-  // Fallback static data
-  return [
-    {
-      id: '1234',
-      status: 'available',
-      sellerName: "Juan's Fresh Market",
-      pickupAddress: 'Stall #15, CDO City Palengke',
-      customerName: 'Maria Santos',
-      deliveryAddress: 'Brgy. Carmen, CDO City',
-      distance: 2.3,
-      estimatedTime: 15,
-      itemCount: 5,
-      totalAmount: 850,
-      driverEarnings: 85,
-      paymentMethod: 'cash',
-      time: '2 mins ago',
-      tipped: false,
-      completedTime: null
-    },
-    {
-      id: '1235',
-      status: 'available',
-      sellerName: "Ana's Palengke",
-      pickupAddress: 'Stall #8, Divisoria Market',
-      customerName: 'Pedro Cruz',
-      deliveryAddress: 'Brgy. Lapasan, CDO City',
-      distance: 3.5,
-      estimatedTime: 20,
-      itemCount: 3,
-      totalAmount: 450,
-      driverEarnings: 65,
-      paymentMethod: 'gcash',
-      time: '5 mins ago',
-      tipped: false,
-      completedTime: null
-    },
-    {
-      id: '1233',
-      status: 'active',
-      sellerName: "Rosa's Veggies",
-      pickupAddress: 'Stall #22, Cogon Market',
-      customerName: 'Ana Lopez',
-      deliveryAddress: 'Brgy. Macasandig, CDO City',
-      distance: 1.8,
-      estimatedTime: 10,
-      itemCount: 7,
-      totalAmount: 620,
-      driverEarnings: 75,
-      paymentMethod: 'cash',
-      time: '15 mins ago',
-      tipped: false,
-      completedTime: null
-    },
-    {
-      id: '1232',
-      status: 'completed',
-      sellerName: "Mario's Fresh Fish",
-      pickupAddress: 'Stall #5, CDO City Palengke',
-      customerName: 'Jose Reyes',
-      deliveryAddress: 'Brgy. Bulua, CDO City',
-      distance: 4.2,
-      estimatedTime: 25,
-      itemCount: 2,
-      totalAmount: 380,
-      driverEarnings: 60,
-      paymentMethod: 'gcash',
-      time: '1 hour ago',
-      tipped: true,
-      completedTime: '1 hour ago'
-    }
-  ];
-};
+const orders = ref([]);
 
-const orders = ref(loadOrders());
+onMounted(() => {
+  fetchOrders();
+});
+
+async function fetchOrders() {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/driver/orders`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      orders.value = [
+        ...(data.available || []),
+        ...(data.active || []),
+        ...(data.completed || []),
+      ];
+    }
+  } catch {}
+}
 
 // Computed
 const filteredOrders = computed(() => {
@@ -346,13 +288,19 @@ const acceptOrder = async (order) => {
       {
         text: 'Accept',
         handler: async () => {
-          // Update order status in driver's localStorage
+          const token = getToken();
+          if (token) {
+            try {
+              await fetch(`${API_BASE}/api/driver/orders/${order.id}/accept`, {
+                method: 'POST',
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
+              });
+            } catch {}
+          }
           order.status = 'active';
-          updateDriverOrdersInStorage();
-          
-          // 🚀 SYNC TO SELLER APP - Update seller's order to "processing"
-          syncToSellerApp(order.id, 'processing');
-          
           await showSuccessModal('Order accepted!\nHead to pickup location.');
           selectedTab.value = 'active';
           router.push('/active-delivery');
@@ -361,25 +309,6 @@ const acceptOrder = async (order) => {
     ]
   });
   await alert.present();
-};
-
-// Helper: Update driver orders in localStorage
-const updateDriverOrdersInStorage = () => {
-  localStorage.setItem('driverOrders', JSON.stringify(orders.value));
-};
-
-// Helper: Sync status back to Seller App
-const syncToSellerApp = (orderId, newStatus) => {
-  try {
-    const sellerOrders = JSON.parse(localStorage.getItem('sellerOrders') || '[]');
-    const orderIndex = sellerOrders.findIndex(o => o.id === orderId);
-    if (orderIndex !== -1) {
-      sellerOrders[orderIndex].status = newStatus;
-      localStorage.setItem('sellerOrders', JSON.stringify(sellerOrders));
-    }
-  } catch (e) {
-    console.log('Seller app not available');
-  }
 };
 
 const showSuccessModal = async (message) => {

@@ -453,6 +453,80 @@ class DriverRegistrationController extends Controller
         ]);
     }
 
+    public function orders(Request $request)
+    {
+        $driver = $request->user();
+
+        $unassigned = Order::whereNull('driver_registration_id')
+            ->where('status', 'pending')
+            ->with('seller')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($order) use ($driver) {
+                return $this->formatOrderForDriver($order, 'available');
+            });
+
+        $active = Order::where('driver_registration_id', $driver->id)
+            ->whereIn('status', ['assigned', 'processing'])
+            ->with('seller')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(fn($o) => $this->formatOrderForDriver($o, 'active'));
+
+        $completed = Order::where('driver_registration_id', $driver->id)
+            ->where('status', 'completed')
+            ->with('seller')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(fn($o) => $this->formatOrderForDriver($o, 'completed'));
+
+        return response()->json([
+            'available' => $unassigned,
+            'active' => $active,
+            'completed' => $completed,
+        ]);
+    }
+
+    private function formatOrderForDriver($order, $driverStatus)
+    {
+        $createdAt = $order->created_at;
+        $diffInMinutes = $createdAt ? $createdAt->diffInMinutes(now()) : 0;
+
+        if ($diffInMinutes < 1) {
+            $time = 'Just now';
+        } elseif ($diffInMinutes < 60) {
+            $time = $diffInMinutes . ' min' . ($diffInMinutes > 1 ? 's' : '') . ' ago';
+        } elseif ($diffInMinutes < 1440) {
+            $hours = (int) floor($diffInMinutes / 60);
+            $time = $hours . ' hour' . ($hours > 1 ? 's' : '') . ' ago';
+        } else {
+            $days = (int) floor($diffInMinutes / 1440);
+            $time = $days . ' day' . ($days > 1 ? 's' : '') . ' ago';
+        }
+
+        $itemCount = count($order->items ?? []);
+        $total = (float) $order->total;
+        $driverEarnings = round($total * 0.10, 2);
+
+        return [
+            'id' => (string) $order->id,
+            'status' => $driverStatus,
+            'sellerName' => $order->seller->store_name ?? $order->seller->first_name ?? 'Store',
+            'pickupAddress' => $order->seller->address ?? $order->seller->city ?? 'Pickup Location',
+            'customerName' => $order->customer_name,
+            'deliveryAddress' => $order->delivery_address,
+            'distance' => 0,
+            'estimatedTime' => max(10, $itemCount * 3),
+            'itemCount' => $itemCount,
+            'totalAmount' => $total,
+            'driverEarnings' => $driverEarnings,
+            'paymentMethod' => $order->payment_method ?? 'cash',
+            'time' => $time,
+            'tipped' => false,
+            'completedTime' => $driverStatus === 'completed' ? $time : null,
+        ];
+    }
+
     public function driverHistory(Request $request)
     {
         $driver = $request->user();
