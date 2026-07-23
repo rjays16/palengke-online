@@ -295,6 +295,7 @@ onMounted(async () => {
   licenceStore.fetchLicence();
   fetchRecentDeliveries();
   fetchActiveDelivery();
+  fetchDashboardStats();
   activeDeliveryInterval = setInterval(fetchActiveDelivery, 30000);
 });
 
@@ -326,21 +327,21 @@ const licenceBannerSub = computed(() => {
 
 const goToLicencePayment = () => router.push('/licence-payment')
 
-const driverName = ref('Juan Dela Cruz');
-const driverRating = ref(4.9);
-const totalTrips = ref(142);
-const notificationCount = ref(2);
-const unreadMessages = ref(3);
-const availableOrders = ref(4);
+const driverName = ref('');
+const driverRating = ref(0);
+const totalTrips = ref(0);
+const notificationCount = ref(0);
+const unreadMessages = ref(0);
+const availableOrders = ref(0);
 
 // Active Status
 const isActive = ref(false);
 
 // Stats
-const todayEarnings = ref(850);
-const todayTrips = ref(5);
-const activeHours = ref(3.5);
-const weekEarnings = ref(4250);
+const todayEarnings = ref(0);
+const todayTrips = ref(0);
+const activeHours = ref(0);
+const weekEarnings = ref(0);
 
 // Active Delivery (null if no active delivery)
 const activeDelivery = ref(null);
@@ -354,6 +355,7 @@ const fetchActiveDelivery = async () => {
     });
     if (res.ok) {
       const data = await res.json();
+      availableOrders.value = (data.available || []).length;
       const activeOrders = data.active || [];
       if (activeOrders.length > 0) {
         const order = activeOrders[0];
@@ -367,6 +369,34 @@ const fetchActiveDelivery = async () => {
       } else {
         activeDelivery.value = null;
       }
+    }
+  } catch {}
+};
+
+const fetchDashboardStats = async () => {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const [earningsRes, profileRes] = await Promise.all([
+      fetch(`${API_BASE}/api/driver/earnings`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+      fetch(`${API_BASE}/api/driver/profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }),
+    ]);
+    if (earningsRes.ok) {
+      const data = await earningsRes.json();
+      todayEarnings.value = data.today?.netEarnings || 0;
+      todayTrips.value = data.today?.jobs || 0;
+      activeHours.value = data.today?.onlineHours || 0;
+      weekEarnings.value = data.week?.netEarnings || 0;
+    }
+    if (profileRes.ok) {
+      const data = await profileRes.json();
+      driverName.value = data.name || '';
+      driverRating.value = data.rating || 0;
+      totalTrips.value = data.totalTrips || 0;
     }
   } catch {}
 };
