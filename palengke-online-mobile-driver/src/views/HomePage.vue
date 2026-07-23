@@ -4,10 +4,6 @@
       <ion-toolbar color="success">
         <ion-title>Driver Dashboard</ion-title>
         <ion-buttons slot="end">
-          <ion-button @click="showNotifications" class="notification-btn">
-            <span v-if="notificationCount > 0" class="notification-badge">{{ notificationCount }}</span>
-            <ion-icon :icon="notificationsOutline"></ion-icon>
-          </ion-button>
           <ion-button @click="openSettings">
             <ion-icon :icon="settingsOutline"></ion-icon>
           </ion-button>
@@ -117,21 +113,6 @@
         <div class="actions-section">
           <h2 class="section-title">Quick Actions</h2>
           <div class="actions-grid">
-            <div class="action-card" @click="goToOrders">
-              <div class="action-icon green">
-                <ion-icon :icon="cubeOutline"></ion-icon>
-              </div>
-              <div class="action-text">Available Orders</div>
-              <span class="action-badge" v-if="availableOrders > 0">{{ availableOrders }}</span>
-            </div>
-
-            <div class="action-card" @click="goToEarnings">
-              <div class="action-icon blue">
-                <ion-icon :icon="cashOutline"></ion-icon>
-              </div>
-              <div class="action-text">Earnings</div>
-            </div>
-
             <div class="action-card" @click="goToMessages">
               <div class="action-icon orange">
                 <ion-icon :icon="chatbubblesOutline"></ion-icon>
@@ -145,6 +126,21 @@
                 <ion-icon :icon="receiptOutline"></ion-icon>
               </div>
               <div class="action-text">History</div>
+            </div>
+
+            <div class="action-card" @click="showNotifications">
+              <div class="action-icon red">
+                <ion-icon :icon="notificationsOutline"></ion-icon>
+              </div>
+              <div class="action-text">Notifications</div>
+              <span class="action-badge" v-if="notificationCount > 0">{{ notificationCount }}</span>
+            </div>
+
+            <div class="action-card" @click="goToHelp">
+              <div class="action-icon teal">
+                <ion-icon :icon="helpCircleOutline"></ion-icon>
+              </div>
+              <div class="action-text">Help & Support</div>
             </div>
           </div>
         </div>
@@ -470,16 +466,6 @@ const openSettings = async () => {
     header: 'Settings',
     buttons: [
       {
-        text: 'My Profile',
-        icon: personOutline,
-        handler: () => router.push('/profile')
-      },
-      {
-        text: 'Help & Support',
-        icon: helpCircleOutline,
-        handler: () => router.push('/help')
-      },
-      {
         text: 'About',
         icon: informationCircleOutline,
         handler: () => router.push('/about')
@@ -521,6 +507,7 @@ const goToOrders = () => router.push('/orders');
 const goToEarnings = () => router.push('/earnings');
 const goToMessages = () => router.push('/messages');
 const goToHistory = () => router.push('/history');
+const goToHelp = () => router.push('/help');
 const goToProfile = () => router.push('/profile');
 const goToActiveDelivery = () => router.push('/active-delivery');
 const viewDeliveryDetails = (id) => router.push(`/history/${id}`);
@@ -683,33 +670,39 @@ ion-header ion-toolbar ion-buttons ion-button {
 
 .actions-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
 }
 
 .action-card {
+  background: var(--color-card-bg);
+  border-radius: 16px;
+  padding: 20px 16px;
   text-align: center;
   cursor: pointer;
   position: relative;
-}
-
-.action-icon {
-  width: 56px; height: 56px;
-  border-radius: 16px;
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 8px;
-  font-size: 26px;
+  box-shadow: 0 2px 8px var(--color-card-shadow);
   transition: transform 0.2s;
 }
 
-.action-card:active .action-icon { transform: scale(0.95); }
+.action-card:active { transform: scale(0.97); }
+
+.action-icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 10px;
+  font-size: 24px;
+}
 
 .action-icon.green { background: var(--color-success-bg); color: var(--color-success); }
 .action-icon.blue { background: var(--color-info-bg); color: var(--color-info); }
 .action-icon.orange { background: var(--color-warning-bg); color: var(--color-warning); }
 .action-icon.purple { background: #F3E5F5; color: #9C27B0; }
+.action-icon.red { background: #FFEBEE; color: #f44336; }
+.action-icon.teal { background: #E0F2F1; color: #009688; }
 
-.action-text { font-size: 11px; color: var(--color-text-primary); font-weight: 600; line-height: 1.3; }
+.action-text { font-size: 13px; color: var(--color-text-primary); font-weight: 600; line-height: 1.3; }
 
 .action-badge {
   position: absolute; top: -4px; right: 4px;
