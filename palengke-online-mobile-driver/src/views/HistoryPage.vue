@@ -60,11 +60,11 @@
       <div class="calendar-section" v-if="viewMode === 'weekly'">
         <div class="week-list">
           <div
-            v-for="week in weekList"
+            v-for="(week, index) in weekList"
             :key="week.id"
             class="week-item"
-            :class="{ active: selectedWeek === week.id }"
-            @click="selectedWeek = week.id"
+            :class="{ active: selectedWeek === index }"
+            @click="selectedWeek = index"
           >
             <span class="week-label">{{ week.label }}</span>
             <span class="week-range">{{ week.range }}</span>
@@ -172,7 +172,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
@@ -184,18 +184,136 @@ import {
   bicycleOutline, homeOutline, cubeOutline,
   cashOutline, personOutline
 } from 'ionicons/icons';
-import { mockWeekDays, mockWeekList, mockMiniChartData, mockAllJobs } from '@/mock/history';
 
 const router = useRouter();
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+
+function getToken() {
+  if (typeof localStorage === 'undefined') return null;
+  return localStorage.getItem('token');
+}
 
 const viewMode = ref('daily');
-const selectedDate = ref(23); // today
-const selectedWeek = ref('week13');
-const currentMonthLabel = ref('March / April');
+const selectedDate = ref('');
+const selectedWeek = ref(0);
+const currentMonthLabel = ref('');
 
-const weekDays = ref(mockWeekDays);
-const weekList = ref(mockWeekList);
-const miniChartData = ref(mockMiniChartData);
+const dailyEarnings = ref({});
+const jobsByDate = ref({});
+
+const weekDays = ref([]);
+const weekList = ref([]);
+const miniChartData = ref([]);
+
+const today = new Date();
+const todayStr = today.toISOString().slice(0, 10);
+
+onMounted(async () => {
+  setSelectedDateToToday();
+  await fetchHistory();
+});
+
+function setSelectedDateToToday() {
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - dayOfWeek);
+
+  const months = ['January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'];
+  currentMonthLabel.value = months[now.getMonth()];
+
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const week = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(startOfWeek);
+    d.setDate(startOfWeek.getDate() + i);
+    const dateStr = d.toISOString().slice(0, 10);
+    week.push({
+      name: dayNames[i],
+      number: d.getDate(),
+      date: dateStr,
+      isToday: dateStr === todayStr,
+      earnings: 0,
+    });
+  }
+  weekDays.value = week;
+  selectedDate.value = todayStr;
+
+  const weeksInMonth = [];
+  const currentMonth = now.getMonth();
+  const firstDay = new Date(now.getFullYear(), currentMonth, 1);
+  const lastDay = new Date(now.getFullYear(), currentMonth + 1, 0);
+  let weekStart = new Date(firstDay);
+  let weekNum = 1;
+  while (weekStart <= lastDay) {
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    const cappedEnd = weekEnd > lastDay ? lastDay : weekEnd;
+    weeksInMonth.push({
+      id: `week${currentMonth}-${weekNum}`,
+      label: `Week ${weekNum}`,
+      range: `${weekStart.getDate()} - ${cappedEnd.getDate()}`,
+      startDate: weekStart.toISOString().slice(0, 10),
+      endDate: cappedEnd.toISOString().slice(0, 10),
+    });
+    weekStart = new Date(weekEnd);
+    weekStart.setDate(weekStart.getDate() + 1);
+    weekNum++;
+  }
+  weekList.value = weeksInMonth;
+
+  const currentWeekIdx = weeksInMonth.findIndex(w =>
+    todayStr >= w.startDate && todayStr <= w.endDate
+  );
+  selectedWeek.value = currentWeekIdx >= 0 ? currentWeekIdx : 0;
+}
+
+async function fetchHistory() {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/driver/history`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      dailyEarnings.value = data.dailyEarnings || {};
+      jobsByDate.value = data.jobsByDate || {};
+      updateWeekDaysEarnings();
+      updateMiniChart();
+    }
+  } catch {}
+}
+
+function updateWeekDaysEarnings() {
+  weekDays.value = weekDays.value.map(day => ({
+    ...day,
+    earnings: dailyEarnings.value[day.date] || 0,
+  }));
+}
+
+function updateMiniChart() {
+  const week = weekList.value[selectedWeek.value];
+  if (!week) {
+    miniChartData.value = [];
+    return;
+  }
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const start = new Date(week.startDate + 'T00:00:00');
+  const chart = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const dateStr = d.toISOString().slice(0, 10);
+    chart.push({
+      label: dayNames[i],
+      amount: dailyEarnings.value[dateStr] || 0,
+      isToday: dateStr === todayStr,
+    });
+  }
+  miniChartData.value = chart;
+}
 
 const maxMiniBar = computed(() => Math.max(...miniChartData.value.map(d => d.amount)));
 const getMiniBarHeight = (bar) => {
@@ -203,24 +321,42 @@ const getMiniBarHeight = (bar) => {
   return Math.max((bar.amount / maxMiniBar.value) * 100, bar.amount > 0 ? 10 : 0);
 };
 
-const allJobs = mockAllJobs;
-
 const currentJobs = computed(() => {
   if (viewMode.value === 'daily') {
-    return allJobs[selectedDate.value] || [];
+    return jobsByDate.value[selectedDate.value] || [];
   }
-  return Object.values(allJobs).flat();
+  const week = weekList.value[selectedWeek.value];
+  if (!week) return [];
+  const jobs = [];
+  const start = new Date(week.startDate + 'T00:00:00');
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const dateStr = d.toISOString().slice(0, 10);
+    if (jobsByDate.value[dateStr]) {
+      jobs.push(...jobsByDate.value[dateStr]);
+    }
+  }
+  return jobs;
 });
 
 const currentPeriodEarnings = computed(() => {
   if (viewMode.value === 'daily') {
-    const day = weekDays.value.find(d => d.date === selectedDate.value);
-    return day ? day.earnings : 0;
+    return dailyEarnings.value[selectedDate.value] || 0;
   }
-  return 10896.73;
+  const week = weekList.value[selectedWeek.value];
+  if (!week) return 0;
+  let total = 0;
+  const start = new Date(week.startDate + 'T00:00:00');
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const dateStr = d.toISOString().slice(0, 10);
+    total += dailyEarnings.value[dateStr] || 0;
+  }
+  return total;
 });
 
-// Methods
 const selectDate = (date) => { selectedDate.value = date; };
 
 const viewJobDetails = (job) => {
@@ -237,11 +373,14 @@ const showHelp = async () => {
   await alert.present();
 };
 
-// Navigation
 const goToHome = () => router.push('/home');
 const goToOrders = () => router.push('/orders');
 const goToEarnings = () => router.push('/earnings');
 const goToProfile = () => router.push('/profile');
+
+watch(selectedWeek, () => {
+  updateMiniChart();
+});
 </script>
 
 <style scoped>

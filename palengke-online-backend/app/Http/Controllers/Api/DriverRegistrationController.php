@@ -453,6 +453,56 @@ class DriverRegistrationController extends Controller
         ]);
     }
 
+    public function driverHistory(Request $request)
+    {
+        $driver = $request->user();
+
+        $orders = Order::where('driver_registration_id', $driver->id)
+            ->where('status', 'completed')
+            ->with('seller')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $dailyEarnings = [];
+        $jobsByDate = [];
+
+        foreach ($orders as $order) {
+            $date = $order->created_at->format('Y-m-d');
+            $dayOfMonth = (int) $order->created_at->format('j');
+            $time = $order->created_at->format('g:i A');
+
+            if (!isset($dailyEarnings[$date])) {
+                $dailyEarnings[$date] = 0;
+            }
+            $dailyEarnings[$date] += $order->total;
+
+            if (!isset($jobsByDate[$date])) {
+                $jobsByDate[$date] = [];
+            }
+
+            $jobsByDate[$date][] = [
+                'id' => (string) $order->id,
+                'time' => $time,
+                'sellerName' => $order->seller->store_name ?? $order->seller->first_name ?? 'Store',
+                'deliveryAddress' => $order->delivery_address,
+                'amount' => $order->total,
+                'paymentMethod' => $order->payment_method ?? 'cash',
+                'tipped' => false,
+                'bonus' => 0,
+                'dayOfMonth' => $dayOfMonth,
+                'date' => $date,
+            ];
+        }
+
+        ksort($dailyEarnings);
+        ksort($jobsByDate);
+
+        return response()->json([
+            'dailyEarnings' => $dailyEarnings,
+            'jobsByDate' => $jobsByDate,
+        ]);
+    }
+
     public function destroy($id)
     {
         $registration = DriverRegistration::findOrFail($this->resolveId($id));
