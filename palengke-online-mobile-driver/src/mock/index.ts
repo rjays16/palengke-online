@@ -1,4 +1,4 @@
-export { mockActiveDelivery, mockRecentDeliveries } from './home'
+export { mockActiveDelivery } from './home'
 export { mockOrderData, driverStartLocation, vendorLocation, customerLocation } from './activeDelivery'
 export { mockNotifications } from './notifications'
 export { mockChatNotifications, mockChats } from './chats'
