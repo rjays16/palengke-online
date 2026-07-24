@@ -8,6 +8,7 @@ class Conversation extends Model
 {
     protected $fillable = [
         'seller_registration_id',
+        'driver_registration_id',
         'participant_type',
         'participant_name',
         'participant_email',
@@ -27,6 +28,11 @@ class Conversation extends Model
     public function seller()
     {
         return $this->belongsTo(SellerRegistration::class, 'seller_registration_id');
+    }
+
+    public function driver()
+    {
+        return $this->belongsTo(DriverRegistration::class, 'driver_registration_id');
     }
 
     public function messages()

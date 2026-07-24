@@ -43,6 +43,7 @@ use App\Http\Controllers\Api\LicenceController;
 use App\Http\Controllers\Api\DriverBadgeController;
 use App\Http\Controllers\Api\DriverPerformanceController;
 use App\Http\Controllers\Api\DriverNotificationController;
+use App\Http\Controllers\Api\DriverMessageController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -123,6 +124,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/driver/notifications/{id}', [DriverNotificationController::class, 'destroy']);
     Route::delete('/driver/notifications', [DriverNotificationController::class, 'clearAll']);
     Route::post('/driver/orders/{id}/accept', [DriverRegistrationController::class, 'acceptOrder']);
+
+    // Driver app — messages / conversations
+    Route::get('/driver/conversations', [DriverMessageController::class, 'index']);
+    Route::get('/driver/conversations/{id}', [DriverMessageController::class, 'show']);
+    Route::post('/driver/conversations/{id}/messages', [DriverMessageController::class, 'sendMessage']);
+    Route::post('/driver/conversations/{id}/upload-image', [DriverMessageController::class, 'uploadImage']);
+    Route::post('/driver/conversations/{id}/read', [DriverMessageController::class, 'markRead']);
+    Route::delete('/driver/conversations/{id}', [DriverMessageController::class, 'destroy']);
+    Route::delete('/driver/messages/{id}', [DriverMessageController::class, 'destroyMessage']);
 });
 
 // Seller app login
