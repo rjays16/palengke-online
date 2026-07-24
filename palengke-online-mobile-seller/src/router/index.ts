@@ -276,6 +276,7 @@ const router = createRouter({
 // ============================================
 router.beforeEach((to, from, next) => {
   const auth = useAuthStore();
+  auth.initFromStorage();
   const isAuthenticated = auth.isAuthenticated;
   const hasPin = auth.hasPin;
   const userEmail = auth.userEmail;
@@ -290,7 +291,7 @@ router.beforeEach((to, from, next) => {
     next('/pin-login');
   } else if (to.path === '/login' && isAuthenticated) {
     next('/home');
-  } else if (to.meta.requiresAuth && isAuthenticated && to.path !== '/plans' && to.path !== '/wallet') {
+  } else if (to.meta.requiresAuth && isAuthenticated && to.path !== '/plans' && to.path !== '/wallet' && to.path !== '/messages') {
     const sub = getSubscription();
     if (isExpired(sub)) {
       next('/plans');

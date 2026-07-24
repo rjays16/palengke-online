@@ -25,6 +25,7 @@ import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
 const auth = useAuthStore();
+auth.initFromStorage();
 
 const INACTIVITY_TIMEOUT = 5 * 60 * 1000;
 const showInactivityModal = ref(false);

@@ -257,7 +257,23 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
-import { actionSheetController, alertController, toastController } from '@ionic/vue';
+import {
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonFooter,
+  IonButton,
+  IonButtons,
+  IonIcon,
+  IonSearchbar,
+  IonSpinner,
+  IonTextarea,
+  actionSheetController,
+  alertController,
+  toastController,
+} from '@ionic/vue';
 import {
   searchOutline,
   personOutline,
