@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\SellerRegistration;
+use App\Models\DriverRegistration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -246,11 +247,19 @@ class MessageController extends Controller
             ? $c->last_message_at->diffForHumans()
             : $c->created_at->diffForHumans();
 
+        $phone = null;
+        if ($c->participant_type === 'driver' && $c->participant_email) {
+            $driver = DriverRegistration::where('email', $c->participant_email)->first();
+            $phone = $driver?->full_phone;
+        }
+
         return [
             'id' => $c->id,
             'name' => $c->participant_name,
             'type' => $c->participant_type,
             'avatar' => $c->participant_avatar,
+            'phone' => $phone,
+            'email' => $c->participant_email,
             'lastMessage' => $c->last_message ?? '',
             'time' => $time,
             'unread' => $c->unread_count,

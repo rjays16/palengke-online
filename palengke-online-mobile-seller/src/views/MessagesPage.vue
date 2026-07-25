@@ -240,15 +240,61 @@
       </ion-footer>
     </div>
 
-    <!-- Call Overlay -->
-    <div v-if="showCallModal" class="call-overlay" @click.self="endCall">
-      <div class="call-card">
-        <div class="call-avatar-wrap">
-          <img :src="callAvatar" :alt="callName" />
+    <!-- Full-Screen Outgoing Call Screen -->
+    <div v-if="showCallModal && !incomingCall" class="call-screen">
+      <div class="call-screen-bg">
+        <div class="call-screen-top">
+          <p class="call-screen-label">Palengke Online</p>
         </div>
-        <h2 class="call-name-text">{{ callName }}</h2>
-        <p class="call-status-text">Calling...</p>
-        <button class="call-end-btn" @click="endCall">End Call</button>
+
+        <div class="call-screen-profile">
+          <div class="call-screen-avatar">
+            <img v-if="callAvatar" :src="callAvatar" :alt="callName" />
+            <div v-else class="call-screen-avatar-fallback">
+              <ion-icon :icon="personOutline"></ion-icon>
+            </div>
+          </div>
+          <h2 class="call-screen-name">{{ callName }}</h2>
+          <p class="call-screen-status">{{ callStatusLabel }}</p>
+        </div>
+
+        <div class="call-screen-actions">
+          <button class="call-action-btn" @click="endCall">
+            <ion-icon :icon="callOutline" class="call-action-icon"></ion-icon>
+            <span>End Call</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full-Screen Incoming Call Screen -->
+    <div v-if="incomingCall" class="call-screen">
+      <div class="call-screen-bg">
+        <div class="call-screen-top">
+          <p class="call-screen-label">Incoming Call</p>
+        </div>
+
+        <div class="call-screen-profile">
+          <div class="call-screen-avatar incoming-pulse">
+            <img v-if="incomingCall.caller_type === 'driver'" :src="callAvatar || ''" alt="" />
+            <div v-else class="call-screen-avatar-fallback">
+              <ion-icon :icon="personOutline"></ion-icon>
+            </div>
+          </div>
+          <h2 class="call-screen-name">{{ incomingCall.caller_name }}</h2>
+          <p class="call-screen-status">{{ incomingCall.caller_type === 'driver' ? 'Driver' : 'Seller' }} is calling you...</p>
+        </div>
+
+        <div class="call-screen-actions incoming-actions">
+          <button class="call-action-btn decline-btn" @click="declineIncomingCall">
+            <ion-icon :icon="callOutline" class="call-action-icon"></ion-icon>
+            <span>Decline</span>
+          </button>
+          <button class="call-action-btn accept-btn" @click="acceptIncomingCall">
+            <ion-icon :icon="callOutline" class="call-action-icon"></ion-icon>
+            <span>Accept</span>
+          </button>
+        </div>
       </div>
     </div>
   </ion-page>
@@ -295,8 +341,11 @@ import {
 import { api } from '@/utils/apiClient';
 import { type Conversation } from '@/types';
 import { useChatWebSocket } from '@/composables/useChatWebSocket';
+import { useMesibo, type IncomingCallSignal } from '@/services/mesibo';
+import { API_BASE } from '@/config/api';
 
 const router = useRouter();
+const apiBaseUrl = API_BASE;
 
 const userEmail = localStorage.getItem('userEmail');
 
@@ -329,6 +378,19 @@ const chatWs = useChatWebSocket(userEmail, {
   },
 });
 
+const {
+  mesiboInitialized,
+  callState,
+  callDuration,
+  activeCallSignalId,
+  initMesibo,
+  startCall,
+  acceptCall,
+  declineCall,
+  endCall: endMesiboCall,
+  formatCallDuration,
+} = useMesibo();
+
 // State
 const showSearch = ref(false);
 const searchQuery = ref('');
@@ -347,6 +409,10 @@ const conversations = ref([] as Conversation[]);
 const showCallModal = ref(false);
 const callName = ref('');
 const callAvatar = ref('');
+
+// Incoming Call
+const incomingCall = ref<IncomingCallSignal | null>(null);
+let incomingCallPollTimer: ReturnType<typeof setInterval> | null = null;
 
 // Quick Replies
 const quickReplies = ref([]);
@@ -595,20 +661,90 @@ const attachImage = async () => {
 const makeCall = async () => {
   if (!selectedChat.value) return;
 
-  playCallSound();
+  const participantEmail = selectedChat.value.email || selectedChat.value.participantEmail;
+  const participantName = selectedChat.value.name;
+  const participantAvatar = selectedChat.value.avatar || '';
 
-  callName.value = selectedChat.value.name || 'Contact';
-  callAvatar.value = selectedChat.value.avatar || '/assets/images/default.png';
+  callName.value = participantName;
+  callAvatar.value = participantAvatar;
   showCallModal.value = true;
+
+  const signalId = await startCall(
+    Number(selectedChat.value.id),
+    userEmail || '',
+    'Seller',
+    'seller',
+    participantEmail || '',
+  );
+
+  if (!signalId) {
+    showCallModal.value = false;
+    const phone = selectedChat.value.phone;
+    if (phone) {
+      window.open(`tel:${phone}`, '_system');
+    } else {
+      showToast('Failed to start call', 'warning');
+    }
+  }
 };
 
-const endCall = () => {
-  if (callAudio.value) {
-    callAudio.value.pause();
-    callAudio.value.currentTime = 0;
+const callStatusLabel = computed(() => {
+  switch (callState.value) {
+    case 'ringing': return 'Ringing...';
+    case 'connecting': return 'Connecting...';
+    case 'connected': return formatCallDuration(callDuration.value);
+    case 'ended': return 'Call Ended';
+    default: return 'Calling...';
   }
+});
+
+const endCall = async () => {
+  await endMesiboCall();
   showCallModal.value = false;
 };
+
+const acceptIncomingCall = async () => {
+  if (!incomingCall.value) return;
+  callAvatar.value = '';
+  callName.value = incomingCall.value.caller_name;
+  await acceptCall(incomingCall.value.id);
+  incomingCall.value = null;
+  showCallModal.value = true;
+  stopIncomingCallPolling();
+};
+
+const declineIncomingCall = async () => {
+  if (!incomingCall.value) return;
+  await declineCall(incomingCall.value.id);
+  incomingCall.value = null;
+  stopIncomingCallPolling();
+};
+
+function startIncomingCallPolling() {
+  stopIncomingCallPolling();
+  incomingCallPollTimer = setInterval(async () => {
+    if (showCallModal.value || incomingCall.value) return;
+    const email = localStorage.getItem('userEmail');
+    if (!email) return;
+    try {
+      const res = await fetch(`${apiBaseUrl}/calls/signal?email=${encodeURIComponent(email)}`, {
+        headers: { Accept: 'application/json' },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.signal) {
+        incomingCall.value = data.signal;
+      }
+    } catch {}
+  }, 2000);
+}
+
+function stopIncomingCallPolling() {
+  if (incomingCallPollTimer) {
+    clearInterval(incomingCallPollTimer);
+    incomingCallPollTimer = null;
+  }
+}
 
 const showToast = async (message: string, color = 'dark') => {
   const toast = await toastController.create({
@@ -753,11 +889,16 @@ onMounted(() => {
   document.addEventListener('ionBackButton', handleBackButton);
   loadConversations();
   chatWs.connect();
+  if (userEmail) {
+    initMesibo(userEmail, 'seller');
+    startIncomingCallPolling();
+  }
 });
 
 onUnmounted(() => {
   document.removeEventListener('ionBackButton', handleBackButton);
   chatWs.disconnect();
+  stopIncomingCallPolling();
 });
 </script>
 
@@ -1303,78 +1444,153 @@ onUnmounted(() => {
   --color: white;
 }
 
-/* Call Overlay */
-.call-overlay {
+/* Call Screen */
+.call-screen {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 9999;
 }
 
-.call-card {
-  background: #fff;
-  border-radius: 24px;
-  padding: 40px 32px 32px;
+.call-screen-bg {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 60px 24px 40px;
+  color: white;
+}
+
+.call-screen-top {
   text-align: center;
-  min-width: 280px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
-.call-avatar-wrap img {
-  width: 80px;
-  height: 80px;
+.call-screen-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.call-screen-profile {
+  text-align: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.call-screen-avatar {
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 24px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  animation: callPulse 2s ease-in-out infinite;
+}
+
+@keyframes callPulse {
+  0%, 100% { border-color: rgba(76, 175, 80, 0.4); transform: scale(1); }
+  50% { border-color: rgba(76, 175, 80, 0.9); transform: scale(1.03); }
+}
+
+.call-screen-avatar img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border: 3px solid #4caf50;
-  margin-bottom: 12px;
 }
 
-.call-name-text {
-  font-size: 22px;
+.call-screen-avatar-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.15);
+  font-size: 48px;
+}
+
+.call-screen-name {
+  font-size: 26px;
   font-weight: 700;
-  color: #1a1a1a;
-  margin: 0 0 4px;
+  margin: 0 0 8px;
+  color: white;
 }
 
-.call-status-text {
-  font-size: 15px;
+.call-screen-status {
+  font-size: 16px;
   color: #4caf50;
-  font-weight: 600;
-  margin: 0 0 20px;
-  animation: pulse-status 1.5s infinite;
+  font-weight: 500;
+  margin: 0;
+  animation: callPulseStatus 1.5s ease-in-out infinite;
 }
 
-@keyframes pulse-status {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+@keyframes callPulseStatus {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
-.call-end-btn {
+.call-screen-actions {
+  padding-bottom: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.call-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
   background: #ff3b30;
-  color: #fff;
+  color: white;
   border: none;
-  border-radius: 30px;
-  height: 48px;
-  min-width: 140px;
-  font-size: 15px;
-  font-weight: 600;
+  border-radius: 50%;
+  width: 72px;
+  height: 72px;
   cursor: pointer;
-  padding: 0 24px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 0;
+  transition: transform 0.2s;
 }
 
-.call-end-btn:hover {
-  background: #d32f2f;
+.call-action-btn .call-action-icon {
+  font-size: 28px;
+  margin-top: 16px;
+}
+
+.call-action-btn:active {
+  transform: scale(0.9);
+}
+
+.incoming-actions {
+  gap: 40px;
+}
+
+.decline-btn {
+  background: #ff3b30;
+}
+
+.accept-btn {
+  background: #4caf50;
+}
+
+.incoming-pulse {
+  animation: incomingPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes incomingPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.6); }
+  50% { box-shadow: 0 0 0 20px rgba(76, 175, 80, 0); }
 }
 
 /* Responsive */

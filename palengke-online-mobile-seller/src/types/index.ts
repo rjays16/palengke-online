@@ -68,6 +68,9 @@ export interface Conversation {
   unread: number
   muted: boolean
   avatar: string
+  phone?: string | null
+  email?: string | null
+  participantEmail?: string | null
   messages: Message[]
   time?: string
   orderId?: string | number

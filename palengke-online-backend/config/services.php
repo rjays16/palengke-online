@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'mesibo' => [
+        'app_token' => env('MESIBO_APP_TOKEN'),
+        'app_id' => env('MESIBO_APP_ID'),
+    ],
+
 ];

@@ -44,6 +44,8 @@ use App\Http\Controllers\Api\DriverBadgeController;
 use App\Http\Controllers\Api\DriverPerformanceController;
 use App\Http\Controllers\Api\DriverNotificationController;
 use App\Http\Controllers\Api\DriverMessageController;
+use App\Http\Controllers\Api\MesiboController;
+use App\Http\Controllers\Api\CallSignalController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -140,6 +142,17 @@ Route::post('/seller/login', [AuthController::class, 'login']);
 Route::post('/seller/forgot-pin', [AuthController::class, 'forgotPin']);
 Route::get('/seller/profile', [AuthController::class, 'profile']);
 Route::post('/seller/profile', [AuthController::class, 'updateProfile']);
+
+// Mesibo VoIP — get user access token
+Route::post('/mesibo/token', [MesiboController::class, 'getToken']);
+
+// Call signaling — both seller and driver
+Route::post('/calls/signal', [CallSignalController::class, 'start']);
+Route::get('/calls/signal', [CallSignalController::class, 'check']);
+Route::post('/calls/signal/{id}/accept', [CallSignalController::class, 'accept']);
+Route::post('/calls/signal/{id}/decline', [CallSignalController::class, 'decline']);
+Route::post('/calls/signal/{id}/end', [CallSignalController::class, 'end']);
+Route::get('/calls/signal/{id}/status', [CallSignalController::class, 'callerStatus']);
 
 // Seller device PIN management
 Route::post('/seller/device/register', [SellerDeviceController::class, 'register']);

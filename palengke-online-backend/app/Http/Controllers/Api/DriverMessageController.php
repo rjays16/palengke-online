@@ -228,11 +228,21 @@ class DriverMessageController extends Controller
             ? $c->last_message_at->diffForHumans()
             : $c->created_at->diffForHumans();
 
+        $phone = null;
+        $sellerEmail = null;
+        if ($c->seller_registration_id) {
+            $seller = \App\Models\SellerRegistration::find($c->seller_registration_id);
+            $phone = $seller?->full_phone;
+            $sellerEmail = $seller?->email;
+        }
+
         return [
             'id' => $c->id,
             'name' => $c->participant_name,
             'type' => $c->participant_type,
             'avatar' => $c->participant_avatar,
+            'phone' => $phone,
+            'email' => $sellerEmail,
             'lastMessage' => $c->last_message ?? '',
             'time' => $time,
             'unread' => $c->unread_count,
