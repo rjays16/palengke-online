@@ -26,6 +26,7 @@ export function useMesibo() {
 
   let callTimerInterval: ReturnType<typeof setInterval> | null = null;
   let callerPollTimer: ReturnType<typeof setInterval> | null = null;
+  let connectedPollTimer: ReturnType<typeof setInterval> | null = null;
 
   async function initMesibo(email: string, userType: 'seller' | 'driver'): Promise<boolean> {
     if (mesiboInitialized.value) return true;
@@ -134,6 +135,7 @@ export function useMesibo() {
           stopCallTimer();
           startCallTimer();
           stopCallerPolling();
+          startConnectedCallPolling(signalId);
         } else if (status === 'declined' || status === 'ended') {
           callState.value = 'ended';
           stopCallTimer();
@@ -142,6 +144,36 @@ export function useMesibo() {
         }
       } catch {}
       }, 2000);
+  }
+
+  function startConnectedCallPolling(signalId: number) {
+    stopConnectedCallPolling();
+    connectedPollTimer = setInterval(async () => {
+      try {
+        const res = await fetch(`${API_BASE}/calls/signal/${signalId}/status`, {
+          headers: { Accept: 'application/json' },
+        });
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const status = data.signal?.status;
+
+        if (status === 'ended' || status === 'declined') {
+          callState.value = 'ended';
+          stopCallTimer();
+          stopConnectedCallPolling();
+          activeCallSignalId.value = null;
+          setTimeout(() => { callState.value = 'idle'; }, 1500);
+        }
+      } catch {}
+    }, 2000);
+  }
+
+  function stopConnectedCallPolling() {
+    if (connectedPollTimer) {
+      clearInterval(connectedPollTimer);
+      connectedPollTimer = null;
+    }
   }
 
   function stopCallerPolling() {
@@ -160,6 +192,7 @@ export function useMesibo() {
       callState.value = 'connected';
       activeCallSignalId.value = signalId;
       startCallTimer();
+      startConnectedCallPolling(signalId);
     } catch (e) {
       console.error('Accept call error:', e);
     }
@@ -178,19 +211,22 @@ export function useMesibo() {
     }
   }
 
-  async function endCall() {
-    if (activeCallSignalId.value) {
-      try {
-        await fetch(`${API_BASE}/calls/signal/${activeCallSignalId.value}/end`, {
-          method: 'POST',
-          headers: { Accept: 'application/json' },
-        });
-      } catch {}
-    }
+  function endCall() {
     stopCallTimer();
     stopCallerPolling();
+    stopConnectedCallPolling();
     callState.value = 'ended';
+
+    const signalId = activeCallSignalId.value;
     activeCallSignalId.value = null;
+
+    if (signalId) {
+      fetch(`${API_BASE}/calls/signal/${signalId}/end`, {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+      }).catch(() => {});
+    }
+
     setTimeout(() => { callState.value = 'idle'; }, 1500);
   }
 

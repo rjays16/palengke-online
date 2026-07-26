@@ -195,7 +195,7 @@
     </div>
 
     <!-- Full-Screen Outgoing Call Screen -->
-    <div v-if="showCallModal && !incomingCall" class="call-screen">
+    <div v-if="showCallModal && !incomingCall" class="call-screen" @click="endCall" @touchend.prevent="endCall">
       <div class="call-screen-bg">
         <div class="call-screen-top">
           <p class="call-screen-label">Palengke Online</p>
@@ -213,7 +213,7 @@
         </div>
 
         <div class="call-screen-actions">
-          <button class="call-action-btn" @click="endCall">
+          <button class="call-action-btn">
             <ion-icon :icon="callOutline" class="call-action-icon"></ion-icon>
             <span>End Call</span>
           </button>
@@ -292,6 +292,7 @@ const activeFilter = ref('all');
 const selectedChat = ref(null);
 const newMessage = ref('');
 const chatContent = ref(null);
+const endCallBtnRef = ref(null);
 const loading = ref(false);
 const sendingMessage = ref(false);
 const loadingMessages = ref(false);
@@ -569,9 +570,9 @@ const callStatusLabel = computed(() => {
   }
 });
 
-async function endCall() {
-  await endMesiboCall();
+function endCall() {
   showCallModal.value = false;
+  endMesiboCall();
 }
 
 async function acceptIncomingCall() {
@@ -594,14 +595,34 @@ async function declineIncomingCall() {
 function startIncomingCallPolling() {
   stopIncomingCallPolling();
   incomingCallPollTimer = setInterval(async () => {
-    if (showCallModal.value || incomingCall.value) return;
     const email = getUserEmail();
     if (!email) return;
+
+    if (incomingCall.value) {
+      try {
+        const res = await fetch(`${API_BASE}/api/calls/signal/${incomingCall.value.id}/status`, {
+          headers: { Accept: 'application/json' },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const status = data.signal?.status;
+          if (status === 'ended' || status === 'declined' || status === 'accepted') {
+            incomingCall.value = null;
+            stopIncomingCallPolling();
+            startIncomingCallPolling();
+          }
+        }
+      } catch {}
+      return;
+    }
+
+    if (showCallModal.value) return;
     try {
       const res = await fetch(`${API_BASE}/api/calls/signal?email=${encodeURIComponent(email)}`, {
         headers: { Accept: 'application/json' },
       });
       if (!res.ok) return;
+      if (showCallModal.value || incomingCall.value) return;
       const data = await res.json();
       if (data.signal) {
         incomingCall.value = data.signal;
@@ -747,6 +768,18 @@ function handleBackButton(event) {
   });
 }
 
+watch(callState, (newState) => {
+  if (newState === 'ended') {
+    showCallModal.value = false;
+    if (maxCallTimer) { clearTimeout(maxCallTimer); maxCallTimer = null; }
+  } else if (newState === 'connected') {
+    if (maxCallTimer) clearTimeout(maxCallTimer);
+    maxCallTimer = setTimeout(() => {
+      endCall();
+    }, 300000);
+  }
+});
+
 watch(incomingCall, (val) => {
   if (val) {
     playCallSound();
@@ -757,6 +790,9 @@ watch(incomingCall, (val) => {
     }
   }
 });
+
+let maxCallTimer = null;
+let globalCallCloseHandler = null;
 
 onMounted(() => {
   document.addEventListener('ionBackButton', handleBackButton);
@@ -769,11 +805,33 @@ onMounted(() => {
   }
 });
 
+watch(showCallModal, (val) => {
+  if (val) {
+    setTimeout(() => {
+      globalCallCloseHandler = () => { if (showCallModal.value) endCall(); };
+      document.addEventListener('click', globalCallCloseHandler);
+      document.addEventListener('touchend', globalCallCloseHandler);
+    }, 300);
+  } else {
+    if (globalCallCloseHandler) {
+      document.removeEventListener('click', globalCallCloseHandler);
+      document.removeEventListener('touchend', globalCallCloseHandler);
+      globalCallCloseHandler = null;
+    }
+  }
+});
+
 onUnmounted(() => {
   document.removeEventListener('ionBackButton', handleBackButton);
   stopConversationPolling();
   stopMessagePolling();
   stopIncomingCallPolling();
+  if (maxCallTimer) { clearTimeout(maxCallTimer); maxCallTimer = null; }
+  if (globalCallCloseHandler) {
+    document.removeEventListener('click', globalCallCloseHandler);
+    document.removeEventListener('touchend', globalCallCloseHandler);
+    globalCallCloseHandler = null;
+  }
 });
 </script>
 
@@ -944,8 +1002,9 @@ onUnmounted(() => {
   transition: transform 0.2s;
 }
 
-.call-action-btn .call-action-icon { font-size: 28px; margin-top: 16px; }
+.call-action-btn .call-action-icon { font-size: 28px; margin-top: 16px; pointer-events: none; }
 .call-action-btn:active { transform: scale(0.9); }
+.call-action-btn span { pointer-events: none; }
 
 .incoming-actions { gap: 40px; }
 .decline-btn { background: #ff3b30; }
