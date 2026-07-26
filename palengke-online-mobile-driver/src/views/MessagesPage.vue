@@ -747,6 +747,17 @@ function handleBackButton(event) {
   });
 }
 
+watch(incomingCall, (val) => {
+  if (val) {
+    playCallSound();
+  } else {
+    if (callAudio.value) {
+      callAudio.value.pause();
+      callAudio.value.currentTime = 0;
+    }
+  }
+});
+
 onMounted(() => {
   document.addEventListener('ionBackButton', handleBackButton);
   loadConversations();

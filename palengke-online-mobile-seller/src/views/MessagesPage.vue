@@ -301,7 +301,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage,
@@ -884,6 +884,17 @@ function handleBackButton(event: any) {
     }
   });
 }
+
+watch(incomingCall, (val) => {
+  if (val) {
+    playCallSound();
+  } else {
+    if (callAudio.value) {
+      callAudio.value.pause();
+      callAudio.value.currentTime = 0;
+    }
+  }
+});
 
 onMounted(() => {
   document.addEventListener('ionBackButton', handleBackButton);
