@@ -867,7 +867,7 @@ const showInactivityModal = ref(false);
 const inactivityCountdown = ref(30);
 let inactivityTimer = null;
 let countdownTimer = null;
-const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+const INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 minutes
 const COUNTDOWN_SECONDS = 30;
 
 function resetInactivityTimer() {

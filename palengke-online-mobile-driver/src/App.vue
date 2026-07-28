@@ -8,7 +8,7 @@
       <div class="inactivity-modal">
         <h3 class="inactivity-title">Session Expired</h3>
         <p class="inactivity-desc">
-          You have been inactive for 5 minutes. You will be logged out for security.
+          You have been inactive for 10 minutes. You will be logged out for security.
         </p>
         <button class="inactivity-ok-btn" @click="handleInactivityOk">OK</button>
       </div>
@@ -24,7 +24,7 @@ import SplashScreen from './components/SplashScreen.vue';
 
 const router = useRouter();
 
-const INACTIVITY_TIMEOUT = 5 * 60 * 1000;
+const INACTIVITY_TIMEOUT = 10 * 60 * 1000;
 const showInactivityModal = ref(false);
 let inactivityTimer = null;
 
