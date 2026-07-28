@@ -222,7 +222,7 @@
     </div>
 
     <!-- Full-Screen Incoming Call Screen -->
-    <div v-if="incomingCall" class="call-screen">
+    <div v-if="callingEnabled && incomingCall" class="call-screen">
       <div class="call-screen-bg">
         <div class="call-screen-top">
           <p class="call-screen-label">Incoming Call</p>
@@ -270,6 +270,20 @@ import {
 import { useMesibo } from '@/services/mesibo';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+
+const callingEnabled = ref(true);
+
+async function fetchCallingSetting() {
+  try {
+    const res = await fetch(`${API_BASE}/api/settings`, {
+      headers: { Accept: 'application/json' },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      callingEnabled.value = data.enable_calling !== 'false';
+    }
+  } catch {}
+}
 
 const { mesiboInitialized, callState, callDuration, activeCallSignalId, initMesibo, startCall, acceptCall, declineCall, endCall: endMesiboCall, formatCallDuration } = useMesibo();
 
@@ -532,6 +546,17 @@ async function attachImage() {
 async function makeCall() {
   if (!selectedChat.value) return;
 
+  const participantPhone = selectedChat.value.phone;
+
+  if (!callingEnabled.value) {
+    if (participantPhone) {
+      window.location.href = `tel:${participantPhone}`;
+    } else {
+      showToast('Phone number not available', 'warning');
+    }
+    return;
+  }
+
   const participantEmail = selectedChat.value.email || selectedChat.value.participantEmail;
   const participantName = selectedChat.value.name;
   const participantAvatar = selectedChat.value.avatar || '';
@@ -551,9 +576,8 @@ async function makeCall() {
 
   if (!signalId) {
     showCallModal.value = false;
-    const phone = selectedChat.value.phone;
-    if (phone) {
-      window.open(`tel:${phone}`, '_system');
+    if (participantPhone) {
+      window.location.href = `tel:${participantPhone}`;
     } else {
       showToast('Failed to start call', 'warning');
     }
@@ -794,14 +818,17 @@ watch(incomingCall, (val) => {
 let maxCallTimer = null;
 let globalCallCloseHandler = null;
 
-onMounted(() => {
+onMounted(async () => {
   document.addEventListener('ionBackButton', handleBackButton);
+  await fetchCallingSetting();
   loadConversations();
   startConversationPolling();
   const email = getUserEmail();
   if (email) {
-    initMesibo(email, 'driver');
-    startIncomingCallPolling();
+    if (callingEnabled.value) {
+      initMesibo(email, 'driver');
+      startIncomingCallPolling();
+    }
   }
 });
 

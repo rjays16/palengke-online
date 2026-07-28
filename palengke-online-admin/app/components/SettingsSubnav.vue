@@ -57,6 +57,7 @@ const allItems: NavItem[] = [
   { to: "/settings/fees", label: "Delivery Fees", roles: ['driver', 'seller'] },
   { to: "/settings/commissions", label: "Commissions", roles: ['seller', 'driver'] },
   { to: "/settings/payments", label: "Payments", roles: ['seller'] },
+  { to: "/settings/calling", label: "Calling", roles: ['driver', 'seller'] },
   { to: "/settings/locations", label: "Locations", exact: true, roles: ['driver', 'seller'] },
   { to: "/settings/countries", label: "Countries", roles: ['driver', 'seller'] },
   { to: "/settings/restriction-codes", label: "Restriction Codes", roles: ['driver'] },
