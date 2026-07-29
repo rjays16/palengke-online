@@ -882,9 +882,15 @@ function resetInactivityTimer() {
   showInactivityModal.value = false;
   inactivityCountdown.value = COUNTDOWN_SECONDS;
   inactivityTimer = setTimeout(() => {
+    if (!inactivityEnabled.value) return;
     showInactivityModal.value = true;
     inactivityCountdown.value = COUNTDOWN_SECONDS;
     countdownTimer = setInterval(() => {
+      if (!inactivityEnabled.value) {
+        clearInterval(countdownTimer);
+        showInactivityModal.value = false;
+        return;
+      }
       inactivityCountdown.value--;
       if (inactivityCountdown.value <= 0) {
         clearInterval(countdownTimer);
@@ -1114,6 +1120,15 @@ onUnmounted(() => {
   clearInterval(countdownTimer);
   const activityEvents = ["mousedown", "mousemove", "keydown", "scroll", "touchstart", "click"];
   activityEvents.forEach((evt) => document.removeEventListener(evt, onUserActivity));
+});
+
+// Re-fetch inactivity setting on route change (layout doesn't remount)
+watch(() => route.fullPath, async () => {
+  clearTimeout(inactivityTimer);
+  clearInterval(countdownTimer);
+  showInactivityModal.value = false;
+  await fetchInactivitySetting();
+  resetInactivityTimer();
 });
 
 function handleNotifClick(n) {

@@ -45,6 +45,7 @@ function resetInactivityTimer() {
   if (!inactivityEnabled.value) return;
   if (auth.isAuthenticated && !showInactivityModal.value) {
     inactivityTimer = setTimeout(() => {
+      if (!inactivityEnabled.value) return;
       if (auth.isAuthenticated) {
         showInactivityModal.value = true;
       }

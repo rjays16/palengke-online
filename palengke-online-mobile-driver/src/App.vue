@@ -43,6 +43,7 @@ function resetInactivityTimer() {
   if (!inactivityEnabled.value) return;
   if (!showInactivityModal.value) {
     inactivityTimer = setTimeout(() => {
+      if (!inactivityEnabled.value) return;
       showInactivityModal.value = true;
     }, INACTIVITY_TIMEOUT);
   }
