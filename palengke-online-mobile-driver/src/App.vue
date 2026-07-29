@@ -24,7 +24,10 @@ import SplashScreen from './components/SplashScreen.vue';
 
 const router = useRouter();
 
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+
 const INACTIVITY_TIMEOUT = 10 * 60 * 1000;
+const inactivityEnabled = ref(true);
 const showInactivityModal = ref(false);
 let inactivityTimer = null;
 
@@ -37,6 +40,7 @@ function clearInactivityTimer() {
 
 function resetInactivityTimer() {
   clearInactivityTimer();
+  if (!inactivityEnabled.value) return;
   if (!showInactivityModal.value) {
     inactivityTimer = setTimeout(() => {
       showInactivityModal.value = true;
@@ -66,12 +70,20 @@ watch(() => localStorage.getItem('isAuthenticated') === 'true', (loggedIn) => {
   }
 });
 
-onMounted(() => {
+onMounted(async () => {
   document.addEventListener('mousedown', onUserActivity);
   document.addEventListener('touchstart', onUserActivity);
   document.addEventListener('keydown', onUserActivity);
   document.addEventListener('scroll', onUserActivity);
   document.addEventListener('click', onUserActivity);
+
+  try {
+    const res = await fetch(`${API_BASE}/api/settings`, { headers: { Accept: 'application/json' } });
+    const data = await res.json();
+    inactivityEnabled.value = data.inactivity_enabled !== 'false';
+  } catch {
+    inactivityEnabled.value = true;
+  }
 
   if (localStorage.getItem('isAuthenticated') === 'true') {
     resetInactivityTimer();

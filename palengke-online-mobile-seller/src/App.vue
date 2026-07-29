@@ -22,12 +22,14 @@ import { IonApp, IonRouterOutlet } from '@ionic/vue';
 import { useRouter } from 'vue-router';
 import SplashScreen from './components/SplashScreen.vue';
 import { useAuthStore } from '@/stores/auth';
+import { API_BASE } from '@/config/api';
 
 const router = useRouter();
 const auth = useAuthStore();
 auth.initFromStorage();
 
 const INACTIVITY_TIMEOUT = 10 * 60 * 1000;
+const inactivityEnabled = ref(true);
 const showInactivityModal = ref(false);
 let inactivityTimer = null;
 
@@ -40,6 +42,7 @@ function clearInactivityTimer() {
 
 function resetInactivityTimer() {
   clearInactivityTimer();
+  if (!inactivityEnabled.value) return;
   if (auth.isAuthenticated && !showInactivityModal.value) {
     inactivityTimer = setTimeout(() => {
       if (auth.isAuthenticated) {
@@ -73,9 +76,16 @@ watch(() => auth.isAuthenticated, (loggedIn) => {
   }
 });
 
-onMounted(() => {
+onMounted(async () => {
   const events = ['mousedown', 'touchstart', 'keydown', 'scroll', 'click'];
   events.forEach((e) => document.addEventListener(e, onUserActivity, { passive: true }));
+  try {
+    const res = await fetch(`${API_BASE}/settings`, { headers: { Accept: 'application/json' } });
+    const data = await res.json();
+    inactivityEnabled.value = data.inactivity_enabled !== 'false';
+  } catch {
+    inactivityEnabled.value = true;
+  }
   if (auth.isAuthenticated) resetInactivityTimer();
 });
 

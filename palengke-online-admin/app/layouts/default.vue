@@ -855,6 +855,9 @@ const auth = useAuthStore();
 const theme = useThemeStore();
 if (import.meta.client) theme.init();
 
+const config = useRuntimeConfig();
+const apiBaseUrl = config.public.apiBaseUrl || "http://localhost:8000";
+
 const sidebarCollapsed = ref(false);
 const sidebarOpen = ref(false);
 const showUserMenu = ref(false);
@@ -863,6 +866,7 @@ const showLogoutModal = ref(false);
 const loggingOut = ref(false);
 
 // Inactivity tracking
+const inactivityEnabled = ref(true);
 const showInactivityModal = ref(false);
 const inactivityCountdown = ref(30);
 let inactivityTimer = null;
@@ -872,6 +876,7 @@ const COUNTDOWN_SECONDS = 30;
 
 function resetInactivityTimer() {
   if (import.meta.server) return;
+  if (!inactivityEnabled.value) return;
   clearTimeout(inactivityTimer);
   clearInterval(countdownTimer);
   showInactivityModal.value = false;
@@ -887,6 +892,20 @@ function resetInactivityTimer() {
       }
     }, 1000);
   }, INACTIVITY_TIMEOUT);
+}
+
+async function fetchInactivitySetting() {
+  try {
+    const token = localStorage.getItem("palengke_auth_token");
+    if (!token) return;
+    const res = await fetch(`${apiBaseUrl}/api/admin/settings`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    inactivityEnabled.value = data.inactivity_enabled !== "false";
+  } catch {
+    inactivityEnabled.value = true;
+  }
 }
 
 function onUserActivity() {
@@ -1075,7 +1094,7 @@ const pendingApprovals = computed(() => registrationsStore.pending.length);
 const unreadNotifs = computed(() => notificationsStore.unreadCount);
 const notifications = computed(() => notificationsStore.allNotifications);
 
-onMounted(() => {
+onMounted(async () => {
   registrationsStore.fetchPending();
   registrationsStore.fetchHistory();
   notificationsStore.fetchNotifications();
@@ -1086,6 +1105,7 @@ onMounted(() => {
   // Inactivity tracking
   const activityEvents = ["mousedown", "mousemove", "keydown", "scroll", "touchstart", "click"];
   activityEvents.forEach((evt) => document.addEventListener(evt, onUserActivity, { passive: true }));
+  await fetchInactivitySetting();
   resetInactivityTimer();
 });
 

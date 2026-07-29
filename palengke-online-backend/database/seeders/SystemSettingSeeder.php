@@ -12,5 +12,7 @@ class SystemSettingSeeder extends Seeder
         SystemSetting::setValue('enable_seller_payment_methods', 'true');
         SystemSetting::setValue('allow_skip_verification', 'true');
         SystemSetting::setValue('enable_calling', 'true');
+        SystemSetting::setValue('inactivity_enabled', 'true');
+        SystemSetting::setValue('inactivity_timeout_minutes', '10');
     }
 }
