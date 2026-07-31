@@ -1,6 +1,0 @@
-export { mockOrderData, driverStartLocation, vendorLocation, customerLocation } from './activeDelivery'
-export { mockChatNotifications, mockChats } from './chats'
-export { mockProfileData, mockRatingCounts, mockBadges, mockImprovements, mockDocumentsPreview } from './profile'
-export { mockTopics, mockFaqs } from './help'
-export { mockDocuments } from './documents'
-export { mockTipData, mockTotalTipsToday, mockConfettiColors } from './tips'
