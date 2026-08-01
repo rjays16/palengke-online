@@ -111,6 +111,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/driver/profile', [DriverRegistrationController::class, 'profile']);
     Route::get('/driver/settings', [DriverRegistrationController::class, 'settings']);
     Route::put('/driver/settings', [DriverRegistrationController::class, 'updateSettings']);
+    Route::put('/driver/status', [DriverRegistrationController::class, 'updateStatus']);
     Route::get('/driver/licence', [LicenceController::class, 'show']);
     Route::post('/driver/licence/pay', [LicenceController::class, 'pay']);
     Route::get('/driver/badges', [DriverBadgeController::class, 'index']);

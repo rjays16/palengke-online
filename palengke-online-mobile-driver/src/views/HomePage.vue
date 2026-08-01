@@ -401,6 +401,7 @@ const fetchDashboardStats = async () => {
       driverName.value = data.name || '';
       driverRating.value = data.rating || 0;
       totalTrips.value = data.totalTrips || 0;
+      isActive.value = data.availabilityStatus === 'active';
     }
   } catch {}
 };
@@ -483,6 +484,21 @@ const toggleActiveStatus = async () => {
           role: 'destructive',
           handler: async () => {
             isActive.value = false;
+            const token = getToken();
+            if (token) {
+              try {
+                await fetch(`${API_BASE}/api/driver/status`, {
+                  method: 'PUT',
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ status: 'offline' }),
+                });
+              } catch {
+                // status update failure shouldn't block going inactive
+              }
+            }
             const toast = await toastController.create({
               message: 'You are now inactive',
               duration: 2000,
@@ -498,6 +514,21 @@ const toggleActiveStatus = async () => {
   } else {
     // Going active
     isActive.value = true;
+    const token = getToken();
+    if (token) {
+      try {
+        await fetch(`${API_BASE}/api/driver/status`, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ status: 'active' }),
+        });
+      } catch {
+        // status update failure shouldn't block going active
+      }
+    }
     const toast = await toastController.create({
       message: 'You are now active! Finding orders...',
       duration: 2500,

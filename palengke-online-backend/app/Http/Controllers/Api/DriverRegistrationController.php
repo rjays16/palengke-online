@@ -391,6 +391,22 @@ class DriverRegistrationController extends Controller
             'ratingCounts' => $ratingCounts,
             'cityAvgRating' => $cityAvg,
             'ratingUpdatedAt' => $ratings->isNotEmpty() ? $ratings->max('created_at')->toIso8601String() : null,
+            'availabilityStatus' => $driver->availability_status,
+        ]);
+    }
+
+    public function updateStatus(Request $request)
+    {
+        $validated = $request->validate([
+            'status' => 'required|string|in:active,offline',
+        ]);
+
+        $driver = $request->user();
+        $driver->update(['availability_status' => $validated['status']]);
+
+        return response()->json([
+            'message' => 'Availability status updated successfully.',
+            'availabilityStatus' => $driver->availability_status,
         ]);
     }
 
