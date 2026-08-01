@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\SellerNotificationController;
 use App\Http\Controllers\Api\FaqController;
 use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\DriverRatingController;
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\AdminPaymentMethodController;
@@ -340,6 +341,9 @@ Route::get('/faqs', [FaqController::class, 'active']);
 
 // Customer app — submit a review / rating
 Route::post('/reviews', [ReviewController::class, 'store']);
+
+// Customer app — submit a driver rating
+Route::post('/driver-ratings', [DriverRatingController::class, 'store']);
 
 // Customer app — get order info for rating page
 Route::get('/order-info/{id}', function ($id) {

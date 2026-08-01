@@ -361,6 +361,21 @@ class DriverRegistrationController extends Controller
     {
         $driver = $request->user();
 
+        $totalTrips = $driver->orders()->where('status', 'completed')->count();
+        $joinedDays = $driver->created_at ? (int) $driver->created_at->diffInDays(now()) : 0;
+
+        $ratings = $driver->ratings()->get();
+        $rating = $ratings->isNotEmpty() ? round($ratings->avg('rating'), 1) : 0;
+
+        $ratingCounts = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
+        foreach ($ratings as $r) {
+            if (isset($ratingCounts[$r->rating])) {
+                $ratingCounts[$r->rating]++;
+            }
+        }
+
+        $cityAvg = $this->cityAverageRating($driver);
+
         return response()->json([
             'name' => trim(implode(' ', array_filter([$driver->first_name, $driver->middle_name, $driver->last_name]))),
             'email' => $driver->email,
@@ -370,10 +385,34 @@ class DriverRegistrationController extends Controller
             'vehicleModel' => $driver->vehicle_model,
             'vehicleColor' => $driver->vehicle_color,
             'plateNumber' => $driver->plate_number,
-            'totalTrips' => 0,
-            'rating' => 0,
-            'joinedDays' => 0,
+            'totalTrips' => $totalTrips,
+            'rating' => $rating,
+            'joinedDays' => $joinedDays,
+            'ratingCounts' => $ratingCounts,
+            'cityAvgRating' => $cityAvg,
+            'ratingUpdatedAt' => $ratings->isNotEmpty() ? $ratings->max('created_at')->toIso8601String() : null,
         ]);
+    }
+
+    private function cityAverageRating($driver)
+    {
+        $preferred = is_array($driver->preferred_locations) ? $driver->preferred_locations : [];
+        $query = \App\Models\DriverRating::query()
+            ->where('driver_registration_id', '!=', $driver->id)
+            ->whereNotNull('rating');
+
+        if (!empty($preferred)) {
+            $query->whereHas('driver', function ($q) use ($preferred) {
+                $q->where(function ($q2) use ($preferred) {
+                    foreach ($preferred as $location) {
+                        $q2->orWhereJsonContains('preferred_locations', $location);
+                    }
+                });
+            });
+        }
+
+        $avg = $query->avg('rating');
+        return $avg !== null ? round($avg, 1) : 0;
     }
 
     public function settings(Request $request)

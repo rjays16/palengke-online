@@ -56,8 +56,8 @@
       <!-- Rating Breakdown -->
       <div class="section">
         <div class="section-header-row">
-          <h3 class="section-title">Last 100 Rated Jobs</h3>
-          <span class="updated-text">Updated 2 Hours ago</span>
+          <h3 class="section-title">Last {{ totalRatings }} Rated Jobs</h3>
+          <span class="updated-text">{{ updatedText }}</span>
         </div>
 
         <div class="rating-breakdown">
@@ -339,7 +339,8 @@ import {
 
 const router = useRouter();
 const activeTab = ref('achievements');
-const cityAvgRating = ref(4.70);
+const cityAvgRating = ref(0);
+const ratingUpdatedAt = ref(null);
 
 const licenceStore = useLicenceStore();
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
@@ -373,6 +374,11 @@ async function fetchProfile() {
     if (res.ok) {
       const data = await res.json();
       profileData.value = { ...profileData.value, ...data };
+      if (data.cityAvgRating !== undefined) cityAvgRating.value = data.cityAvgRating;
+      if (data.ratingUpdatedAt) ratingUpdatedAt.value = data.ratingUpdatedAt;
+      if (data.ratingCounts) {
+        ratingCounts.value = data.ratingCounts;
+      }
     }
   } catch {}
 }
@@ -403,9 +409,29 @@ const licenceBarPercent = computed(() => {
 })
 
 // Rating distribution
-const ratingCounts = {};
-const getRatingCount = (star) => ratingCounts[star] || 0;
-const getRatingWidth = () => 0;
+const ratingCounts = ref({ 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 });
+const totalRatings = computed(() => {
+  const counts = ratingCounts.value || {};
+  return [5, 4, 3, 2, 1].reduce((sum, star) => sum + (counts[star] || 0), 0);
+});
+const getRatingCount = (star) => ratingCounts.value[star] || 0;
+const getRatingWidth = (star) => {
+  const total = totalRatings.value;
+  return total > 0 ? Math.round((getRatingCount(star) / total) * 100) : 0;
+};
+const updatedText = computed(() => {
+  if (!ratingUpdatedAt.value) return 'No ratings yet';
+  const diff = Date.now() - new Date(ratingUpdatedAt.value).getTime();
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return 'Updated just now';
+  if (minutes < 60) return `Updated ${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `Updated ${hours} hour${hours > 1 ? 's' : ''} ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `Updated ${days} day${days > 1 ? 's' : ''} ago`;
+  const months = Math.floor(days / 30);
+  return `Updated ${months} month${months > 1 ? 's' : ''} ago`;
+});
 
 const iconMap = {
   trophyOutline,
@@ -458,7 +484,6 @@ async function fetchPerformance() {
         ...item,
         icon: iconMap[item.icon] || helpCircleOutline,
       }));
-      profileData.value.totalTrips = data.totalTrips || 0;
     }
   } catch {}
 }

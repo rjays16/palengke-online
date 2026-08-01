@@ -34,6 +34,11 @@ class DriverRegistration extends Model
         return $this->hasMany(Order::class, 'driver_registration_id');
     }
 
+    public function ratings()
+    {
+        return $this->hasMany(DriverRating::class, 'driver_registration_id');
+    }
+
     public function badges()
     {
         return $this->belongsToMany(Badge::class, 'driver_badge')
