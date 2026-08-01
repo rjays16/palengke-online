@@ -331,6 +331,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/admin/restriction-codes', [RestrictionCodeController::class, 'adminIndex']);
     Route::post('/admin/restriction-codes/{id}/toggle', [RestrictionCodeController::class, 'toggle']);
+    Route::put('/admin/restriction-codes/{id}', [RestrictionCodeController::class, 'update']);
 });
 
 // Public — fetch active notices for seller / customer / driver apps

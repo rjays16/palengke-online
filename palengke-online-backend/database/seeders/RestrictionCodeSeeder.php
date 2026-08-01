@@ -10,18 +10,18 @@ class RestrictionCodeSeeder extends Seeder
     public function run(): void
     {
         $codes = [
-            ['code' => 'A', 'label' => 'Motorcycles/Tricycles (Automatic Clutch)'],
-            ['code' => 'A1', 'label' => 'Motorcycles/Tricycles (Manual Clutch)'],
-            ['code' => 'B', 'label' => 'Light Vehicles — Automatic Transmission'],
-            ['code' => 'B1', 'label' => 'Light Vehicles — Manual Transmission'],
-            ['code' => 'B2', 'label' => 'Heavy Vehicles — Automatic Transmission'],
-            ['code' => 'C', 'label' => 'Heavy Vehicles — Manual Transmission'],
-            ['code' => 'D', 'label' => 'Articulated Vehicles'],
-            ['code' => 'BE', 'label' => 'Vehicles with Trailer'],
+            ['code' => 'A', 'label' => 'Motorcycles/Tricycles (Automatic Clutch)', 'vehicle_types' => ['Scooter', 'Motorcycle (Automatic)', 'Motorized Tricycle']],
+            ['code' => 'A1', 'label' => 'Motorcycles/Tricycles (Manual Clutch)', 'vehicle_types' => ['Motorcycle (Manual)', 'Underbone Motorcycle', 'Motorized Tricycle']],
+            ['code' => 'B', 'label' => 'Light Vehicles — Automatic Transmission', 'vehicle_types' => ['Sedan', 'AUV', 'SUV', 'Pickup', 'Van', 'Jeepney', 'Multicab', 'UV Express']],
+            ['code' => 'B1', 'label' => 'Light Vehicles — Manual Transmission', 'vehicle_types' => ['Sedan', 'AUV', 'SUV', 'Pickup', 'Van', 'Jeepney', 'Multicab', 'UV Express']],
+            ['code' => 'B2', 'label' => 'Heavy Vehicles — Automatic Transmission', 'vehicle_types' => ['Bus', 'Delivery Van', 'Wing Van Truck', 'Dump Truck']],
+            ['code' => 'C', 'label' => 'Heavy Vehicles — Manual Transmission', 'vehicle_types' => ['Bus', 'Delivery Van', 'Wing Van Truck', 'Dump Truck']],
+            ['code' => 'D', 'label' => 'Articulated Vehicles', 'vehicle_types' => ['Trailer Truck', 'Container Truck', 'Articulated Bus']],
+            ['code' => 'BE', 'label' => 'Vehicles with Trailer', 'vehicle_types' => ['Car with Trailer', 'Van with Trailer']],
         ];
 
         foreach ($codes as $code) {
-            RestrictionCode::create($code);
+            RestrictionCode::updateOrCreate(['code' => $code['code']], $code);
         }
     }
 }

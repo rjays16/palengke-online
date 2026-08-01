@@ -40,5 +40,21 @@ export const useRestrictionCodesStore = defineStore("restrictionCodes", () => {
     }
   }
 
-  return { codes, loading, fetchCodes, toggleCode };
+  async function updateCode(id: number, data: { label?: string; enabled?: boolean; vehicle_types?: string[] }) {
+    loading.value = true;
+    try {
+      const token = getToken();
+      await $fetch(`${getApiBaseUrl()}/api/admin/restriction-codes/${id}`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+        body: data,
+      });
+    } catch {
+      throw new Error("Failed to update restriction code");
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  return { codes, loading, fetchCodes, toggleCode, updateCode };
 });

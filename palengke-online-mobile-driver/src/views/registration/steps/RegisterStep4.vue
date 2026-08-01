@@ -34,7 +34,6 @@
             <ion-icon :icon="codeSlashOutline"></ion-icon>
             <span>Restriction Code <strong>{{ getRestrictionCode() }}</strong> — {{ restrictionCodes[getRestrictionCode()] }}</span>
           </div>
-
           <!-- Vehicle Type -->
           <div class="input-group">
             <label class="input-label">Vehicle Type *</label>
@@ -150,28 +149,34 @@ import {
 } from 'ionicons/icons';
 
 const router = useRouter();
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
-const restrictionCodes = {
-  A: 'Motorcycles/Tricycles (Automatic Clutch)',
-  A1: 'Motorcycles/Tricycles (Manual Clutch)',
-  B: 'Light Vehicles — Automatic Transmission',
-  B1: 'Light Vehicles — Manual Transmission',
-  B2: 'Heavy Vehicles — Automatic Transmission',
-  C: 'Heavy Vehicles — Manual Transmission',
-  D: 'Articulated Vehicles',
-  BE: 'Vehicles with Trailer',
-};
+const restrictionCodes = ref({});
+const vehiclesByCode = ref({});
+const loadingCodes = ref(false);
 
-const vehiclesByCode = {
-  A: ['Motorcycle', 'Tricycle'],
-  A1: ['Motorcycle', 'Tricycle'],
-  B: ['Car', 'Van', 'SUV', 'Pickup'],
-  B1: ['Car', 'Van', 'SUV', 'Pickup'],
-  B2: ['Truck', 'Bus', 'Delivery Van'],
-  C: ['Truck', 'Bus', 'Delivery Van'],
-  D: ['Trailer Truck', 'Articulated Bus'],
-  BE: ['Car with Trailer', 'Van with Trailer', 'Pickup with Trailer'],
-};
+async function fetchRestrictionCodes() {
+  loadingCodes.value = true;
+  try {
+    const res = await fetch(`${API_BASE}/api/restriction-codes`);
+    if (res.ok) {
+      const data = await res.json();
+      const map = {};
+      const vehicles = {};
+      for (const r of data.restriction_codes || []) {
+        map[r.code] = r.label;
+        vehicles[r.code] = r.vehicle_types || [];
+      }
+      restrictionCodes.value = map;
+      vehiclesByCode.value = vehicles;
+    }
+  } catch {
+    restrictionCodes.value = {};
+    vehiclesByCode.value = {};
+  } finally {
+    loadingCodes.value = false;
+  }
+}
 
 const renderKey = ref(0);
 const formData = ref({
@@ -196,7 +201,10 @@ function loadFromStorage() {
   if (state.vehicleColor) formData.value.vehicleColor = state.vehicleColor;
 }
 
-onMounted(loadFromStorage);
+onMounted(() => {
+  fetchRestrictionCodes();
+  loadFromStorage();
+});
 onActivated(() => {
   renderKey.value++;
   loadFromStorage();
@@ -210,7 +218,7 @@ function getRestrictionCode() {
 function resetVehicleTypeOnCodeMismatch(code) {
   const current = formData.value.vehicleType;
   if (!current) return;
-  const allowed = vehiclesByCode[code] || [];
+  const allowed = vehiclesByCode.value[code] || [];
   if (!allowed.includes(current)) {
     formData.value.vehicleType = '';
   }
@@ -218,7 +226,7 @@ function resetVehicleTypeOnCodeMismatch(code) {
 
 function getAvailableVehicles() {
   const code = getRestrictionCode();
-  return vehiclesByCode[code] || ['Motorcycle', 'Tricycle', 'Car', 'Van', 'Truck'];
+  return vehiclesByCode.value[code] || ['Motorcycle', 'Tricycle', 'Car', 'Van', 'Truck'];
 }
 
 const isFormValid = computed(() => {

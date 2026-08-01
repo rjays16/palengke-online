@@ -24,19 +24,47 @@
         <div v-if="store.loading && codes.length === 0" class="loading-state">Loading restriction codes...</div>
         <div v-else class="codes-list">
           <div v-for="code in codes" :key="code.id" class="code-row">
-            <label class="toggle-label">
-              <input
-                type="checkbox"
-                v-model="code.enabled"
-                @change="onToggle(code)"
-              />
-              <span class="checkmark"></span>
-              <span class="code-badge">{{ code.code }}</span>
-              <span class="code-label">{{ code.label }}</span>
-            </label>
-            <span class="status-badge" :class="code.enabled ? 'active' : 'inactive'">
-              {{ code.enabled ? 'Enabled' : 'Disabled' }}
-            </span>
+            <div class="code-row-main">
+              <label class="toggle-label">
+                <input
+                  type="checkbox"
+                  v-model="code.enabled"
+                  @change="onToggle(code)"
+                />
+                <span class="checkmark"></span>
+                <span class="code-badge">{{ code.code }}</span>
+                <span class="code-label">{{ code.label }}</span>
+              </label>
+              <span class="status-badge" :class="code.enabled ? 'active' : 'inactive'">
+                {{ code.enabled ? 'Enabled' : 'Disabled' }}
+              </span>
+            </div>
+            <div class="vehicle-types-block">
+              <div class="vehicle-types-head">
+                <span class="vehicle-types-title">Vehicle Types</span>
+                <button
+                  v-if="!editingId || editingId !== code.id"
+                  class="text-btn"
+                  @click="startEdit(code)"
+                >
+                  {{ code.vehicle_types?.length ? 'Edit' : 'Add' }}
+                </button>
+              </div>
+              <div v-if="editingId === code.id" class="vehicle-types-edit">
+                <input
+                  v-model="editVehicleTypes"
+                  type="text"
+                  placeholder="e.g. Motorcycle, Tricycle"
+                  class="vehicle-types-input"
+                />
+                <button class="save-btn" @click="saveEdit(code)" :disabled="store.loading">Save</button>
+                <button class="cancel-btn" @click="cancelEdit">Cancel</button>
+              </div>
+              <div v-else class="vehicle-types-list">
+                <span v-for="v in code.vehicle_types || []" :key="v" class="vehicle-type-tag">{{ v }}</span>
+                <span v-if="!(code.vehicle_types || []).length" class="vehicle-types-empty">No vehicle types set</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -91,6 +119,37 @@ const { codes } = storeToRefs(store);
 
 const success = ref(false);
 const error = ref("");
+
+const editingId = ref<number | null>(null);
+const editVehicleTypes = ref("");
+
+function startEdit(code: any) {
+  editingId.value = code.id;
+  editVehicleTypes.value = (code.vehicle_types || []).join(", ");
+}
+
+function cancelEdit() {
+  editingId.value = null;
+  editVehicleTypes.value = "";
+}
+
+async function saveEdit(code: any) {
+  const types = editVehicleTypes.value
+    .split(",")
+    .map((s: string) => s.trim())
+    .filter(Boolean);
+  error.value = "";
+  success.value = false;
+  try {
+    await store.updateCode(code.id, { vehicle_types: types });
+    code.vehicle_types = types;
+    cancelEdit();
+    success.value = true;
+    setTimeout(() => { success.value = false; }, 2500);
+  } catch {
+    error.value = "Failed to save vehicle types";
+  }
+}
 
 const totalCodes = computed(() => codes.value.length);
 const enabledCount = computed(() => codes.value.filter((c) => c.enabled).length);
@@ -240,6 +299,95 @@ onMounted(() => {
 }
 .code-row:hover {
   background: #f9fafb;
+}
+.code-row-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+.vehicle-types-block {
+  margin: 10px 0 4px 0;
+  padding: 10px 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.vehicle-types-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.vehicle-types-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.vehicle-types-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.vehicle-type-tag {
+  font-size: 12px;
+  font-weight: 500;
+  color: #111827;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+.vehicle-types-empty {
+  font-size: 12px;
+  color: #9ca3af;
+}
+.vehicle-types-edit {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.vehicle-types-input {
+  flex: 1;
+  font-size: 13px;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-family: "Inter", sans-serif;
+}
+.vehicle-types-input:focus {
+  outline: none;
+  border-color: #059669;
+}
+.save-btn {
+  background: #059669;
+  color: #fff;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: "Inter", sans-serif;
+}
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.cancel-btn {
+  background: none;
+  border: 1px solid #d1d5db;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: "Inter", sans-serif;
 }
 .toggle-label {
   display: flex;

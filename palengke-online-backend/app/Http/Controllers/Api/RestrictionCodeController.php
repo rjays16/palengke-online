@@ -12,7 +12,7 @@ class RestrictionCodeController extends Controller
     {
         $codes = RestrictionCode::where('enabled', true)
             ->orderBy('code')
-            ->get(['code', 'label']);
+            ->get(['code', 'label', 'vehicle_types']);
 
         return response()->json([
             'restriction_codes' => $codes,
@@ -25,6 +25,24 @@ class RestrictionCodeController extends Controller
 
         return response()->json([
             'restriction_codes' => $codes,
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'label' => 'sometimes|required|string|max:255',
+            'enabled' => 'sometimes|boolean',
+            'vehicle_types' => 'sometimes|array',
+            'vehicle_types.*' => 'string|max:100',
+        ]);
+
+        $code = RestrictionCode::findOrFail($id);
+        $code->update($validated);
+
+        return response()->json([
+            'message' => 'Restriction code updated successfully.',
+            'restriction_code' => $code->fresh(),
         ]);
     }
 
