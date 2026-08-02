@@ -66,7 +66,7 @@
               <ion-icon :icon="callOutline"></ion-icon>
               {{ orderData.pickupPhone }}
             </p>
-            <p class="instructions">
+            <p v-if="orderData.pickupInstructions" class="instructions">
               <ion-icon :icon="documentTextOutline"></ion-icon>
               {{ orderData.pickupInstructions }}
             </p>
@@ -159,9 +159,19 @@ import {
 } from 'ionicons/icons';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { mockOrderData, driverStartLocation, vendorLocation, customerLocation } from '@/mock/activeDelivery';
+import {
+  mockOrderData as fallbackOrderData,
+  driverStartLocation as fallbackDriverLocation,
+  vendorLocation as fallbackVendorLocation,
+  customerLocation as fallbackCustomerLocation,
+} from '@/mock/activeDelivery';
 
 const router = useRouter();
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+
+function getToken() {
+  return localStorage.getItem('token') || '';
+}
 
 let map = null;
 let driverMarker = null;
@@ -176,11 +186,62 @@ const sheetExpanded = ref(false);
 const etaTime = ref('12 min');
 const etaDistance = ref('2.3 km');
 
-// Order Data
-const orderData = ref(mockOrderData);
+// Order Data (fallback = mock, replaced by real active order from API)
+const orderData = ref({ ...fallbackOrderData });
 
-// Vendor/Driver/Customer Locations (mock coordinates - CDO area)
-const driverLocation = ref(driverStartLocation);
+// Locations (fallback = mock CDO coordinates; customer coords come from API when available)
+const driverLocation = ref([...fallbackDriverLocation]);
+const vendorPos = ref([...fallbackVendorLocation]);
+const customerPos = ref([...fallbackCustomerLocation]);
+
+const paymentLabel = (method) => {
+  if (method === 'cod') return 'Cash on Delivery';
+  if (method === 'gcash') return 'GCash';
+  if (method === 'cash') return 'Cash';
+  return method || 'Cash';
+};
+
+// Fetch the driver's active order and populate the page with real data
+const fetchActiveOrder = async () => {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/driver/orders`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const active = (data.active || [])[0];
+    if (!active) return;
+
+    orderData.value = {
+      id: active.id,
+      sellerName: active.sellerName,
+      pickupAddress: active.pickupAddress,
+      pickupPhone: active.pickupPhone || fallbackOrderData.pickupPhone,
+      customerName: active.customerName,
+      deliveryAddress: active.deliveryAddress,
+      customerPhone: active.customerPhone || fallbackOrderData.customerPhone,
+      itemCount: active.itemCount || 0,
+      totalAmount: active.totalAmount || 0,
+      paymentMethod: paymentLabel(active.paymentMethod),
+      driverEarnings: active.driverEarnings || 0,
+      pickupInstructions: active.pickupInstructions,
+      items: Array.isArray(active.items) && active.items.length
+        ? active.items.map((i) => `${i.qty ?? ''}${i.unit ?? ''} ${i.name ?? ''}`.trim())
+        : fallbackOrderData.items,
+    };
+
+    if (active.estimatedTime) {
+      etaTime.value = `${active.estimatedTime} min`;
+    }
+    if (active.latitude && active.longitude) {
+      customerPos.value = [Number(active.latitude), Number(active.longitude)];
+    }
+  } catch {
+    // Keep mock fallback data on network error
+  }
+};
 
 // Init Map with both pickup and delivery locations
 const initMap = () => {
@@ -227,7 +288,7 @@ const initMap = () => {
   });
 
   // Add all markers
-  vendorMarker = L.marker(vendorLocation, { icon: vendorIcon })
+  vendorMarker = L.marker(vendorPos.value, { icon: vendorIcon })
     .addTo(map).bindPopup(`
       <div style="text-align:center;min-width:160px;">
         <strong style="color:#4CAF50;font-size:14px;">🏪 PICKUP HERE</strong><br>
@@ -238,7 +299,7 @@ const initMap = () => {
       </div>
     `);
 
-  customerMarker = L.marker(customerLocation, { icon: customerIcon })
+  customerMarker = L.marker(customerPos.value, { icon: customerIcon })
     .addTo(map).bindPopup(`
       <div style="text-align:center;min-width:160px;">
         <strong style="color:#f44336;font-size:14px;">🏠 DELIVER HERE</strong><br>
@@ -249,7 +310,7 @@ const initMap = () => {
       </div>
     `);
 
-  driverMarker = L.marker(driverStartLocation, { icon: driverIcon })
+  driverMarker = L.marker(driverLocation.value, { icon: driverIcon })
     .addTo(map).bindPopup('<b>🏍️ Driver</b>');
 
   // Draw route from driver to vendor
@@ -259,7 +320,7 @@ const initMap = () => {
   fitMapToShowAll();
   
   // Start driver moving to vendor for pickup
-  simulateDriverMovement(driverStartLocation, vendorLocation);
+  simulateDriverMovement(driverLocation.value, vendorPos.value);
 };
 
 // Draw route from driver to vendor (pickup phase)
@@ -270,7 +331,7 @@ const drawPickupRoute = () => {
   
   if (currentStep.value === 1) {
     // Pickup phase: show driver → vendor route (green dashed)
-    pickupRouteLine = L.polyline([driverLocation.value, vendorLocation], {
+    pickupRouteLine = L.polyline([driverLocation.value, vendorPos.value], {
       color: '#4CAF50',
       weight: 5,
       opacity: 0.9,
@@ -279,7 +340,7 @@ const drawPickupRoute = () => {
     }).addTo(map);
     
     // Also show dotted line from vendor to customer (as reference)
-    deliveryRouteLine = L.polyline([vendorLocation, customerLocation], {
+    deliveryRouteLine = L.polyline([vendorPos.value, customerPos.value], {
       color: '#ccc',
       weight: 3,
       opacity: 0.6,
@@ -288,7 +349,7 @@ const drawPickupRoute = () => {
     }).addTo(map);
     
     // Start driver moving to vendor
-    simulateDriverMovement(driverLocation.value, vendorLocation);
+    simulateDriverMovement(driverLocation.value, vendorPos.value);
   }
 };
 
@@ -379,7 +440,7 @@ const drawDeliveryRoute = () => {
   if (deliveryRouteLine) map.removeLayer(deliveryRouteLine);
   
   // Delivery phase: show driver → customer route (blue)
-  pickupRouteLine = L.polyline([driverLocation.value, customerLocation], {
+  pickupRouteLine = L.polyline([driverLocation.value, customerPos.value], {
     color: '#2196F3',
     weight: 5,
     opacity: 0.9,
@@ -390,7 +451,7 @@ const drawDeliveryRoute = () => {
 
 // Fit map to show all locations
 const fitMapToShowAll = () => {
-  const allPoints = [driverLocation.value, vendorLocation, customerLocation];
+  const allPoints = [driverLocation.value, vendorPos.value, customerPos.value];
   const bounds = L.latLngBounds(allPoints);
   map.fitBounds(bounds, { padding: [80, 80] });
 };
@@ -399,17 +460,17 @@ const fitMapToShowAll = () => {
 const updateMapForStep = () => {
   if (currentStep.value === 1) {
     // Focus on vendor for pickup
-    const bounds = L.latLngBounds([driverLocation.value, vendorLocation]);
+    const bounds = L.latLngBounds([driverLocation.value, vendorPos.value]);
     map.fitBounds(bounds, { padding: [80, 80] });
     drawPickupRoute();
   } else if (currentStep.value >= 2) {
     // Focus on customer for delivery
-    const bounds = L.latLngBounds([vendorLocation, customerLocation]);
+    const bounds = L.latLngBounds([vendorPos.value, customerPos.value]);
     map.fitBounds(bounds, { padding: [80, 80] });
     drawDeliveryRoute();
     
     // Start moving from vendor to customer
-    simulateDriverMovement(vendorLocation, customerLocation);
+    simulateDriverMovement(vendorPos.value, customerPos.value);
   }
 };
 
@@ -446,7 +507,7 @@ const confirmArrived = async () => {
   currentStep.value = 3;
   etaTime.value = 'Arrived';
   etaDistance.value = '0 m';
-  if (driverMarker) driverMarker.setLatLng(customerLocation);
+  if (driverMarker) driverMarker.setLatLng(customerPos.value);
   const toast = await toastController.create({
     message: 'You have arrived! Confirm delivery with customer.',
     duration: 2500, color: 'medium', position: 'top'
@@ -555,7 +616,7 @@ const callCustomer = () => {
 
 const openNavigation = () => {
   // Open Google Maps navigation to current destination
-  const dest = currentStep.value === 1 ? vendorLocation : customerLocation;
+  const dest = currentStep.value === 1 ? vendorPos.value : customerPos.value;
   const name = currentStep.value === 1 ? orderData.value.sellerName : orderData.value.customerName;
   const address = currentStep.value === 1 ? orderData.value.pickupAddress : orderData.value.deliveryAddress;
   const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
@@ -643,7 +704,8 @@ const centerOnDriver = () => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
+  await fetchActiveOrder();
   setTimeout(() => initMap(), 100);
 });
 
