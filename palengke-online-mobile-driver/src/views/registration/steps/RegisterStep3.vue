@@ -55,14 +55,16 @@
               <select
                 v-model="formData.licenseType"
                 class="custom-input with-icon custom-select"
+                :disabled="loadingLicenseTypes"
                 @blur="validateField('licenseType')"
                 @change="errors.licenseType = ''"
               >
-                <option value="" disabled>Select license type</option>
-                <option value="Student Permit">Student Permit</option>
-                <option value="Non-Professional">Non-Professional</option>
-                <option value="Professional">Professional</option>
+                <option value="" disabled>{{ loadingLicenseTypes ? 'Loading...' : 'Select license type' }}</option>
+                <option v-for="t in licenseTypes" :key="t.name" :value="t.name">
+                  {{ t.name }}
+                </option>
               </select>
+              <ion-spinner v-if="loadingLicenseTypes" name="crescent" class="input-spinner"></ion-spinner>
             </div>
             <span v-if="errors.licenseType" class="error-message">{{ errors.licenseType }}</span>
           </div>
@@ -160,6 +162,10 @@ const restrictionCodes = ref([]);
 
 const loadingCodes = ref(false);
 
+const licenseTypes = ref([]);
+
+const loadingLicenseTypes = ref(false);
+
 async function fetchRestrictionCodes() {
   loadingCodes.value = true;
   try {
@@ -174,6 +180,23 @@ async function fetchRestrictionCodes() {
     restrictionCodes.value = [];
   } finally {
     loadingCodes.value = false;
+  }
+}
+
+async function fetchLicenseTypes() {
+  loadingLicenseTypes.value = true;
+  try {
+    const res = await fetch(`${API_BASE}/api/license-types`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.license_types?.length) {
+        licenseTypes.value = data.license_types;
+      }
+    }
+  } catch {
+    licenseTypes.value = [];
+  } finally {
+    loadingLicenseTypes.value = false;
   }
 }
 
@@ -198,6 +221,7 @@ const minDate = computed(() => {
 
 onMounted(() => {
   fetchRestrictionCodes();
+  fetchLicenseTypes();
   const { state } = useRegistrationStore();
   if (state.licenseNumber) formData.value.licenseNumber = state.licenseNumber;
   if (state.licenseType) formData.value.licenseType = state.licenseType;

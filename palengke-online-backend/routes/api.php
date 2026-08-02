@@ -36,6 +36,7 @@ use App\Http\Controllers\Api\AdminWalletController;
 use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\AdminSubscriptionController;
 use App\Http\Controllers\Api\RestrictionCodeController;
+use App\Http\Controllers\Api\LicenseTypeController;
 use App\Http\Controllers\Api\DriverRegistrationController;
 use App\Http\Controllers\Api\DriverAuthController;
 use App\Http\Controllers\Api\DriverDeviceController;
@@ -247,6 +248,9 @@ Route::get('/help-topics', [HelpTopicController::class, 'index']);
 
 // Public endpoint for driver app to fetch enabled restriction codes
 Route::get('/restriction-codes', [RestrictionCodeController::class, 'index']);
+
+// Public endpoint for driver app to fetch enabled license types
+Route::get('/license-types', [LicenseTypeController::class, 'index']);
 
 // Public endpoint for seller app to fetch enabled locations (filtered by country_regions)
 Route::get('/locations', [LocationController::class, 'publicIndex']);
