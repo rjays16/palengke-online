@@ -409,7 +409,7 @@ import {
 } from 'ionicons/icons';
 import { api } from '@/utils/apiClient';
 import { useAuthStore } from '@/stores/auth';
-import { type SellerProfile, type OperatingHours, type PaymentMethod } from '@/types';
+import { type SellerProfile, type OperatingHours, type PaymentMethod, type DayHours } from '@/types';
 import BottomNav from '@/components/BottomNav.vue';
 import { useSuccessModal } from '@/composables/useSuccessModal';
 import { useModals } from '@/composables/useModals';
@@ -482,7 +482,7 @@ const dayLabels: Record<string, string> = {
   sunday: 'Sunday',
 };
 
-const defaultDayHours = {
+const defaultDayHours: DayHours = {
   openHour: 7,
   openMin: '00',
   openAmPm: 'AM',
@@ -625,7 +625,7 @@ const loadPaymentMethods = async () => {
   }
 };
 
-const paymentIcon = (type: string) => {
+const paymentIcon = (type?: string) => {
   const icons: Record<string, any> = {
     gcash: walletOutline,
     bdo: businessOutline,
@@ -635,10 +635,10 @@ const paymentIcon = (type: string) => {
     unionbank: businessOutline,
     pnb: businessOutline,
   };
-  return icons[type] || cardOutline;
+  return icons[type ?? ''] || cardOutline;
 };
 
-const displayType = (type: string) => {
+const displayType = (type?: string) => {
   const names: Record<string, string> = {
     gcash: 'GCash',
     bdo: 'BDO',
@@ -648,10 +648,11 @@ const displayType = (type: string) => {
     unionbank: 'Unionbank',
     pnb: 'PNB',
   };
+  if (!type) return '';
   return names[type] || type.charAt(0).toUpperCase() + type.slice(1);
 };
 
-const maskAccount = (number: string) => {
+const maskAccount = (number?: string) => {
   if (!number) return '';
   if (number.length <= 4) return number;
   return '****' + number.slice(-4);
@@ -954,7 +955,7 @@ const handleFileInput = async (event: any) => {
   const reader = new FileReader();
   reader.onload = async (e) => {
     const dataUrl = e.target?.result;
-    if (dataUrl) {
+    if (typeof dataUrl === 'string') {
       await uploadAvatar(dataUrl);
     }
   };

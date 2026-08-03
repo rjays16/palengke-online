@@ -5,6 +5,9 @@ interface RegistrationData {
   email: string
   phone: string
   country: string
+  countryCode: string
+  fullPhone: string
+  emailVerified: boolean
   firstName: string
   middleName: string
   lastName: string
@@ -19,9 +22,15 @@ interface RegistrationData {
   storePlace: string
   completeAddress: string
   verificationChoice: string
+  verificationStatus: string
+  verificationSubmittedAt: string
   idType: string
+  idTypeName: string
   idFront: string
   idBack: string
+  idFrontPhoto: string
+  idBackPhoto: string
+  selfiePhoto: string
   selfieWithId: string
   acceptedTOS: boolean
   acceptedDataPrivacy: boolean
@@ -34,6 +43,9 @@ function defaults(): RegistrationData {
     email: '',
     phone: '',
     country: '',
+    countryCode: '',
+    fullPhone: '',
+    emailVerified: false,
     firstName: '',
     middleName: '',
     lastName: '',
@@ -48,9 +60,15 @@ function defaults(): RegistrationData {
     storePlace: '',
     completeAddress: '',
     verificationChoice: '',
+    verificationStatus: '',
+    verificationSubmittedAt: '',
     idType: '',
+    idTypeName: '',
     idFront: '',
     idBack: '',
+    idFrontPhoto: '',
+    idBackPhoto: '',
+    selfiePhoto: '',
     selfieWithId: '',
     acceptedTOS: false,
     acceptedDataPrivacy: false,
