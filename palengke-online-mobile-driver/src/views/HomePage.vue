@@ -368,7 +368,7 @@ const fetchActiveDelivery = async () => {
           customerName: order.customerName,
           address: order.deliveryAddress,
           amount: order.totalAmount,
-          status: 'delivering',
+          status: order.dbStatus === 'processing' ? 'delivering' : 'pickup',
         };
       } else {
         activeDelivery.value = null;
