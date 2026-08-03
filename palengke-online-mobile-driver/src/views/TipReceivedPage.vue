@@ -126,17 +126,22 @@ import {
   personOutline, chatbubbleOutline, trophyOutline,
   bicycleOutline, cashOutline
 } from 'ionicons/icons';
-import { mockTipData, mockTotalTipsToday, mockConfettiColors } from '@/mock/tips';
-
 const router = useRouter();
 const route = useRoute();
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
-const tipData = ref({ ...mockTipData });
-const totalTipsToday = ref(mockTotalTipsToday);
+const tipData = ref({
+  amount: 0,
+  customerName: '',
+  message: '',
+  orderId: '',
+  deliveryFee: 0,
+});
 
-const confettiColors = mockConfettiColors;
+const totalTipsToday = ref(0);
+
+const confettiColors = ['#4CAF50', '#FFD700', '#FF9800', '#2196F3', '#E91E63', '#9C27B0'];
 
 function getToken() {
   if (typeof localStorage === 'undefined') return null;
