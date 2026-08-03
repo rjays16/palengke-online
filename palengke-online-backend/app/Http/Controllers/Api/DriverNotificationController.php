@@ -23,6 +23,7 @@ class DriverNotificationController extends Controller
                 'category' => $n->category ?? 'all',
                 'time' => $n->created_at->diffForHumans(),
                 'read' => $n->is_read,
+                'data' => $n->data,
             ]);
 
         return response()->json([

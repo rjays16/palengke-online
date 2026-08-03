@@ -18,11 +18,17 @@ class Order extends Model
         'total',
         'status',
         'payment_method',
+        'delivery_fee',
+        'tip_amount',
+        'tip_message',
+        'tip_customer_name',
     ];
 
     protected $casts = [
         'items' => 'array',
         'total' => 'float',
+        'delivery_fee' => 'float',
+        'tip_amount' => 'float',
     ];
 
     public function seller()

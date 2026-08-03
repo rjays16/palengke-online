@@ -500,7 +500,8 @@ class DriverRegistrationController extends Controller
                     'amount' => $order->total,
                     'time' => $time,
                     'status' => $order->status,
-                    'tipped' => false,
+                    'tipped' => (bool) ($order->tip_amount > 0),
+                    'tipAmount' => (float) ($order->tip_amount ?? 0),
                 ];
             });
 
@@ -584,7 +585,8 @@ class DriverRegistrationController extends Controller
             'latitude' => $order->latitude !== null ? (float) $order->latitude : null,
             'longitude' => $order->longitude !== null ? (float) $order->longitude : null,
             'time' => $time,
-            'tipped' => false,
+            'tipped' => (bool) ($order->tip_amount > 0),
+            'tipAmount' => (float) ($order->tip_amount ?? 0),
             'completedTime' => $driverStatus === 'completed' ? $time : null,
         ];
     }
@@ -623,7 +625,8 @@ class DriverRegistrationController extends Controller
                 'deliveryAddress' => $order->delivery_address,
                 'amount' => $order->total,
                 'paymentMethod' => $order->payment_method ?? 'cash',
-                'tipped' => false,
+                'tipped' => (bool) ($order->tip_amount > 0),
+                'tipAmount' => (float) ($order->tip_amount ?? 0),
                 'bonus' => 0,
                 'dayOfMonth' => $dayOfMonth,
                 'date' => $date,
@@ -675,11 +678,12 @@ class DriverRegistrationController extends Controller
             $netEarnings = round($total * 0.90, 2);
             $commission = round($total * 0.10, 2);
             $avgPerJob = $jobs > 0 ? round($netEarnings / $jobs, 2) : 0;
+            $tips = round($orders->sum('tip_amount'), 2);
 
             return [
                 'netEarnings' => $netEarnings,
                 'jobs' => $jobs,
-                'tips' => 0,
+                'tips' => $tips,
                 'onlineHours' => 0,
                 'avgPerJob' => $avgPerJob,
                 'deliveryFee' => $total,

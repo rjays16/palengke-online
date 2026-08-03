@@ -358,7 +358,19 @@ const placeOrder = async () => {
 
 const closeSuccessModal = () => {
   showSuccessModal.value = false;
-  router.push('/tip');
+  const fee = deliveryMode.value === 'pickup' ? 0 : currentDeliveryFee.value;
+  router.push({
+    path: '/tip',
+    query: {
+      seller_id: storeData.value.id,
+      store: storeData.value.name,
+      subtotal: subtotal.value.toFixed(2),
+      delivery_fee: fee.toFixed(2),
+      address: deliveryAddress.value.main,
+      payment: selectedPayment.value.label,
+      items: JSON.stringify(orderItems.value.map(i => ({ name: i.name, price: i.price, quantity: i.quantity })))
+    }
+  });
 };
 
 const goBack = () => router.back();

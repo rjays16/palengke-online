@@ -131,10 +131,60 @@ import { mockTipData, mockTotalTipsToday, mockConfettiColors } from '@/mock/tips
 const router = useRouter();
 const route = useRoute();
 
-const tipData = ref(mockTipData);
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+
+const tipData = ref({ ...mockTipData });
 const totalTipsToday = ref(mockTotalTipsToday);
 
 const confettiColors = mockConfettiColors;
+
+function getToken() {
+  if (typeof localStorage === 'undefined') return null;
+  return localStorage.getItem('token');
+}
+
+const qNum = (val) => {
+  const n = parseFloat(String(val ?? ''));
+  return isNaN(n) ? null : n;
+};
+
+const qStr = (val) => (val != null && val !== '' ? String(val) : null);
+
+const applyRouteParams = () => {
+  const amount = qNum(route.query.amount);
+  const deliveryFee = qNum(route.query.deliveryFee);
+  const customerName = qStr(route.query.customerName);
+  const message = qStr(route.query.message);
+  const orderId = qStr(route.query.orderId);
+
+  if (amount != null) tipData.value.amount = amount;
+  if (deliveryFee != null) tipData.value.deliveryFee = deliveryFee;
+  if (customerName) tipData.value.customerName = customerName;
+  if (message) tipData.value.message = message;
+  if (orderId) tipData.value.orderId = orderId;
+};
+
+const fetchLatestTip = async () => {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/driver/tips/latest`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const tip = data.tip || {};
+      tipData.value = {
+        amount: qNum(tip.amount) ?? 0,
+        customerName: tip.customer_name || '',
+        message: tip.message || '',
+        orderId: tip.order_id != null ? String(tip.order_id) : '',
+        deliveryFee: qNum(tip.delivery_fee) ?? 0,
+      };
+      totalTipsToday.value = qNum(data.total_tips_today) ?? 0;
+    }
+  } catch {}
+};
 
 const getConfettiStyle = (i) => {
   const color = confettiColors[i % confettiColors.length];
@@ -157,10 +207,9 @@ const getConfettiStyle = (i) => {
 const continueDelivering = () => router.push('/home');
 const viewEarnings = () => router.push('/earnings');
 
-onMounted(() => {
-  // Load tip data from route params if available
-  if (route.params.amount) tipData.value.amount = parseFloat(route.params.amount);
-  if (route.params.customerName) tipData.value.customerName = route.params.customerName;
+onMounted(async () => {
+  await fetchLatestTip();
+  applyRouteParams();
 });
 </script>
 

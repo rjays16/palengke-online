@@ -48,6 +48,7 @@ use App\Http\Controllers\Api\DriverNotificationController;
 use App\Http\Controllers\Api\DriverMessageController;
 use App\Http\Controllers\Api\MesiboController;
 use App\Http\Controllers\Api\CallSignalController;
+use App\Http\Controllers\Api\TipController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -122,6 +123,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/driver/history', [DriverRegistrationController::class, 'driverHistory']);
     Route::get('/driver/orders', [DriverRegistrationController::class, 'orders']);
     Route::get('/driver/earnings', [DriverRegistrationController::class, 'earnings']);
+    Route::get('/driver/tips/latest', [TipController::class, 'latest']);
     Route::get('/driver/notifications', [DriverNotificationController::class, 'index']);
     Route::get('/driver/notifications/unread-count', [DriverNotificationController::class, 'unreadCount']);
     Route::post('/driver/notifications/read-all', [DriverNotificationController::class, 'markAllRead']);
@@ -350,6 +352,9 @@ Route::post('/reviews', [ReviewController::class, 'store']);
 
 // Customer app — submit a driver rating
 Route::post('/driver-ratings', [DriverRatingController::class, 'store']);
+
+// Customer app — place an order with an optional tip (public)
+Route::post('/tips', [TipController::class, 'store']);
 
 // Customer app — get order info for rating page
 Route::get('/order-info/{id}', function ($id) {

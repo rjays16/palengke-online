@@ -159,7 +159,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import {
   IonPage, IonContent, IonButton, IonIcon, IonSpinner,
   alertController, toastController
@@ -169,8 +169,12 @@ import {
   chevronDownOutline, chevronForwardOutline,
   heartOutline, heart
 } from 'ionicons/icons';
+import { tipOrderData as mockTipOrderData, tipAmounts as mockTipAmounts } from '@/mock/tips';
 
 const router = useRouter();
+const route = useRoute();
+
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
 const showTipInfo = ref(false);
 const selectedTip = ref(50);
@@ -179,15 +183,31 @@ const customAmount = ref('');
 const isFavorite = ref(false);
 const isPlacing = ref(false);
 const showSuccessModal = ref(false);
-
-import { tipOrderData as mockTipOrderData, tipAmounts as mockTipAmounts } from '@/mock/tips';
+const orderId = ref(null);
 
 const tipAmounts = mockTipAmounts;
-const orderData = ref({ ...mockTipOrderData });
+
+const parseItems = (raw) => {
+  try { return raw ? JSON.parse(raw) : []; } catch { return []; }
+};
+
+const orderData = ref({
+  ...mockTipOrderData,
+  storeName: route.query.store || mockTipOrderData.storeName,
+  subtotal: route.query.subtotal ? parseFloat(route.query.subtotal) : mockTipOrderData.subtotal,
+  deliveryFee: route.query.delivery_fee ? parseFloat(route.query.delivery_fee) : mockTipOrderData.deliveryFee,
+  deliveryAddress: route.query.address || mockTipOrderData.deliveryAddress,
+  paymentLabel: route.query.payment || mockTipOrderData.paymentLabel,
+  items: parseItems(route.query.items),
+  sellerId: route.query.seller_id ? parseInt(route.query.seller_id, 10) : null,
+});
+
+const getTipAmount = () => {
+  return isCustom.value ? (parseFloat(customAmount.value) || 0) : selectedTip.value;
+};
 
 const grandTotal = computed(() => {
-  const tip = isCustom.value ? (parseFloat(customAmount.value) || 0) : selectedTip.value;
-  return orderData.value.subtotal + orderData.value.deliveryFee + tip;
+  return orderData.value.subtotal + orderData.value.deliveryFee + getTipAmount();
 });
 
 const selectTip = (amount) => {
@@ -208,9 +228,10 @@ const toggleCustom = () => {
 const toggleFavorite = () => { isFavorite.value = !isFavorite.value; };
 
 const viewOrderSummary = async () => {
+  const tip = getTipAmount();
   const alert = await alertController.create({
     header: 'Order Summary',
-    message: `Subtotal: ₱${orderData.value.subtotal.toFixed(2)}\nDelivery Fee: ₱${orderData.value.deliveryFee.toFixed(2)}\nTip: ₱${selectedTip.value.toFixed(2)}\nTotal: ₱${grandTotal.value.toFixed(2)}`,
+    message: `Subtotal: ₱${orderData.value.subtotal.toFixed(2)}\nDelivery Fee: ₱${orderData.value.deliveryFee.toFixed(2)}\nTip: ₱${tip.toFixed(2)}\nTotal: ₱${(orderData.value.subtotal + orderData.value.deliveryFee + tip).toFixed(2)}`,
     buttons: ['Close']
   });
   await alert.present();
@@ -229,10 +250,43 @@ const getHelp = () => router.push('/help');
 const shareOrder = () => {};
 
 const confirmOrder = async () => {
+  if (isPlacing.value) return;
   isPlacing.value = true;
   try {
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    const tipAmount = getTipAmount();
+    const payload = {
+      seller_id: orderData.value.sellerId || undefined,
+      customer_name: 'Guest Customer',
+      delivery_address: orderData.value.deliveryAddress,
+      items: orderData.value.items,
+      delivery_fee: orderData.value.deliveryFee,
+      amount: tipAmount,
+      message: '',
+      payment_method: orderData.value.paymentLabel,
+    };
+
+    const res = await fetch(`${API_BASE}/api/tips`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Could not place your order.');
+    }
+
+    const data = await res.json();
+    orderId.value = data.order?.id || null;
     showSuccessModal.value = true;
+  } catch (e) {
+    const toast = await toastController.create({
+      message: e.message || 'Could not place your order. Please try again.',
+      duration: 3000,
+      color: 'danger',
+      position: 'top',
+    });
+    await toast.present();
   } finally {
     isPlacing.value = false;
   }
@@ -240,7 +294,7 @@ const confirmOrder = async () => {
 
 const closeSuccessModal = () => {
   showSuccessModal.value = false;
-  router.push('/order-tracking/1234');
+  router.push(`/order-tracking/${orderId.value || '1234'}`);
 };
 
 const goBack = () => router.back();

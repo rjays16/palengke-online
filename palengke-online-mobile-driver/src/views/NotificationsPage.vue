@@ -162,7 +162,18 @@ const handleNotifClick = async (notif) => {
     }
     notif.read = true;
   }
-  if (notif.type === 'tip') router.push('/tip-received');
+  if (notif.type === 'tip') {
+    router.push({
+      path: '/tip-received',
+      query: notif.data ? {
+        orderId: notif.data.order_id,
+        amount: notif.data.amount,
+        customerName: notif.data.customer_name,
+        message: notif.data.message,
+        deliveryFee: notif.data.delivery_fee,
+      } : {},
+    });
+  }
   if (notif.type === 'order') router.push('/orders');
 };
 
