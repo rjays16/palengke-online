@@ -558,6 +558,8 @@ const submitVerification = async () => {
       barangay: reg.data.barangay,
       store_place: reg.data.storePlace,
       complete_address: reg.data.completeAddress,
+      latitude: reg.data.latitude || null,
+      longitude: reg.data.longitude || null,
       verification_choice: reg.data.verificationChoice,
       verification_status: reg.data.verificationStatus,
       id_type: reg.data.idType,

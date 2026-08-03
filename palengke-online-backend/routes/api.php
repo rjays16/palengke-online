@@ -131,6 +131,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/driver/notifications/{id}', [DriverNotificationController::class, 'destroy']);
     Route::delete('/driver/notifications', [DriverNotificationController::class, 'clearAll']);
     Route::post('/driver/orders/{id}/accept', [DriverRegistrationController::class, 'acceptOrder']);
+    Route::post('/driver/orders/{id}/status', [DriverRegistrationController::class, 'updateOrderStatus']);
 
     // Driver app — messages / conversations
     Route::get('/driver/conversations', [DriverMessageController::class, 'index']);

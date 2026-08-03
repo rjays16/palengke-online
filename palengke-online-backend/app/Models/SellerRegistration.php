@@ -13,6 +13,7 @@ class SellerRegistration extends Model
         'email', 'country_code', 'phone', 'full_phone', 'email_verified', 'pin',
         'first_name', 'middle_name', 'last_name', 'country', 'birthdate', 'birthplace', 'current_address',
         'store_name', 'region', 'city', 'barangay', 'store_place', 'complete_address',
+        'latitude', 'longitude',
         'verification_choice', 'verification_status',
         'id_type', 'id_type_name',
         'id_front_photo', 'id_back_photo', 'selfie_photo',
@@ -33,6 +34,8 @@ class SellerRegistration extends Model
         'plan_started_at' => 'datetime',
         'plan_ends_at' => 'datetime',
         'wallet_balance' => 'decimal:2',
+        'latitude' => 'decimal:7',
+        'longitude' => 'decimal:7',
     ];
 
     public function reviewedBy()

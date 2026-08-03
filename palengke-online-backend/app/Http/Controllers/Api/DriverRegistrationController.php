@@ -568,6 +568,7 @@ class DriverRegistrationController extends Controller
         return [
             'id' => (string) $order->id,
             'status' => $driverStatus,
+            'dbStatus' => $order->status,
             'sellerName' => $order->seller?->store_name ?? $order->seller?->first_name ?? 'Store',
             'pickupAddress' => $order->seller?->address ?? $order->seller?->city ?? 'Pickup Location',
             'customerName' => $order->customer_name,
@@ -584,6 +585,8 @@ class DriverRegistrationController extends Controller
             'items' => $order->items ?? [],
             'latitude' => $order->latitude !== null ? (float) $order->latitude : null,
             'longitude' => $order->longitude !== null ? (float) $order->longitude : null,
+            'sellerLatitude' => $order->seller?->latitude !== null ? (float) $order->seller->latitude : null,
+            'sellerLongitude' => $order->seller?->longitude !== null ? (float) $order->seller->longitude : null,
             'time' => $time,
             'tipped' => (bool) ($order->tip_amount > 0),
             'tipAmount' => (float) ($order->tip_amount ?? 0),
@@ -764,6 +767,77 @@ class DriverRegistrationController extends Controller
         return response()->json([
             'message' => 'Order accepted successfully.',
             'order' => $this->formatOrderForDriver($order->fresh()->load('seller'), 'active'),
+        ]);
+    }
+
+    public function updateOrderStatus(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'status' => 'required|string|in:picked_up,delivered,cancelled',
+        ]);
+
+        $driver = $request->user();
+
+        $order = Order::where('id', $id)
+            ->where('driver_registration_id', $driver->id)
+            ->first();
+
+        if (!$order) {
+            return response()->json(['message' => 'Order not found.'], 404);
+        }
+
+        if (!in_array($order->status, ['assigned', 'processing'])) {
+            return response()->json(['message' => 'Order cannot be updated in its current state.'], 400);
+        }
+
+        $status = $validated['status'];
+        $newStatus = match ($status) {
+            'picked_up' => 'processing',
+            'delivered' => 'completed',
+            'cancelled' => 'cancelled',
+        };
+
+        $order->update(['status' => $newStatus]);
+
+        if ($order->seller) {
+            Notification::create([
+                'seller_registration_id' => $order->seller->id,
+                'type' => 'order_update',
+                'title' => $status === 'delivered' ? 'Order Delivered' : ($status === 'cancelled' ? 'Order Cancelled' : 'Order Picked Up'),
+                'category' => 'orders',
+                'message' => $status === 'delivered'
+                    ? "Your order #{$order->id} has been delivered."
+                    : ($status === 'cancelled'
+                        ? "Order #{$order->id} was cancelled by the driver."
+                        : "Order #{$order->id} has been picked up by the driver."),
+                'data' => ['order_id' => $order->id, 'status' => $newStatus],
+            ]);
+        }
+
+        if ($status === 'delivered' && (float) ($order->tip_amount ?? 0) > 0) {
+            $customerName = $order->tip_customer_name ?? $order->customer_name ?? 'Customer';
+            Notification::create([
+                'driver_registration_id' => $driver->id,
+                'type' => 'tip',
+                'title' => 'You Got a Tip!',
+                'category' => 'earnings',
+                'message' => $customerName . ' tipped you ₱' . number_format((float) $order->tip_amount, 2) . '.',
+                'data' => [
+                    'order_id' => $order->id,
+                    'amount' => (float) $order->tip_amount,
+                    'customer_name' => $customerName,
+                    'message' => $order->tip_message,
+                    'delivery_fee' => (float) ($order->delivery_fee ?? 0),
+                ],
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Order status updated successfully.',
+            'order' => [
+                'id' => $order->id,
+                'status' => $order->status,
+            ],
         ]);
     }
 

@@ -19,6 +19,8 @@ class TipController extends Controller
             'customer_name' => 'nullable|string|max:255',
             'customer_phone' => 'nullable|string|max:255',
             'delivery_address' => 'nullable|string',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'items' => 'nullable|array',
             'items.*.name' => 'nullable|string',
             'items.*.price' => 'nullable|numeric',
@@ -45,10 +47,6 @@ class TipController extends Controller
             ? DriverRegistration::find($validated['driver_id'])
             : null;
 
-        if (!$driver) {
-            $driver = DriverRegistration::where('status', 'approved')->orderBy('id')->first();
-        }
-
         $items = $validated['items'] ?? [];
         $subtotal = array_reduce($items, function ($sum, $item) {
             return $sum + ((float) ($item['price'] ?? 0) * (int) ($item['quantity'] ?? 1));
@@ -64,10 +62,12 @@ class TipController extends Controller
             'customer_name' => $customerName,
             'customer_phone' => $validated['customer_phone'] ?? null,
             'delivery_address' => $validated['delivery_address'] ?? null,
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
             'items' => $items,
             'delivery_fee' => $deliveryFee,
             'total' => round($subtotal + $deliveryFee, 2),
-            'status' => 'completed',
+            'status' => 'pending',
             'payment_method' => $validated['payment_method'] ?? null,
             'tip_amount' => $tipAmount,
             'tip_message' => $validated['message'] ?? null,

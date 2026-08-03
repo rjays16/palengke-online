@@ -22,8 +22,20 @@
         </div>
       </div>
 
+<!-- No Active Order -->
+      <div v-if="!orderData" class="no-order-overlay">
+        <div class="no-order-card">
+          <ion-icon :icon="bicycleOutline"></ion-icon>
+          <h3>No active delivery</h3>
+          <p>There is no active order assigned to you right now.</p>
+          <ion-button expand="block" class="no-order-btn" @click="router.replace('/home')">
+            Back to Home
+          </ion-button>
+        </div>
+      </div>
+
 <!-- Bottom Sheet - scrollable -->
-      <div class="bottom-sheet" :class="{ expanded: sheetExpanded }">
+      <div v-if="orderData" class="bottom-sheet" :class="{ expanded: sheetExpanded }">
         <div class="sheet-handle" @click="sheetExpanded = !sheetExpanded">
           <div class="handle-bar"></div>
         </div>
@@ -143,7 +155,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage, IonContent, IonButton, IonIcon,
@@ -151,20 +163,14 @@ import {
 } from '@ionic/vue';
 import {
   arrowBackOutline, timeOutline,
-  basketOutline, bicycleOutline, homeOutline,
-  checkmarkOutline, checkmarkCircleOutline, cubeOutline,
-  cashOutline, chatbubbleOutline, callOutline,
+  bicycleOutline, homeOutline,
+  checkmarkCircleOutline, cubeOutline,
+  cashOutline, callOutline,
   locationOutline, locateOutline, storefrontOutline,
   documentTextOutline
 } from 'ionicons/icons';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import {
-  mockOrderData as fallbackOrderData,
-  driverStartLocation as fallbackDriverLocation,
-  vendorLocation as fallbackVendorLocation,
-  customerLocation as fallbackCustomerLocation,
-} from '@/mock/activeDelivery';
 
 const router = useRouter();
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
@@ -179,20 +185,20 @@ let customerMarker = null;
 let vendorMarker = null;
 let pickupRouteLine = null;
 let deliveryRouteLine = null;
+let watchId = null;
 
 // Delivery state
 const currentStep = ref(1); // 1=pickup, 2=delivering, 3=arrived
 const sheetExpanded = ref(false);
-const etaTime = ref('12 min');
-const etaDistance = ref('2.3 km');
+const etaTime = ref('--');
+const etaDistance = ref('');
+const orderData = ref(null);
+const gpsActive = ref(false);
 
-// Order Data (fallback = mock, replaced by real active order from API)
-const orderData = ref({ ...fallbackOrderData });
-
-// Locations (fallback = mock CDO coordinates; customer coords come from API when available)
-const driverLocation = ref([...fallbackDriverLocation]);
-const vendorPos = ref([...fallbackVendorLocation]);
-const customerPos = ref([...fallbackCustomerLocation]);
+// Real coordinates (populated from the API / device GPS; null when unavailable)
+const driverPos = ref(null);
+const vendorPos = ref(null);
+const customerPos = ref(null);
 
 const paymentLabel = (method) => {
   if (method === 'cod') return 'Cash on Delivery';
@@ -200,6 +206,13 @@ const paymentLabel = (method) => {
   if (method === 'cash') return 'Cash';
   return method || 'Cash';
 };
+
+// Current destination marker based on delivery step
+const destination = computed(() => {
+  if (currentStep.value === 1 && vendorPos.value) return vendorPos.value;
+  if (currentStep.value >= 2 && customerPos.value) return customerPos.value;
+  return null;
+});
 
 // Fetch the driver's active order and populate the page with real data
 const fetchActiveOrder = async () => {
@@ -218,41 +231,95 @@ const fetchActiveOrder = async () => {
       id: active.id,
       sellerName: active.sellerName,
       pickupAddress: active.pickupAddress,
-      pickupPhone: active.pickupPhone || fallbackOrderData.pickupPhone,
+      pickupPhone: active.pickupPhone || '',
       customerName: active.customerName,
       deliveryAddress: active.deliveryAddress,
-      customerPhone: active.customerPhone || fallbackOrderData.customerPhone,
+      customerPhone: active.customerPhone || '',
       itemCount: active.itemCount || 0,
       totalAmount: active.totalAmount || 0,
       paymentMethod: paymentLabel(active.paymentMethod),
       driverEarnings: active.driverEarnings || 0,
-      pickupInstructions: active.pickupInstructions,
+      pickupInstructions: active.pickupInstructions || '',
       items: Array.isArray(active.items) && active.items.length
         ? active.items.map((i) => `${i.qty ?? ''}${i.unit ?? ''} ${i.name ?? ''}`.trim())
-        : fallbackOrderData.items,
+        : [],
     };
 
-    if (active.estimatedTime) {
-      etaTime.value = `${active.estimatedTime} min`;
+    if (active.dbStatus === 'processing') {
+      currentStep.value = 2;
+    }
+
+    if (active.sellerLatitude && active.sellerLongitude) {
+      vendorPos.value = [Number(active.sellerLatitude), Number(active.sellerLongitude)];
     }
     if (active.latitude && active.longitude) {
       customerPos.value = [Number(active.latitude), Number(active.longitude)];
     }
   } catch {
-    // Keep mock fallback data on network error
+    // Leave the page in a "no active order" state
   }
 };
 
-// Init Map with both pickup and delivery locations
-const initMap = () => {
-  map = L.map('delivery-map', { 
-    zoomControl: false, 
-    dragging: true, 
-    tap: true,
-    bounceZoom: false
-  }).setView(driverLocation.value, 15);
+// Haversine distance (km)
+const haversine = (a, b) => {
+  const R = 6371;
+  const toRad = (v) => (v * Math.PI) / 180;
+  const dLat = toRad(b[0] - a[0]);
+  const dLng = toRad(b[1] - a[1]);
+  const s = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a[0])) * Math.cos(toRad(b[0])) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1 - s));
+};
 
-  // Track drag state to prevent auto-pan while user is dragging
+// Real ETA based on current GPS position
+const updateEta = () => {
+  if (!driverPos.value || !destination.value) {
+    etaTime.value = '--';
+    etaDistance.value = '';
+    return;
+  }
+  const km = haversine(driverPos.value, destination.value);
+  etaDistance.value = km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
+  const mins = Math.round((km / 30) * 60);
+  etaTime.value = mins < 1 ? '< 1 min' : `${mins} min`;
+};
+
+// Watch the driver's real device position
+const startWatchingPosition = () => {
+  if (!navigator.geolocation) return;
+  watchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      driverPos.value = [pos.coords.latitude, pos.coords.longitude];
+      gpsActive.value = true;
+      if (driverMarker) driverMarker.setLatLng(driverPos.value);
+      updateEta();
+      if (map && !userIsDragging) map.panTo(driverPos.value);
+    },
+    () => {
+      gpsActive.value = false;
+    },
+    { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 },
+  );
+};
+
+const stopWatchingPosition = () => {
+  if (watchId !== null) {
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+  }
+};
+
+// Init Map with the coordinates we actually have
+const initMap = () => {
+  const firstPoint = driverPos.value || vendorPos.value || customerPos.value;
+  if (!firstPoint) return;
+
+  map = L.map('delivery-map', {
+    zoomControl: false,
+    dragging: true,
+    tap: true,
+    bounceZoom: false,
+  }).setView(firstPoint, 15);
+
   map.on('movestart', onMapDragStart);
   map.on('moveend', onMapDragEnd);
 
@@ -287,190 +354,144 @@ const initMap = () => {
     iconSize: [48, 48], iconAnchor: [24, 24]
   });
 
-  // Add all markers
-  vendorMarker = L.marker(vendorPos.value, { icon: vendorIcon })
-    .addTo(map).bindPopup(`
-      <div style="text-align:center;min-width:160px;">
-        <strong style="color:#4CAF50;font-size:14px;">🏪 PICKUP HERE</strong><br>
-        <span style="color:#666;font-size:12px;">${orderData.value.sellerName}</span><br>
-        <span style="color:#888;font-size:11px;">${orderData.value.pickupAddress}</span><br>
-        <hr style="margin:6px 0;border:none;border-top:1px solid #eee;">
-        <span style="color:#4CAF50;font-size:11px;">📞 ${orderData.value.pickupPhone}</span>
-      </div>
-    `);
+  if (vendorPos.value) {
+    vendorMarker = L.marker(vendorPos.value, { icon: vendorIcon })
+      .addTo(map).bindPopup(`
+        <div style="text-align:center;min-width:160px;">
+          <strong style="color:#4CAF50;font-size:14px;">🏪 PICKUP HERE</strong><br>
+          <span style="color:#666;font-size:12px;">${orderData.value?.sellerName || ''}</span><br>
+          <span style="color:#888;font-size:11px;">${orderData.value?.pickupAddress || ''}</span><br>
+          <hr style="margin:6px 0;border:none;border-top:1px solid #eee;">
+          <span style="color:#4CAF50;font-size:11px;">📞 ${orderData.value?.pickupPhone || ''}</span>
+        </div>
+      `);
+  }
 
-  customerMarker = L.marker(customerPos.value, { icon: customerIcon })
-    .addTo(map).bindPopup(`
-      <div style="text-align:center;min-width:160px;">
-        <strong style="color:#f44336;font-size:14px;">🏠 DELIVER HERE</strong><br>
-        <span style="color:#666;font-size:12px;">${orderData.value.customerName}</span><br>
-        <span style="color:#888;font-size:11px;">${orderData.value.deliveryAddress}</span><br>
-        <hr style="margin:6px 0;border:none;border-top:1px solid #eee;">
-        <span style="color:#f44336;font-size:11px;">📞 ${orderData.value.customerPhone}</span>
-      </div>
-    `);
+  if (customerPos.value) {
+    customerMarker = L.marker(customerPos.value, { icon: customerIcon })
+      .addTo(map).bindPopup(`
+        <div style="text-align:center;min-width:160px;">
+          <strong style="color:#f44336;font-size:14px;">🏠 DELIVER HERE</strong><br>
+          <span style="color:#666;font-size:12px;">${orderData.value?.customerName || ''}</span><br>
+          <span style="color:#888;font-size:11px;">${orderData.value?.deliveryAddress || ''}</span><br>
+          <hr style="margin:6px 0;border:none;border-top:1px solid #eee;">
+          <span style="color:#f44336;font-size:11px;">📞 ${orderData.value?.customerPhone || ''}</span>
+        </div>
+      `);
+  }
 
-  driverMarker = L.marker(driverLocation.value, { icon: driverIcon })
-    .addTo(map).bindPopup('<b>🏍️ Driver</b>');
+  if (driverPos.value) {
+    driverMarker = L.marker(driverPos.value, { icon: driverIcon })
+      .addTo(map).bindPopup('<b>🏍️ Driver</b>');
+  }
 
-  // Draw route from driver to vendor
   drawPickupRoute();
-  
-  // Fit map to show all locations
   fitMapToShowAll();
-  
-  // Start driver moving to vendor for pickup
-  simulateDriverMovement(driverLocation.value, vendorPos.value);
 };
 
 // Draw route from driver to vendor (pickup phase)
 const drawPickupRoute = () => {
-  // Remove existing route
+  if (!map) return;
   if (pickupRouteLine) map.removeLayer(pickupRouteLine);
   if (deliveryRouteLine) map.removeLayer(deliveryRouteLine);
-  
+
   if (currentStep.value === 1) {
-    // Pickup phase: show driver → vendor route (green dashed)
-    pickupRouteLine = L.polyline([driverLocation.value, vendorPos.value], {
-      color: '#4CAF50',
+    if (driverPos.value && vendorPos.value) {
+      pickupRouteLine = L.polyline([driverPos.value, vendorPos.value], {
+        color: '#4CAF50',
+        weight: 5,
+        opacity: 0.9,
+        dashArray: '12, 8',
+        lineCap: 'round'
+      }).addTo(map);
+    }
+
+    if (vendorPos.value && customerPos.value) {
+      deliveryRouteLine = L.polyline([vendorPos.value, customerPos.value], {
+        color: '#ccc',
+        weight: 3,
+        opacity: 0.6,
+        dashArray: '8, 8',
+        lineCap: 'round'
+      }).addTo(map);
+    }
+  }
+};
+
+// Track when user is dragging the map
+let userIsDragging = false;
+const onMapDragStart = () => { userIsDragging = true; };
+const onMapDragEnd = () => {
+  // Resume following the driver once the user lets go
+  userIsDragging = false;
+};
+
+// Draw route from driver to customer (delivery phase)
+const drawDeliveryRoute = () => {
+  if (!map) return;
+  if (pickupRouteLine) map.removeLayer(pickupRouteLine);
+  if (deliveryRouteLine) map.removeLayer(deliveryRouteLine);
+
+  if (driverPos.value && customerPos.value) {
+    pickupRouteLine = L.polyline([driverPos.value, customerPos.value], {
+      color: '#2196F3',
       weight: 5,
       opacity: 0.9,
       dashArray: '12, 8',
       lineCap: 'round'
     }).addTo(map);
-    
-    // Also show dotted line from vendor to customer (as reference)
-    deliveryRouteLine = L.polyline([vendorPos.value, customerPos.value], {
-      color: '#ccc',
-      weight: 3,
-      opacity: 0.6,
-      dashArray: '8, 8',
-      lineCap: 'round'
-    }).addTo(map);
-    
-    // Start driver moving to vendor
-    simulateDriverMovement(driverLocation.value, vendorPos.value);
   }
 };
 
-// Simulate driver movement to destination
-let movementInterval = null;
-let currentDriverPos = null;
-let userIsDragging = false;
-
-const simulateDriverMovement = (from, to) => {
-  // Clear any existing movement
-  if (movementInterval) clearInterval(movementInterval);
-  
-  currentDriverPos = [...from];
-  const endLat = to[0];
-  const endLng = to[1];
-  
-  let progress = 0;
-  const steps = 20;
-  const stepLat = (endLat - from[0]) / steps;
-  const stepLng = (endLng - from[1]) / steps;
-  
-  movementInterval = setInterval(() => {
-    progress++;
-    currentDriverPos[0] = from[0] + (stepLat * progress);
-    currentDriverPos[1] = from[1] + (stepLng * progress);
-    
-// Update driver marker position
-    if (driverMarker) {
-      driverMarker.setLatLng(currentDriverPos);
-      driverMarker.setPopupContent('<b>🏍️ On the way</b>');
-    }
-    
-    // Stop when reached
-    if (progress >= steps) {
-      clearInterval(movementInterval);
-      movementInterval = null;
-      etaTime.value = 'Arrived';
-      etaDistance.value = '0 km';
-      if (driverMarker) {
-        driverMarker.setPopupContent('<b>🏍️ Arrived!</b>');
-      }
-    }
-    
-    // Only pan if user is NOT manually dragging
-    if (map && currentDriverPos && !userIsDragging) {
-      map.panTo(currentDriverPos);
-    }
-    
-    // Update ETA based on progress
-    const remainingSteps = steps - progress;
-    if (remainingSteps > 0) {
-      etaTime.value = Math.ceil(remainingSteps * 0.6) + ' min';
-      const distanceRemaining = (remainingSteps / steps * 2.3).toFixed(1);
-      etaDistance.value = distanceRemaining + ' km';
-    }
-    
-    // Stop when reached
-    if (progress >= steps) {
-      clearInterval(movementInterval);
-      movementInterval = null;
-      etaTime.value = 'Arrived';
-      etaDistance.value = '0 km';
-      if (driverMarker) {
-        driverMarker.setPopupContent('<b>Arrived!</b>');
-      }
-    }
-  }, 800);
-};
-
-// Track when user is dragging the map
-const onMapDragStart = () => { userIsDragging = true; };
-const onMapDragEnd = () => { 
-  // Don't auto-pan after user manually drags - let them explore
-  userIsDragging = true;
-};
-
-// Stop driver movement simulation
-const stopDriverMovement = () => {
-  if (movementInterval) {
-    clearInterval(movementInterval);
-    movementInterval = null;
-  }
-};
-
-// Draw route from driver to customer (delivery phase)  
-const drawDeliveryRoute = () => {
-  if (pickupRouteLine) map.removeLayer(pickupRouteLine);
-  if (deliveryRouteLine) map.removeLayer(deliveryRouteLine);
-  
-  // Delivery phase: show driver → customer route (blue)
-  pickupRouteLine = L.polyline([driverLocation.value, customerPos.value], {
-    color: '#2196F3',
-    weight: 5,
-    opacity: 0.9,
-    dashArray: '12, 8',
-    lineCap: 'round'
-  }).addTo(map);
-};
-
-// Fit map to show all locations
+// Fit map to show all available locations
 const fitMapToShowAll = () => {
-  const allPoints = [driverLocation.value, vendorPos.value, customerPos.value];
+  if (!map) return;
+  const allPoints = [driverPos.value, vendorPos.value, customerPos.value].filter(Boolean);
+  if (!allPoints.length) return;
   const bounds = L.latLngBounds(allPoints);
   map.fitBounds(bounds, { padding: [80, 80] });
 };
 
 // Update map when step changes
 const updateMapForStep = () => {
+  if (!map) return;
   if (currentStep.value === 1) {
-    // Focus on vendor for pickup
-    const bounds = L.latLngBounds([driverLocation.value, vendorPos.value]);
-    map.fitBounds(bounds, { padding: [80, 80] });
+    const points = [driverPos.value, vendorPos.value].filter(Boolean);
+    if (points.length) map.fitBounds(L.latLngBounds(points), { padding: [80, 80] });
     drawPickupRoute();
   } else if (currentStep.value >= 2) {
-    // Focus on customer for delivery
-    const bounds = L.latLngBounds([vendorPos.value, customerPos.value]);
-    map.fitBounds(bounds, { padding: [80, 80] });
+    const points = [vendorPos.value, customerPos.value].filter(Boolean);
+    if (points.length) map.fitBounds(L.latLngBounds(points), { padding: [80, 80] });
     drawDeliveryRoute();
-    
-    // Start moving from vendor to customer
-    simulateDriverMovement(vendorPos.value, customerPos.value);
+  }
+  updateEta();
+};
+
+// Send a real status update to the backend
+const updateOrderStatus = async (status) => {
+  const token = getToken();
+  if (!token || !orderData.value) return false;
+  try {
+    const res = await fetch(`${API_BASE}/api/driver/orders/${orderData.value.id}/status`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ status }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Could not update order.');
+    }
+    return true;
+  } catch (e) {
+    const toast = await toastController.create({
+      message: e.message || 'Could not update the order. Please try again.',
+      duration: 3000, color: 'danger', position: 'top'
+    });
+    await toast.present();
+    return false;
   }
 };
 
@@ -478,7 +499,7 @@ const updateMapForStep = () => {
 const confirmPickup = async () => {
   const itemsList = orderData.value.items.join(', ');
   const message = `Pickup from: ${orderData.value.sellerName}\n${orderData.value.pickupAddress}\n\nItems: ${itemsList}\n\nCollect: ₱${orderData.value.totalAmount.toLocaleString()} (${orderData.value.paymentMethod})`;
-  
+
   const alert = await alertController.create({
     header: 'Confirm Pickup',
     message: message,
@@ -487,10 +508,10 @@ const confirmPickup = async () => {
       {
         text: 'Yes, Picked Up!',
         handler: async () => {
+          const ok = await updateOrderStatus('picked_up');
+          if (!ok) return;
           currentStep.value = 2;
           updateMapForStep();
-          etaTime.value = '8 min';
-          etaDistance.value = '1.5 km';
           const toast = await toastController.create({
             message: 'Order picked up! Now deliver to customer.',
             duration: 2500, color: 'medium', position: 'top'
@@ -507,7 +528,6 @@ const confirmArrived = async () => {
   currentStep.value = 3;
   etaTime.value = 'Arrived';
   etaDistance.value = '0 m';
-  if (driverMarker) driverMarker.setLatLng(customerPos.value);
   const toast = await toastController.create({
     message: 'You have arrived! Confirm delivery with customer.',
     duration: 2500, color: 'medium', position: 'top'
@@ -524,41 +544,16 @@ const confirmDelivery = async () => {
       {
         text: 'Complete!',
         handler: async () => {
-          stopDriverMovement();
-          
-          // 🚀 UPDATE DRIVER ORDERS IN LOCALSTORAGE
-          const driverOrders = JSON.parse(localStorage.getItem('driverOrders') || '[]');
-          const orderIndex = driverOrders.findIndex(o => o.id === orderData.value.id);
-          if (orderIndex !== -1) {
-            driverOrders[orderIndex].status = 'completed';
-            driverOrders[orderIndex].completedTime = 'Just now';
-            localStorage.setItem('driverOrders', JSON.stringify(driverOrders));
-          }
-          
-          // 🚀 SYNC TO SELLER APP - Mark seller's order as "completed"
-          syncCompletionToSeller(orderData.value.id);
-          
+          const ok = await updateOrderStatus('delivered');
+          if (!ok) return;
+          stopWatchingPosition();
           await showSuccessModal(`Delivery complete!\nYou earned ₱${orderData.value.driverEarnings}`);
-          setTimeout(() => router.push('/home'), 2000);
+          router.replace('/home');
         }
       }
     ]
   });
   await alert.present();
-};
-
-// Helper: Sync completion to Seller App
-const syncCompletionToSeller = (orderId) => {
-  try {
-    const sellerOrders = JSON.parse(localStorage.getItem('sellerOrders') || '[]');
-    const orderIndex = sellerOrders.findIndex(o => o.id === orderId);
-    if (orderIndex !== -1) {
-      sellerOrders[orderIndex].status = 'completed';
-      localStorage.setItem('sellerOrders', JSON.stringify(sellerOrders));
-    }
-  } catch (e) {
-    console.log('Seller app not available');
-  }
 };
 
 const showSuccessModal = async (message) => {
@@ -568,28 +563,28 @@ const showSuccessModal = async (message) => {
     message: message,
     buttons: ['OK']
   });
-  
+
   await alert.present();
-  
+
   setTimeout(() => {
     const alertElement = document.querySelector('.success-modal .alert-message');
     if (alertElement) {
       const textContent = alertElement.textContent;
       alertElement.innerHTML = '';
-      
+
       const wrapper = document.createElement('div');
       wrapper.style.display = 'flex';
       wrapper.style.flexDirection = 'column';
       wrapper.style.alignItems = 'center';
       wrapper.style.textAlign = 'center';
-      
+
       const img = document.createElement('img');
       img.src = '/assets/images/checkmark_success.png';
       img.style.width = '80px';
       img.style.height = '80px';
       img.style.margin = '0 auto 16px auto';
       img.style.display = 'block';
-      
+
       const textDiv = document.createElement('div');
       textDiv.textContent = textContent;
       textDiv.style.fontSize = '18px';
@@ -597,33 +592,22 @@ const showSuccessModal = async (message) => {
       textDiv.style.color = '#1a1a1a';
       textDiv.style.textAlign = 'center';
       textDiv.style.whiteSpace = 'pre-line';
-      
+
       wrapper.appendChild(img);
       wrapper.appendChild(textDiv);
       alertElement.appendChild(wrapper);
     }
   }, 50);
-  
+
   await alert.onDidDismiss();
 };
 
-const chatCustomer = () => router.push('/messages');
-
-const callCustomer = () => {
-  const phone = currentStep.value === 1 ? orderData.value.pickupPhone : orderData.value.customerPhone;
-  window.location.href = `tel:${phone.replace(/\s/g, '')}`;
-};
-
 const openNavigation = () => {
-  // Open Google Maps navigation to current destination
-  const dest = currentStep.value === 1 ? vendorPos.value : customerPos.value;
   const name = currentStep.value === 1 ? orderData.value.sellerName : orderData.value.customerName;
   const address = currentStep.value === 1 ? orderData.value.pickupAddress : orderData.value.deliveryAddress;
   const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
   window.open(url, '_blank');
 };
-
-const openHelpCenter = () => router.push('/help');
 
 const showMoreActions = async () => {
   const actionSheet = await actionSheetController.create({
@@ -664,12 +648,15 @@ const showCancelReasons = async () => {
 };
 
 const handleCancel = async (reason) => {
+  const ok = await updateOrderStatus('cancelled');
+  if (!ok) return;
+  stopWatchingPosition();
   const toast = await toastController.create({
     message: `Order cancelled: ${reason}`,
     duration: 2500, color: 'danger', position: 'top'
   });
   await toast.present();
-  router.push('/home');
+  router.replace('/home');
 };
 
 const goBack = async () => {
@@ -678,9 +665,9 @@ const goBack = async () => {
     message: 'You can come back to track this delivery anytime from your orders.',
     buttons: [
       { text: 'Stay', role: 'cancel' },
-      { 
-        text: 'Go Back', 
-        handler: () => router.push('/home')
+      {
+        text: 'Go Back',
+        handler: () => router.replace('/home')
       }
     ]
   });
@@ -688,28 +675,28 @@ const goBack = async () => {
 };
 
 const centerOnDriver = () => {
-  if (map) {
-    // Stop following temporarily when user taps center button
-    userIsDragging = true;
-    setTimeout(() => { userIsDragging = false; }, 3000);
-    
-    if (currentDriverPos) {
-      map.panTo(currentDriverPos);
-      map.setZoom(16);
-    } else if (driverMarker) {
-      const pos = driverMarker.getLatLng();
-      map.panTo(pos);
-      map.setZoom(16);
-    }
+  if (map && driverPos.value) {
+    map.panTo(driverPos.value);
+    map.setZoom(16);
   }
 };
 
 onMounted(async () => {
   await fetchActiveOrder();
+  startWatchingPosition();
   setTimeout(() => initMap(), 100);
+
+  if (orderData.value && (!vendorPos.value || !customerPos.value)) {
+    const toast = await toastController.create({
+      message: 'Some location data is missing for this order.',
+      duration: 3000, color: 'warning', position: 'top'
+    });
+    await toast.present();
+  }
 });
 
 onUnmounted(() => {
+  stopWatchingPosition();
   if (map) { map.remove(); map = null; }
 });
 </script>
@@ -748,6 +735,38 @@ onUnmounted(() => {
 .eta-info { display: flex; align-items: center; gap: 6px; }
 .eta-label { font-size: 16px; font-weight: 800; color: #1a1a1a; }
 .eta-dist { font-size: 14px; color: #666; font-weight: 500; }
+
+/* No Active Order */
+.no-order-overlay {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 1500;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+}
+
+.no-order-card {
+  background: white; border-radius: 20px;
+  padding: 32px 24px; text-align: center;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+  width: 100%; max-width: 320px;
+}
+
+.no-order-card ion-icon {
+  font-size: 56px; color: #999; margin-bottom: 12px;
+}
+
+.no-order-card h3 {
+  font-size: 18px; font-weight: 700; color: #1a1a1a; margin: 0 0 8px 0;
+}
+
+.no-order-card p {
+  font-size: 14px; color: #666; margin: 0 0 20px 0; line-height: 1.5;
+}
+
+.no-order-btn {
+  --background: #4CAF50; --border-radius: 12px;
+  font-size: 15px; font-weight: 600; text-transform: none;
+}
 
 /* Bottom Sheet - scrollable */
 .bottom-sheet {

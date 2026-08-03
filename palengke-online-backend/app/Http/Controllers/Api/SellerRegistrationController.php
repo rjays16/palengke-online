@@ -53,6 +53,8 @@ class SellerRegistrationController extends Controller
             'barangay' => 'required|string',
             'store_place' => 'required|string|min:5',
             'complete_address' => 'required|string|min:15',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
 
             // Step 4
             'verification_choice' => 'nullable|string|in:verify,skip',

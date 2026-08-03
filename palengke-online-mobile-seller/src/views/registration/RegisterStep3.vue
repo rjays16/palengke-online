@@ -138,6 +138,29 @@
             <span v-else class="helper-text">Include barangay, city, and province</span>
           </div>
 
+          <!-- Store Coordinates -->
+          <div class="input-group">
+            <label class="input-label">Store Coordinates</label>
+            <div class="gps-box" :class="{ captured: !!formData.latitude }">
+              <div class="gps-box-main">
+                <ion-icon :icon="locateOutline"></ion-icon>
+                <div>
+                  <p v-if="formData.latitude" class="gps-coords">
+                    {{ formData.latitude }}, {{ formData.longitude }}
+                  </p>
+                  <p v-else class="gps-hint">Pin the exact store location so drivers can find you.</p>
+                </div>
+              </div>
+              <ion-button size="small" class="gps-button" @click="captureLocation" :disabled="isLocating">
+                <ion-spinner v-if="isLocating" name="crescent"></ion-spinner>
+                <span v-else>{{ formData.latitude ? 'Update Location' : 'Use Current Location' }}</span>
+              </ion-button>
+            </div>
+            <span v-if="locationError" class="error-message">{{ locationError }}</span>
+            <span v-else-if="formData.latitude" class="helper-text">Location captured via GPS</span>
+            <span v-else class="helper-text">Optional — allows the driver app to show your store on the map</span>
+          </div>
+
           <!-- Info Box -->
           <div class="info-box">
             <ion-icon :icon="informationCircleOutline"></ion-icon>
@@ -168,7 +191,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { IonPage, IonContent, IonButton, IonIcon } from '@ionic/vue';
+import { IonPage, IonContent, IonButton, IonIcon, IonSpinner } from '@ionic/vue';
 import {
   arrowBackOutline,
   arrowForwardOutline,
@@ -178,6 +201,7 @@ import {
   mapOutline,
   pinOutline,
   homeOutline,
+  locateOutline,
   informationCircleOutline,
 } from 'ionicons/icons';
 import { useRegistrationStore } from '@/stores/registration';
@@ -752,6 +776,8 @@ const formData = ref({
   barangay: '',
   storePlace: '',
   completeAddress: '',
+  latitude: '',
+  longitude: '',
 } as StoreInfoForm);
 
 // Error states
@@ -763,6 +789,31 @@ const errors = ref({
   storePlace: '',
   completeAddress: '',
 });
+
+// GPS capture
+const isLocating = ref(false);
+const locationError = ref('');
+
+const captureLocation = () => {
+  if (!navigator.geolocation) {
+    locationError.value = 'Geolocation is not supported on this device.';
+    return;
+  }
+  isLocating.value = true;
+  locationError.value = '';
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      formData.value.latitude = pos.coords.latitude.toFixed(7);
+      formData.value.longitude = pos.coords.longitude.toFixed(7);
+      isLocating.value = false;
+    },
+    () => {
+      isLocating.value = false;
+      locationError.value = 'Could not get your location. Please enable location access.';
+    },
+    { enableHighAccuracy: true, timeout: 10000 },
+  );
+};
 
 // Available cities based on selected region
 const availableCities = computed(() => {
@@ -791,6 +842,8 @@ onMounted(() => {
   if (reg.data.barangay) formData.value.barangay = reg.data.barangay;
   if (reg.data.storePlace) formData.value.storePlace = reg.data.storePlace;
   if (reg.data.completeAddress) formData.value.completeAddress = reg.data.completeAddress;
+  if (reg.data.latitude) formData.value.latitude = reg.data.latitude;
+  if (reg.data.longitude) formData.value.longitude = reg.data.longitude;
 });
 
 // Region change handler
@@ -905,6 +958,8 @@ const saveData = () => {
     barangay: formData.value.barangay,
     storePlace: formData.value.storePlace,
     completeAddress: formData.value.completeAddress,
+    latitude: formData.value.latitude,
+    longitude: formData.value.longitude,
   });
 };
 
@@ -1173,6 +1228,64 @@ const handleNext = () => {
   color: var(--color-error);
   margin-top: 6px;
   font-weight: 500;
+}
+
+/* GPS Box */
+.gps-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-input-bg);
+}
+
+.gps-box.captured {
+  border-color: var(--color-success-border);
+  background: var(--color-success-bg);
+}
+
+.gps-box-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.gps-box-main ion-icon {
+  font-size: 24px;
+  color: var(--color-icon-primary);
+  flex-shrink: 0;
+}
+
+.gps-box.captured .gps-box-main ion-icon {
+  color: var(--color-success-border);
+}
+
+.gps-coords {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+  word-break: break-all;
+}
+
+.gps-hint {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.gps-button {
+  --background: var(--color-primary);
+  --background-hover: var(--color-primary-hover);
+  --border-radius: 10px;
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: none;
 }
 
 /* Info Box */

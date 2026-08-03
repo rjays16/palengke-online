@@ -300,6 +300,8 @@ export interface StoreInfoForm {
   barangay: string
   storePlace: string
   completeAddress: string
+  latitude: string
+  longitude: string
 }
 
 export interface AccountSummary {

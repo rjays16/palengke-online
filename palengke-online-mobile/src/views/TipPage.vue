@@ -249,11 +249,22 @@ const addFloor = async () => {
 const getHelp = () => router.push('/help');
 const shareOrder = () => {};
 
+const getCurrentPosition = () =>
+  new Promise((resolve) => {
+    if (!navigator.geolocation) return resolve(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+      () => resolve(null),
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  });
+
 const confirmOrder = async () => {
   if (isPlacing.value) return;
   isPlacing.value = true;
   try {
     const tipAmount = getTipAmount();
+    const position = await getCurrentPosition();
     const payload = {
       seller_id: orderData.value.sellerId || undefined,
       customer_name: 'Guest Customer',
@@ -263,6 +274,8 @@ const confirmOrder = async () => {
       amount: tipAmount,
       message: '',
       payment_method: orderData.value.paymentLabel,
+      latitude: position ? position.latitude.toFixed(7) : undefined,
+      longitude: position ? position.longitude.toFixed(7) : undefined,
     };
 
     const res = await fetch(`${API_BASE}/api/tips`, {

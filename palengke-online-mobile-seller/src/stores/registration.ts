@@ -21,6 +21,8 @@ interface RegistrationData {
   storeName: string
   storePlace: string
   completeAddress: string
+  latitude: string
+  longitude: string
   verificationChoice: string
   verificationStatus: string
   verificationSubmittedAt: string
@@ -59,6 +61,8 @@ function defaults(): RegistrationData {
     storeName: '',
     storePlace: '',
     completeAddress: '',
+    latitude: '',
+    longitude: '',
     verificationChoice: '',
     verificationStatus: '',
     verificationSubmittedAt: '',
