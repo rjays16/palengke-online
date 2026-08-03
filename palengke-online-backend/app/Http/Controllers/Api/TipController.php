@@ -66,7 +66,7 @@ class TipController extends Controller
             'delivery_address' => $validated['delivery_address'] ?? null,
             'items' => $items,
             'delivery_fee' => $deliveryFee,
-            'total' => round($subtotal + $deliveryFee + $tipAmount, 2),
+            'total' => round($subtotal + $deliveryFee, 2),
             'status' => 'completed',
             'payment_method' => $validated['payment_method'] ?? null,
             'tip_amount' => $tipAmount,
