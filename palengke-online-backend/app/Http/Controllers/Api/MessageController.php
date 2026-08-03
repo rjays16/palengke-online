@@ -87,6 +87,8 @@ class MessageController extends Controller
         $conversation->last_message_at = now();
         $conversation->save();
 
+        $conversation->increment('unread_count');
+
         return response()->json([
             'message' => 'Message sent successfully.',
             'data' => $this->formatMessage($message),
@@ -125,6 +127,8 @@ class MessageController extends Controller
         $conversation->last_message_at = now();
         $conversation->save();
 
+        $conversation->increment('unread_count');
+
         return response()->json([
             'message' => 'Image sent successfully.',
             'data' => $this->formatMessage($message),
@@ -147,7 +151,7 @@ class MessageController extends Controller
         }
 
         Message::where('conversation_id', $conversation->id)
-            ->where('sender_type', 'participant')
+            ->where('sender_type', '!=', 'seller')
             ->where('is_read', false)
             ->update(['is_read' => true]);
 

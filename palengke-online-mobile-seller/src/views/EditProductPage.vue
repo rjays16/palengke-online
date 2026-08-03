@@ -346,6 +346,7 @@ async function loadProduct() {
         discountPrice: p.discount_price,
         stock: p.stock_quantity,
         sku: p.sku || '',
+        trackInventory: p.track_inventory ?? true,
         origin: p.origin || '',
         brand: p.brand || '',
         isFeatured: !!p.is_featured,

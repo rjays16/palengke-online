@@ -89,6 +89,8 @@ class DriverMessageController extends Controller
         $conversation->last_message_at = now();
         $conversation->save();
 
+        $conversation->increment('unread_count');
+
         return response()->json([
             'message' => 'Message sent successfully.',
             'data' => $this->formatMessage($message),
@@ -128,6 +130,8 @@ class DriverMessageController extends Controller
         $conversation->last_message_at = now();
         $conversation->save();
 
+        $conversation->increment('unread_count');
+
         return response()->json([
             'message' => 'Image sent successfully.',
             'data' => $this->formatMessage($message),
@@ -151,7 +155,7 @@ class DriverMessageController extends Controller
         }
 
         Message::where('conversation_id', $conversation->id)
-            ->where('sender_type', 'seller')
+            ->where('sender_type', '!=', 'driver')
             ->where('is_read', false)
             ->update(['is_read' => true]);
 

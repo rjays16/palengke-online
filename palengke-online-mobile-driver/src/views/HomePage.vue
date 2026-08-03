@@ -196,7 +196,7 @@
           </div>
 
           <div class="delivery-card" v-for="delivery in recentDeliveries" :key="delivery.id"
-            @click="viewDeliveryDetails(delivery.id)">
+            @click="viewDeliveryDetails(delivery)">
             <div class="delivery-header">
               <div class="delivery-id">Order #{{ delivery.id }}</div>
               <div class="delivery-status" :class="delivery.status">{{ delivery.status }}</div>
@@ -571,6 +571,8 @@ const handleLogout = async () => {
         role: 'destructive',
         handler: () => {
           localStorage.removeItem('isAuthenticated');
+          localStorage.removeItem('token');
+          localStorage.removeItem('pendingAuth');
           router.push('/login');
         }
       }
@@ -589,7 +591,10 @@ const goToHistory = () => router.push('/history');
 const goToHelp = () => router.push('/help');
 const goToProfile = () => router.push('/profile');
 const goToActiveDelivery = () => router.push('/active-delivery');
-const viewDeliveryDetails = (id) => router.push(`/history/${id}`);
+const viewDeliveryDetails = (delivery) => {
+  const jobData = encodeURIComponent(JSON.stringify(delivery));
+  router.push(`/history/${jobData}`);
+};
 </script>
 
 <style scoped>

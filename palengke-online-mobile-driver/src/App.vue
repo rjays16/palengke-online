@@ -58,6 +58,7 @@ function handleInactivityOk() {
   showInactivityModal.value = false;
   localStorage.removeItem('isAuthenticated');
   localStorage.removeItem('token');
+  localStorage.removeItem('pendingAuth');
   router.push('/pin-login');
 }
 

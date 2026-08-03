@@ -215,7 +215,7 @@ const handleLogout = async () => {
     message: 'Are you sure you want to logout?',
     buttons: [
       { text: 'Cancel', role: 'cancel' },
-      { text: 'Logout', role: 'destructive', handler: () => { localStorage.removeItem('isAuthenticated'); router.push('/login'); } }
+      { text: 'Logout', role: 'destructive', handler: () => { localStorage.removeItem('isAuthenticated'); localStorage.removeItem('token'); localStorage.removeItem('pendingAuth'); router.push('/login'); } }
     ]
   });
   await alert.present();

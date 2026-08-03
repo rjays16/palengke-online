@@ -230,7 +230,22 @@ const orders = ref([]);
 
 onMounted(() => {
   fetchOrders();
+  fetchAvailability();
 });
+
+async function fetchAvailability() {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/driver/profile`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      isActive.value = data.availabilityStatus === 'active';
+    }
+  } catch {}
+}
 
 async function fetchOrders() {
   const token = getToken();
@@ -404,7 +419,39 @@ const declineOrder = async (order) => {
 const viewActiveDelivery = (order) => { router.push('/active-delivery'); };
 
 const goActive = async () => {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/driver/status`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ status: 'active' }),
+    });
+    if (!res.ok) {
+      const toast = await toastController.create({
+        message: 'Failed to go active. Please try again.',
+        duration: 3000,
+        color: 'danger',
+        position: 'top',
+      });
+      await toast.present();
+      return;
+    }
+  } catch {
+    const toast = await toastController.create({
+      message: 'Network error. Please try again.',
+      duration: 3000,
+      color: 'danger',
+      position: 'top',
+    });
+    await toast.present();
+    return;
+  }
   isActive.value = true;
+  await fetchOrders();
   const toast = await toastController.create({
     message: 'You are now active!',
     duration: 2000,

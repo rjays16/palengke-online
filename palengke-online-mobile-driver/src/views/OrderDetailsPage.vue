@@ -14,7 +14,7 @@
 
         <!-- Order Header -->
         <div class="order-header">
-          <div class="order-id">Order #{{ job?.id?.toUpperCase() }}</div>
+          <div class="order-id">Order #{{ String(job?.id ?? '').toUpperCase() }}</div>
           <div class="order-status completed">Completed</div>
         </div>
 
@@ -93,11 +93,25 @@ const router = useRouter();
 const route = useRoute();
 
 const job = computed(() => {
+  const raw = route.params.job;
+  if (!raw) return {};
+
+  let parsed;
   try {
-    return JSON.parse(decodeURIComponent(route.params.job || '{}'));
+    parsed = JSON.parse(decodeURIComponent(raw));
   } catch {
-    return {};
+    parsed = {};
   }
+
+  if (!parsed || typeof parsed !== 'object') {
+    return { id: raw };
+  }
+
+  if (parsed.address && !parsed.deliveryAddress) {
+    parsed.deliveryAddress = parsed.address;
+  }
+
+  return parsed;
 });
 
 const totalAmount = computed(() => {
