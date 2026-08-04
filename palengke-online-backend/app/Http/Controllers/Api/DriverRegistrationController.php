@@ -724,6 +724,51 @@ class DriverRegistrationController extends Controller
         ]);
     }
 
+    private function driverWallet($driver)
+    {
+        $codEarnings = (float) Order::where('driver_registration_id', $driver->id)
+            ->where('status', 'completed')
+            ->where('payment_method', 'cod')
+            ->sum('total');
+
+        $cashedOut = (float) $driver->cashOuts()->sum('amount');
+
+        return [
+            'codEarnings' => round($codEarnings, 2),
+            'cashedOut' => round($cashedOut, 2),
+            'balance' => round($codEarnings - $cashedOut, 2),
+        ];
+    }
+
+    public function walletBalance(Request $request)
+    {
+        return response()->json($this->driverWallet($request->user()));
+    }
+
+    public function cashOut(Request $request)
+    {
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:1',
+        ]);
+
+        $driver = $request->user();
+        $wallet = $this->driverWallet($driver);
+        $amount = round((float) $validated['amount'], 2);
+
+        if ($amount > $wallet['balance']) {
+            return response()->json([
+                'message' => 'Amount exceeds your available balance.',
+            ], 422);
+        }
+
+        $driver->cashOuts()->create(['amount' => $amount]);
+
+        return response()->json([
+            'message' => 'Cash out successful.',
+            'balance' => round($wallet['balance'] - $amount, 2),
+        ]);
+    }
+
     public function acceptOrder(Request $request, $id)
     {
         $driver = $request->user();

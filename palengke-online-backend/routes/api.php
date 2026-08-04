@@ -123,6 +123,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/driver/history', [DriverRegistrationController::class, 'driverHistory']);
     Route::get('/driver/orders', [DriverRegistrationController::class, 'orders']);
     Route::get('/driver/earnings', [DriverRegistrationController::class, 'earnings']);
+    Route::get('/driver/wallet', [DriverRegistrationController::class, 'walletBalance']);
+    Route::post('/driver/wallet/cash-out', [DriverRegistrationController::class, 'cashOut']);
     Route::get('/driver/tips/latest', [TipController::class, 'latest']);
     Route::get('/driver/notifications', [DriverNotificationController::class, 'index']);
     Route::get('/driver/notifications/unread-count', [DriverNotificationController::class, 'unreadCount']);

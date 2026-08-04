@@ -256,11 +256,13 @@ const selectedPeriod = ref('today');
 const showBreakdown = ref(false);
 const cashWallet = ref(0);
 
+const EMPTY_STATS = { netEarnings: 0, jobs: 0, tips: 0, onlineHours: 0, avgPerJob: 0, deliveryFee: 0, commission: 0, completionRate: 0, rating: 0, acceptRate: 0, totalKm: 0 };
+
 const statsData = ref({
-  today: { netEarnings: 0, jobs: 0, tips: 0, onlineHours: 0, avgPerJob: 0, deliveryFee: 0, commission: 0, completionRate: 0, rating: 0, acceptRate: 0, totalKm: 0 },
-  yesterday: { netEarnings: 0, jobs: 0, tips: 0, onlineHours: 0, avgPerJob: 0, deliveryFee: 0, commission: 0, completionRate: 0, rating: 0, acceptRate: 0, totalKm: 0 },
-  week: { netEarnings: 0, jobs: 0, tips: 0, onlineHours: 0, avgPerJob: 0, deliveryFee: 0, commission: 0, completionRate: 0, rating: 0, acceptRate: 0, totalKm: 0 },
-  month: { netEarnings: 0, jobs: 0, tips: 0, onlineHours: 0, avgPerJob: 0, deliveryFee: 0, commission: 0, completionRate: 0, rating: 0, acceptRate: 0, totalKm: 0 },
+  today: { ...EMPTY_STATS },
+  yesterday: { ...EMPTY_STATS },
+  week: { ...EMPTY_STATS },
+  month: { ...EMPTY_STATS },
 });
 
 const currentStats = computed(() => statsData.value[selectedPeriod.value]);
@@ -283,7 +285,22 @@ const getBarHeight = (amount) => {
 
 onMounted(() => {
   fetchEarnings();
+  fetchWallet();
 });
+
+async function fetchWallet() {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/driver/wallet`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      cashWallet.value = data.balance || 0;
+    }
+  } catch {}
+}
 
 async function fetchEarnings() {
   const token = getToken();
@@ -334,13 +351,40 @@ const showCashoutModal = async () => {
       {
         text: 'Cash Out',
         handler: async (data) => {
-          if (data.amount && data.amount > 0 && data.amount <= cashWallet.value) {
-            cashWallet.value -= parseFloat(data.amount);
-            await showSuccessModal(`₱${parseFloat(data.amount).toLocaleString()} cashed out successfully!`);
-          } else if (data.amount > cashWallet.value) {
+          if (!data.amount || data.amount <= 0) return;
+          if (data.amount > cashWallet.value) {
             await alertController.create({
               header: 'Error',
               message: 'Amount exceeds your available balance.',
+              buttons: ['OK']
+            }).then(a => a.present());
+            return;
+          }
+          try {
+            const res = await fetch(`${API_BASE}/api/driver/wallet/cash-out`, {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${getToken()}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ amount: data.amount }),
+            });
+            if (res.ok) {
+              const result = await res.json();
+              cashWallet.value = result.balance || 0;
+              await showSuccessModal(`₱${parseFloat(data.amount).toLocaleString()} cashed out successfully!`);
+            } else {
+              const err = await res.json().catch(() => ({}));
+              await alertController.create({
+                header: 'Error',
+                message: err.message || 'Cash out failed.',
+                buttons: ['OK']
+              }).then(a => a.present());
+            }
+          } catch {
+            await alertController.create({
+              header: 'Error',
+              message: 'Cash out failed. Please try again.',
               buttons: ['OK']
             }).then(a => a.present());
           }
