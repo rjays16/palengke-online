@@ -157,6 +157,7 @@ import { useLicenceStore } from '@/composables/useLicenceStore';
 
 const router = useRouter();
 const licenceStore = useLicenceStore();
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
 const selectedPayment = ref(null);
 const isPaying = ref(false);
@@ -164,6 +165,7 @@ const isPaying = ref(false);
 onMounted(async () => {
   await licenceStore.checkLicenceEnabled();
   licenceStore.fetchLicence();
+  fetchPaymentMethods();
 });
 
 const licenceStatusIcon = computed(() => {
@@ -172,22 +174,45 @@ const licenceStatusIcon = computed(() => {
   return timeIcon
 })
 
-const paymentMethods = ref([
-  { id: 1, name: 'GCash', description: 'Pay via GCash app', icon: walletOutline, color: '#00BFA5' },
-  { id: 2, name: 'PayPal', description: 'Pay with PayPal account', icon: walletOutline, color: '#003087' },
-  { id: 3, name: 'Credit/Debit Card', description: 'Visa, Mastercard, JCB', icon: cardOutline, color: '#1a1a1a' },
-]);
+const paymentMethods = ref([]);
+
+function getMethodIcon(name) {
+  const n = (name || '').toLowerCase();
+  if (n.includes('card') || n.includes('stripe') || n.includes('credit') || n.includes('debit')) return cardOutline;
+  return walletOutline;
+}
+
+async function fetchPaymentMethods() {
+  try {
+    const res = await fetch(`${API_BASE}/api/payment-methods`);
+    if (res.ok) {
+      const data = await res.json();
+      paymentMethods.value = (data || [])
+        .filter(m => !m.coming_soon && m.name !== 'Cash on Delivery' && m.name !== 'Palengke Wallet')
+        .map(m => ({ ...m, icon: getMethodIcon(m.name) }));
+      if (paymentMethods.value.length > 0) {
+        selectedPayment.value = paymentMethods.value[0].id;
+      }
+    }
+  } catch {}
+}
 
 const handlePayment = async () => {
   if (!selectedPayment.value || isPaying.value) return;
   isPaying.value = true;
 
-  const method = paymentMethods.value.find(m => m.id === selectedPayment.value);
+  const success = await licenceStore.payLicence(selectedPayment.value);
 
-  // Simulate payment processing
-  await new Promise(resolve => setTimeout(resolve, 2000));
-
-  licenceStore.payLicence();
+  if (!success) {
+    isPaying.value = false;
+    const errAlert = await alertController.create({
+      header: 'Payment Failed',
+      message: 'We could not process your payment. Please try again.',
+      buttons: ['OK']
+    });
+    await errAlert.present();
+    return;
+  }
 
   isPaying.value = false;
 

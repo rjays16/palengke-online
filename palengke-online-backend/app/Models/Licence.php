@@ -9,6 +9,7 @@ class Licence extends Model
     protected $fillable = [
         'driver_registration_id', 'licence_id', 'trial_started_at',
         'trial_ends_at', 'is_paid', 'paid_at', 'amount', 'is_free',
+        'payment_method_name',
     ];
 
     protected $casts = [

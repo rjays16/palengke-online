@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Licence;
 use App\Models\DriverRegistration;
 use App\Models\Notification;
+use App\Models\PaymentMethod;
 use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 
@@ -59,6 +60,10 @@ class LicenceController extends Controller
 
     public function pay(Request $request)
     {
+        $validated = $request->validate([
+            'payment_method_id' => 'sometimes|integer|exists:payment_methods,id',
+        ]);
+
         $driver = $request->user();
 
         if (!$driver) {
@@ -79,9 +84,16 @@ class LicenceController extends Controller
             return response()->json(['message' => 'Licence is already paid.'], 400);
         }
 
+        $paymentMethodName = null;
+        if (!empty($validated['payment_method_id'])) {
+            $paymentMethod = PaymentMethod::find($validated['payment_method_id']);
+            $paymentMethodName = $paymentMethod?->name;
+        }
+
         $licence->update([
             'is_paid' => true,
             'paid_at' => now(),
+            'payment_method_name' => $paymentMethodName,
         ]);
 
         return response()->json([
@@ -93,6 +105,7 @@ class LicenceController extends Controller
                 'paidDate' => $licence->paid_at?->toISOString(),
                 'amount' => (float) $licence->amount,
                 'isFree' => $licence->is_free,
+                'paymentMethodName' => $paymentMethodName,
             ],
         ]);
     }

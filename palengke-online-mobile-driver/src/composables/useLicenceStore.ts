@@ -90,9 +90,9 @@ export function useLicenceStore() {
     } catch {}
   }
 
-  async function payLicence() {
+  async function payLicence(paymentMethodId?: number): Promise<boolean> {
     const token = getToken()
-    if (!token) return
+    if (!token) return false
     try {
       const res = await fetch(`${API_BASE}/api/driver/licence/pay`, {
         method: 'POST',
@@ -100,14 +100,19 @@ export function useLicenceStore() {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify(paymentMethodId ? { payment_method_id: paymentMethodId } : {}),
       })
       if (res.ok) {
         const data = await res.json()
         const l = data.licence
         state.isPaid = l.isPaid
         state.paidDate = l.paidDate
+        return true
       }
-    } catch {}
+      return false
+    } catch {
+      return false
+    }
   }
 
   function resetLicence() {
