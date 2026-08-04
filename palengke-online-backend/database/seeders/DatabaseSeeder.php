@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             SystemSettingSeeder::class,
             OrderSeeder::class,
             PaymentMethodSeeder::class,
+            DeliveryServiceSeeder::class,
             RestrictionCodeSeeder::class,
             HelpTopicSeeder::class,
             FaqSeeder::class,

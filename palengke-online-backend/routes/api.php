@@ -49,6 +49,7 @@ use App\Http\Controllers\Api\DriverMessageController;
 use App\Http\Controllers\Api\MesiboController;
 use App\Http\Controllers\Api\CallSignalController;
 use App\Http\Controllers\Api\TipController;
+use App\Http\Controllers\Api\DeliveryServiceController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -256,6 +257,9 @@ Route::get('/restriction-codes', [RestrictionCodeController::class, 'index']);
 
 // Public endpoint for driver app to fetch enabled license types
 Route::get('/license-types', [LicenseTypeController::class, 'index']);
+
+// Public endpoint for driver app to fetch delivery services
+Route::get('/delivery-services', [DeliveryServiceController::class, 'index']);
 
 // Public endpoint for seller app to fetch enabled locations (filtered by country_regions)
 Route::get('/locations', [LocationController::class, 'publicIndex']);

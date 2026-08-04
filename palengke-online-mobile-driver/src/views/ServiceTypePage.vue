@@ -30,16 +30,16 @@
               <div class="service-info">
                 <div class="service-name-row">
                   <h4>{{ service.name }}</h4>
-                  <span class="service-tag" v-if="service.tag" :class="service.tagType">{{ service.tag }}</span>
+                  <span class="service-tag" v-if="service.tag" :class="service.tag_type">{{ service.tag }}</span>
                 </div>
                 <p v-if="service.description">{{ service.description }}</p>
-                <p v-if="service.alwaysOn" class="always-on">Always on</p>
+                <p v-if="service.always_on" class="always-on">Always on</p>
               </div>
             </div>
             <ion-toggle
               v-model="service.enabled"
               color="success"
-              :disabled="service.alwaysOn"
+              :disabled="service.always_on"
               @ionChange="onServiceToggle(service)"
             ></ion-toggle>
           </div>
@@ -79,58 +79,48 @@ function getToken() {
   return localStorage.getItem('token') || '';
 }
 
+const iconMap = {
+  bicycle: bicycleOutline,
+  flash: flashOutline,
+  cube: cubeOutline,
+};
+
 const expressGloballyEnabled = ref(false);
-const services = ref([
-  { id: 1, name: 'Palengke Standard Delivery', description: 'Regular delivery orders', icon: bicycleOutline, color: '#4CAF50', enabled: true, tag: null, alwaysOn: true },
-  { id: 2, name: 'Palengke Express Delivery', description: '15% higher earnings than standard', icon: flashOutline, color: '#FF9800', enabled: true, tag: 'Higher Earnings', tagType: 'earnings', alwaysOn: false },
-  { id: 3, name: 'Bulky Item Delivery', description: 'Large or heavy orders', icon: cubeOutline, color: '#2196F3', enabled: true, tag: null, alwaysOn: false },
-]);
+const services = ref([]);
 
 onMounted(async () => {
   try {
-    const [settingsRes, driverRes] = await Promise.all([
-      fetch(`${API_BASE}/api/settings`),
+    const [servicesRes, driverRes] = await Promise.all([
+      fetch(`${API_BASE}/api/delivery-services`),
       fetch(`${API_BASE}/api/driver/settings`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       }),
     ]);
-    if (settingsRes.ok) {
-      const data = await settingsRes.json();
-      expressGloballyEnabled.value = data.express_delivery_enabled === 'true';
-    }
-    if (driverRes.ok) {
-      const data = await driverRes.json();
-      const expressService = services.value.find(s => s.name === 'Palengke Express Delivery');
-      if (expressService) {
-        expressService.enabled = data.express_enabled;
-      }
-      const bulkyService = services.value.find(s => s.name === 'Bulky Item Delivery');
-      if (bulkyService) {
-        bulkyService.enabled = data.bulky_enabled;
-      }
+    if (servicesRes.ok) {
+      const list = await servicesRes.json();
+      const driverSettings = driverRes.ok ? await driverRes.json() : {};
+      services.value = list
+        .filter((s) => s.global_enabled)
+        .map((s) => ({
+          ...s,
+          icon: iconMap[s.icon] || bicycleOutline,
+          enabled: s.always_on ? true : Boolean(driverSettings[s.driver_setting]),
+        }));
+      expressGloballyEnabled.value = services.value.some((s) => s.slug === 'express');
     }
   } catch {}
-  if (!expressGloballyEnabled.value) {
-    services.value = services.value.filter(s => s.name !== 'Palengke Express Delivery');
-  }
 });
 
 const onServiceToggle = async (service) => {
   try {
-      const payload = {};
-    if (service.name === 'Palengke Express Delivery') {
-      payload.express_enabled = service.enabled;
-    } else if (service.name === 'Bulky Item Delivery') {
-      payload.bulky_enabled = service.enabled;
-    }
-    if (Object.keys(payload).length) {
+    if (service.driver_setting) {
       await fetch(`${API_BASE}/api/driver/settings`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${getToken()}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ [service.driver_setting]: service.enabled }),
       });
     }
   } catch {}
