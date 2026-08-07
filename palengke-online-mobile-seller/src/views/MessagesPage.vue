@@ -360,7 +360,7 @@ async function fetchCallingSetting() {
       const data = await res.json();
       callingEnabled.value = data.enable_calling !== 'false';
     }
-  } catch {}
+  } catch { /* ignore */ }
 }
 
 const chatWs = useChatWebSocket(userEmail, {
@@ -369,7 +369,6 @@ const chatWs = useChatWebSocket(userEmail, {
     if (selectedChat.value) {
       const updated = list.find((c: any) => c.id === selectedChat.value?.id);
       if (updated) {
-        const prevMsgCount = selectedChat.value.messages.length;
         selectedChat.value = { ...selectedChat.value, ...updated };
         if (updated.lastMessage !== selectedChat.value?.lastMessage) {
           if (!updated.muted) playMessageSound();
@@ -393,10 +392,8 @@ const chatWs = useChatWebSocket(userEmail, {
 });
 
 const {
-  mesiboInitialized,
   callState,
   callDuration,
-  activeCallSignalId,
   initMesibo,
   startCall,
   acceptCall,
@@ -413,7 +410,6 @@ const selectedChat = ref(null as Conversation | null);
 const newMessage = ref('');
 const isTyping = ref(false);
 const chatContent = ref(null as any);
-const endCallBtnRef = ref<HTMLButtonElement | null>(null);
 const loading = ref(false);
 const sendingMessage = ref(false);
 const loadingMessages = ref(false);
@@ -577,7 +573,7 @@ const playMessageSound = () => {
       messageAudio.value.currentTime = 0;
       messageAudio.value.play().catch((e: any) => console.warn('Play msg sound:', e));
     }
-  } catch {}
+  } catch { /* ignore */ }
 };
 
 const playCallSound = () => {
@@ -587,7 +583,7 @@ const playCallSound = () => {
       callAudio.value.currentTime = 0;
       callAudio.value.play().catch((e: any) => console.warn('Play call sound:', e));
     }
-  } catch {}
+  } catch { /* ignore */ }
 };
 
 // Real-time updates via WebSocket (falls back to polling)
@@ -765,7 +761,7 @@ function startIncomingCallPolling() {
             startIncomingCallPolling();
           }
         }
-      } catch {}
+      } catch { /* ignore */ }
       return;
     }
 
@@ -780,7 +776,7 @@ function startIncomingCallPolling() {
       if (data.signal) {
         incomingCall.value = data.signal;
       }
-    } catch {}
+    } catch { /* ignore */ }
   }, 2000);
 }
 

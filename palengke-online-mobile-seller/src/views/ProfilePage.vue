@@ -363,12 +363,8 @@ import {
   IonToolbar,
   IonTitle,
   IonContent,
-  IonFooter,
-  IonButtons,
   IonButton,
-  IonBackButton,
   IonIcon,
-  IonToggle,
   alertController,
   actionSheetController,
   toastController,
@@ -399,13 +395,8 @@ import {
   imagesOutline,
   trashOutline,
   closeOutline,
-  homeOutline,
-  cubeOutline,
-  receiptOutline,
   phonePortraitOutline,
-  cashOutline,
   businessOutline,
-  checkmarkCircleOutline,
 } from 'ionicons/icons';
 import { api } from '@/utils/apiClient';
 import { useAuthStore } from '@/stores/auth';
@@ -519,21 +510,6 @@ function parseHoursFromString(str: string): OperatingHours {
   } catch {
     return initDefaultHours();
   }
-}
-
-function formatOpenClose(day: string) {
-  const d = hoursData.value[day];
-  if (!d || d.closed) return 'Closed';
-  return `${d.openHour}:${d.openMin} ${d.openAmPm} - ${d.closeHour}:${d.closeMin} ${d.closeAmPm}`;
-}
-
-function formatOperatingHours(hoursObj: any) {
-  const lines = dayKeys.map((day) => {
-    const d = hoursObj[day];
-    if (!d || d.closed) return `${dayLabels[day]}: Closed`;
-    return `${dayLabels[day]}: ${d.openHour}:${d.openMin} ${d.openAmPm} - ${d.closeHour}:${d.closeMin} ${d.closeAmPm}`;
-  });
-  return lines.join('\n');
 }
 
 function getHoursSummary(str: string) {
@@ -761,7 +737,7 @@ const showPaymentDetailsForm = async (selectedType: string) => {
           const loading = await showLoadingModal('Adding payment method...');
 
           try {
-            const result = await api.post('/seller/payment-methods', {
+            await api.post('/seller/payment-methods', {
               email: localStorage.getItem('userEmail') || '',
               type: selectedType,
               account_name: data.account_name,

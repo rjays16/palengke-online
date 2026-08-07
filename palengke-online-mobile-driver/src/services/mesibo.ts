@@ -13,8 +13,6 @@ export interface IncomingCallSignal {
 
 const mesiboInitialized = ref(false);
 
-let mesiboApi: any = null;
-
 function getMesibo(): any {
   return (window as any).Mesibo;
 }
@@ -73,7 +71,6 @@ export function useMesibo() {
       api.setListener(self);
       api.start();
 
-      mesiboApi = api;
       return true;
     } catch (e) {
       console.error('Mesibo init error:', e);
@@ -141,7 +138,7 @@ export function useMesibo() {
           stopCallerPolling();
           setTimeout(() => { callState.value = 'idle'; }, 1500);
         }
-      } catch {}
+      } catch { /* ignore */ }
     }, 2000);
   }
 
@@ -164,7 +161,7 @@ export function useMesibo() {
           activeCallSignalId.value = null;
           setTimeout(() => { callState.value = 'idle'; }, 1500);
         }
-      } catch {}
+      } catch { /* ignore */ }
     }, 2000);
   }
 

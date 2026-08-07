@@ -85,11 +85,10 @@
 
 <script setup>
 import { computed } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton, IonIcon } from '@ionic/vue';
 import { storefrontOutline, personOutline, timeOutline } from 'ionicons/icons';
 
-const router = useRouter();
 const route = useRoute();
 
 const job = computed(() => {

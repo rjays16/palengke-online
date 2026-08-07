@@ -246,7 +246,6 @@ import {
   IonBackButton,
   IonIcon,
   IonBadge,
-  IonSpinner,
   alertController,
   actionSheetController,
   toastController,

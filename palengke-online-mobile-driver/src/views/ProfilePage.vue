@@ -334,7 +334,6 @@ import {
   checkmarkCircleOutline as checkmarkIcon,
   timeOutline as timeIcon,
   closeCircleOutline as closeIcon,
-  cardOutline as cardIcon,
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -380,7 +379,7 @@ async function fetchProfile() {
         ratingCounts.value = data.ratingCounts;
       }
     }
-  } catch {}
+  } catch { /* ignore */ }
 }
 
 onMounted(async () => {
@@ -468,7 +467,7 @@ async function fetchBadges() {
         count: b.isNew ? 1 : 0,
       }));
     }
-  } catch {}
+  } catch { /* ignore */ }
 }
 
 async function fetchPerformance() {
@@ -485,7 +484,7 @@ async function fetchPerformance() {
         icon: iconMap[item.icon] || helpCircleOutline,
       }));
     }
-  } catch {}
+  } catch { /* ignore */ }
 }
 
 // Methods

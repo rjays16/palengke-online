@@ -194,7 +194,7 @@ async function fetchPaymentMethods() {
         selectedPayment.value = paymentMethods.value[0].id;
       }
     }
-  } catch {}
+  } catch { /* ignore */ }
 }
 
 const handlePayment = async () => {

@@ -66,7 +66,7 @@ export function useLicenceStore() {
         const data = await res.json()
         licenceEnabled.value = data.licence_enabled !== "false"
       }
-    } catch {}
+    } catch { /* ignore */ }
   }
 
   async function fetchLicence() {
@@ -87,7 +87,7 @@ export function useLicenceStore() {
         state.amount = l.amount
         state.isFree = l.isFree || false
       }
-    } catch {}
+    } catch { /* ignore */ }
   }
 
   async function payLicence(paymentMethodId?: number): Promise<boolean> {

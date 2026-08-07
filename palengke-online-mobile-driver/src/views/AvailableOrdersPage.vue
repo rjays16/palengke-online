@@ -244,7 +244,7 @@ async function fetchAvailability() {
       const data = await res.json();
       isActive.value = data.availabilityStatus === 'active';
     }
-  } catch {}
+    } catch { /* ignore */ }
 }
 
 async function fetchOrders() {
@@ -262,7 +262,7 @@ async function fetchOrders() {
         ...(data.completed || []),
       ];
     }
-  } catch {}
+    } catch { /* ignore */ }
 }
 
 // Computed
@@ -416,7 +416,7 @@ const declineOrder = async (order) => {
   await alert.present();
 };
 
-const viewActiveDelivery = (order) => { router.push('/active-delivery'); };
+const viewActiveDelivery = () => { router.push('/active-delivery'); };
 
 const goActive = async () => {
   const token = getToken();

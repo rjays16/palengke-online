@@ -36,7 +36,6 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon } from '@ionic/vue';
-import { timeOutline, arrowBackOutline } from 'ionicons/icons';
 import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();

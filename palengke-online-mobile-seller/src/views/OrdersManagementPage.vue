@@ -127,9 +127,7 @@ import {
   receiptOutline,
   personOutline,
   cartOutline,
-  checkmarkCircleOutline,
   timeOutline,
-  closeCircleOutline,
 } from 'ionicons/icons';
 import { type Order } from '@/types';
 import BottomNav from '@/components/BottomNav.vue';

@@ -25,7 +25,7 @@
 <script setup>
 import { defineProps } from 'vue';
 
-const props = defineProps({
+defineProps({
   show: {
     type: Boolean,
     default: true,

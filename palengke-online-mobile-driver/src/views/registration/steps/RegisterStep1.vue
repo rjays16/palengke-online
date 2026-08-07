@@ -187,7 +187,6 @@ import {
   arrowBackOutline,
   arrowForwardOutline,
   mailOutline,
-  callOutline,
   checkmarkCircleOutline,
   shieldCheckmarkOutline,
   paperPlaneOutline,
@@ -400,12 +399,6 @@ const validateField = (field) => {
     return true;
   }
 
-};
-
-// Format phone for display
-const formatPhone = (phoneNum) => {
-  if (!phoneNum || phoneNum.length !== 11) return phoneNum;
-  return `${phoneNum.slice(0, 4)} ${phoneNum.slice(4, 7)} ${phoneNum.slice(7)}`;
 };
 
 // Send OTP to email

@@ -96,13 +96,12 @@ import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonButtons, IonBackButton, IonButton, IonIcon,
-  alertController, actionSheetController, toastController
+  actionSheetController, toastController
 } from '@ionic/vue';
 import {
   checkmarkDoneOutline, ellipsisVerticalOutline,
   notificationsOffOutline, cartOutline, cashOutline,
-  warningOutline, informationCircleOutline, trophyOutline,
-  starOutline, closeCircleOutline
+  warningOutline, informationCircleOutline, trophyOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -146,7 +145,7 @@ const fetchNotifications = async () => {
       const data = await res.json();
       notifications.value = data.notifications || [];
     }
-  } catch {}
+  } catch { /* ignore */ }
 };
 
 const handleNotifClick = async (notif) => {
@@ -158,7 +157,7 @@ const handleNotifClick = async (notif) => {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}` },
         });
-      } catch {}
+      } catch { /* ignore */ }
     }
     notif.read = true;
   }
@@ -185,7 +184,7 @@ const markAllRead = async () => {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
-    } catch {}
+    } catch { /* ignore */ }
   }
   notifications.value.forEach(n => n.read = true);
   const toast = await toastController.create({ message: 'All marked as read', duration: 2000, color: 'medium', position: 'top' });
@@ -205,7 +204,7 @@ const showOptions = async () => {
               method: 'DELETE',
               headers: { Authorization: `Bearer ${token}` },
             });
-          } catch {}
+          } catch { /* ignore */ }
         }
         notifications.value = [];
         const toast = await toastController.create({ message: 'All notifications cleared', duration: 2000, color: 'medium', position: 'top' });

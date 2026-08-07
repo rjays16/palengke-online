@@ -286,7 +286,6 @@ import {
   IonToolbar,
   IonTitle,
   IonContent,
-  IonFooter,
   IonButton,
   IonButtons,
   IonIcon,
@@ -308,14 +307,10 @@ import {
   cubeOutline,
   trendingUpOutline,
   addCircleOutline,
-  receiptOutline,
   statsChartOutline,
   personOutline,
   addOutline,
-  homeOutline,
   logOutOutline,
-  helpCircleOutline,
-  informationCircleOutline,
   closeOutline,
   shareSocialOutline,
   chatbubblesOutline,
@@ -328,12 +323,10 @@ import {
 import { type Order, type Notice, type BannerRequest } from '@/types';
 import BottomNav from '@/components/BottomNav.vue';
 import { useSuccessModal } from '@/composables/useSuccessModal';
-import { useModals } from '@/composables/useModals';
 
 const router = useRouter();
 const auth = useAuthStore();
 const { showSuccessModal } = useSuccessModal();
-const { showLoadingModal: showLoadingWithLogo } = useModals();
 
 // Seller Data
 const sellerName = ref('Loading...');
@@ -441,8 +434,6 @@ const expired = computed(() => isExpired(sub.value));
 const subActive = computed(() => sub.value.status === 'active' && !expired.value);
 const subLow = computed(() => subActive.value && remaining.value <= 15);
 const isTrialActive = computed(() => sub.value.status === 'trial' && !expired.value);
-const trialDaysLeft = computed(() => remaining.value);
-
 const remainingText = computed(() => {
   const days = remaining.value;
   const months = Math.floor(days / 30);
@@ -770,10 +761,6 @@ const showToast = async (message: string, color = 'dark') => {
     position: 'top',
   });
   await toast.present();
-};
-
-const viewAnalytics = () => {
-  router.push('/analytics');
 };
 
 const viewAllOrders = () => {

@@ -299,7 +299,7 @@ async function fetchWallet() {
       const data = await res.json();
       cashWallet.value = data.balance || 0;
     }
-  } catch {}
+    } catch { /* ignore */ }
 }
 
 async function fetchEarnings() {
@@ -319,7 +319,7 @@ async function fetchEarnings() {
       };
       chartData.value = data.chart || [];
     }
-  } catch {}
+    } catch { /* ignore */ }
 }
 
 // Methods

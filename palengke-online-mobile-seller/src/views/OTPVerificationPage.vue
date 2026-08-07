@@ -65,7 +65,7 @@ import {
   alertController,
   toastController,
 } from '@ionic/vue';
-import { mailOpenOutline, shieldCheckmarkOutline } from 'ionicons/icons';
+import { mailOpenOutline } from 'ionicons/icons';
 import { api, ApiError } from '@/utils/apiClient';
 import { useAuthStore } from '@/stores/auth';
 import { useSuccessModal } from '@/composables/useSuccessModal';
@@ -166,7 +166,7 @@ const verifyCode = async () => {
   isVerifying.value = true;
 
   try {
-    const data = await api.post('/verify-otp', { email: userEmail.value, otp: otpCode.value }, { skipAuth: true });
+    await api.post('/verify-otp', { email: userEmail.value, otp: otpCode.value }, { skipAuth: true });
 
     if (countdownInterval) clearInterval(countdownInterval);
 

@@ -124,8 +124,7 @@ import {
 import {
   shieldCheckmarkOutline, documentTextOutline, cloudUploadOutline,
   refreshOutline, informationCircleOutline, alertCircleOutline,
-  timeOutline, checkmarkCircleOutline, closeCircleOutline,
-  warningOutline
+  timeOutline, warningOutline
 } from 'ionicons/icons';
 import { compressImage, readFileAsDataURL } from '@/utils/imageCompression';
 
@@ -140,16 +139,15 @@ const imageLoaded = ref({});
 function getEmail() {
   const fromStore = localStorage.getItem('driverRegistrationData');
   if (fromStore) {
-    try { const parsed = JSON.parse(fromStore); if (parsed.email) return parsed.email; } catch {}
+    try { const parsed = JSON.parse(fromStore); if (parsed.email) return parsed.email; } catch { /* ignore */ }
   }
   const submitted = localStorage.getItem('submittedRegistrationData');
   if (submitted) {
-    try { const parsed = JSON.parse(submitted); if (parsed.email) return parsed.email; } catch {}
+    try { const parsed = JSON.parse(submitted); if (parsed.email) return parsed.email; } catch { /* ignore */ }
   }
   return localStorage.getItem('userEmail') || '';
 }
 
-const verifiedCount = computed(() => documents.value.filter(d => d.status === 'verified').length);
 const pendingCount = computed(() => documents.value.filter(d => d.status === 'pending').length);
 const missingCount = computed(() => documents.value.filter(d => d.status === 'missing').length);
 

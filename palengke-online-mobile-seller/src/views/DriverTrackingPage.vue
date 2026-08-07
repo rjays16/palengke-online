@@ -145,7 +145,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 import {
   IonPage,
   IonHeader,
@@ -156,7 +156,6 @@ import {
   IonButton,
   IonBackButton,
   IonIcon,
-  alertController,
 } from '@ionic/vue';
 import {
   personOutline,
@@ -183,14 +182,11 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 const router = useRouter();
-const route = useRoute();
 const { showSuccessModal } = useSuccessModal();
 const { showLoadingModal } = useModals();
 
 let map: any = null;
 let driverMarker: any = null;
-let sellerMarker: any = null;
-let customerMarker: any = null;
 let routeLine: any = null;
 let locationUpdateInterval: any = null;
 
@@ -296,11 +292,11 @@ const initMap = () => {
   });
 
   // Add markers
-  sellerMarker = L.marker(sellerLocation, { icon: sellerIcon })
+  L.marker(sellerLocation, { icon: sellerIcon })
     .addTo(map)
     .bindPopup('<b><i class="fas fa-store"></i> Your Shop</b><br>Pickup Location');
 
-  customerMarker = L.marker(customerLocation, { icon: customerIcon })
+  L.marker(customerLocation, { icon: customerIcon })
     .addTo(map)
     .bindPopup('<b><i class="fas fa-home"></i> Customer</b><br>' + orderData.value.customerName);
 

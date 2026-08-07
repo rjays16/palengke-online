@@ -307,7 +307,7 @@ const validateField = (fieldName) => {
       errors.value.country = '';
       return true;
 
-    case 'birthdate':
+    case 'birthdate': {
       if (!formData.value.birthdate) {
         errors.value.birthdate = 'Birthdate is required';
         return false;
@@ -329,6 +329,7 @@ const validateField = (fieldName) => {
 
       errors.value.birthdate = '';
       return true;
+    }
 
     case 'birthplace':
       if (!formData.value.birthplace.trim()) {

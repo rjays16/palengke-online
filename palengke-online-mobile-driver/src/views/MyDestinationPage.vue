@@ -84,7 +84,6 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonButtons, IonBackButton, IonButton, IonIcon,
@@ -95,7 +94,6 @@ import {
   chevronForwardOutline, chevronDownOutline
 } from 'ionicons/icons';
 
-const router = useRouter();
 import { API_BASE } from '@/services/api';
 
 function getToken() {
@@ -188,15 +186,6 @@ function clearAll() {
   preferredIds.value.clear();
 }
 
-function flattenIds(region) {
-  const ids = [];
-  region.cities.forEach(city => {
-    ids.push(city.id);
-    city.barangays.forEach(b => ids.push(b.id));
-  });
-  return ids;
-}
-
 onMounted(async () => {
   try {
     const [locRes, setRes] = await Promise.all([
@@ -215,7 +204,7 @@ onMounted(async () => {
         preferredIds.value = new Set(data.preferred_locations);
       }
     }
-  } catch {}
+  } catch { /* ignore */ }
   loading.value = false;
 });
 

@@ -167,7 +167,6 @@ import {
   IonContent,
   IonButton,
   IonIcon,
-  IonSpinner,
   toastController
 } from '@ionic/vue';
 import { useRegistrationStore } from '@/composables/useRegistrationStore';

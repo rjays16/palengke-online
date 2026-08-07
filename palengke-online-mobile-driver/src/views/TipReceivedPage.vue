@@ -188,7 +188,7 @@ const fetchLatestTip = async () => {
       };
       totalTipsToday.value = qNum(data.total_tips_today) ?? 0;
     }
-  } catch {}
+  } catch { /* ignore */ }
 };
 
 const getConfettiStyle = (i) => {

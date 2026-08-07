@@ -258,11 +258,9 @@ import {
   IonIcon,
   IonSpinner,
   alertController,
-  toastController,
 } from '@ionic/vue';
-import { trashOutline, closeCircle, addOutline, cloudUploadOutline, checkmarkCircle, cubeOutline } from 'ionicons/icons';
+import { trashOutline, closeCircle, cloudUploadOutline, cubeOutline } from 'ionicons/icons';
 import { api } from '@/utils/apiClient';
-import { type Product } from '@/types';
 import { useSuccessModal } from '@/composables/useSuccessModal';
 
 const router = useRouter();
@@ -479,17 +477,6 @@ const deleteProduct = async () => {
 
 const goBack = () => {
   router.push('/products');
-};
-
-const showToast = async (message: string, color: string = 'success', icon: any = null) => {
-  const toast = await toastController.create({
-    message: icon ? `${icon} ${message}` : message,
-    duration: 2500,
-    color,
-    position: 'top',
-    cssClass: 'custom-toast',
-  });
-  await toast.present();
 };
 
 onMounted(loadProduct);

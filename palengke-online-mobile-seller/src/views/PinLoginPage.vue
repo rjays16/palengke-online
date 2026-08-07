@@ -217,9 +217,8 @@ const handleForgotPin = async () => {
           const loading = await showLoadingModal('Sending verification code...');
 
           try {
-            let data;
             try {
-              data = await api.post('/seller/forgot-pin', { email: userEmail.value }, { skipAuth: true });
+              await api.post('/seller/forgot-pin', { email: userEmail.value }, { skipAuth: true });
             } catch (apiError) {
               await loading.dismiss();
               throw apiError;

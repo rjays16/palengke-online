@@ -283,7 +283,7 @@ async function fetchHistory() {
       updateWeekDaysEarnings();
       updateMiniChart();
     }
-  } catch {}
+  } catch { /* ignore */ }
 }
 
 function updateWeekDaysEarnings() {

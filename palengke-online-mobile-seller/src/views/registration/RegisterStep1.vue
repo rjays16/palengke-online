@@ -174,7 +174,6 @@ import {
   arrowBackOutline,
   arrowForwardOutline,
   mailOutline,
-  callOutline,
   checkmarkCircleOutline,
   shieldCheckmarkOutline,
   paperPlaneOutline,
@@ -290,7 +289,7 @@ const checkEmailExists = async () => {
   emailExistsError.value = '';
 
   try {
-    const data = await api.post('/seller/login', { email: email.value }, { skipAuth: true });
+    await api.post('/seller/login', { email: email.value }, { skipAuth: true });
 
     // If we got a 200-level response, the email is already registered
     emailExistsError.value = 'This email is already registered.';
@@ -367,12 +366,6 @@ const validateField = (field: string) => {
 
 };
 
-// Format phone for display
-const formatPhone = (phoneNum: string) => {
-  if (!phoneNum || phoneNum.length !== 11) return phoneNum;
-  return `${phoneNum.slice(0, 4)} ${phoneNum.slice(4, 7)} ${phoneNum.slice(7)}`;
-};
-
 // Mask email for display
 const maskedEmail = computed(() => {
   if (!email.value) return '';
@@ -399,7 +392,7 @@ const sendOtp = async () => {
   isSendingOtp.value = true;
 
   try {
-    const data = await api.post('/send-otp', { email: email.value }, { skipAuth: true });
+    await api.post('/send-otp', { email: email.value }, { skipAuth: true });
 
     const toast = await toastController.create({
       message: `Verification code sent to ${maskedEmail.value}`,
@@ -474,7 +467,7 @@ const verifyOtp = async () => {
   otpError.value = '';
 
   try {
-    const data = await api.post('/verify-otp', { email: email.value, otp: otpValue.value }, { skipAuth: true });
+    await api.post('/verify-otp', { email: email.value, otp: otpValue.value }, { skipAuth: true });
 
     isEmailVerified.value = true;
     showOtpSection.value = false;

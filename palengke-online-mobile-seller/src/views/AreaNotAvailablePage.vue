@@ -34,7 +34,6 @@
 import { computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon } from '@ionic/vue';
-import { locationOutline, arrowBackOutline } from 'ionicons/icons';
 import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();

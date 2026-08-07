@@ -277,12 +277,10 @@ import {
   IonToggle,
   IonSpinner,
   alertController,
-  toastController,
 } from '@ionic/vue';
 import {
   imagesOutline,
   cloudUploadOutline,
-  addOutline,
   closeCircle,
   informationCircleOutline,
   pricetagOutline,
@@ -295,7 +293,6 @@ import {
   alertCircleOutline,
 } from 'ionicons/icons';
 import { api } from '@/utils/apiClient';
-import { type Product } from '@/types';
 import { useSuccessModal } from '@/composables/useSuccessModal';
 
 const router = useRouter();

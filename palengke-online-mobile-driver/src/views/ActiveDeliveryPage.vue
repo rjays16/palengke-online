@@ -159,7 +159,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage, IonContent, IonButton, IonIcon,
-  alertController, actionSheetController, toastController
+  alertController, toastController
 } from '@ionic/vue';
 import {
   arrowBackOutline, timeOutline,
@@ -181,8 +181,6 @@ function getToken() {
 
 let map = null;
 let driverMarker = null;
-let customerMarker = null;
-let vendorMarker = null;
 let pickupRouteLine = null;
 let deliveryRouteLine = null;
 let watchId = null;
@@ -355,7 +353,7 @@ const initMap = () => {
   });
 
   if (vendorPos.value) {
-    vendorMarker = L.marker(vendorPos.value, { icon: vendorIcon })
+    L.marker(vendorPos.value, { icon: vendorIcon })
       .addTo(map).bindPopup(`
         <div style="text-align:center;min-width:160px;">
           <strong style="color:#4CAF50;font-size:14px;">🏪 PICKUP HERE</strong><br>
@@ -368,7 +366,7 @@ const initMap = () => {
   }
 
   if (customerPos.value) {
-    customerMarker = L.marker(customerPos.value, { icon: customerIcon })
+    L.marker(customerPos.value, { icon: customerIcon })
       .addTo(map).bindPopup(`
         <div style="text-align:center;min-width:160px;">
           <strong style="color:#f44336;font-size:14px;">🏠 DELIVER HERE</strong><br>
@@ -600,63 +598,6 @@ const showSuccessModal = async (message) => {
   }, 50);
 
   await alert.onDidDismiss();
-};
-
-const openNavigation = () => {
-  const name = currentStep.value === 1 ? orderData.value.sellerName : orderData.value.customerName;
-  const address = currentStep.value === 1 ? orderData.value.pickupAddress : orderData.value.deliveryAddress;
-  const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
-  window.open(url, '_blank');
-};
-
-const showMoreActions = async () => {
-  const actionSheet = await actionSheetController.create({
-    header: 'More Actions',
-    buttons: [
-      {
-        text: 'Cancel Order',
-        role: 'destructive',
-        icon: 'close-circle-outline',
-        handler: () => showCancelReasons()
-      },
-      { text: 'Close', role: 'cancel' }
-    ]
-  });
-  await actionSheet.present();
-};
-
-const showCancelReasons = async () => {
-  const alert = await alertController.create({
-    header: 'Why are you cancelling?',
-    buttons: [
-      {
-        text: 'Accepted by mistake',
-        handler: () => handleCancel('Accepted by mistake')
-      },
-      {
-        text: "Can't reach pickup in time",
-        handler: () => handleCancel("Can't reach pickup in time")
-      },
-      {
-        text: 'Vehicle breakdown',
-        handler: () => handleCancel('Vehicle breakdown')
-      },
-      { text: 'Close', role: 'cancel' }
-    ]
-  });
-  await alert.present();
-};
-
-const handleCancel = async (reason) => {
-  const ok = await updateOrderStatus('cancelled');
-  if (!ok) return;
-  stopWatchingPosition();
-  const toast = await toastController.create({
-    message: `Order cancelled: ${reason}`,
-    duration: 2500, color: 'danger', position: 'top'
-  });
-  await toast.present();
-  router.replace('/home');
 };
 
 const goBack = async () => {

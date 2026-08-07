@@ -259,7 +259,7 @@ const validateField = (fieldName) => {
       errors.value.restrictionCode = '';
       return true;
 
-    case 'expiryDate':
+    case 'expiryDate': {
       if (!formData.value.expiryDate) {
         errors.value.expiryDate = 'Expiry date is required';
         return false;
@@ -272,6 +272,7 @@ const validateField = (fieldName) => {
       }
       errors.value.expiryDate = '';
       return true;
+    }
 
     default:
       return true;

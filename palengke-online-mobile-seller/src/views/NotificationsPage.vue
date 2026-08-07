@@ -107,7 +107,6 @@ import {
   IonSpinner,
   actionSheetController,
   alertController,
-  toastController,
 } from '@ionic/vue';
 import {
   notificationsOffOutline,

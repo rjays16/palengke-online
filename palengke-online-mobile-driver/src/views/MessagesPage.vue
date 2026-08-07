@@ -282,10 +282,10 @@ async function fetchCallingSetting() {
       const data = await res.json();
       callingEnabled.value = data.enable_calling !== 'false';
     }
-  } catch {}
+  } catch { /* ignore */ }
 }
 
-const { mesiboInitialized, callState, callDuration, activeCallSignalId, initMesibo, startCall, acceptCall, declineCall, endCall: endMesiboCall, formatCallDuration } = useMesibo();
+const { callState, callDuration, initMesibo, startCall, acceptCall, declineCall, endCall: endMesiboCall, formatCallDuration } = useMesibo();
 
 function getToken() {
   if (typeof localStorage === 'undefined') return null;
@@ -306,7 +306,6 @@ const activeFilter = ref('all');
 const selectedChat = ref(null);
 const newMessage = ref('');
 const chatContent = ref(null);
-const endCallBtnRef = ref(null);
 const loading = ref(false);
 const sendingMessage = ref(false);
 const loadingMessages = ref(false);
@@ -350,7 +349,7 @@ function playMessageSound() {
       messageAudio.value.currentTime = 0;
       messageAudio.value.play().catch(() => {});
     }
-  } catch {}
+  } catch { /* ignore */ }
 }
 
 // Computed
@@ -382,7 +381,7 @@ async function apiGet(endpoint) {
       headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
     });
     if (res.ok) return await res.json();
-  } catch {}
+  } catch { /* ignore */ }
   return null;
 }
 
@@ -401,7 +400,7 @@ async function apiPost(endpoint, body) {
       body: isFormData ? body : JSON.stringify(body),
     });
     if (res.ok) return await res.json();
-  } catch {}
+  } catch { /* ignore */ }
   return null;
 }
 
@@ -414,7 +413,7 @@ async function apiDelete(endpoint) {
       headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
     });
     if (res.ok) return await res.json();
-  } catch {}
+  } catch { /* ignore */ }
   return null;
 }
 
@@ -636,7 +635,7 @@ function startIncomingCallPolling() {
             startIncomingCallPolling();
           }
         }
-      } catch {}
+      } catch { /* ignore */ }
       return;
     }
 
@@ -651,7 +650,7 @@ function startIncomingCallPolling() {
       if (data.signal) {
         incomingCall.value = data.signal;
       }
-    } catch {}
+    } catch { /* ignore */ }
   }, 2000);
 }
 
@@ -669,7 +668,7 @@ function playCallSound() {
       callAudio.value.currentTime = 0;
       callAudio.value.play().catch(() => {});
     }
-  } catch {}
+  } catch { /* ignore */ }
 }
 
 // Action Sheets & Alerts

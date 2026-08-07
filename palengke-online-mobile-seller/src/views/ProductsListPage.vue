@@ -173,7 +173,6 @@ import {
   IonToolbar,
   IonTitle,
   IonContent,
-  IonFooter,
   IonButton,
   IonButtons,
   IonIcon,
@@ -192,9 +191,6 @@ import {
   createOutline,
   trashOutline,
   cartOutline,
-  homeOutline,
-  receiptOutline,
-  personOutline,
 } from 'ionicons/icons';
 import BottomNav from '@/components/BottomNav.vue';
 import { api } from '@/utils/apiClient';

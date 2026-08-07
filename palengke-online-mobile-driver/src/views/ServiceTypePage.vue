@@ -61,7 +61,6 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonButtons, IonBackButton, IonIcon, IonToggle,
@@ -72,7 +71,6 @@ import {
   cubeOutline, cashOutline
 } from 'ionicons/icons';
 
-const router = useRouter();
 import { API_BASE } from '@/services/api';
 
 function getToken() {
@@ -108,7 +106,7 @@ onMounted(async () => {
         }));
       expressGloballyEnabled.value = services.value.some((s) => s.slug === 'express');
     }
-  } catch {}
+  } catch { /* ignore */ }
 });
 
 const onServiceToggle = async (service) => {
@@ -123,7 +121,7 @@ const onServiceToggle = async (service) => {
         body: JSON.stringify({ [service.driver_setting]: service.enabled }),
       });
     }
-  } catch {}
+  } catch { /* ignore */ }
   const toast = await toastController.create({
     message: `${service.name} ${service.enabled ? 'enabled' : 'disabled'}`,
     duration: 2000, color: 'medium', position: 'top'

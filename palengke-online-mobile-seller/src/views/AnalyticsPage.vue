@@ -370,7 +370,6 @@
 <script setup lang="ts">
 import { api } from '@/utils/apiClient';
 import { ref, computed, watch } from 'vue';
-import { useRouter } from 'vue-router';
 import {
   IonPage,
   IonHeader,
@@ -407,7 +406,6 @@ import {
   createOutline,
 } from 'ionicons/icons';
 import { type AnalyticsStats, type ChartDataPoint, type TopProduct, type CategorySales, type Activity, type MonthlyGoals } from '@/types';
-const router = useRouter();
 
 // State
 const selectedPeriod = ref('week');

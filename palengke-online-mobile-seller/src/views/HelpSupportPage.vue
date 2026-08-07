@@ -271,7 +271,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import {
   IonPage,
   IonHeader,
@@ -282,7 +281,6 @@ import {
   IonBackButton,
   IonIcon,
   alertController,
-  toastController,
 } from '@ionic/vue';
 import {
   searchOutline,
@@ -313,7 +311,6 @@ import { type FAQ, type ContactSupport, type Report } from '@/types';
 import { useSuccessModal } from '@/composables/useSuccessModal';
 import { useModals } from '@/composables/useModals';
 
-const router = useRouter();
 const { showSuccessModal } = useSuccessModal();
 const { showLoadingModal } = useModals();
 
@@ -702,7 +699,8 @@ const showTopic = async (topic: any) => {
   await showLoadingModal(`Opening ${topics[topic]}...`);
 };
 
-const playVideo = async (video: any) => {
+const playVideo = async (_video: any) => {
+  void _video;
   await showLoadingModal('Loading video tutorial...');
 };
 

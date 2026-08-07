@@ -275,7 +275,7 @@ import {
   receiptOutline, homeOutline, personOutline, locationOutline,
   navigateOutline, storefrontOutline, logOutOutline,
   helpCircleOutline, informationCircleOutline,
-  closeCircleOutline, cardOutline
+  closeCircleOutline
 } from 'ionicons/icons';
 import { useLicenceStore } from '@/composables/useLicenceStore';
 
@@ -374,7 +374,7 @@ const fetchActiveDelivery = async () => {
         activeDelivery.value = null;
       }
     }
-  } catch {}
+  } catch { /* ignore */ }
 };
 
 const fetchDashboardStats = async () => {
@@ -403,7 +403,7 @@ const fetchDashboardStats = async () => {
       totalTrips.value = data.totalTrips || 0;
       isActive.value = data.availabilityStatus === 'active';
     }
-  } catch {}
+  } catch { /* ignore */ }
 };
 
 // Recent Deliveries
@@ -420,7 +420,7 @@ const fetchRecentDeliveries = async () => {
       const data = await res.json();
       recentDeliveries.value = data.deliveries || [];
     }
-  } catch {}
+  } catch { /* ignore */ }
 };
 
 const fetchNotificationCount = async () => {
@@ -434,7 +434,7 @@ const fetchNotificationCount = async () => {
       const data = await res.json();
       notificationCount.value = data.unread_count || 0;
     }
-  } catch {}
+  } catch { /* ignore */ }
 };
 
 // Toggle Active/Inactive

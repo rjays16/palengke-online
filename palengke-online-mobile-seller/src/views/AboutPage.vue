@@ -18,7 +18,7 @@
           </div>
           <h1 class="app-name">Palengke Online</h1>
           <p class="app-tagline">Empowering Filipino Sellers</p>
-          <p class="app-version">Version 1.0.0 (Build 100)</p>
+          <p class="app-version">Version {{ appVersion }}</p>
           <p class="company-badge">by Chui Tech Solution Inc.</p>
         </div>
 
@@ -314,7 +314,7 @@
 
         <!-- Copyright -->
         <div class="copyright">
-          <p>© 2024-2026 Chui Tech Solution Inc.</p>
+          <p>© {{ copyrightYear }} Chui Tech Solution Inc.</p>
           <p>All rights reserved</p>
         </div>
 
@@ -332,6 +332,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { App } from '@capacitor/app';
 import {
   IonPage,
   IonHeader,
@@ -370,10 +371,13 @@ import {
   starOutline,
 } from 'ionicons/icons';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+import { API_BASE } from '@/config/api';
 
 const stats = ref({ activeSellers: 0, happyCustomers: 0, deliveriesDone: 0, citiesServed: 0 });
 const statsLoaded = ref(false);
+
+const appVersion = ref('1.0.0 (Build 100)');
+const copyrightYear = new Date().getFullYear();
 
 const formatNumber = (value) => {
   if (!statsLoaded.value) return '--';
@@ -383,7 +387,16 @@ const formatNumber = (value) => {
 
 onMounted(async () => {
   try {
-    const res = await fetch(`${API_BASE}/api/app-stats`);
+    const info = await App.getInfo();
+    if (info.version) {
+      appVersion.value = info.build ? `${info.version} (Build ${info.build})` : info.version;
+    }
+  } catch (err) {
+    console.error('Failed to read app version:', err);
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/app-stats`);
     if (res.ok) {
       const data = await res.json();
       stats.value = {
@@ -439,7 +452,7 @@ const viewTerms = async () => {
     header: 'Terms & Conditions',
     cssClass: 'terms-modal',
     message:
-      'By using this app, you agree to provide accurate product information, deliver quality products to customers, maintain professional conduct, and follow local business regulations. © 2024-2026 Chui Tech Solution Inc. All rights reserved.',
+      'By using this app, you agree to provide accurate product information, deliver quality products to customers, maintain professional conduct, and follow local business regulations. © ' + copyrightYear + ' Chui Tech Solution Inc. All rights reserved.',
     buttons: [
       {
         text: 'View Full Terms',
@@ -461,7 +474,7 @@ const viewPrivacy = async () => {
     header: 'Privacy Policy',
     cssClass: 'privacy-modal',
     message:
-      'We protect your data by encrypting all transactions, never sharing personal information, securing payment details, and following data privacy laws. © 2024-2026 Chui Tech Solution Inc.',
+      'We protect your data by encrypting all transactions, never sharing personal information, securing payment details, and following data privacy laws. © ' + copyrightYear + ' Chui Tech Solution Inc.',
     buttons: [
       {
         text: 'View Full Policy',

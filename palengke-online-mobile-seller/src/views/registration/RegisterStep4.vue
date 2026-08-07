@@ -130,12 +130,11 @@
 </template>
 
     <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { IonPage, IonContent, IonButton, IonIcon, IonSpinner, alertController } from '@ionic/vue';
+import { IonPage, IonContent, IonIcon, alertController } from '@ionic/vue';
 import {
   arrowBackOutline,
-  arrowForwardOutline,
   informationCircleOutline,
   shieldCheckmarkOutline,
 } from 'ionicons/icons';
@@ -157,7 +156,7 @@ onMounted(async () => {
     if (data.allow_skip_verification !== undefined) {
       allowSkip.value = data.allow_skip_verification === 'true';
     }
-  } catch {}
+  } catch { /* ignore */ }
 });
 
 // Navigation

@@ -138,11 +138,9 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
-  IonButtons, IonBackButton, IonIcon,
-  toastController
+  IonButtons, IonBackButton, IonIcon
 } from '@ionic/vue';
 import {
   searchOutline, closeCircleOutline,
@@ -152,7 +150,6 @@ import {
   cubeOutline, helpCircleOutline, chatbubbleEllipsesOutline,
   logoFacebook, rocketOutline, storefrontOutline, alertCircle,
 } from 'ionicons/icons';
-const router = useRouter();
 
 const searchQuery = ref('');
 const selectedTopic = ref('all');
@@ -346,13 +343,6 @@ async function fetchFaqs() {
     loadingFaqs.value = false;
   }
 }
-
-const showLoadingModal = async (message) => {
-  const toast = await toastController.create({
-    message, duration: 2000, color: 'medium', position: 'top'
-  });
-  await toast.present();
-};
 
 onMounted(() => {
   fetchContactSupports();
