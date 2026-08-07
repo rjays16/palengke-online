@@ -46,13 +46,16 @@
                 @blur="validateField('vehicleType')"
               >
                 <option value="" disabled>Select vehicle type</option>
-                <option v-for="v in getAvailableVehicles()" :key="v" :value="v">
+                <option v-for="v in vehicleOptions" :key="v" :value="v">
                   {{ v }}
                 </option>
               </select>
             </div>
             <span v-if="errors.vehicleType" class="error-message">{{ errors.vehicleType }}</span>
-            <span v-else class="helper-text">{{ getAvailableVehicles().length }} vehicle type(s) available for restriction code {{ getRestrictionCode() }}</span>
+            <span v-else-if="loadingCodes" class="helper-text">Loading available vehicle types...</span>
+            <span v-else-if="!getRestrictionCode()" class="helper-text">Select your restriction code first</span>
+            <span v-else-if="vehicleOptions.length === 0" class="warning-message">No vehicle types configured for restriction code {{ getRestrictionCode() }}. Please contact support.</span>
+            <span v-else class="helper-text">{{ vehicleOptions.length }} vehicle type(s) available for restriction code {{ getRestrictionCode() }}</span>
           </div>
 
           <!-- Plate Number -->
@@ -226,8 +229,10 @@ function resetVehicleTypeOnCodeMismatch(code) {
 
 function getAvailableVehicles() {
   const code = getRestrictionCode();
-  return vehiclesByCode.value[code] || ['Motorcycle', 'Tricycle', 'Car', 'Van', 'Truck'];
+  return vehiclesByCode.value[code] || [];
 }
+
+const vehicleOptions = computed(() => getAvailableVehicles());
 
 const isFormValid = computed(() => {
   return (
@@ -530,6 +535,14 @@ const handleNext = () => {
   display: block;
   font-size: 12px;
   color: var(--color-error);
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+.warning-message {
+  display: block;
+  font-size: 12px;
+  color: var(--color-warning);
   margin-top: 6px;
   font-weight: 500;
 }
