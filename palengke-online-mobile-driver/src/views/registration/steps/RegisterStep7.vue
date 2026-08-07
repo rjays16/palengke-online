@@ -202,7 +202,7 @@ const fullName = computed(() => {
 const showTerms = async () => {
   const alert = await alertController.create({
     header: 'Terms & Conditions',
-    message: 'By submitting this application, you agree to our terms of service, privacy policy, and driver partnership agreement.',
+    message: 'By submitting this application, you agree to our terms of service and privacy policy. You confirm that all information you provide is accurate, that you meet the eligibility requirements (at least 18 years old with a valid driver\u2019s license appropriate for your vehicle), and that you will comply with all applicable laws, safety regulations, and the driver partnership agreement.',
     buttons: ['Close']
   });
   await alert.present();

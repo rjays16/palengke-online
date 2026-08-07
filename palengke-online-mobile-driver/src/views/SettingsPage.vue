@@ -154,7 +154,9 @@ onMounted(async () => {
       autoAccept.value = data.auto_accept;
       bulkyEnabled.value = data.bulky_enabled;
     }
-  } catch {}
+  } catch (err) {
+    console.error('Failed to load driver settings:', err);
+  }
 });
 
 async function saveSettings() {
@@ -170,7 +172,9 @@ async function saveSettings() {
         bulky_enabled: bulkyEnabled.value,
       }),
     });
-  } catch {}
+  } catch (err) {
+    console.error('Failed to save driver settings:', err);
+  }
 }
 
 const onAutoAcceptChange = async () => {
@@ -194,7 +198,7 @@ const onBulkyToggle = async () => {
 const showTerms = async () => {
   const alert = await alertController.create({
     header: 'Terms & Conditions',
-    message: 'By using Palengke Online Driver, you agree to our terms of service.',
+    message: 'By using Palengke Online Driver, you agree to our terms of service. You must be at least 18 years old, hold a valid driver\u2019s license appropriate for your vehicle, and provide accurate information. You operate as an independent contractor and are responsible for complying with all applicable traffic laws, safety regulations, and local ordinances while using the app. We may update these terms from time to time.',
     buttons: ['Close']
   });
   await alert.present();
@@ -203,7 +207,7 @@ const showTerms = async () => {
 const showPrivacy = async () => {
   const alert = await alertController.create({
     header: 'Privacy Policy',
-    message: 'We protect your personal data and will never share it without your consent.',
+    message: 'We collect personal information to provide our services, including your profile, vehicle, and document details. Your data is encrypted and never sold to third parties. We share only the information needed to complete deliveries and comply with the Data Privacy Act of 2012 (RA 10173).',
     buttons: ['Close']
   });
   await alert.present();
