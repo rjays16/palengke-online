@@ -33,7 +33,7 @@
           <div class="app-stat">
             <div class="app-stat-icon green"><ion-icon :icon="bicycleOutline"></ion-icon></div>
             <div>
-              <h4>1,000+</h4>
+              <h4>{{ formatNumber(stats.activeDrivers) }}</h4>
               <p>Active Drivers</p>
             </div>
           </div>
@@ -41,7 +41,7 @@
           <div class="app-stat">
             <div class="app-stat-icon blue"><ion-icon :icon="cubeOutline"></ion-icon></div>
             <div>
-              <h4>50,000+</h4>
+              <h4>{{ formatNumber(stats.deliveriesDone) }}</h4>
               <p>Deliveries Done</p>
             </div>
           </div>
@@ -49,7 +49,7 @@
           <div class="app-stat">
             <div class="app-stat-icon orange"><ion-icon :icon="storefrontOutline"></ion-icon></div>
             <div>
-              <h4>500+</h4>
+              <h4>{{ formatNumber(stats.activeSellers) }}</h4>
               <p>Sellers Served</p>
             </div>
           </div>
@@ -108,7 +108,7 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonButtons, IonBackButton, IonButton, IonIcon,
@@ -120,7 +120,34 @@ import {
   globeOutline, logoFacebook, logoInstagram
 } from 'ionicons/icons';
 
-const router = useRouter();
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+
+const stats = ref({ activeDrivers: 0, deliveriesDone: 0, activeSellers: 0 });
+const statsLoaded = ref(false);
+
+const formatNumber = (value) => {
+  if (!statsLoaded.value) return '--';
+  const num = Number(value) || 0;
+  return num.toLocaleString() + '+';
+};
+
+onMounted(async () => {
+  try {
+    const res = await fetch(`${API_BASE}/api/app-stats`);
+    if (res.ok) {
+      const data = await res.json();
+      stats.value = {
+        activeDrivers: data.active_drivers ?? 0,
+        deliveriesDone: data.deliveries_done ?? 0,
+        activeSellers: data.active_sellers ?? 0,
+      };
+    }
+  } catch (err) {
+    console.error('Failed to load app stats:', err);
+  } finally {
+    statsLoaded.value = true;
+  }
+});
 
 const openSocial = (platform) => {
   const urls = {

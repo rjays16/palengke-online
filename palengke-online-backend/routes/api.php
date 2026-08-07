@@ -50,6 +50,7 @@ use App\Http\Controllers\Api\MesiboController;
 use App\Http\Controllers\Api\CallSignalController;
 use App\Http\Controllers\Api\TipController;
 use App\Http\Controllers\Api\DeliveryServiceController;
+use App\Http\Controllers\Api\AppStatsController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -260,6 +261,9 @@ Route::get('/license-types', [LicenseTypeController::class, 'index']);
 
 // Public endpoint for driver app to fetch delivery services
 Route::get('/delivery-services', [DeliveryServiceController::class, 'index']);
+
+// Public endpoint for driver app to fetch app-wide stats
+Route::get('/app-stats', [AppStatsController::class, 'index']);
 
 // Public endpoint for seller app to fetch enabled locations (filtered by country_regions)
 Route::get('/locations', [LocationController::class, 'publicIndex']);
