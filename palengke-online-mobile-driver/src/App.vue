@@ -8,7 +8,7 @@
       <div class="inactivity-modal">
         <h3 class="inactivity-title">Session Expired</h3>
         <p class="inactivity-desc">
-          You have been inactive for 10 minutes. You will be logged out for security.
+          You have been inactive for {{ inactivityMinutes }} minutes. You will be logged out for security.
         </p>
         <button class="inactivity-ok-btn" @click="handleInactivityOk">OK</button>
       </div>
@@ -26,8 +26,10 @@ const router = useRouter();
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
 
-const INACTIVITY_TIMEOUT = 10 * 60 * 1000;
+const DEFAULT_INACTIVITY_TIMEOUT = 10 * 60 * 1000;
 const inactivityEnabled = ref(true);
+const inactivityTimeoutMs = ref(DEFAULT_INACTIVITY_TIMEOUT);
+const inactivityMinutes = ref(10);
 const showInactivityModal = ref(false);
 let inactivityTimer = null;
 
@@ -45,7 +47,7 @@ function resetInactivityTimer() {
     inactivityTimer = setTimeout(() => {
       if (!inactivityEnabled.value) return;
       showInactivityModal.value = true;
-    }, INACTIVITY_TIMEOUT);
+    }, inactivityTimeoutMs.value);
   }
 }
 
@@ -83,6 +85,11 @@ onMounted(async () => {
     const res = await fetch(`${API_BASE}/api/settings`, { headers: { Accept: 'application/json' } });
     const data = await res.json();
     inactivityEnabled.value = data.inactivity_enabled !== 'false';
+    const minutes = parseInt(data.inactivity_timeout_minutes, 10);
+    if (!Number.isNaN(minutes) && minutes > 0) {
+      inactivityMinutes.value = minutes;
+      inactivityTimeoutMs.value = minutes * 60 * 1000;
+    }
   } catch {
     inactivityEnabled.value = true;
   }
