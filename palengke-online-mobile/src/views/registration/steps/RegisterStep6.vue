@@ -205,7 +205,7 @@ const showSuccessToast = async () => {
 
 const contactSupport = async () => {
   const toast = await toastController.create({
-    message: 'Support: support@palengke-online.com',
+    message: 'Support: support@palengkeonline.com',
     duration: 3000,
     color: 'primary',
     position: 'bottom'

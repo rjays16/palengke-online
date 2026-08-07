@@ -92,7 +92,7 @@ const goToLogin = () => {
 
 const contactSupport = async () => {
   const toast = await toastController.create({
-    message: '<font-awesome-icon icon="phone" /> Contact: support@palengke-online.com',
+    message: '<font-awesome-icon icon="phone" /> Contact: support@palengkeonline.com',
     duration: 3000,
     color: 'dark',
     position: 'top',

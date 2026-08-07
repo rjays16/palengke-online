@@ -127,7 +127,7 @@ const emailSupport = async () => {
   });
   await toast.present();
   setTimeout(() => {
-    window.location.href = 'mailto:support@palengke-online.com';
+    window.location.href = 'mailto:support@palengkeonline.com';
   }, 500);
 };
 

@@ -23,9 +23,9 @@ class ContactSupportSeeder extends Seeder
             [
                 'key' => 'email',
                 'title' => 'Email Support',
-                'subtitle' => 'support@palengke-online.com',
+                'subtitle' => 'support@palengkeonline.com',
                 'type' => 'email',
-                'value' => 'support@palengke-online.com',
+                'value' => 'support@palengkeonline.com',
                 'icon' => 'email',
                 'enabled' => true,
                 'sort_order' => 3,

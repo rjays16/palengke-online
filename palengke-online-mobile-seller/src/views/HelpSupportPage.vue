@@ -445,9 +445,9 @@ function getDefaultContacts(): ContactSupport[] {
     {
       key: 'email',
       title: 'Email Support',
-      subtitle: 'support@palengke-online.com',
+      subtitle: 'support@palengkeonline.com',
       type: 'email' as const,
-      value: 'support@palengke-online.com',
+      value: 'support@palengkeonline.com',
       enabled: true,
     },
     {

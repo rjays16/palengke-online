@@ -74,7 +74,7 @@
           <tr>
             <td align="center" style="padding:0 48px 32px;">
               <p style="margin:0 0 12px;font-size:13px;color:#94a3b8;line-height:1.5;">
-                Need help? Contact us at support@palengke-online.com
+                Need help? Contact us at support@palengkeonline.com
               </p>
               <p style="margin:0;font-size:12px;color:#cbd5e1;">
                 &copy; {{ date('Y') }} Palengke Online. All rights reserved.
