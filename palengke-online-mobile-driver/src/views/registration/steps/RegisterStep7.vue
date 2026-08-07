@@ -212,7 +212,7 @@ const goBack = () => {
   router.push('/register/step6');
 };
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+import { API_BASE } from '@/services/api';
 
 const handleSubmit = async () => {
   if (!acceptedTerms.value || isSubmitting.value) return;

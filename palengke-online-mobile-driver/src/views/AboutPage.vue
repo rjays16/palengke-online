@@ -19,7 +19,7 @@
           </div>
           <h1 class="app-name">Palengke Online</h1>
           <p class="app-tagline">Driver Partner App</p>
-          <div class="version-badge">Version 1.0.0 (Build 100)</div>
+          <div class="version-badge">Version {{ appVersion }}</div>
         </div>
 
         <!-- App Description -->
@@ -100,7 +100,7 @@
           <span @click="openLegal('licenses')">Licenses</span>
         </div>
 
-        <p class="copyright">© 2024 Palengke Online Inc. All rights reserved.</p>
+        <p class="copyright">© {{ copyrightYear }} Palengke Online Inc. All rights reserved.</p>
 
       </div>
     </ion-content>
@@ -109,6 +109,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { App } from '@capacitor/app';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonButtons, IonBackButton, IonButton, IonIcon,
@@ -120,10 +121,13 @@ import {
   globeOutline, logoFacebook, logoInstagram
 } from 'ionicons/icons';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+import { API_BASE } from '@/services/api';
 
 const stats = ref({ activeDrivers: 0, deliveriesDone: 0, activeSellers: 0 });
 const statsLoaded = ref(false);
+
+const appVersion = ref('1.0.0 (Build 100)');
+const copyrightYear = new Date().getFullYear();
 
 const formatNumber = (value) => {
   if (!statsLoaded.value) return '--';
@@ -132,6 +136,15 @@ const formatNumber = (value) => {
 };
 
 onMounted(async () => {
+  try {
+    const info = await App.getInfo();
+    if (info.version) {
+      appVersion.value = info.build ? `${info.version} (Build ${info.build})` : info.version;
+    }
+  } catch (err) {
+    console.error('Failed to read app version:', err);
+  }
+
   try {
     const res = await fetch(`${API_BASE}/api/app-stats`);
     if (res.ok) {

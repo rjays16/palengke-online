@@ -129,7 +129,7 @@ import {
 } from 'ionicons/icons';
 import { compressImage, readFileAsDataURL } from '@/utils/imageCompression';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+import { API_BASE } from '@/services/api';
 
 const documents = ref([]);
 const loading = ref(true);

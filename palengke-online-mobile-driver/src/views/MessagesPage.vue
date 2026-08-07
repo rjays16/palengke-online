@@ -269,7 +269,7 @@ import {
 } from 'ionicons/icons';
 import { useMesibo } from '@/services/mesibo';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+import { API_BASE } from '@/services/api';
 
 const callingEnabled = ref(true);
 

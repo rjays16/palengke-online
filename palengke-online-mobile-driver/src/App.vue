@@ -24,7 +24,7 @@ import SplashScreen from './components/SplashScreen.vue';
 
 const router = useRouter();
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+import { API_BASE } from '@/services/api';
 
 const DEFAULT_INACTIVITY_TIMEOUT = 10 * 60 * 1000;
 const inactivityEnabled = ref(true);

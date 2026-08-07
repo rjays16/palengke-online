@@ -1,6 +1,6 @@
 import { reactive, computed, ref } from 'vue'
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000'
+import { API_BASE } from '@/services/api';
 
 function getToken(): string | null {
   return localStorage.getItem('token')

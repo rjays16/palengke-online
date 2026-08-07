@@ -152,7 +152,7 @@ import {
 } from 'ionicons/icons';
 
 const router = useRouter();
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+import { API_BASE } from '@/services/api';
 
 const restrictionCodes = ref({});
 const vehiclesByCode = ref({});
