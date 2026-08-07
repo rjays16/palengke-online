@@ -15,6 +15,8 @@ class AppStatsController extends Controller
             'active_drivers' => DriverRegistration::where('status', 'approved')->count(),
             'deliveries_done' => Order::whereIn('status', ['completed', 'delivered'])->count(),
             'active_sellers' => SellerRegistration::where('status', 'approved')->count(),
+            'happy_customers' => Order::whereNotNull('customer_name')->distinct('customer_name')->count('customer_name'),
+            'cities_served' => SellerRegistration::where('status', 'approved')->whereNotNull('city')->distinct('city')->count('city'),
         ]);
     }
 }

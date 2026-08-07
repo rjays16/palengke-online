@@ -108,25 +108,25 @@
           <div class="stats-grid">
             <div class="stat-card">
               <div class="stat-icon"><font-awesome-icon icon="store" /></div>
-              <div class="stat-value">5,000+</div>
+              <div class="stat-value">{{ formatNumber(stats.activeSellers) }}</div>
               <div class="stat-label">Active Sellers</div>
             </div>
 
             <div class="stat-card">
               <div class="stat-icon"><font-awesome-icon icon="users" /></div>
-              <div class="stat-value">50,000+</div>
+              <div class="stat-value">{{ formatNumber(stats.happyCustomers) }}</div>
               <div class="stat-label">Happy Customers</div>
             </div>
 
             <div class="stat-card">
               <div class="stat-icon"><font-awesome-icon icon="box" /></div>
-              <div class="stat-value">100,000+</div>
+              <div class="stat-value">{{ formatNumber(stats.deliveriesDone) }}</div>
               <div class="stat-label">Orders Delivered</div>
             </div>
 
             <div class="stat-card">
               <div class="stat-icon"><font-awesome-icon icon="city" /></div>
-              <div class="stat-value">15+</div>
+              <div class="stat-value">{{ formatNumber(stats.citiesServed) }}</div>
               <div class="stat-label">Cities Served</div>
             </div>
           </div>
@@ -331,7 +331,7 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
 import {
   IonPage,
   IonHeader,
@@ -370,7 +370,35 @@ import {
   starOutline,
 } from 'ionicons/icons';
 
-const router = useRouter();
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+
+const stats = ref({ activeSellers: 0, happyCustomers: 0, deliveriesDone: 0, citiesServed: 0 });
+const statsLoaded = ref(false);
+
+const formatNumber = (value) => {
+  if (!statsLoaded.value) return '--';
+  const num = Number(value) || 0;
+  return num.toLocaleString() + '+';
+};
+
+onMounted(async () => {
+  try {
+    const res = await fetch(`${API_BASE}/api/app-stats`);
+    if (res.ok) {
+      const data = await res.json();
+      stats.value = {
+        activeSellers: data.active_sellers ?? 0,
+        happyCustomers: data.happy_customers ?? 0,
+        deliveriesDone: data.deliveries_done ?? 0,
+        citiesServed: data.cities_served ?? 0,
+      };
+    }
+  } catch (err) {
+    console.error('Failed to load app stats:', err);
+  } finally {
+    statsLoaded.value = true;
+  }
+});
 
 // Methods
 const openWebsite = () => {
