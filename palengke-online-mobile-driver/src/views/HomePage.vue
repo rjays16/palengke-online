@@ -625,7 +625,7 @@ ion-header ion-toolbar ion-buttons ion-button {
 /* ─── Welcome Section ────────────────────────── */
 .welcome-section {
   background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-  padding: 20px 20px 24px;
+  padding: 20px 20px 20px;
   color: white;
 }
 
@@ -751,6 +751,7 @@ ion-header ion-toolbar ion-buttons ion-button {
 /* ─── Actions Section ────────────────────────── */
 .actions-section { padding: 0 20px 20px; }
 .section-title { font-size: 18px; font-weight: 700; color: var(--color-text-primary); margin: 0 0 16px 0; }
+.section-header .section-title { margin-bottom: 0; }
 
 .actions-grid {
   display: grid;
@@ -967,7 +968,7 @@ ion-header ion-toolbar ion-buttons ion-button {
 
 /* ─── Licence Banner ──────────────────────────── */
 .licence-banner {
-  margin: 0 20px 16px;
+  margin: 16px 20px 0;
   padding: 14px 16px;
   border-radius: 14px;
   display: flex;
