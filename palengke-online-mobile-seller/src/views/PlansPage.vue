@@ -562,7 +562,7 @@ const handleLogout = async () => {
           } catch {
             /* silent */
           }
-          ['isAuthenticated', 'token', 'pendingAuth'].forEach((k) => localStorage.removeItem(k));
+          ['isAuthenticated', 'seller_token', 'pendingAuth'].forEach((k) => localStorage.removeItem(k));
           const toast = await toastController.create({
             message: 'Logged out successfully.',
             duration: 1500,

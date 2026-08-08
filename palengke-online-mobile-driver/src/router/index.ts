@@ -29,6 +29,8 @@ import NotificationsPage from '@/views/NotificationsPage.vue';
 import HelpSupportPage from '@/views/HelpSupportPage.vue';
 import AboutPage from '@/views/AboutPage.vue';
 import OrderDetailsPage from '@/views/OrderDetailsPage.vue';
+import WalletTopUpPage from '@/views/WalletTopUpPage.vue';
+import WalletTransactionsPage from '@/views/WalletTransactionsPage.vue';
 
 // ============================================
 // REGISTRATION STEP IMPORTS
@@ -183,6 +185,18 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/wallet',
+    name: 'Wallet',
+    component: WalletTopUpPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/wallet/transactions',
+    name: 'WalletTransactions',
+    component: WalletTransactionsPage,
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/history',
     name: 'History',
     component: HistoryPage,
@@ -283,10 +297,11 @@ const router = createRouter({
 // ============================================
 router.beforeEach((to, from, next) => {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  const hasToken = !!localStorage.getItem('driver_token');
   
-  if (to.meta.requiresAuth && !isAuthenticated) {
+  if (to.meta.requiresAuth && (!isAuthenticated || !hasToken)) {
     next('/login');
-  } else if (to.path === '/login' && isAuthenticated) {
+  } else if (to.path === '/login' && isAuthenticated && hasToken) {
     next('/home');
   } else {
     next();

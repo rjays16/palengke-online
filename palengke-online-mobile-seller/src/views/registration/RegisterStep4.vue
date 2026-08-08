@@ -146,7 +146,7 @@ const reg = useRegistrationStore();
 const allowSkip = ref(true);
 
 onMounted(async () => {
-  if (localStorage.getItem('token')) {
+  if (localStorage.getItem('seller_token')) {
     const redirect = localStorage.getItem('verificationRedirect') || '/home';
     localStorage.removeItem('verificationRedirect');
     router.replace(redirect);

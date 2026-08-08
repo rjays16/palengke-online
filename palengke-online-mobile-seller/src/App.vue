@@ -63,7 +63,7 @@ function handleInactivityOk() {
   auth.isAuthenticated = false;
   auth.token = null;
   localStorage.removeItem('isAuthenticated');
-  localStorage.removeItem('token');
+  localStorage.removeItem('seller_token');
   router.push('/pin-login');
 }
 

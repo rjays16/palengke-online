@@ -192,7 +192,7 @@ import { useRegistrationStore } from '@/stores/registration';
 
 const router = useRouter();
 const reg = useRegistrationStore();
-const isLoggedIn = ref(!!localStorage.getItem('token') && !!localStorage.getItem('userEmail'));
+const isLoggedIn = ref(!!localStorage.getItem('seller_token') && !!localStorage.getItem('userEmail'));
 const fileInput = ref(null);
 const uploadInput = ref(null);
 const videoRef = ref(null);

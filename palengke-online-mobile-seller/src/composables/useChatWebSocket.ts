@@ -27,7 +27,7 @@ export function useChatWebSocket(email: string | null, events: ChatEvents = {}) 
   function getWsUrl(): string | null {
     if (!email) return null
     const wsBase = API_BASE.replace(/^http/, 'ws').replace(/\/api\/?$/, '')
-    const token = localStorage.getItem('token') || ''
+    const token = localStorage.getItem('seller_token') || ''
     return `${wsBase}/ws/seller/chat?email=${encodeURIComponent(email)}&token=${encodeURIComponent(token)}`
   }
 

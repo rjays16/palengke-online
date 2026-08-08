@@ -3,7 +3,7 @@ import { reactive, computed, ref } from 'vue'
 import { API_BASE } from '@/services/api';
 
 function getToken(): string | null {
-  return localStorage.getItem('token')
+  return localStorage.getItem('driver_token')
 }
 
 export interface LicenceState {

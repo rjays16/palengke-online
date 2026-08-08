@@ -145,7 +145,7 @@ const confettiColors = ['#4CAF50', '#FFD700', '#FF9800', '#2196F3', '#E91E63', '
 
 function getToken() {
   if (typeof localStorage === 'undefined') return null;
-  return localStorage.getItem('token');
+  return localStorage.getItem('driver_token');
 }
 
 const qNum = (val) => {

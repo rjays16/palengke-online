@@ -141,7 +141,7 @@ const autoAccept = ref(false);
 const bulkyEnabled = ref(false);
 
 function getToken() {
-  return localStorage.getItem('token') || '';
+  return localStorage.getItem('driver_token') || '';
 }
 
 onMounted(async () => {
@@ -219,7 +219,7 @@ const handleLogout = async () => {
     message: 'Are you sure you want to logout?',
     buttons: [
       { text: 'Cancel', role: 'cancel' },
-      { text: 'Logout', role: 'destructive', handler: () => { localStorage.removeItem('isAuthenticated'); localStorage.removeItem('token'); localStorage.removeItem('pendingAuth'); router.push('/login'); } }
+      { text: 'Logout', role: 'destructive', handler: () => { localStorage.removeItem('isAuthenticated'); localStorage.removeItem('driver_token'); localStorage.removeItem('pendingAuth'); router.push('/login'); } }
     ]
   });
   await alert.present();

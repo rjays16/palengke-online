@@ -131,7 +131,7 @@ const logoutCurrent = async () => {
     // silent
   }
 
-  ['isAuthenticated', 'token', 'pendingAuth'].forEach((k) => localStorage.removeItem(k));
+  ['isAuthenticated', 'seller_token', 'pendingAuth'].forEach((k) => localStorage.removeItem(k));
   router.replace('/login');
 };
 

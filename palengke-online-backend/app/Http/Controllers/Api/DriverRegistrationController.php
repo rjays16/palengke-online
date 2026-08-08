@@ -740,9 +740,20 @@ class DriverRegistrationController extends Controller
         ];
     }
 
+    private function driver(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user instanceof DriverRegistration) {
+            abort(401, 'Unauthenticated.');
+        }
+
+        return $user;
+    }
+
     public function walletBalance(Request $request)
     {
-        return response()->json($this->driverWallet($request->user()));
+        return response()->json($this->driverWallet($this->driver($request)));
     }
 
     public function cashOut(Request $request)
@@ -751,7 +762,7 @@ class DriverRegistrationController extends Controller
             'amount' => 'required|numeric|min:1',
         ]);
 
-        $driver = $request->user();
+        $driver = $this->driver($request);
         $wallet = $this->driverWallet($driver);
         $amount = round((float) $validated['amount'], 2);
 

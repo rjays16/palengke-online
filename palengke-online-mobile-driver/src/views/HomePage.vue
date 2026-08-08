@@ -4,6 +4,10 @@
       <ion-toolbar color="success">
         <ion-title>Driver Dashboard</ion-title>
         <ion-buttons slot="end">
+          <div class="wallet-pill" @click="goToWallet">
+            <ion-icon :icon="walletOutline" class="wallet-pill-icon"></ion-icon>
+            <span class="wallet-pill-balance">₱{{ walletBalance.toLocaleString() }}</span>
+          </div>
           <ion-button @click="openSettings">
             <ion-icon :icon="settingsOutline"></ion-icon>
           </ion-button>
@@ -266,7 +270,7 @@ import { useRouter } from 'vue-router';
 import {
   IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
   IonFooter, IonButton, IonButtons, IonIcon,
-  alertController, actionSheetController, toastController
+  alertController, actionSheetController, toastController, onIonViewWillEnter
 } from '@ionic/vue';
 import {
   notificationsOutline, settingsOutline, starOutline,
@@ -275,7 +279,7 @@ import {
   receiptOutline, homeOutline, personOutline, locationOutline,
   navigateOutline, storefrontOutline, logOutOutline,
   helpCircleOutline, informationCircleOutline,
-  closeCircleOutline
+  closeCircleOutline, walletOutline
 } from 'ionicons/icons';
 import { useLicenceStore } from '@/composables/useLicenceStore';
 
@@ -288,7 +292,7 @@ let notificationCountInterval = null;
 
 function getToken() {
   if (typeof localStorage === 'undefined') return null;
-  return localStorage.getItem('token');
+  return localStorage.getItem('driver_token');
 }
 
 onMounted(async () => {
@@ -298,6 +302,7 @@ onMounted(async () => {
   fetchActiveDelivery();
   fetchDashboardStats();
   fetchNotificationCount();
+  fetchWalletBalance();
   activeDeliveryInterval = setInterval(fetchActiveDelivery, 30000);
   notificationCountInterval = setInterval(fetchNotificationCount, 15000);
 });
@@ -305,6 +310,10 @@ onMounted(async () => {
 onUnmounted(() => {
   if (activeDeliveryInterval) clearInterval(activeDeliveryInterval);
   if (notificationCountInterval) clearInterval(notificationCountInterval);
+});
+
+onIonViewWillEnter(() => {
+  fetchWalletBalance();
 });
 
 // Driver Data
@@ -337,6 +346,7 @@ const totalTrips = ref(0);
 const notificationCount = ref(0);
 const unreadMessages = ref(0);
 const availableOrders = ref(0);
+const walletBalance = ref(0);
 
 // Active Status
 const isActive = ref(false);
@@ -433,6 +443,20 @@ const fetchNotificationCount = async () => {
     if (res.ok) {
       const data = await res.json();
       notificationCount.value = data.unread_count || 0;
+    }
+  } catch { /* ignore */ }
+};
+
+const fetchWalletBalance = async () => {
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/driver/wallet/balance`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      walletBalance.value = data.balance || 0;
     }
   } catch { /* ignore */ }
 };
@@ -571,7 +595,7 @@ const handleLogout = async () => {
         role: 'destructive',
         handler: () => {
           localStorage.removeItem('isAuthenticated');
-          localStorage.removeItem('token');
+          localStorage.removeItem('driver_token');
           localStorage.removeItem('pendingAuth');
           router.push('/login');
         }
@@ -591,6 +615,7 @@ const goToHistory = () => router.push('/history');
 const goToHelp = () => router.push('/help');
 const goToProfile = () => router.push('/profile');
 const goToActiveDelivery = () => router.push('/active-delivery');
+const goToWallet = () => router.push('/wallet');
 const viewDeliveryDetails = (delivery) => {
   const jobData = encodeURIComponent(JSON.stringify(delivery));
   router.push(`/history/${jobData}`);
@@ -619,6 +644,19 @@ ion-header ion-toolbar ion-buttons ion-button {
   box-shadow: 0 1px 2px rgba(0,0,0,0.3);
   border: 1px solid #4CAF50;
 }
+
+.wallet-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  margin-right: 4px;
+}
+.wallet-pill-icon { font-size: 14px; color: white; }
+.wallet-pill-balance { font-size: 13px; font-weight: 600; color: white; }
 
 .dashboard-container { padding-bottom: 80px; }
 

@@ -257,6 +257,11 @@
       <div class="section">
         <h3 class="section-title">Account Settings</h3>
         <div class="settings-list">
+          <div class="settings-item" @click="goToWallet">
+            <div class="settings-icon"><ion-icon :icon="walletOutline"></ion-icon></div>
+            <div class="settings-content"><p>Wallet</p></div>
+            <ion-icon :icon="chevronForwardOutline" class="settings-arrow"></ion-icon>
+          </div>
           <div class="settings-item" @click="goToSettings">
             <div class="settings-icon"><ion-icon :icon="settingsOutline"></ion-icon></div>
             <div class="settings-content"><p>All Settings</p></div>
@@ -327,7 +332,7 @@ import {
   settingsOutline, logOutOutline,
   homeOutline, cubeOutline, cashOutline, trophyOutline,
   starOutline, flashOutline, thumbsUpOutline, heartOutline,
-  timeOutline, closeCircleOutline, warningOutline
+  timeOutline, closeCircleOutline, warningOutline, walletOutline
 } from 'ionicons/icons';
 import { useLicenceStore } from '@/composables/useLicenceStore';
 import {
@@ -346,7 +351,7 @@ import { API_BASE } from '@/services/api';
 
 function getToken() {
   if (typeof localStorage === 'undefined') return null;
-  return localStorage.getItem('token');
+  return localStorage.getItem('driver_token');
 }
 
 const profileData = ref({
@@ -512,7 +517,7 @@ const handleLogout = async () => {
     message: 'Are you sure you want to logout?',
     buttons: [
       { text: 'Cancel', role: 'cancel' },
-      { text: 'Logout', role: 'destructive', handler: () => { localStorage.removeItem('isAuthenticated'); localStorage.removeItem('token'); localStorage.removeItem('pendingAuth'); router.push('/login'); } }
+      { text: 'Logout', role: 'destructive', handler: () => { localStorage.removeItem('isAuthenticated'); localStorage.removeItem('driver_token'); localStorage.removeItem('pendingAuth'); router.push('/login'); } }
     ]
   });
   await alert.present();
@@ -526,6 +531,7 @@ const goToOrders = () => router.push('/orders');
 const goToEarnings = () => router.push('/earnings');
 const goToDocuments = () => router.push('/documents');
 const goToSettings = () => router.push('/settings');
+const goToWallet = () => router.push('/wallet');
 const goToHelp = () => router.push('/help');
 const goToLicencePayment = () => router.push('/licence-payment');
 </script>

@@ -110,7 +110,7 @@ let pollInterval = null;
 
 function getToken() {
   if (typeof localStorage === 'undefined') return null;
-  return localStorage.getItem('token');
+  return localStorage.getItem('driver_token');
 }
 
 const selectedFilter = ref('all');

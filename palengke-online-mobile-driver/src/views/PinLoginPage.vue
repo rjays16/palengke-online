@@ -219,7 +219,7 @@ const verifyPin = async () => {
       throw new Error(data.message || 'Invalid PIN.');
     }
 
-    localStorage.setItem('token', data.token);
+    localStorage.setItem('driver_token', data.token);
     localStorage.setItem('isAuthenticated', 'true');
 
     const availability = await checkAvailability();
@@ -251,7 +251,7 @@ const verifyPin = async () => {
 
 const goToLogin = () => {
   localStorage.removeItem('isAuthenticated');
-  localStorage.removeItem('token');
+  localStorage.removeItem('driver_token');
   localStorage.removeItem('hasPin');
   localStorage.removeItem('deviceId');
   localStorage.removeItem('userEmail');

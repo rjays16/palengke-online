@@ -220,7 +220,7 @@ import { API_BASE } from '@/services/api';
 
 function getToken() {
   if (typeof localStorage === 'undefined') return null;
-  return localStorage.getItem('token');
+  return localStorage.getItem('driver_token');
 }
 
 const selectedTab = ref('available');

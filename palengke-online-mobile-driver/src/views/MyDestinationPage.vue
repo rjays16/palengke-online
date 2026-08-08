@@ -97,7 +97,7 @@ import {
 import { API_BASE } from '@/services/api';
 
 function getToken() {
-  return localStorage.getItem('token') || '';
+  return localStorage.getItem('driver_token') || '';
 }
 
 const searchQuery = ref('');

@@ -12,8 +12,11 @@ export const useAuthStore = defineStore('auth', () => {
   const email = computed(() => userEmail.value)
 
   function initFromStorage() {
+    if (localStorage.getItem('token')) {
+      localStorage.removeItem('token')
+    }
     isAuthenticated.value = localStorage.getItem('isAuthenticated') === 'true'
-    token.value = localStorage.getItem('token')
+    token.value = localStorage.getItem('seller_token')
     hasPin.value = localStorage.getItem('hasPin') === 'true'
     userEmail.value = localStorage.getItem('userEmail')
     deviceId.value = localStorage.getItem('deviceId')
@@ -21,6 +24,10 @@ export const useAuthStore = defineStore('auth', () => {
     if (!deviceId.value) {
       deviceId.value = 'device_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10)
       localStorage.setItem('deviceId', deviceId.value)
+    }
+
+    if (isAuthenticated.value && !token.value) {
+      isAuthenticated.value = false
     }
   }
 
@@ -32,7 +39,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated.value = true
 
     localStorage.setItem('userEmail', email)
-    localStorage.setItem('token', authToken)
+    localStorage.setItem('seller_token', authToken)
     localStorage.setItem('hasPin', pinStatus ? 'true' : 'false')
     localStorage.setItem('deviceId', devId)
     localStorage.setItem('isAuthenticated', 'true')
@@ -45,7 +52,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   function setToken(value: string) {
     token.value = value
-    localStorage.setItem('token', value)
+    localStorage.setItem('seller_token', value)
   }
 
   function clearAuth() {
@@ -56,7 +63,7 @@ export const useAuthStore = defineStore('auth', () => {
     deviceId.value = null
 
     localStorage.removeItem('isAuthenticated')
-    localStorage.removeItem('token')
+    localStorage.removeItem('seller_token')
     localStorage.removeItem('hasPin')
     localStorage.removeItem('userEmail')
     localStorage.removeItem('deviceId')

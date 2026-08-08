@@ -59,7 +59,7 @@ function onUserActivity() {
 function handleInactivityOk() {
   showInactivityModal.value = false;
   localStorage.removeItem('isAuthenticated');
-  localStorage.removeItem('token');
+  localStorage.removeItem('driver_token');
   localStorage.removeItem('pendingAuth');
   router.push('/pin-login');
 }
@@ -75,6 +75,11 @@ watch(() => localStorage.getItem('isAuthenticated') === 'true', (loggedIn) => {
 });
 
 onMounted(async () => {
+  localStorage.removeItem('token');
+  if (localStorage.getItem('isAuthenticated') === 'true' && !localStorage.getItem('driver_token')) {
+    localStorage.removeItem('isAuthenticated');
+  }
+
   document.addEventListener('mousedown', onUserActivity);
   document.addEventListener('touchstart', onUserActivity);
   document.addEventListener('keydown', onUserActivity);

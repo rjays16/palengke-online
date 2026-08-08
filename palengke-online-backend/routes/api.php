@@ -38,6 +38,7 @@ use App\Http\Controllers\Api\AdminSubscriptionController;
 use App\Http\Controllers\Api\RestrictionCodeController;
 use App\Http\Controllers\Api\LicenseTypeController;
 use App\Http\Controllers\Api\DriverRegistrationController;
+use App\Http\Controllers\Api\DriverWalletController;
 use App\Http\Controllers\Api\DriverAuthController;
 use App\Http\Controllers\Api\DriverDeviceController;
 use App\Http\Controllers\Api\DriverDocumentController;
@@ -126,6 +127,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/driver/orders', [DriverRegistrationController::class, 'orders']);
     Route::get('/driver/earnings', [DriverRegistrationController::class, 'earnings']);
     Route::get('/driver/wallet', [DriverRegistrationController::class, 'walletBalance']);
+    Route::get('/driver/wallet/balance', [DriverWalletController::class, 'balance']);
+    Route::get('/driver/wallet/transactions', [DriverWalletController::class, 'transactions']);
+    Route::post('/driver/wallet/top-up', [DriverWalletController::class, 'topUp']);
     Route::post('/driver/wallet/cash-out', [DriverRegistrationController::class, 'cashOut']);
     Route::get('/driver/tips/latest', [TipController::class, 'latest']);
     Route::get('/driver/notifications', [DriverNotificationController::class, 'index']);

@@ -176,7 +176,7 @@ const router = useRouter();
 import { API_BASE } from '@/services/api';
 
 function getToken() {
-  return localStorage.getItem('token') || '';
+  return localStorage.getItem('driver_token') || '';
 }
 
 let map = null;
