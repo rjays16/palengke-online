@@ -33,11 +33,23 @@ class ContactSupportController extends Controller
         $validated = $request->validate([
             'contacts' => 'required|array',
             'contacts.*.id' => 'required|integer|exists:contact_supports,id',
-            'contacts.*.enabled' => 'required|boolean',
+            'contacts.*.title' => 'sometimes|string|max:255',
+            'contacts.*.subtitle' => 'sometimes|string|max:255',
+            'contacts.*.value' => 'sometimes|nullable|string|max:500',
+            'contacts.*.type' => 'sometimes|string|in:chat,phone,email,facebook',
+            'contacts.*.icon' => 'sometimes|nullable|string|max:50',
+            'contacts.*.sort_order' => 'sometimes|integer',
+            'contacts.*.enabled' => 'sometimes|boolean',
         ]);
 
+        $editable = ['title', 'subtitle', 'value', 'type', 'icon', 'enabled', 'sort_order'];
+
         foreach ($validated['contacts'] as $item) {
-            ContactSupport::where('id', $item['id'])->update(['enabled' => $item['enabled']]);
+            $contact = ContactSupport::findOrFail($item['id']);
+            $data = array_intersect_key($item, array_flip($editable));
+            if (!empty($data)) {
+                $contact->fill($data)->save();
+            }
         }
 
         return response()->json([

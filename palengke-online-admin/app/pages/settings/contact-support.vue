@@ -43,6 +43,7 @@
             <span class="status-badge" :class="contact.enabled ? 'active' : 'inactive'">
               {{ contact.enabled ? 'Enabled' : 'Disabled' }}
             </span>
+            <button class="edit-btn" @click="openEdit(contact)">Edit</button>
           </div>
         </div>
       </div>
@@ -62,6 +63,67 @@
             <span class="summary-label">Disabled</span>
             <span class="summary-value">{{ disabledCount }}</span>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3>Edit Contact Support</h3>
+          <button class="modal-close" @click="closeModal">×</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Title</label>
+            <input
+              v-model="editForm.title"
+              type="text"
+              class="form-input"
+              placeholder="e.g. Call Us"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Subtitle</label>
+            <input
+              v-model="editForm.subtitle"
+              type="text"
+              class="form-input"
+              placeholder="Shown under the title"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select v-model="editForm.type" class="form-input">
+              <option value="chat">Chat</option>
+              <option value="phone">Phone</option>
+              <option value="email">Email</option>
+              <option value="facebook">Facebook</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Value</label>
+            <input
+              v-model="editForm.value"
+              type="text"
+              class="form-input"
+              :placeholder="valuePlaceholder"
+            />
+            <span class="form-hint">{{ valueHint }}</span>
+          </div>
+
+          <div v-if="error" class="error-toast">✕ {{ error }}</div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="text-btn" @click="closeModal">Cancel</button>
+          <button class="save-btn" :disabled="saving" @click="saveContact">
+            {{ saving ? 'Saving...' : 'Save Changes' }}
+          </button>
         </div>
       </div>
     </div>
@@ -107,10 +169,39 @@ const contacts = ref<any[]>([]);
 const isLoading = ref(false);
 const success = ref(false);
 const error = ref("");
+const showModal = ref(false);
+const saving = ref(false);
+const editForm = ref<any>({});
 
 const totalContacts = computed(() => contacts.value.length);
 const enabledCount = computed(() => contacts.value.filter((c) => c.enabled).length);
 const disabledCount = computed(() => contacts.value.filter((c) => !c.enabled).length);
+
+const valuePlaceholder = computed(() => {
+  switch (editForm.value.type) {
+    case "phone":
+      return "e.g. +639123456789";
+    case "email":
+      return "e.g. support@palengkeonline.com";
+    case "facebook":
+      return "e.g. https://facebook.com/PalengkeOnlinePH";
+    default:
+      return "Value used when the option is tapped";
+  }
+});
+
+const valueHint = computed(() => {
+  switch (editForm.value.type) {
+    case "phone":
+      return "Opens the dialer with this number. Use international format.";
+    case "email":
+      return "Opens the mail app addressed to this email.";
+    case "facebook":
+      return "Opens this URL in the browser.";
+    default:
+      return "This option is shown for display only.";
+  }
+});
 
 async function fetchContacts() {
   isLoading.value = true;
@@ -192,6 +283,65 @@ async function updateAll(enabled: boolean) {
     }, 2500);
   } catch (err: any) {
     error.value = err?.data?.message || "Failed to update contact support options";
+  }
+}
+
+function openEdit(contact: any) {
+  error.value = "";
+  editForm.value = {
+    id: contact.id,
+    title: contact.title,
+    subtitle: contact.subtitle,
+    type: contact.type,
+    value: contact.value || "",
+  };
+  showModal.value = true;
+}
+
+function closeModal() {
+  if (saving.value) return;
+  showModal.value = false;
+  editForm.value = {};
+  error.value = "";
+}
+
+async function saveContact() {
+  error.value = "";
+  success.value = false;
+
+  if (!editForm.value.title || !editForm.value.subtitle) {
+    error.value = "Title and subtitle are required.";
+    return;
+  }
+
+  saving.value = true;
+
+  try {
+    const token = getToken();
+    await $fetch(`${getApiBaseUrl()}/api/admin/contact-supports`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: {
+        contacts: [{ ...editForm.value }],
+      },
+    });
+
+    const idx = contacts.value.findIndex((c) => c.id === editForm.value.id);
+    if (idx !== -1) {
+      contacts.value[idx] = { ...contacts.value[idx], ...editForm.value };
+    }
+
+    closeModal();
+    success.value = true;
+    setTimeout(() => {
+      success.value = false;
+    }, 2500);
+  } catch (err: any) {
+    error.value = err?.data?.message || "Failed to update contact support";
+  } finally {
+    saving.value = false;
   }
 }
 
@@ -400,6 +550,129 @@ onMounted(() => {
   font-size: 20px;
   font-weight: 700;
   color: #111827;
+}
+.edit-btn {
+  background: none;
+  border: 1px solid #e5e7eb;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-family: "Inter", sans-serif;
+  transition: all 0.15s;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+.edit-btn:hover {
+  background: #f9fafb;
+  border-color: #059669;
+  color: #059669;
+}
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+.modal-card {
+  background: #fff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.modal-header h3 {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0 4px;
+}
+.modal-close:hover {
+  color: #111827;
+}
+.modal-body {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.form-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+}
+.form-input {
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+  color: #111827;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.form-input:focus {
+  border-color: #059669;
+}
+.form-hint {
+  font-size: 12px;
+  color: #9ca3af;
+}
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #e5e7eb;
+}
+.save-btn {
+  background: #059669;
+  color: #fff;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: "Inter", sans-serif;
+  transition: background 0.15s;
+}
+.save-btn:hover {
+  background: #047857;
+}
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 .save-toast {
   padding: 10px 16px;
