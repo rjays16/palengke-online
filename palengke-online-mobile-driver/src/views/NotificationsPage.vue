@@ -47,6 +47,13 @@
           >
             Earnings
           </div>
+          <div
+            class="custom-tab"
+            :class="{ active: selectedFilter === 'wallet' }"
+            @click="selectedFilter = 'wallet'"
+          >
+            Wallet
+          </div>
         </div>
       </ion-toolbar>
     </ion-header>
@@ -101,7 +108,8 @@ import {
 import {
   checkmarkDoneOutline, ellipsisVerticalOutline,
   notificationsOffOutline, cartOutline, cashOutline,
-  warningOutline, informationCircleOutline, trophyOutline
+  warningOutline, informationCircleOutline, trophyOutline,
+  walletOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -122,6 +130,7 @@ const filteredNotifications = computed(() => {
   if (selectedFilter.value === 'unread') return notifications.value.filter(n => !n.read);
   if (selectedFilter.value === 'orders') return notifications.value.filter(n => n.category === 'orders');
   if (selectedFilter.value === 'earnings') return notifications.value.filter(n => n.category === 'earnings');
+  if (selectedFilter.value === 'wallet') return notifications.value.filter(n => n.category === 'wallet');
   return notifications.value;
 });
 
@@ -129,7 +138,8 @@ const getNotifIcon = (type) => {
   const icons = {
     order: cartOutline, payment: cashOutline,
     tip: cashOutline, warning: warningOutline,
-    info: informationCircleOutline, achievement: trophyOutline
+    info: informationCircleOutline, achievement: trophyOutline,
+    wallet_top_up: walletOutline
   };
   return icons[type] || informationCircleOutline;
 };
@@ -174,6 +184,7 @@ const handleNotifClick = async (notif) => {
     });
   }
   if (notif.type === 'order') router.push('/orders');
+  if (notif.type === 'wallet_top_up') router.push('/wallet/transactions');
 };
 
 const markAllRead = async () => {
@@ -275,6 +286,7 @@ onUnmounted(() => {
 .notif-icon.warning { background: #FFEBEE; color: #f44336; }
 .notif-icon.info { background: #F3E5F5; color: #9C27B0; }
 .notif-icon.achievement { background: #FFF8E1; color: #FFD700; }
+.notif-icon.wallet_top_up { background: #E8F5E9; color: #4CAF50; }
 
 .notif-body { flex: 1; min-width: 0; }
 .notif-body h4 { font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 0 0 5px 0; }
