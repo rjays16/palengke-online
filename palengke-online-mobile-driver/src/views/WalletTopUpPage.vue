@@ -93,8 +93,32 @@
           <ion-icon :icon="checkmarkCircle"></ion-icon>
         </div>
         <h3>Funds Added!</h3>
-        <p class="success-sub">₱{{ topUpAmount }} added via {{ topUpMethod }}</p>
-        <div class="success-balance">New Balance: ₱{{ newBalance.toLocaleString() }}</div>
+        <p class="success-sub">₱{{ topUpAmount }} added to your wallet via {{ topUpMethod }}</p>
+        <div class="success-details">
+          <div class="success-row">
+            <span>Amount Added</span>
+            <span class="success-price">₱{{ topUpAmount.toLocaleString() }}</span>
+          </div>
+          <div class="success-row">
+            <span>Payment Method</span>
+            <span class="success-pm">
+              <img v-if="pmLogo(topUpMethod)" :src="pmLogo(topUpMethod)" class="success-pm-img" />
+              {{ topUpMethod }}
+            </span>
+          </div>
+          <div class="success-row">
+            <span>Transaction ID</span>
+            <span class="success-txn">{{ receiptData?.transactionId || 'WLT-' + String(topUpTransactionId).padStart(6, '0') }}</span>
+          </div>
+          <div class="success-row">
+            <span>Date</span>
+            <span>{{ receiptDate }}</span>
+          </div>
+          <div class="success-row">
+            <span>New Balance</span>
+            <span class="success-price">₱{{ newBalance.toLocaleString() }}</span>
+          </div>
+        </div>
         <div class="receipt-actions">
           <button class="receipt-btn download" @click="handleDownloadReceipt">
             <ion-icon :icon="downloadOutline"></ion-icon>
@@ -481,11 +505,44 @@ onMounted(() => {
 .center-state.success .success-sub {
   margin-bottom: 16px;
 }
-.success-balance {
-  font-size: 20px;
+.success-details {
+  background: #f0fdf4;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+  text-align: left;
+  width: 100%;
+}
+.success-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  padding: 6px 0;
+  color: #374151;
+}
+.success-row + .success-row {
+  border-top: 1px solid #d1fae5;
+}
+.success-price {
   font-weight: 700;
   color: #059669;
-  margin-bottom: 24px;
+}
+.success-pm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+.success-pm-img {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+.success-txn {
+  font-family: 'Courier New', monospace;
+  font-size: 12px !important;
+  letter-spacing: 0.5px;
 }
 .done-btn {
   --background: #059669;
@@ -505,28 +562,57 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 12px 8px;
+  padding: 14px 8px;
   border-radius: 12px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  border: none;
   cursor: pointer;
-  transition: all 0.15s;
+  border: none;
+  transition: all 0.2s;
   font-family: inherit;
 }
 .receipt-btn:active {
   transform: scale(0.97);
 }
 .receipt-btn.download {
-  background: #059669;
-  color: white;
+  background: #f0fdf4;
+  color: #059669;
+  border: 2px solid #d1fae5;
+}
+.receipt-btn.download:hover {
+  background: #dcfce7;
 }
 .receipt-btn.share {
-  background: #e5e7eb;
-  color: #374151;
+  background: #eff6ff;
+  color: #2563eb;
+  border: 2px solid #dbeafe;
+}
+.receipt-btn.share:hover {
+  background: #dbeafe;
 }
 .receipt-btn ion-icon {
-  font-size: 16px;
+  font-size: 18px;
+}
+@media (prefers-color-scheme: dark) {
+  .success-details {
+    background: rgba(76, 175, 80, 0.1);
+  }
+  .success-row {
+    color: #d1d5db;
+  }
+  .center-state h3 {
+    color: #e5e5e5;
+  }
+  .receipt-btn.download {
+    background: rgba(76, 175, 80, 0.1);
+    border-color: rgba(76, 175, 80, 0.3);
+    color: #4caf50;
+  }
+  .receipt-btn.share {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: #60a5fa;
+  }
 }
 .history-link {
   display: flex;
