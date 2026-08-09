@@ -101,10 +101,15 @@
           <div class="licence-status-row" v-if="!driverFree">
             <span class="status-label">Status</span>
             <span class="status-value">
-              <span v-if="driverLic?.isPaid" style="color:#059669;">Paid</span>
+              <span v-if="driverLic?.isPaid && !driverLic?.isExpired" style="color:#059669;">Paid</span>
+              <span v-else-if="driverLic?.isPaid && driverLic?.isExpired" style="color:#dc2626;">Expired</span>
               <span v-else-if="driverLic?.isFree" style="color:#9ca3af;">Free</span>
               <span v-else style="color:#d97706;">Trial</span>
             </span>
+          </div>
+          <div class="licence-status-row" v-if="!driverFree && driverLic?.paidUntil">
+            <span class="status-label">Valid Until</span>
+            <span class="status-value" :style="driverLic?.isExpired ? 'color:#dc2626;' : 'color:#059669;'">{{ formatLicenceDate(driverLic.paidUntil) }}</span>
           </div>
         </div>
 
@@ -310,6 +315,17 @@ async function fetchDriverLicence() {
       driverFree.value = lic?.isFree || false;
     }
   } catch {}
+}
+
+function formatLicenceDate(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-PH", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 async function toggleDriverFree() {

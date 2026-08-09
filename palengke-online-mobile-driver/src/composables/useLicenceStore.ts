@@ -12,6 +12,7 @@ export interface LicenceState {
   trialEndDate: string | null
   isPaid: boolean
   paidDate: string | null
+  paidUntil: string | null
   amount: number
   isFree: boolean
 }
@@ -22,7 +23,8 @@ const defaults = {
   trialEndDate: null,
   isPaid: false,
   paidDate: null,
-  amount: 1000,
+  paidUntil: null,
+  amount: 2000,
   isFree: false,
 }
 
@@ -42,10 +44,27 @@ export function useLicenceStore() {
     return trialDaysRemaining.value <= 0
   })
 
+  const licenceExpired = computed(() => {
+    if (!state.isPaid || !state.paidUntil) return false
+    return new Date(state.paidUntil).getTime() <= Date.now()
+  })
+
+  const licenceDaysLeft = computed(() => {
+    if (!state.isPaid || !state.paidUntil) return 0
+    const end = new Date(state.paidUntil)
+    const now = new Date()
+    const diff = end.getTime() - now.getTime()
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)))
+  })
+
+  const licenceActive = computed(() => {
+    return state.isPaid && !licenceExpired.value
+  })
+
   const canDeliver = computed(() => {
     if (!licenceEnabled.value) return true
     if (state.isFree) return true
-    if (state.isPaid) return true
+    if (licenceActive.value) return true
     return !trialExpired.value
   })
 
@@ -84,15 +103,16 @@ export function useLicenceStore() {
         state.trialEndDate = l.trialEndDate
         state.isPaid = l.isPaid
         state.paidDate = l.paidDate
+        state.paidUntil = l.paidUntil
         state.amount = l.amount
         state.isFree = l.isFree || false
       }
     } catch { /* ignore */ }
   }
 
-  async function payLicence(paymentMethodId?: number): Promise<boolean> {
+  async function payLicence(paymentMethodId?: number): Promise<{ success: boolean; message?: string; balance?: number }> {
     const token = getToken()
-    if (!token) return false
+    if (!token) return { success: false }
     try {
       const res = await fetch(`${API_BASE}/api/driver/licence/pay`, {
         method: 'POST',
@@ -107,11 +127,18 @@ export function useLicenceStore() {
         const l = data.licence
         state.isPaid = l.isPaid
         state.paidDate = l.paidDate
-        return true
+        state.paidUntil = l.paidUntil
+        state.amount = l.amount
+        return { success: true, balance: data.balance }
       }
-      return false
+      let message = 'Payment could not be processed. Please try again.'
+      try {
+        const data = await res.json()
+        if (data && data.message) message = data.message
+      } catch { /* ignore */ }
+      return { success: false, message }
     } catch {
-      return false
+      return { success: false }
     }
   }
 
@@ -134,17 +161,28 @@ export function useLicenceStore() {
   function getStatusText(): string {
     if (!licenceEnabled.value) return 'Not Required'
     if (state.isFree) return 'Free'
-    if (state.isPaid) return 'Paid'
-    if (trialExpired.value) return `Expired — Pay ₱${state.amount.toLocaleString()} to continue`
+    if (licenceActive.value) return 'Paid'
+    if (state.isPaid && licenceExpired.value) return `Expired — Renew ₱${state.amount.toLocaleString()}/yr`
+    if (trialExpired.value) return `Expired — Pay ₱${state.amount.toLocaleString()}/yr to continue`
     return `Trial — ${trialDaysRemaining.value} days left`
   }
 
   function getStatusColor(): string {
     if (!licenceEnabled.value) return '#9ca3af'
     if (state.isFree) return '#3b82f6'
-    if (state.isPaid) return '#4CAF50'
+    if (licenceActive.value) return '#4CAF50'
+    if (state.isPaid && licenceExpired.value) return '#f44336'
     if (trialExpired.value) return '#f44336'
     return '#FF9800'
+  }
+
+  function getPaidUntilDisplay(): string {
+    if (!state.paidUntil) return ''
+    return new Date(state.paidUntil).toLocaleDateString('en-PH', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
   }
 
   return {
@@ -152,6 +190,9 @@ export function useLicenceStore() {
     licenceEnabled,
     trialDaysRemaining,
     trialExpired,
+    licenceExpired,
+    licenceDaysLeft,
+    licenceActive,
     canDeliver,
     isOnTrial,
     showLicenceFeature,
@@ -163,5 +204,6 @@ export function useLicenceStore() {
     getDaysUsed,
     getStatusText,
     getStatusColor,
+    getPaidUntilDisplay,
   }
 }

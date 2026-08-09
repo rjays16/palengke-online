@@ -132,6 +132,22 @@
               }}</span>
             </div>
           </div>
+          <div class="form-row">
+            <div class="form-group" style="grid-column: 1 / -1;" :class="{ hasError: errors.licenceFee }">
+              <label>Driver Licence Fee (₱) <span class="req">*</span></label>
+              <input
+                v-model="fees.licenceFee"
+                type="number"
+                min="0"
+                class="form-input"
+                required
+              />
+              <span class="form-hint">Annual driver licence fee — default ₱2,000</span>
+              <span class="form-error" v-if="errors.licenceFee">{{
+                errors.licenceFee
+              }}</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -199,6 +215,7 @@ const defaults = {
   freeThreshold: 500,
   maxRadius: 15,
   nightSurcharge: 25,
+  licenceFee: 2000,
 };
 
 const FEE_KEYS = {
@@ -208,6 +225,7 @@ const FEE_KEYS = {
   freeThreshold: 'delivery_free_threshold',
   maxRadius: 'delivery_max_radius',
   nightSurcharge: 'delivery_night_surcharge',
+  licenceFee: 'licence_fee',
 };
 
 function loadFees() {
@@ -266,6 +284,7 @@ const errors = reactive({
   freeThreshold: "",
   maxRadius: "",
   nightSurcharge: "",
+  licenceFee: "",
 });
 
 function validate() {
@@ -320,6 +339,14 @@ function validate() {
     valid = false;
   } else if (fees.value.nightSurcharge < 0) {
     errors.nightSurcharge = "Cannot be negative";
+    valid = false;
+  }
+
+  if (fees.value.licenceFee === "" || fees.value.licenceFee == null) {
+    errors.licenceFee = "Driver licence fee is required";
+    valid = false;
+  } else if (fees.value.licenceFee < 0) {
+    errors.licenceFee = "Cannot be negative";
     valid = false;
   }
 

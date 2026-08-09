@@ -209,13 +209,17 @@
             </div>
           </div>
           <div class="licence-details">
-            <div class="licence-detail-item" v-if="!licenceStore.state.isFree">
+            <div class="licence-detail-item" v-if="!licenceStore.state.isFree && licenceStore.licenceActive.value">
+              <span class="licence-detail-label">Valid Until</span>
+              <span class="licence-detail-value">{{ licenceStore.getPaidUntilDisplay() }}</span>
+            </div>
+            <div class="licence-detail-item" v-else-if="!licenceStore.state.isFree">
               <span class="licence-detail-label">Days Active</span>
               <span class="licence-detail-value">{{ licenceStore.getDaysUsed() }} / 30</span>
             </div>
             <div class="licence-detail-item" v-if="!licenceStore.state.isFree">
               <span class="licence-detail-label">Amount</span>
-              <span class="licence-detail-value">₱{{ licenceStore.state.amount.toLocaleString() }}</span>
+              <span class="licence-detail-value">₱{{ licenceStore.state.amount.toLocaleString() }}/yr</span>
             </div>
           </div>
           <div class="licence-bar-track" v-if="!licenceStore.state.isFree">
@@ -223,18 +227,20 @@
           </div>
           <div class="licence-footer-text">
             <span v-if="licenceStore.state.isFree">Licence is free — no payment needed</span>
-            <span v-else-if="licenceStore.state.isPaid">Licence is active until further notice</span>
-            <span v-else-if="licenceStore.trialExpired.value">Trial ended — pay ₱{{ licenceStore.state.amount.toLocaleString() }} to continue delivering</span>
+            <span v-else-if="licenceStore.licenceActive.value">Active until {{ licenceStore.getPaidUntilDisplay() }} — renew annually</span>
+            <span v-else-if="licenceStore.state.isPaid && licenceStore.licenceExpired.value">Licence expired — renew ₱{{ licenceStore.state.amount.toLocaleString() }}/yr to continue</span>
+            <span v-else-if="licenceStore.trialExpired.value">Trial ended — pay ₱{{ licenceStore.state.amount.toLocaleString() }}/yr to continue delivering</span>
             <span v-else>{{ licenceStore.trialDaysRemaining.value }} days remaining in trial</span>
           </div>
           <ion-button
-            v-if="!licenceStore.state.isFree && licenceStore.trialExpired.value && !licenceStore.state.isPaid"
+            v-if="!licenceStore.state.isFree && !licenceStore.canDeliver.value"
             expand="block"
             color="success"
             class="licence-pay-btn"
             @click="goToLicencePayment"
           >
-            Pay ₱{{ licenceStore.state.amount.toLocaleString() }} to Continue
+            <span v-if="licenceStore.state.isPaid && licenceStore.licenceExpired.value">Renew ₱{{ licenceStore.state.amount.toLocaleString() }} to Continue</span>
+            <span v-else>Pay ₱{{ licenceStore.state.amount.toLocaleString() }} to Continue</span>
           </ion-button>
         </div>
       </div>
@@ -393,7 +399,8 @@ onMounted(async () => {
 });
 
 const licenceStatusIcon = computed(() => {
-  if (licenceStore.state.isPaid) return checkmarkIcon
+  if (licenceStore.licenceActive.value) return checkmarkIcon
+  if (licenceStore.licenceExpired.value) return closeIcon
   if (licenceStore.trialExpired.value) return closeIcon
   return timeIcon
 })
@@ -403,6 +410,10 @@ const licenceStatusColor = computed(() => {
 })
 
 const licenceBarPercent = computed(() => {
+  if (licenceStore.licenceActive.value) {
+    const remaining = licenceStore.licenceDaysLeft.value
+    return Math.min(100, Math.max(5, (remaining / 365) * 100))
+  }
   const used = licenceStore.getDaysUsed()
   return Math.min(100, (used / 30) * 100)
 })

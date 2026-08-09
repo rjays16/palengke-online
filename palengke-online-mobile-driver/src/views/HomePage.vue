@@ -50,7 +50,7 @@
         </div>
 
         <!-- Palengke Licence Banner -->
-        <div class="licence-banner" :class="licenceBannerClass" v-if="licenceStore.showLicenceFeature.value && !licenceStore.state.isPaid && !licenceStore.state.isFree">
+        <div class="licence-banner" :class="licenceBannerClass" v-if="licenceStore.showLicenceFeature.value && !licenceStore.licenceActive.value && !licenceStore.state.isFree">
           <div class="licence-banner-left">
             <ion-icon :icon="licenceBannerIcon" class="licence-banner-icon"></ion-icon>
             <div>
@@ -59,7 +59,7 @@
             </div>
           </div>
           <ion-button
-            v-if="licenceStore.trialExpired.value"
+            v-if="licenceStore.licenceExpired.value || licenceStore.trialExpired.value"
             size="small"
             color="danger"
             fill="solid"
@@ -318,24 +318,26 @@ onIonViewWillEnter(() => {
 
 // Driver Data
 const licenceBannerClass = computed(() => {
-  if (licenceStore.trialExpired.value) return 'expired'
+  if (licenceStore.licenceExpired.value || licenceStore.trialExpired.value) return 'expired'
   if (licenceStore.trialDaysRemaining.value <= 5) return 'warning'
   return ''
 })
 
 const licenceBannerIcon = computed(() => {
-  if (licenceStore.trialExpired.value) return closeCircleOutline
+  if (licenceStore.licenceExpired.value || licenceStore.trialExpired.value) return closeCircleOutline
   return timeOutline
 })
 
 const licenceBannerTitle = computed(() => {
+  if (licenceStore.licenceExpired.value) return 'Licence Expired'
   if (licenceStore.trialExpired.value) return 'Trial Expired'
   return `${licenceStore.trialDaysRemaining.value} days trial remaining`
 })
 
 const licenceBannerSub = computed(() => {
-  if (licenceStore.trialExpired.value) return `Pay ₱${licenceStore.state.amount.toLocaleString()} to continue delivering`
-  return `Pay ₱${licenceStore.state.amount.toLocaleString()} after trial to keep delivering`
+  if (licenceStore.licenceExpired.value) return `Renew ₱${licenceStore.state.amount.toLocaleString()}/yr to keep delivering`
+  if (licenceStore.trialExpired.value) return `Pay ₱${licenceStore.state.amount.toLocaleString()}/yr to continue delivering`
+  return `Pay ₱${licenceStore.state.amount.toLocaleString()}/yr after trial to keep delivering`
 })
 
 const goToLicencePayment = () => router.push('/licence-payment')
@@ -489,7 +491,7 @@ const toggleActiveStatus = async () => {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
             </div>
             <div class="custom-alert-title">Licence Expired</div>
-            <div class="custom-alert-text">Your 30-day trial has ended. Pay ₱${licenceStore.state.amount.toLocaleString()} to continue delivering.</div>
+            <div class="custom-alert-text">${licenceStore.state.isPaid ? `Your licence has expired. Renew ₱${licenceStore.state.amount.toLocaleString()}/yr to continue delivering.` : `Your 30-day trial has ended. Pay ₱${licenceStore.state.amount.toLocaleString()}/yr to continue delivering.`}</div>
           </div>`;
       }
     }

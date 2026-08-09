@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Licence;
 use App\Models\DriverRegistration;
+use App\Models\DriverWalletTransaction;
 use App\Models\Notification;
 use App\Models\PaymentMethod;
 use App\Models\SystemSetting;
@@ -15,7 +16,28 @@ class LicenceController extends Controller
     private function getLicenceFee(): float
     {
         $fee = SystemSetting::getValue('licence_fee');
-        return $fee ? (float) $fee : 1000.00;
+        return $fee ? (float) $fee : 2000.00;
+    }
+
+    private function isLicenceExpired(Licence $licence): bool
+    {
+        return $licence->is_paid && $licence->paid_until && $licence->paid_until->isPast();
+    }
+
+    private function serializeLicence(Licence $licence): array
+    {
+        return [
+            'id' => $licence->id,
+            'licenceId' => $licence->licence_id,
+            'trialStartDate' => $licence->trial_started_at?->toISOString(),
+            'trialEndDate' => $licence->trial_ends_at?->toISOString(),
+            'isPaid' => $licence->is_paid,
+            'paidDate' => $licence->paid_at?->toISOString(),
+            'paidUntil' => $licence->paid_until?->toISOString(),
+            'isExpired' => $this->isLicenceExpired($licence),
+            'amount' => (float) $licence->amount,
+            'isFree' => $licence->is_free,
+        ];
     }
 
     public function show(Request $request)
@@ -42,19 +64,12 @@ class LicenceController extends Controller
                 'paid_at' => null,
                 'amount' => $fee,
             ]);
+        } elseif ((float) $licence->amount !== $fee) {
+            $licence->update(['amount' => $fee]);
         }
 
         return response()->json([
-            'licence' => [
-                'id' => $licence->id,
-                'licenceId' => $licence->licence_id,
-                'trialStartDate' => $licence->trial_started_at?->toISOString(),
-                'trialEndDate' => $licence->trial_ends_at?->toISOString(),
-                'isPaid' => $licence->is_paid,
-                'paidDate' => $licence->paid_at?->toISOString(),
-                'amount' => (float) $licence->amount,
-                'isFree' => $licence->is_free,
-            ],
+            'licence' => $this->serializeLicence($licence),
         ]);
     }
 
@@ -80,33 +95,57 @@ class LicenceController extends Controller
             return response()->json(['message' => 'Licence is free — no payment needed.'], 400);
         }
 
-        if ($licence->is_paid) {
+        if ($licence->is_paid && !$this->isLicenceExpired($licence)) {
             return response()->json(['message' => 'Licence is already paid.'], 400);
         }
 
+        $fee = $this->getLicenceFee();
         $paymentMethodName = null;
+        $paymentMethod = null;
+
         if (!empty($validated['payment_method_id'])) {
             $paymentMethod = PaymentMethod::find($validated['payment_method_id']);
             $paymentMethodName = $paymentMethod?->name;
         }
 
+        $isWalletPayment = $paymentMethod && strtolower($paymentMethod->name) === 'palengke wallet';
+
+        if ($isWalletPayment) {
+            if ((float) $driver->wallet_balance < $fee) {
+                return response()->json([
+                    'message' => 'Insufficient wallet balance. Please top up your Palengke Wallet.',
+                    'balance' => (float) $driver->wallet_balance,
+                ], 422);
+            }
+
+            $driver->wallet_balance -= $fee;
+            $driver->save();
+
+            DriverWalletTransaction::create([
+                'driver_registration_id' => $driver->id,
+                'type' => 'licence_fee',
+                'amount' => $fee,
+                'payment_method_id' => $paymentMethod->id,
+                'payment_method_name' => $paymentMethod->name,
+                'notes' => 'Palengke Online licence fee (1 year)',
+            ]);
+        }
+
         $licence->update([
             'is_paid' => true,
             'paid_at' => now(),
+            'paid_until' => now()->addYear(),
+            'amount' => $fee,
             'payment_method_name' => $paymentMethodName,
         ]);
 
+        $licence->refresh();
+
         return response()->json([
             'message' => 'Payment successful.',
-            'licence' => [
-                'id' => $licence->id,
-                'licenceId' => $licence->licence_id,
-                'isPaid' => $licence->is_paid,
-                'paidDate' => $licence->paid_at?->toISOString(),
-                'amount' => (float) $licence->amount,
-                'isFree' => $licence->is_free,
-                'paymentMethodName' => $paymentMethodName,
-            ],
+            'licence' => $this->serializeLicence($licence),
+            'balance' => $isWalletPayment ? (float) $driver->wallet_balance : null,
+            'paid_with_wallet' => $isWalletPayment,
         ]);
     }
 
@@ -135,16 +174,7 @@ class LicenceController extends Controller
         }
 
         return response()->json([
-            'licence' => [
-                'id' => $licence->id,
-                'licenceId' => $licence->licence_id,
-                'trialStartDate' => $licence->trial_started_at?->toISOString(),
-                'trialEndDate' => $licence->trial_ends_at?->toISOString(),
-                'isPaid' => $licence->is_paid,
-                'paidDate' => $licence->paid_at?->toISOString(),
-                'amount' => (float) $licence->amount,
-                'isFree' => $licence->is_free,
-            ],
+            'licence' => $this->serializeLicence($licence),
         ]);
     }
 
