@@ -50,7 +50,7 @@ class DriverWalletController extends Controller
         $driver->wallet_balance += $amount;
         $driver->save();
 
-        DriverWalletTransaction::create([
+        $transaction = DriverWalletTransaction::create([
             'driver_registration_id' => $driver->id,
             'type' => 'top_up',
             'amount' => $amount,
@@ -77,6 +77,7 @@ class DriverWalletController extends Controller
             'balance' => (float) $driver->wallet_balance,
             'amount_added' => $amount,
             'payment_method' => $pm->name,
+            'transaction_id' => $transaction->id,
         ]);
     }
 

@@ -439,12 +439,15 @@ const receiptData = computed<ReceiptData | null>(() => {
   if (paymentStep.value !== 'success' || !selectedPlan.value || !selectedPM.value) return null;
   return {
     transactionId: transactionId.value,
-    planName: selectedPlan.value.name,
+    title: 'Payment Receipt',
     amount: selectedPlan.value.price,
-    paymentMethod: selectedPM.value.name,
     date: paymentDate.value,
-    validUntil: sub.value.planEnd || sub.value.trialEnd || '',
-    sellerEmail: localStorage.getItem('userEmail') || '',
+    rows: [
+      { label: 'Plan', value: selectedPlan.value.name },
+      { label: 'Payment Method', value: selectedPM.value.name },
+      { label: 'Valid Until', value: sub.value.planEnd || sub.value.trialEnd || '' },
+    ],
+    account: localStorage.getItem('userEmail') || '',
   };
 });
 
@@ -476,7 +479,9 @@ const handleShareReceipt = async () => {
   if (shared) return;
 
   // Fallback: action sheet with direct share links
-  const text = `Palengke Online Payment Receipt\n\nPlan: ${receiptData.value.planName}\nAmount: ₱${receiptData.value.amount.toLocaleString()}\nPayment: ${receiptData.value.paymentMethod}\nDate: ${receiptData.value.date}\nValid Until: ${receiptData.value.validUntil}\nTransaction ID: ${receiptData.value.transactionId}`;
+  const text = `Palengke Online ${receiptData.value.title}\n\n${receiptData.value.rows
+    .map((r) => `${r.label}: ${r.value}`)
+    .join('\n')}\nAmount: ₱${receiptData.value.amount.toLocaleString()}\nDate: ${receiptData.value.date}\nTransaction ID: ${receiptData.value.transactionId}`;
 
   const actionSheet = await actionSheetController.create({
     header: 'Share Receipt',

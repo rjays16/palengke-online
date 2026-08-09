@@ -51,7 +51,7 @@ class WalletController extends Controller
         $seller->wallet_balance += $amount;
         $seller->save();
 
-        WalletTransaction::create([
+        $transaction = WalletTransaction::create([
             'seller_registration_id' => $seller->id,
             'type' => 'top_up',
             'amount' => $amount,
@@ -78,6 +78,7 @@ class WalletController extends Controller
             'balance' => (float) $seller->wallet_balance,
             'amount_added' => $amount,
             'payment_method' => $pm->name,
+            'transaction_id' => $transaction->id,
         ]);
     }
 

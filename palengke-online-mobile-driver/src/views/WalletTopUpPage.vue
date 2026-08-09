@@ -95,6 +95,16 @@
         <h3>Funds Added!</h3>
         <p class="success-sub">₱{{ topUpAmount }} added via {{ topUpMethod }}</p>
         <div class="success-balance">New Balance: ₱{{ newBalance.toLocaleString() }}</div>
+        <div class="receipt-actions">
+          <button class="receipt-btn download" @click="handleDownloadReceipt">
+            <ion-icon :icon="downloadOutline"></ion-icon>
+            Download Receipt
+          </button>
+          <button class="receipt-btn share" @click="handleShareReceipt">
+            <ion-icon :icon="shareSocialOutline"></ion-icon>
+            Share Receipt
+          </button>
+        </div>
         <ion-button expand="block" class="done-btn" @click="goBack"> Done </ion-button>
       </div>
     </ion-content>
@@ -104,9 +114,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonButtons, IonIcon } from '@ionic/vue';
-import { arrowBackOutline, walletOutline, checkmarkCircle, chevronForwardOutline } from 'ionicons/icons';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonButtons, IonIcon, toastController } from '@ionic/vue';
+import { arrowBackOutline, walletOutline, checkmarkCircle, chevronForwardOutline, downloadOutline, shareSocialOutline } from 'ionicons/icons';
 import { API_BASE } from '@/services/api';
+import { downloadReceipt, shareReceiptWithFallback } from '@/utils/receiptGenerator';
 
 const router = useRouter();
 
@@ -129,6 +140,55 @@ const topUpAmount = ref(0);
 const topUpMethod = ref('');
 const newBalance = ref(0);
 const error = ref(null);
+const topUpTransactionId = ref(0);
+const receiptDate = ref('');
+
+const receiptData = computed(() => {
+  if (!topUpSuccess.value || !topUpTransactionId.value) return null;
+  return {
+    transactionId: 'WLT-' + String(topUpTransactionId.value).padStart(6, '0'),
+    title: 'Wallet Top-Up Receipt',
+    amount: topUpAmount.value,
+    date: receiptDate.value,
+    rows: [
+      { label: 'Type', value: 'Wallet Top-Up' },
+      { label: 'Payment Method', value: topUpMethod.value },
+    ],
+    account: getEmail() || '',
+    footer: 'Thank you for using Palengke Online!',
+  };
+});
+
+const handleDownloadReceipt = async () => {
+  if (!receiptData.value) return;
+  try {
+    await downloadReceipt(receiptData.value);
+    const toast = await toastController.create({
+      message: 'Receipt downloaded!',
+      duration: 2000,
+      color: 'success',
+      position: 'top',
+    });
+    await toast.present();
+  } catch {
+    const toast = await toastController.create({
+      message: 'Failed to download receipt.',
+      duration: 2000,
+      color: 'danger',
+      position: 'top',
+    });
+    await toast.present();
+  }
+};
+
+const handleShareReceipt = async () => {
+  if (!receiptData.value) return;
+  await shareReceiptWithFallback(receiptData.value);
+};
+
+function getEmail() {
+  return localStorage.getItem('userEmail');
+}
 
 const quickAmounts = [100, 200, 500, 1000];
 
@@ -201,6 +261,8 @@ async function processTopUp() {
       topUpMethod.value = json.payment_method;
       newBalance.value = json.balance;
       balance.value = json.balance;
+      topUpTransactionId.value = json.transaction_id;
+      receiptDate.value = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
       topUpSuccess.value = true;
     } else {
       error.value = json.message || 'Top up failed. Please try again.';
@@ -430,6 +492,41 @@ onMounted(() => {
   --border-radius: 12px;
   font-weight: 600;
   margin: 0;
+}
+.receipt-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+.receipt-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 8px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.receipt-btn:active {
+  transform: scale(0.97);
+}
+.receipt-btn.download {
+  background: #059669;
+  color: white;
+}
+.receipt-btn.share {
+  background: #e5e7eb;
+  color: #374151;
+}
+.receipt-btn ion-icon {
+  font-size: 16px;
 }
 .history-link {
   display: flex;

@@ -1,11 +1,16 @@
+export interface ReceiptRow {
+  label: string;
+  value: string;
+}
+
 export interface ReceiptData {
   transactionId: string;
-  planName: string;
+  title: string;
   amount: number;
-  paymentMethod: string;
   date: string;
-  validUntil: string;
-  sellerEmail: string;
+  rows: ReceiptRow[];
+  account: string;
+  footer?: string;
 }
 
 function drawRoundedRect(
@@ -86,7 +91,7 @@ export async function generateReceipt(data: ReceiptData): Promise<Blob> {
   ctx.fillText('Palengke Online', W / 2, cardY + 35);
   ctx.font = '13px Inter, sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.85)';
-  ctx.fillText('Payment Receipt', W / 2, cardY + 55);
+  ctx.fillText(data.title, W / 2, cardY + 55);
 
   // Checkmark circle
   const checkY = cardY + headerH + 30;
@@ -134,10 +139,8 @@ export async function generateReceipt(data: ReceiptData): Promise<Blob> {
   const rows: [string, string][] = [
     ['Transaction ID', data.transactionId],
     ['Date', data.date],
-    ['Plan', data.planName],
-    ['Payment Method', data.paymentMethod],
-    ['Valid Until', data.validUntil],
-    ['Account', data.sellerEmail],
+    ...data.rows.map((r): [string, string] => [r.label, r.value]),
+    ['Account', data.account],
   ];
 
   let rowY = detailsY;
@@ -170,7 +173,7 @@ export async function generateReceipt(data: ReceiptData): Promise<Blob> {
   ctx.textAlign = 'center';
   ctx.fillStyle = '#6b7280';
   ctx.font = '11px Inter, sans-serif';
-  ctx.fillText('Thank you for your purchase!', W / 2, footerY);
+  ctx.fillText(data.footer || 'Thank you for your purchase!', W / 2, footerY);
   ctx.fillText('Palengke Online — Your Digital Palengke', W / 2, footerY + 18);
 
   // Small green accent bar at bottom of card
@@ -201,7 +204,9 @@ export async function shareReceipt(data: ReceiptData) {
     type: 'image/png',
   });
 
-  const shareText = `Palengke Online Payment Receipt\n\nPlan: ${data.planName}\nAmount: ₱${data.amount.toLocaleString()}\nPayment: ${data.paymentMethod}\nDate: ${data.date}\nValid Until: ${data.validUntil}\nTransaction ID: ${data.transactionId}`;
+  const shareText = `Palengke Online ${data.title}\n\n${data.rows
+    .map((r) => `${r.label}: ${r.value}`)
+    .join('\n')}\nAmount: ₱${data.amount.toLocaleString()}\nDate: ${data.date}\nTransaction ID: ${data.transactionId}`;
 
   if (navigator.share && navigator.canShare?.({ files: [file] })) {
     try {
@@ -217,4 +222,78 @@ export async function shareReceipt(data: ReceiptData) {
   }
 
   return false;
+}
+
+export function receiptShareText(data: ReceiptData): string {
+  return `Palengke Online ${data.title}\n\n${data.rows
+    .map((r) => `${r.label}: ${r.value}`)
+    .join('\n')}\nAmount: ₱${data.amount.toLocaleString()}\nDate: ${data.date}\nTransaction ID: ${data.transactionId}`;
+}
+
+export async function shareReceiptWithFallback(data: ReceiptData): Promise<void> {
+  const shared = await shareReceipt(data);
+  if (shared) return;
+
+  const text = receiptShareText(data);
+  const { actionSheetController, toastController } = await import('@ionic/vue');
+
+  const actionSheet = await actionSheetController.create({
+    header: 'Share Receipt',
+    buttons: [
+      {
+        text: 'Share via WhatsApp',
+        handler: () => {
+          window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+        },
+      },
+      {
+        text: 'Share via Messenger',
+        handler: () => {
+          window.open(
+            `https://www.facebook.com/dialog/send?link=${encodeURIComponent(window.location.href)}&app_id=&redirect_uri=${encodeURIComponent(window.location.href)}`,
+            '_blank',
+          );
+        },
+      },
+      {
+        text: 'Share via Viber',
+        handler: () => {
+          window.open(`viber://forward?text=${encodeURIComponent(text)}`, '_blank');
+        },
+      },
+      {
+        text: 'Share via Facebook',
+        handler: () => {
+          window.open(
+            `https://www.facebook.com/sharer/sharer.php?quote=${encodeURIComponent(text)}`,
+            '_blank',
+          );
+        },
+      },
+      {
+        text: 'Copy Receipt Text',
+        handler: async () => {
+          try {
+            await navigator.clipboard.writeText(text);
+          } catch {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+          }
+          const toast = await toastController.create({
+            message: 'Receipt text copied!',
+            duration: 2000,
+            color: 'success',
+            position: 'top',
+          });
+          await toast.present();
+        },
+      },
+      { text: 'Cancel', role: 'cancel' },
+    ],
+  });
+  await actionSheet.present();
 }
