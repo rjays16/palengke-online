@@ -8,6 +8,7 @@ use App\Mail\DriverAccountApprovedMail;
 use App\Mail\DriverAccountRejectedMail;
 use App\Models\DriverDocument;
 use App\Models\DriverRegistration;
+use App\Models\DriverWalletTransaction;
 use App\Models\Notification;
 use App\Models\Order;
 use Illuminate\Http\Request;
@@ -871,7 +872,19 @@ class DriverRegistrationController extends Controller
         }
 
         if ($status === 'delivered' && (float) ($order->tip_amount ?? 0) > 0) {
+            $tipAmount = (float) $order->tip_amount;
             $customerName = $order->tip_customer_name ?? $order->customer_name ?? 'Customer';
+
+            $driver->wallet_balance += $tipAmount;
+            $driver->save();
+
+            DriverWalletTransaction::create([
+                'driver_registration_id' => $driver->id,
+                'type' => 'tip',
+                'amount' => $tipAmount,
+                'notes' => 'Tip from ' . $customerName . ' for Order #' . $order->id,
+            ]);
+
             Notification::create([
                 'driver_registration_id' => $driver->id,
                 'type' => 'tip',

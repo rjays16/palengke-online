@@ -47,7 +47,7 @@
       <div v-else class="txn-list">
         <div v-for="txn in filteredTransactions" :key="txn.id" class="txn-item">
           <div class="txn-left">
-            <div class="txn-icon" :class="txn.type === 'top_up' ? 'icon-green' : 'icon-red'">
+            <div class="txn-icon" :class="isCredit(txn.type) ? 'icon-green' : 'icon-red'">
               <ion-icon :icon="txnIcon(txn.type)"></ion-icon>
             </div>
             <div class="txn-info">
@@ -59,8 +59,8 @@
               <span class="txn-notes" v-if="txn.notes">{{ txn.notes }}</span>
             </div>
           </div>
-          <span class="txn-amount" :class="txn.type === 'top_up' ? 'text-green' : 'text-red'">
-            {{ txn.type === 'top_up' ? '+' : '-' }}₱{{ txn.amount.toLocaleString() }}
+          <span class="txn-amount" :class="isCredit(txn.type) ? 'text-green' : 'text-red'">
+            {{ isCredit(txn.type) ? '+' : '-' }}₱{{ txn.amount.toLocaleString() }}
           </span>
         </div>
       </div>
@@ -72,7 +72,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonButtons, IonIcon } from '@ionic/vue';
-import { arrowBackOutline, walletOutline, addCircleOutline, removeCircleOutline, receiptOutline } from 'ionicons/icons';
+import { arrowBackOutline, walletOutline, addCircleOutline, removeCircleOutline, receiptOutline, giftOutline } from 'ionicons/icons';
 import { API_BASE } from '@/services/api';
 
 const router = useRouter();
@@ -90,6 +90,7 @@ const activeFilter = ref('all');
 const filters = [
   { label: 'All', value: 'all' },
   { label: 'Top-Up', value: 'top_up' },
+  { label: 'Tip', value: 'tip' },
   { label: 'Cash-Out', value: 'cash_out' },
 ];
 
@@ -98,8 +99,13 @@ const filteredTransactions = computed(() => {
   return transactions.value.filter((t) => t.type === activeFilter.value);
 });
 
+function isCredit(type) {
+  return type === 'top_up' || type === 'tip';
+}
+
 function txnIcon(type) {
   if (type === 'top_up') return addCircleOutline;
+  if (type === 'tip') return giftOutline;
   return removeCircleOutline;
 }
 
@@ -107,6 +113,8 @@ function txnLabel(txn) {
   switch (txn.type) {
     case 'top_up':
       return 'Wallet Top-Up';
+    case 'tip':
+      return 'Tip Received';
     case 'cash_out':
       return 'Cash Out';
     default:
