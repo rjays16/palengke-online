@@ -129,15 +129,11 @@
   </ion-page>
 </template>
 
-    <script setup>
+<script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonIcon, alertController } from '@ionic/vue';
-import {
-  arrowBackOutline,
-  informationCircleOutline,
-  shieldCheckmarkOutline,
-} from 'ionicons/icons';
+import { arrowBackOutline, informationCircleOutline, shieldCheckmarkOutline } from 'ionicons/icons';
 import { api } from '@/utils/apiClient';
 import { useRegistrationStore } from '@/stores/registration';
 
@@ -156,7 +152,9 @@ onMounted(async () => {
     if (data.allow_skip_verification !== undefined) {
       allowSkip.value = data.allow_skip_verification === 'true';
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 });
 
 // Navigation

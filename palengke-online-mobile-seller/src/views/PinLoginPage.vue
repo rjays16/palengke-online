@@ -23,7 +23,14 @@
           <p class="email-address">{{ maskedEmail }}</p>
         </div>
 
-        <OtpInput ref="pinInputRef" :key="otpKey" v-model="pinCodeStr" :length="5" type="pin" @complete="onPinComplete" />
+        <OtpInput
+          ref="pinInputRef"
+          :key="otpKey"
+          v-model="pinCodeStr"
+          :length="5"
+          type="pin"
+          @complete="onPinComplete"
+        />
 
         <div class="options-section">
           <button class="switch-account-btn" @click="goToLogin">Sign in with different account</button>
@@ -60,7 +67,7 @@ import { api, ApiError } from '@/utils/apiClient';
 import { useAuthStore } from '@/stores/auth';
 import { useRegistrationStore } from '@/stores/registration';
 import OtpInput from '@/components/OtpInput.vue';
-import { useModals } from '@/composables/useModals';
+import { useModals } from '@/components/modals/useModals';
 
 const router = useRouter();
 const auth = useAuthStore();
@@ -97,9 +104,7 @@ const checkAvailability = async () => {
       let foundCity = null;
 
       for (const region of locData.locations) {
-        const city = region.cities.find((c) =>
-          userCity.toLowerCase().includes(c.name.toLowerCase())
-        );
+        const city = region.cities.find((c) => userCity.toLowerCase().includes(c.name.toLowerCase()));
         if (city) {
           foundRegion = region;
           foundCity = city;
@@ -161,11 +166,15 @@ const verifyPin = async () => {
   isVerifying.value = true;
 
   try {
-    const data = await api.post('/seller/device/verify-pin', {
-      email: userEmail.value,
-      device_id: deviceId.value,
-      pin: pinCode.value,
-    }, { skipAuth: true });
+    const data = await api.post(
+      '/seller/device/verify-pin',
+      {
+        email: userEmail.value,
+        device_id: deviceId.value,
+        pin: pinCode.value,
+      },
+      { skipAuth: true },
+    );
 
     auth.setSession(userEmail.value, data.token, true, deviceId.value);
 
@@ -178,7 +187,7 @@ const verifyPin = async () => {
 
     router.push('/home');
   } catch (error) {
-    const message = error instanceof ApiError ? (error.data?.message || error.message) : error.message;
+    const message = error instanceof ApiError ? error.data?.message || error.message : error.message;
     if (message && message.includes('No PIN set')) {
       auth.setHasPin(false);
       router.push('/login');
@@ -233,7 +242,7 @@ const handleForgotPin = async () => {
             });
           } catch (e) {
             await loading.dismiss();
-            const message = e instanceof ApiError ? (e.data?.message || e.message) : e.message;
+            const message = e instanceof ApiError ? e.data?.message || e.message : e.message;
             const errAlert = await alertController.create({
               header: 'Error',
               message: message || 'Failed to send verification code.',
@@ -260,7 +269,11 @@ onMounted(async () => {
     return;
   }
   try {
-    const data = await api.post('/seller/device/status', { email: userEmail.value, device_id: deviceId.value }, { skipAuth: true });
+    const data = await api.post(
+      '/seller/device/status',
+      { email: userEmail.value, device_id: deviceId.value },
+      { skipAuth: true },
+    );
     if (!data.hasPin) {
       auth.setHasPin(false);
       router.replace('/login');
@@ -425,6 +438,4 @@ onActivated(() => {
     gap: 6px;
   }
 }
-
-
 </style>

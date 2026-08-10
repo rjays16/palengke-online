@@ -438,9 +438,7 @@ const showToast = async (message, color = 'primary') => {
 
 // Navigation
 const goBack = async () => {
-  const backRoute = isLoggedIn.value
-    ? (localStorage.getItem('verificationRedirect') || '/home')
-    : '/register/step5';
+  const backRoute = isLoggedIn.value ? localStorage.getItem('verificationRedirect') || '/home' : '/register/step5';
   if (frontPhotoTaken.value || backPhotoTaken.value) {
     const alert = await alertController.create({
       header: 'Discard Photos?',

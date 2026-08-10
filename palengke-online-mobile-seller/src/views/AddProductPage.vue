@@ -25,9 +25,7 @@
               <span class="banner-title">Basic Account</span>
               <span class="banner-desc">Limited to 1 product. Verify your ID to add more.</span>
             </div>
-            <ion-button size="small" fill="outline" class="banner-btn" @click="goVerify">
-              Verify Now
-            </ion-button>
+            <ion-button size="small" fill="outline" class="banner-btn" @click="goVerify"> Verify Now </ion-button>
           </div>
 
           <!-- No Categories Set -->
@@ -35,217 +33,221 @@
             <ion-icon :icon="gridOutline" class="no-cat-icon"></ion-icon>
             <h3>No Categories Selected</h3>
             <p>Please set your product categories in the homepage first before adding a product.</p>
-            <ion-button expand="block" class="home-btn" router-link="/home">
-              Go to Homepage
-            </ion-button>
+            <ion-button expand="block" class="home-btn" router-link="/home"> Go to Homepage </ion-button>
           </div>
 
           <template v-else>
-          <!-- Product Images Section -->
-          <div class="section">
-            <h2 class="section-title">
-              <ion-icon :icon="imagesOutline"></ion-icon>
-              Product Images
-            </h2>
+            <!-- Product Images Section -->
+            <div class="section">
+              <h2 class="section-title">
+                <ion-icon :icon="imagesOutline"></ion-icon>
+                Product Images
+              </h2>
 
-            <div class="image-upload-area" @click="selectImage">
-              <div class="uploaded-image" v-if="productImage">
-                <img :src="productImage" alt="Product" />
-                <div class="remove-image" @click.stop="productImage = ''">
-                  <ion-icon :icon="closeCircle"></ion-icon>
+              <div class="image-upload-area" @click="selectImage">
+                <div class="uploaded-image" v-if="productImage">
+                  <img :src="productImage" alt="Product" />
+                  <div class="remove-image" @click.stop="productImage = ''">
+                    <ion-icon :icon="closeCircle"></ion-icon>
+                  </div>
                 </div>
-              </div>
-              <div class="upload-placeholder" v-else>
-                <ion-icon :icon="cloudUploadOutline" class="upload-icon"></ion-icon>
-                <p>Click to upload product image</p>
-                <span>PNG, JPG, WEBP (Max 5MB)</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Basic Information -->
-          <div class="section">
-            <h2 class="section-title">
-              <ion-icon :icon="informationCircleOutline"></ion-icon>
-              Basic Information
-            </h2>
-
-            <div class="form-group">
-              <label>Product Name *</label>
-              <input
-                v-model="productName"
-                type="text"
-                placeholder="e.g., Fresh Tilapia, Pork Belly, Tomatoes"
-                class="form-input"
-              />
-            </div>
-
-            <div class="form-group">
-              <label>Category *</label>
-              <select v-model="category" class="form-select">
-                <option value="">Select a category</option>
-                <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label>Description *</label>
-              <textarea
-                v-model="description"
-                placeholder="Describe your product (freshness, quality, origin, etc.)"
-                class="form-textarea"
-                rows="4"
-              ></textarea>
-            </div>
-          </div>
-
-          <!-- Pricing Section -->
-          <div class="section">
-            <h2 class="section-title">
-              <ion-icon :icon="pricetagOutline"></ion-icon>
-              Pricing
-            </h2>
-
-            <div class="form-group">
-              <label>Selling Unit *</label>
-              <div class="unit-selector">
-                <div class="unit-option" :class="{ active: sellingUnit === 'kilo' }" @click="sellingUnit = 'kilo'">
-                  <ion-icon :icon="scaleOutline"></ion-icon>
-                  <span>Per Kilo</span>
-                </div>
-                <div class="unit-option" :class="{ active: sellingUnit === 'piece' }" @click="sellingUnit = 'piece'">
-                  <ion-icon :icon="cubeOutline"></ion-icon>
-                  <span>Per Piece</span>
-                </div>
-                <div class="unit-option" :class="{ active: sellingUnit === 'pack' }" @click="sellingUnit = 'pack'">
-                  <ion-icon :icon="gridOutline"></ion-icon>
-                  <span>Per Pack</span>
+                <div class="upload-placeholder" v-else>
+                  <ion-icon :icon="cloudUploadOutline" class="upload-icon"></ion-icon>
+                  <p>Click to upload product image</p>
+                  <span>PNG, JPG, WEBP (Max 5MB)</span>
                 </div>
               </div>
             </div>
 
-            <div class="form-row">
+            <!-- Basic Information -->
+            <div class="section">
+              <h2 class="section-title">
+                <ion-icon :icon="informationCircleOutline"></ion-icon>
+                Basic Information
+              </h2>
+
               <div class="form-group">
-                <label>Price (₱) *</label>
-                <div class="input-with-prefix">
-                  <span class="prefix">₱</span>
-                  <input v-model="price" type="number" placeholder="0.00" class="form-input with-prefix" step="0.01" />
-                </div>
-                <small class="helper-text">Price per {{ sellingUnit }}</small>
-              </div>
-
-              <div class="form-group" v-if="sellingUnit === 'kilo'">
-                <label>Minimum Order (kg)</label>
-                <input v-model="minimumOrder" type="number" placeholder="0.5" class="form-input" step="0.1" />
-                <small class="helper-text">Optional</small>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label class="checkbox-label">
-                <input type="checkbox" v-model="hasDiscount" />
-                <span> Add discount price</span>
-              </label>
-            </div>
-
-            <div class="form-group" v-if="hasDiscount">
-              <label>Discount Price (₱)</label>
-              <div class="input-with-prefix">
-                <span class="prefix">₱</span>
+                <label>Product Name *</label>
                 <input
-                  v-model="discountPrice"
-                  type="number"
-                  placeholder="0.00"
-                  class="form-input with-prefix"
-                  step="0.01"
+                  v-model="productName"
+                  type="text"
+                  placeholder="e.g., Fresh Tilapia, Pork Belly, Tomatoes"
+                  class="form-input"
                 />
               </div>
-              <div class="discount-badge" v-if="discountPercentage > 0">
-                <ion-icon :icon="pricetagOutline"></ion-icon>
-                {{ discountPercentage }}% OFF
+
+              <div class="form-group">
+                <label>Category *</label>
+                <select v-model="category" class="form-select">
+                  <option value="">Select a category</option>
+                  <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Description *</label>
+                <textarea
+                  v-model="description"
+                  placeholder="Describe your product (freshness, quality, origin, etc.)"
+                  class="form-textarea"
+                  rows="4"
+                ></textarea>
               </div>
             </div>
-          </div>
 
-          <!-- Inventory Section -->
-          <div class="section">
-            <h2 class="section-title">
-              <ion-icon :icon="cubeOutline"></ion-icon>
-              Inventory
-            </h2>
+            <!-- Pricing Section -->
+            <div class="section">
+              <h2 class="section-title">
+                <ion-icon :icon="pricetagOutline"></ion-icon>
+                Pricing
+              </h2>
 
-            <div class="form-group">
-              <label>Stock Quantity *</label>
-              <input
-                v-model="stockQuantity"
-                type="number"
-                :placeholder="sellingUnit === 'kilo' ? 'e.g., 50 (kilos)' : 'e.g., 100 (pieces)'"
-                class="form-input"
-              />
-              <small class="helper-text">Available {{ sellingUnit }}s in stock</small>
+              <div class="form-group">
+                <label>Selling Unit *</label>
+                <div class="unit-selector">
+                  <div class="unit-option" :class="{ active: sellingUnit === 'kilo' }" @click="sellingUnit = 'kilo'">
+                    <ion-icon :icon="scaleOutline"></ion-icon>
+                    <span>Per Kilo</span>
+                  </div>
+                  <div class="unit-option" :class="{ active: sellingUnit === 'piece' }" @click="sellingUnit = 'piece'">
+                    <ion-icon :icon="cubeOutline"></ion-icon>
+                    <span>Per Piece</span>
+                  </div>
+                  <div class="unit-option" :class="{ active: sellingUnit === 'pack' }" @click="sellingUnit = 'pack'">
+                    <ion-icon :icon="gridOutline"></ion-icon>
+                    <span>Per Pack</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Price (₱) *</label>
+                  <div class="input-with-prefix">
+                    <span class="prefix">₱</span>
+                    <input
+                      v-model="price"
+                      type="number"
+                      placeholder="0.00"
+                      class="form-input with-prefix"
+                      step="0.01"
+                    />
+                  </div>
+                  <small class="helper-text">Price per {{ sellingUnit }}</small>
+                </div>
+
+                <div class="form-group" v-if="sellingUnit === 'kilo'">
+                  <label>Minimum Order (kg)</label>
+                  <input v-model="minimumOrder" type="number" placeholder="0.5" class="form-input" step="0.1" />
+                  <small class="helper-text">Optional</small>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" v-model="hasDiscount" />
+                  <span> Add discount price</span>
+                </label>
+              </div>
+
+              <div class="form-group" v-if="hasDiscount">
+                <label>Discount Price (₱)</label>
+                <div class="input-with-prefix">
+                  <span class="prefix">₱</span>
+                  <input
+                    v-model="discountPrice"
+                    type="number"
+                    placeholder="0.00"
+                    class="form-input with-prefix"
+                    step="0.01"
+                  />
+                </div>
+                <div class="discount-badge" v-if="discountPercentage > 0">
+                  <ion-icon :icon="pricetagOutline"></ion-icon>
+                  {{ discountPercentage }}% OFF
+                </div>
+              </div>
             </div>
 
-            <div class="form-group">
-              <label>SKU (Stock Keeping Unit)</label>
-              <input v-model="sku" type="text" placeholder="e.g., FISH-001" class="form-input" />
-              <small class="helper-text">Optional - for your reference</small>
-            </div>
-          </div>
+            <!-- Inventory Section -->
+            <div class="section">
+              <h2 class="section-title">
+                <ion-icon :icon="cubeOutline"></ion-icon>
+                Inventory
+              </h2>
 
-          <!-- Additional Details -->
-          <div class="section">
-            <h2 class="section-title">
-              <ion-icon :icon="listOutline"></ion-icon>
-              Additional Details
-            </h2>
+              <div class="form-group">
+                <label>Stock Quantity *</label>
+                <input
+                  v-model="stockQuantity"
+                  type="number"
+                  :placeholder="sellingUnit === 'kilo' ? 'e.g., 50 (kilos)' : 'e.g., 100 (pieces)'"
+                  class="form-input"
+                />
+                <small class="helper-text">Available {{ sellingUnit }}s in stock</small>
+              </div>
 
-            <div class="form-group">
-              <label>Origin/Source</label>
-              <select v-model="origin" class="form-select">
-                <option value="">Select origin</option>
-                <option v-for="loc in locations" :key="loc" :value="loc">{{ loc }}</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label>Brand (if applicable)</label>
-              <input v-model="brand" type="text" placeholder="e.g., Nestle, Magnolia, etc." class="form-input" />
+              <div class="form-group">
+                <label>SKU (Stock Keeping Unit)</label>
+                <input v-model="sku" type="text" placeholder="e.g., FISH-001" class="form-input" />
+                <small class="helper-text">Optional - for your reference</small>
+              </div>
             </div>
 
-            <div class="form-group" v-if="canFeature">
-              <label class="checkbox-label">
-                <input type="checkbox" v-model="isFeatured" />
-                <span> Feature this product (show first)</span>
-              </label>
+            <!-- Additional Details -->
+            <div class="section">
+              <h2 class="section-title">
+                <ion-icon :icon="listOutline"></ion-icon>
+                Additional Details
+              </h2>
+
+              <div class="form-group">
+                <label>Origin/Source</label>
+                <select v-model="origin" class="form-select">
+                  <option value="">Select origin</option>
+                  <option v-for="loc in locations" :key="loc" :value="loc">{{ loc }}</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Brand (if applicable)</label>
+                <input v-model="brand" type="text" placeholder="e.g., Nestle, Magnolia, etc." class="form-input" />
+              </div>
+
+              <div class="form-group" v-if="canFeature">
+                <label class="checkbox-label">
+                  <input type="checkbox" v-model="isFeatured" />
+                  <span> Feature this product (show first)</span>
+                </label>
+              </div>
             </div>
-          </div>
 
-          <!-- Product Status -->
-          <div class="section">
-            <h2 class="section-title">
-              <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
-              Product Status
-            </h2>
+            <!-- Product Status -->
+            <div class="section">
+              <h2 class="section-title">
+                <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
+                Product Status
+              </h2>
 
-            <div class="status-toggle">
-              <span>Product is {{ isActive ? 'Active' : 'Inactive' }}</span>
-              <ion-toggle v-model="isActive" color="success"></ion-toggle>
+              <div class="status-toggle">
+                <span>Product is {{ isActive ? 'Active' : 'Inactive' }}</span>
+                <ion-toggle v-model="isActive" color="success"></ion-toggle>
+              </div>
+              <small class="helper-text">
+                {{ isActive ? 'Customers can see and buy this product' : 'Product is hidden from customers' }}
+              </small>
             </div>
-            <small class="helper-text">
-              {{ isActive ? 'Customers can see and buy this product' : 'Product is hidden from customers' }}
-            </small>
-          </div>
 
-          <!-- Action Buttons -->
-          <div class="action-buttons">
-            <ion-button expand="block" size="large" class="save-button" @click="saveProduct">
-              <ion-icon :icon="checkmarkOutline" slot="start"></ion-icon>
-              Save Product
-            </ion-button>
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+              <ion-button expand="block" size="large" class="save-button" @click="saveProduct">
+                <ion-icon :icon="checkmarkOutline" slot="start"></ion-icon>
+                Save Product
+              </ion-button>
 
-            <ion-button expand="block" fill="outline" size="large" @click="saveDraft"> Save as Draft </ion-button>
-          </div>
-        </template>
+              <ion-button expand="block" fill="outline" size="large" @click="saveDraft"> Save as Draft </ion-button>
+            </div>
+          </template>
         </template>
       </div>
 
@@ -293,7 +295,7 @@ import {
   alertCircleOutline,
 } from 'ionicons/icons';
 import { api } from '@/utils/apiClient';
-import { useSuccessModal } from '@/composables/useSuccessModal';
+import { useSuccessModal } from '@/components/modals/useSuccessModal';
 
 const router = useRouter();
 const { showSuccessModal } = useSuccessModal();
@@ -399,7 +401,10 @@ const saveWithStatus = async (status: string) => {
       status,
     });
 
-    await showSuccessModal({ message: status === 'draft' ? 'Draft saved!' : 'Product added successfully!', awaitDismiss: true });
+    await showSuccessModal({
+      message: status === 'draft' ? 'Draft saved!' : 'Product added successfully!',
+      awaitDismiss: true,
+    });
     router.push('/products');
   } catch (e: any) {
     const alert = await alertController.create({

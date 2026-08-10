@@ -136,10 +136,14 @@ export function useMesibo() {
           callState.value = 'ended';
           stopCallTimer();
           stopCallerPolling();
-          setTimeout(() => { callState.value = 'idle'; }, 1500);
+          setTimeout(() => {
+            callState.value = 'idle';
+          }, 1500);
         }
-      } catch { /* ignore */ }
-      }, 2000);
+      } catch {
+        /* ignore */
+      }
+    }, 2000);
   }
 
   function startConnectedCallPolling(signalId: number) {
@@ -159,9 +163,13 @@ export function useMesibo() {
           stopCallTimer();
           stopConnectedCallPolling();
           activeCallSignalId.value = null;
-          setTimeout(() => { callState.value = 'idle'; }, 1500);
+          setTimeout(() => {
+            callState.value = 'idle';
+          }, 1500);
         }
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }, 2000);
   }
 
@@ -201,7 +209,9 @@ export function useMesibo() {
         headers: { Accept: 'application/json' },
       });
       callState.value = 'ended';
-      setTimeout(() => { callState.value = 'idle'; }, 1500);
+      setTimeout(() => {
+        callState.value = 'idle';
+      }, 1500);
     } catch (e) {
       console.error('Decline call error:', e);
     }
@@ -223,7 +233,9 @@ export function useMesibo() {
       }).catch(() => {});
     }
 
-    setTimeout(() => { callState.value = 'idle'; }, 1500);
+    setTimeout(() => {
+      callState.value = 'idle';
+    }, 1500);
   }
 
   function startCallTimer() {

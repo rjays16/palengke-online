@@ -174,8 +174,8 @@ import {
   chevronDownOutline,
 } from 'ionicons/icons';
 import { type DriverInfo, type OrderTrackingInfo, type TrackingMetrics, type DeliveryStep } from '@/types';
-import { useSuccessModal } from '@/composables/useSuccessModal';
-import { useModals } from '@/composables/useModals';
+import { useSuccessModal } from '@/components/modals/useSuccessModal';
+import { useModals } from '@/components/modals/useModals';
 
 // Import Leaflet
 import L from 'leaflet';

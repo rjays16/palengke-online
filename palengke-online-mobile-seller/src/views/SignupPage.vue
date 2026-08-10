@@ -112,13 +112,7 @@ const isLoading = ref(false);
 
 // Form validation
 const isFormValid = computed(() => {
-  return (
-    fullName.value &&
-    email.value &&
-    phone.value &&
-    storeName.value &&
-    acceptedTerms.value
-  );
+  return fullName.value && email.value && phone.value && storeName.value && acceptedTerms.value;
 });
 
 // Signup handler

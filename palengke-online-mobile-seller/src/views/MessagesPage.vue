@@ -282,7 +282,9 @@
             </div>
           </div>
           <h2 class="call-screen-name">{{ incomingCall.caller_name }}</h2>
-          <p class="call-screen-status">{{ incomingCall.caller_type === 'driver' ? 'Driver' : 'Seller' }} is calling you...</p>
+          <p class="call-screen-status">
+            {{ incomingCall.caller_type === 'driver' ? 'Driver' : 'Seller' }} is calling you...
+          </p>
         </div>
 
         <div class="call-screen-actions incoming-actions">
@@ -342,10 +344,12 @@ import { api } from '@/utils/apiClient';
 import { type Conversation } from '@/types';
 import { useChatWebSocket } from '@/composables/useChatWebSocket';
 import { useMesibo, type IncomingCallSignal } from '@/services/mesibo';
+import { useModals } from '@/components/modals/useModals';
 import { API_BASE } from '@/config/api';
 
 const router = useRouter();
 const apiBaseUrl = API_BASE;
+const { showLoadingModal } = useModals();
 
 const userEmail = localStorage.getItem('userEmail');
 
@@ -360,7 +364,9 @@ async function fetchCallingSetting() {
       const data = await res.json();
       callingEnabled.value = data.enable_calling !== 'false';
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 const chatWs = useChatWebSocket(userEmail, {
@@ -573,7 +579,9 @@ const playMessageSound = () => {
       messageAudio.value.currentTime = 0;
       messageAudio.value.play().catch((e: any) => console.warn('Play msg sound:', e));
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 };
 
 const playCallSound = () => {
@@ -583,7 +591,9 @@ const playCallSound = () => {
       callAudio.value.currentTime = 0;
       callAudio.value.play().catch((e: any) => console.warn('Play call sound:', e));
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 };
 
 // Real-time updates via WebSocket (falls back to polling)
@@ -618,7 +628,10 @@ const sendMessage = async () => {
 
   sendingMessage.value = true;
   try {
-    const data = await api.post(`/seller/conversations/${selectedChat.value.id}/messages`, { email: userEmail, message: text });
+    const data = await api.post(`/seller/conversations/${selectedChat.value.id}/messages`, {
+      email: userEmail,
+      message: text,
+    });
     if (data.data) {
       tempMessage.id = data.data.id;
       tempMessage.time = data.data.time;
@@ -711,11 +724,16 @@ const makeCall = async () => {
 
 const callStatusLabel = computed(() => {
   switch (callState.value) {
-    case 'ringing': return 'Ringing...';
-    case 'connecting': return 'Connecting...';
-    case 'connected': return formatCallDuration(callDuration.value);
-    case 'ended': return 'Call Ended';
-    default: return 'Calling...';
+    case 'ringing':
+      return 'Ringing...';
+    case 'connecting':
+      return 'Connecting...';
+    case 'connected':
+      return formatCallDuration(callDuration.value);
+    case 'ended':
+      return 'Call Ended';
+    default:
+      return 'Calling...';
   }
 });
 
@@ -761,7 +779,9 @@ function startIncomingCallPolling() {
             startIncomingCallPolling();
           }
         }
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
       return;
     }
 
@@ -776,7 +796,9 @@ function startIncomingCallPolling() {
       if (data.signal) {
         incomingCall.value = data.signal;
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, 2000);
 }
 
@@ -849,7 +871,9 @@ const deleteChat = async () => {
         role: 'destructive',
         handler: async () => {
           try {
-            await api.delete(`/seller/conversations/${selectedChat.value?.id}?email=${encodeURIComponent(userEmail || '')}`);
+            await api.delete(
+              `/seller/conversations/${selectedChat.value?.id}?email=${encodeURIComponent(userEmail || '')}`,
+            );
           } catch (e) {
             console.error('Failed to delete conversation:', e);
           }
@@ -885,13 +909,7 @@ const confirmDeleteMessage = async (message: any) => {
 };
 
 const showDeleteLoading = async () => {
-  const loading = await alertController.create({
-    cssClass: 'loading-modal-simple',
-    message: 'Deleting...',
-    buttons: [],
-  });
-  await loading.present();
-  return loading;
+  return showLoadingModal('Deleting...');
 };
 
 const deleteMessage = async (message: any) => {
@@ -929,7 +947,10 @@ function handleBackButton(event: any) {
 watch(callState, (newState) => {
   if (newState === 'ended') {
     showCallModal.value = false;
-    if (maxCallTimer) { clearTimeout(maxCallTimer); maxCallTimer = null; }
+    if (maxCallTimer) {
+      clearTimeout(maxCallTimer);
+      maxCallTimer = null;
+    }
   } else if (newState === 'connected') {
     if (maxCallTimer) clearTimeout(maxCallTimer);
     maxCallTimer = setTimeout(() => {
@@ -968,7 +989,9 @@ onMounted(async () => {
 watch(showCallModal, (val) => {
   if (val) {
     setTimeout(() => {
-      globalCallCloseHandler = () => { if (showCallModal.value) endCall(); };
+      globalCallCloseHandler = () => {
+        if (showCallModal.value) endCall();
+      };
       document.addEventListener('click', globalCallCloseHandler);
       document.addEventListener('touchend', globalCallCloseHandler);
     }, 300);
@@ -985,7 +1008,10 @@ onUnmounted(() => {
   document.removeEventListener('ionBackButton', handleBackButton);
   chatWs.disconnect();
   stopIncomingCallPolling();
-  if (maxCallTimer) { clearTimeout(maxCallTimer); maxCallTimer = null; }
+  if (maxCallTimer) {
+    clearTimeout(maxCallTimer);
+    maxCallTimer = null;
+  }
   if (globalCallCloseHandler) {
     document.removeEventListener('click', globalCallCloseHandler);
     document.removeEventListener('touchend', globalCallCloseHandler);
@@ -1590,8 +1616,15 @@ onUnmounted(() => {
 }
 
 @keyframes callPulse {
-  0%, 100% { border-color: rgba(76, 175, 80, 0.4); transform: scale(1); }
-  50% { border-color: rgba(76, 175, 80, 0.9); transform: scale(1.03); }
+  0%,
+  100% {
+    border-color: rgba(76, 175, 80, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    border-color: rgba(76, 175, 80, 0.9);
+    transform: scale(1.03);
+  }
 }
 
 .call-screen-avatar img {
@@ -1626,8 +1659,13 @@ onUnmounted(() => {
 }
 
 @keyframes callPulseStatus {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .call-screen-actions {
@@ -1686,8 +1724,13 @@ onUnmounted(() => {
 }
 
 @keyframes incomingPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.6); }
-  50% { box-shadow: 0 0 0 20px rgba(76, 175, 80, 0); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 20px rgba(76, 175, 80, 0);
+  }
 }
 
 /* Responsive */
@@ -1701,6 +1744,4 @@ onUnmounted(() => {
     height: 48px;
   }
 }
-
-
 </style>

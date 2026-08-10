@@ -93,8 +93,6 @@
             <span v-else class="helper-text">{{ phoneHelperText }}</span>
           </div>
 
-
-
           <!-- Send OTP Button (shows when email is valid but OTP not sent) -->
           <ion-button
             v-if="isEmailValid && !showOtpSection && !isEmailVerified && !emailExistsError"
@@ -120,7 +118,14 @@
               </div>
             </div>
 
-            <OtpInput ref="otpInputRef" v-model="otpCodeStr" :length="6" type="otp" @complete="onOtpComplete" :error="!!otpError" />
+            <OtpInput
+              ref="otpInputRef"
+              v-model="otpCodeStr"
+              :length="6"
+              type="otp"
+              @complete="onOtpComplete"
+              :error="!!otpError"
+            />
 
             <div v-if="otpError" class="otp-error">
               <ion-icon :icon="alertCircleOutline"></ion-icon>
@@ -202,7 +207,7 @@ onMounted(async () => {
       digits: c.digit_count,
     }));
     if (countryCodes.value.length > 0) {
-      const ph = countryCodes.value.find(c => c.code === '+63');
+      const ph = countryCodes.value.find((c) => c.code === '+63');
       if (ph) countryCode.value = '+63';
     }
   } catch {
@@ -363,7 +368,6 @@ const validateField = (field: string) => {
     errors.value.phone = '';
     return true;
   }
-
 };
 
 // Mask email for display

@@ -68,7 +68,7 @@ import {
 import { mailOpenOutline } from 'ionicons/icons';
 import { api, ApiError } from '@/utils/apiClient';
 import { useAuthStore } from '@/stores/auth';
-import { useSuccessModal } from '@/composables/useSuccessModal';
+import { useSuccessModal } from '@/components/modals/useSuccessModal';
 import OtpInput from '@/components/OtpInput.vue';
 
 const router = useRouter();
@@ -147,7 +147,7 @@ const resendCode = async () => {
 
     startCountdown(true);
   } catch (e) {
-    const message = e instanceof ApiError ? (e.data?.message || e.message) : e.message;
+    const message = e instanceof ApiError ? e.data?.message || e.message : e.message;
     const toast = await toastController.create({
       message: message || 'Failed to resend code',
       duration: 2000,
@@ -190,7 +190,7 @@ const verifyCode = async () => {
       router.push('/create-pin');
     }
   } catch (error) {
-    const message = error instanceof ApiError ? (error.data?.message || error.message) : error.message;
+    const message = error instanceof ApiError ? error.data?.message || error.message : error.message;
     const alert = await alertController.create({
       header: 'Verification Failed',
       message: message || 'Invalid code. Please try again.',
@@ -203,7 +203,6 @@ const verifyCode = async () => {
     isVerifying.value = false;
   }
 };
-
 
 // Lifecycle
 onMounted(() => {

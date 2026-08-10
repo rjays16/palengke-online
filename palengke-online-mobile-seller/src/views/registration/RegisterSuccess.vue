@@ -20,9 +20,7 @@
             <ion-icon slot="start" :icon="refreshOutline"></ion-icon>
             Try Again
           </ion-button>
-          <ion-button expand="block" fill="clear" class="back-btn" @click="goToLogin">
-            Back to Login
-          </ion-button>
+          <ion-button expand="block" fill="clear" class="back-btn" @click="goToLogin"> Back to Login </ion-button>
         </div>
       </div>
 
@@ -176,7 +174,9 @@ const submitRegistration = async () => {
   submitError.value = '';
 
   try {
-    await api.post('/seller/register', {
+    await api.post(
+      '/seller/register',
+      {
         email: d.email,
         country_code: (d as any).countryCode,
         phone: d.phone,
@@ -202,7 +202,9 @@ const submitRegistration = async () => {
         id_front_photo: (d as any).idFrontPhoto || null,
         id_back_photo: (d as any).idBackPhoto || null,
         selfie_photo: (d as any).selfiePhoto || null,
-      }, { skipAuth: true });
+      },
+      { skipAuth: true },
+    );
 
     (reg as any).setFields({ verificationSubmittedAt: new Date().toISOString() });
 
@@ -550,7 +552,6 @@ const contactSupport = async () => {
   .icon-circle ion-icon {
     font-size: 56px;
   }
-
 }
 
 /* Loading / Error Overlay */

@@ -261,7 +261,7 @@ import {
 } from '@ionic/vue';
 import { trashOutline, closeCircle, cloudUploadOutline, cubeOutline } from 'ionicons/icons';
 import { api } from '@/utils/apiClient';
-import { useSuccessModal } from '@/composables/useSuccessModal';
+import { useSuccessModal } from '@/components/modals/useSuccessModal';
 
 const router = useRouter();
 const route = useRoute();
@@ -457,7 +457,10 @@ const deleteProduct = async () => {
           saving.value = true;
           try {
             await api.delete(`/seller/products/${productData.value.id}?email=${encodeURIComponent(userEmail || '')}`);
-            await showSuccessModal({ message: 'Product successfully deleted', onDismiss: () => router.push('/products') });
+            await showSuccessModal({
+              message: 'Product successfully deleted',
+              onDismiss: () => router.push('/products'),
+            });
           } catch (e: any) {
             const alert = await alertController.create({
               header: 'Error',

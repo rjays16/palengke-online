@@ -46,19 +46,14 @@ async function request<T = any>(endpoint: string, options: ApiOptions = {}): Pro
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new ApiError(
-      data.message || `Request failed with status ${response.status}`,
-      response.status,
-      data,
-    );
+    throw new ApiError(data.message || `Request failed with status ${response.status}`, response.status, data);
   }
 
   return data as T;
 }
 
 export const api = {
-  get: <T = any>(endpoint: string, options?: ApiOptions) =>
-    request<T>(endpoint, { ...options, method: 'GET' }),
+  get: <T = any>(endpoint: string, options?: ApiOptions) => request<T>(endpoint, { ...options, method: 'GET' }),
 
   post: <T = any>(endpoint: string, body?: unknown, options?: ApiOptions) =>
     request<T>(endpoint, { ...options, method: 'POST', body }),
@@ -66,8 +61,7 @@ export const api = {
   put: <T = any>(endpoint: string, body?: unknown, options?: ApiOptions) =>
     request<T>(endpoint, { ...options, method: 'PUT', body }),
 
-  delete: <T = any>(endpoint: string, options?: ApiOptions) =>
-    request<T>(endpoint, { ...options, method: 'DELETE' }),
+  delete: <T = any>(endpoint: string, options?: ApiOptions) => request<T>(endpoint, { ...options, method: 'DELETE' }),
 };
 
 export { ApiError, API_BASE };

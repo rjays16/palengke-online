@@ -452,7 +452,9 @@ const viewTerms = async () => {
     header: 'Terms & Conditions',
     cssClass: 'terms-modal',
     message:
-      'By using this app, you agree to provide accurate product information, deliver quality products to customers, maintain professional conduct, and follow local business regulations. © ' + copyrightYear + ' Chui Tech Solution Inc. All rights reserved.',
+      'By using this app, you agree to provide accurate product information, deliver quality products to customers, maintain professional conduct, and follow local business regulations. © ' +
+      copyrightYear +
+      ' Chui Tech Solution Inc. All rights reserved.',
     buttons: [
       {
         text: 'View Full Terms',
@@ -474,7 +476,9 @@ const viewPrivacy = async () => {
     header: 'Privacy Policy',
     cssClass: 'privacy-modal',
     message:
-      'We protect your data by encrypting all transactions, never sharing personal information, securing payment details, and following data privacy laws. © ' + copyrightYear + ' Chui Tech Solution Inc.',
+      'We protect your data by encrypting all transactions, never sharing personal information, securing payment details, and following data privacy laws. © ' +
+      copyrightYear +
+      ' Chui Tech Solution Inc.',
     buttons: [
       {
         text: 'View Full Policy',

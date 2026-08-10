@@ -199,74 +199,10 @@
     </ion-content>
 
     <!-- Notice Modal -->
-    <ion-modal :is-open="showNoticeModal" @did-dismiss="closeNoticeModal" css-class="notice-modal">
-      <ion-header>
-        <ion-toolbar color="warning">
-          <ion-title>Notice</ion-title>
-          <ion-buttons slot="end">
-            <ion-button @click="closeNoticeModal">
-              <ion-icon :icon="closeOutline"></ion-icon>
-            </ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content class="ion-padding">
-        <div class="notice-modal-body" v-if="activeNotice">
-          <div class="notice-modal-icon">
-            <ion-icon :icon="megaphoneOutline"></ion-icon>
-          </div>
-          <h2 class="notice-modal-title">{{ (activeNotice as any).title }}</h2>
-          <p class="notice-modal-msg">{{ (activeNotice as any).message }}</p>
-          <ion-button expand="block" class="notice-modal-btn" @click="closeNoticeModal">Got it</ion-button>
-        </div>
-      </ion-content>
-    </ion-modal>
+    <NoticeModal :is-open="showNoticeModal" :notice="activeNotice" @close="closeNoticeModal" />
 
     <!-- Banner Request Modal -->
-    <ion-modal :is-open="showBannerModal" @did-dismiss="showBannerModal = false" css-class="banner-modal">
-      <ion-header>
-        <ion-toolbar>
-          <ion-buttons slot="start">
-            <ion-button @click="showBannerModal = false">
-              <ion-icon :icon="closeOutline"></ion-icon>
-            </ion-button>
-          </ion-buttons>
-          <ion-title>Request Promo Banner</ion-title>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content class="ion-padding">
-        <div class="banner-form">
-          <ion-item>
-            <ion-label position="stacked">Banner Title</ion-label>
-            <ion-input v-model="bannerForm.title" placeholder="e.g. Fresh Seafood Sale"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Subtitle</ion-label>
-            <ion-input v-model="bannerForm.subtitle" placeholder="e.g. Up to 30% off all seafood"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Link</ion-label>
-            <ion-input v-model="bannerForm.link" placeholder="e.g. /category/seafood"></ion-input>
-          </ion-item>
-          <ion-item>
-            <ion-label position="stacked">Image URL (optional)</ion-label>
-            <ion-input v-model="bannerForm.image" placeholder="/images/banner.jpg"></ion-input>
-          </ion-item>
-
-          <div class="banner-preview-box" v-if="bannerForm.title || bannerForm.subtitle">
-            <p class="preview-label">Preview</p>
-            <div class="preview-banner">
-              <span class="preview-title">{{ bannerForm.title || 'Banner Title' }}</span>
-              <span class="preview-sub">{{ bannerForm.subtitle || 'Banner subtitle' }}</span>
-            </div>
-          </div>
-
-          <ion-button expand="block" class="submit-banner-btn" @click="submitBannerRequest">
-            Submit Request
-          </ion-button>
-        </div>
-      </ion-content>
-    </ion-modal>
+    <BannerRequestModal :is-open="showBannerModal" @close="showBannerModal = false" @submit="submitBannerRequest" />
 
     <!-- Bottom Navigation -->
     <BottomNav active="home" />
@@ -289,10 +225,6 @@ import {
   IonButton,
   IonButtons,
   IonIcon,
-  IonModal,
-  IonInput,
-  IonLabel,
-  IonItem,
   alertController,
   actionSheetController,
   toastController,
@@ -311,7 +243,6 @@ import {
   personOutline,
   addOutline,
   logOutOutline,
-  closeOutline,
   shareSocialOutline,
   chatbubblesOutline,
   alertCircleOutline,
@@ -322,7 +253,9 @@ import {
 } from 'ionicons/icons';
 import { type Order, type Notice, type BannerRequest } from '@/types';
 import BottomNav from '@/components/BottomNav.vue';
-import { useSuccessModal } from '@/composables/useSuccessModal';
+import NoticeModal from '@/components/modals/NoticeModal.vue';
+import BannerRequestModal from '@/components/modals/BannerRequestModal.vue';
+import { useSuccessModal } from '@/components/modals/useSuccessModal';
 
 const router = useRouter();
 const auth = useAuthStore();
@@ -459,15 +392,13 @@ const goToVerification = () => {
 };
 
 const showBannerModal = ref(false);
-const bannerForm = ref({ title: '', subtitle: '', link: '', image: '' } as BannerRequest);
 
 function openBannerRequest() {
-  bannerForm.value = { title: '', subtitle: '', link: '', image: '' };
   showBannerModal.value = true;
 }
 
-async function submitBannerRequest() {
-  if (!bannerForm.value.title) {
+async function submitBannerRequest(form: BannerRequest) {
+  if (!form.title) {
     const toast = await toastController.create({
       message: 'Please enter a banner title',
       duration: 2000,
@@ -481,7 +412,7 @@ async function submitBannerRequest() {
   requests.push({
     id: Date.now(),
     seller: sellerName.value,
-    ...bannerForm.value,
+    ...form,
     status: 'pending',
     submittedAt: new Date().toISOString().slice(0, 10),
   });
@@ -585,7 +516,7 @@ const handleLogout = async () => {
         role: 'destructive',
         handler: () => {
           auth.clearAuth();
-          showSuccessLogout();
+          showSuccessModal({ message: 'Logged out successfully', autoDismissMs: 1500 });
           setTimeout(() => {
             router.push('/login');
           }, 1500);
@@ -594,61 +525,6 @@ const handleLogout = async () => {
     ],
   });
   await alert.present();
-};
-
-const showSuccessLogout = async () => {
-  const alert = await alertController.create({
-    cssClass: 'success-modal',
-    header: ' ',
-    message: 'Logged out successfully',
-    buttons: ['OK'],
-  });
-
-  await alert.present();
-
-  // Add the image after modal is presented
-  setTimeout(() => {
-    const alertElement = document.querySelector('.success-modal .alert-message');
-    if (alertElement) {
-      // Clear the text content
-      const textContent = alertElement.textContent;
-      alertElement.innerHTML = '';
-
-      // Create wrapper for centering
-      const wrapper = document.createElement('div');
-      wrapper.style.display = 'flex';
-      wrapper.style.flexDirection = 'column';
-      wrapper.style.alignItems = 'center';
-      wrapper.style.textAlign = 'center';
-
-      // Create and add the image
-      const img = document.createElement('img');
-      img.src = '/assets/images/checkmark_success.png';
-      img.style.width = '80px';
-      img.style.height = '80px';
-      img.style.margin = '0 auto 16px auto';
-      img.style.display = 'block';
-
-      // Create and add the text
-      const textDiv = document.createElement('div');
-      textDiv.textContent = textContent;
-      textDiv.style.fontSize = '18px';
-      textDiv.style.fontWeight = '600';
-      textDiv.style.color = '#1a1a1a';
-      textDiv.style.textAlign = 'center';
-
-      // Append to wrapper
-      wrapper.appendChild(img);
-      wrapper.appendChild(textDiv);
-
-      // Append wrapper to alert
-      alertElement.appendChild(wrapper);
-    }
-  }, 50);
-
-  setTimeout(() => {
-    alert.dismiss();
-  }, 1500);
 };
 
 const addProduct = async () => {
@@ -819,8 +695,6 @@ const manageCategories = async () => {
   });
   await alert.present();
 };
-
-
 </script>
 
 <style scoped>
@@ -1068,39 +942,6 @@ ion-header ion-toolbar ion-buttons ion-button {
 .stat-label {
   font-size: 12px;
   color: #666;
-}
-
-/* Notice Modal */
-.notice-modal-body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 32px 16px 16px;
-  gap: 12px;
-}
-.notice-modal-icon {
-  font-size: 48px;
-  color: #f57f17;
-  margin-bottom: 8px;
-}
-.notice-modal-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin: 0;
-}
-.notice-modal-msg {
-  font-size: 14px;
-  color: #666;
-  line-height: 1.6;
-  margin: 0 0 8px;
-}
-.notice-modal-btn {
-  --border-radius: 12px;
-  height: 48px;
-  font-weight: 600;
-  --background: #f57f17;
 }
 
 /* Actions Section */
@@ -1362,54 +1203,6 @@ ion-header ion-toolbar ion-buttons ion-button {
   align-items: center;
   gap: 4px;
 }
-
-/* Banner Request Modal */
-.banner-form {
-  padding-top: 8px;
-}
-.banner-form ion-item {
-  --padding-start: 0;
-  margin-bottom: 8px;
-}
-.banner-form ion-label {
-  font-weight: 600;
-  font-size: 14px;
-  margin-bottom: 4px;
-}
-.banner-preview-box {
-  margin: 20px 0;
-}
-.preview-label {
-  font-size: 12px;
-  color: #999;
-  margin-bottom: 8px;
-}
-.preview-banner {
-  background: linear-gradient(135deg, #4caf50, #2e7d32);
-  border-radius: 12px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.preview-title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #fff;
-}
-.preview-sub {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.8);
-}
-.submit-banner-btn {
-  --border-radius: 12px;
-  height: 48px;
-  font-weight: 600;
-  margin-top: 12px;
-  --background: #9c27b0;
-}
-
-
 
 /* Responsive */
 @media (max-width: 360px) {

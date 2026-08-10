@@ -384,27 +384,36 @@ const processPayment = async () => {
     sub.value = await refreshSubscription();
     remaining.value = daysLeft(sub.value);
     walletBalance.value = sub.value.planId ? 0 : walletBalance.value;
-    transactionId.value = 'TXN' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
-    paymentDate.value = new Date().toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    transactionId.value =
+      'TXN' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).substring(2, 6).toUpperCase();
+    paymentDate.value = new Date().toLocaleDateString('en-PH', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
     paymentStep.value = 'success';
 
     // Create a notification for the seller
     const email = localStorage.getItem('userEmail');
     if (email) {
-      api.post('/seller/notifications', {
-        email,
-        type: 'payment',
-        title: 'Subscription Activated',
-        message: `Your ${selectedPlan.value?.name} plan has been activated via ${selectedPM.value?.name}. Amount: ₱${selectedPlan.value?.price.toLocaleString()}`,
-        link: '/plans',
-        data: {
-          transaction_id: transactionId.value,
-          plan_id: selected.value,
-          plan_name: selectedPlan.value?.name,
-          amount: selectedPlan.value?.price,
-          payment_method: selectedPM.value?.name,
-        },
-      }).catch(() => {});
+      api
+        .post('/seller/notifications', {
+          email,
+          type: 'payment',
+          title: 'Subscription Activated',
+          message: `Your ${selectedPlan.value?.name} plan has been activated via ${selectedPM.value?.name}. Amount: ₱${selectedPlan.value?.price.toLocaleString()}`,
+          link: '/plans',
+          data: {
+            transaction_id: transactionId.value,
+            plan_id: selected.value,
+            plan_name: selectedPlan.value?.name,
+            amount: selectedPlan.value?.price,
+            payment_method: selectedPM.value?.name,
+          },
+        })
+        .catch(() => {});
     }
   } catch (err: any) {
     if (err && err.code === 'insufficient_balance') {
@@ -481,7 +490,9 @@ const handleShareReceipt = async () => {
   // Fallback: action sheet with direct share links
   const text = `Palengke Online ${receiptData.value.title}\n\n${receiptData.value.rows
     .map((r) => `${r.label}: ${r.value}`)
-    .join('\n')}\nAmount: ₱${receiptData.value.amount.toLocaleString()}\nDate: ${receiptData.value.date}\nTransaction ID: ${receiptData.value.transactionId}`;
+    .join(
+      '\n',
+    )}\nAmount: ₱${receiptData.value.amount.toLocaleString()}\nDate: ${receiptData.value.date}\nTransaction ID: ${receiptData.value.transactionId}`;
 
   const actionSheet = await actionSheetController.create({
     header: 'Share Receipt',
@@ -510,10 +521,7 @@ const handleShareReceipt = async () => {
       {
         text: 'Share via Facebook',
         handler: () => {
-          window.open(
-            `https://www.facebook.com/sharer/sharer.php?quote=${encodeURIComponent(text)}`,
-            '_blank',
-          );
+          window.open(`https://www.facebook.com/sharer/sharer.php?quote=${encodeURIComponent(text)}`, '_blank');
         },
       },
       {

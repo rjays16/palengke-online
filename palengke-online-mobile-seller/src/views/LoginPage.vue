@@ -54,7 +54,7 @@ import { mailOutline } from 'ionicons/icons';
 import { api, ApiError } from '@/utils/apiClient';
 import { useAuthStore } from '@/stores/auth';
 import { useRegistrationStore } from '@/stores/registration';
-import { useModals } from '@/composables/useModals';
+import { useModals } from '@/components/modals/useModals';
 
 const router = useRouter();
 const auth = useAuthStore();
@@ -93,9 +93,7 @@ const checkAvailability = async () => {
       let foundCity = null;
 
       for (const region of locData.locations) {
-        const city = region.cities.find((c) =>
-          userCity.toLowerCase().includes(c.name.toLowerCase())
-        );
+        const city = region.cities.find((c) => userCity.toLowerCase().includes(c.name.toLowerCase()));
         if (city) {
           foundRegion = region;
           foundCity = city;

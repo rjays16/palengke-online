@@ -266,8 +266,8 @@ import {
   alertCircleOutline,
 } from 'ionicons/icons';
 import { type Order } from '@/types';
-import { useSuccessModal } from '@/composables/useSuccessModal';
-import { useModals } from '@/composables/useModals';
+import { useSuccessModal } from '@/components/modals/useSuccessModal';
+import { useModals } from '@/components/modals/useModals';
 
 const router = useRouter();
 const { showSuccessModal } = useSuccessModal();

@@ -291,7 +291,13 @@ router.beforeEach((to, from, next) => {
     next('/pin-login');
   } else if (to.path === '/login' && isAuthenticated) {
     next('/home');
-  } else if (to.meta.requiresAuth && isAuthenticated && to.path !== '/plans' && to.path !== '/wallet' && to.path !== '/messages') {
+  } else if (
+    to.meta.requiresAuth &&
+    isAuthenticated &&
+    to.path !== '/plans' &&
+    to.path !== '/wallet' &&
+    to.path !== '/messages'
+  ) {
     const sub = getSubscription();
     if (isExpired(sub)) {
       next('/plans');

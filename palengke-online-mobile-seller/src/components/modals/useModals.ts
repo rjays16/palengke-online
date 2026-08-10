@@ -24,14 +24,7 @@ export function useModals() {
   };
 
   const showConfirmDialog = async (options: ConfirmDialogOptions) => {
-    const {
-      header,
-      message,
-      confirmText = 'Confirm',
-      cancelText = 'Cancel',
-      destructive = false,
-      onConfirm,
-    } = options;
+    const { header, message, confirmText = 'Confirm', cancelText = 'Cancel', destructive = false, onConfirm } = options;
 
     const alert = await alertController.create({
       header,

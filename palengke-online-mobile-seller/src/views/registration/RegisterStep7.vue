@@ -172,62 +172,7 @@
     </ion-content>
 
     <!-- Review Photos Modal -->
-    <ion-modal
-      :is-open="showReviewModal"
-      @did-dismiss="showReviewModal = false"
-      class="review-modal"
-    >
-      <ion-header>
-        <ion-toolbar color="success">
-          <ion-title>Review Your Photos</ion-title>
-          <ion-buttons slot="end">
-            <ion-button @click="showReviewModal = false">
-              <ion-icon :icon="closeOutline"></ion-icon>
-            </ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content class="modal-content">
-        <div class="review-container">
-          <div class="photo-card">
-            <h3>ID Front</h3>
-            <div class="photo-frame">
-              <img v-if="reviewPhotos.idFront" :src="reviewPhotos.idFront" alt="ID Front" />
-              <div v-else class="no-photo">
-                <ion-icon :icon="imageOutline"></ion-icon>
-                <span>No photo</span>
-              </div>
-            </div>
-          </div>
-          <div class="photo-card">
-            <h3>ID Back</h3>
-            <div class="photo-frame">
-              <img v-if="reviewPhotos.idBack" :src="reviewPhotos.idBack" alt="ID Back" />
-              <div v-else class="no-photo">
-                <ion-icon :icon="imageOutline"></ion-icon>
-                <span>No photo</span>
-              </div>
-            </div>
-          </div>
-          <div class="photo-card">
-            <h3>Selfie with ID</h3>
-            <div class="photo-frame">
-              <img v-if="reviewPhotos.selfie" :src="reviewPhotos.selfie" alt="Selfie" />
-              <div v-else class="no-photo">
-                <ion-icon :icon="imageOutline"></ion-icon>
-                <span>No photo</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-actions">
-          <ion-button expand="block" class="close-review-btn" @click="showReviewModal = false">
-            <ion-icon slot="start" :icon="checkmarkCircleOutline"></ion-icon>
-            Done Reviewing
-          </ion-button>
-        </div>
-      </ion-content>
-    </ion-modal>
+    <ReviewPhotosModal :is-open="showReviewModal" :photos="reviewPhotos" @close="showReviewModal = false" />
   </ion-page>
 </template>
 
@@ -243,11 +188,6 @@ import {
   IonContent,
   IonButton,
   IonIcon,
-  IonModal,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonButtons,
   toastController,
   alertController,
   loadingController,
@@ -263,10 +203,10 @@ import {
   informationCircleOutline,
   bulbOutline,
   cloudUploadOutline,
-  imageOutline,
 } from 'ionicons/icons';
 import { useRegistrationStore } from '@/stores/registration';
 import { useAuthStore } from '@/stores/auth';
+import ReviewPhotosModal from '@/components/modals/ReviewPhotosModal.vue';
 
 const router = useRouter();
 const auth = useAuthStore();
@@ -452,9 +392,7 @@ const showToast = async (message, color = 'primary') => {
 
 // Navigation
 const goBack = async () => {
-  const backRoute = isLoggedIn.value
-    ? (localStorage.getItem('verificationRedirect') || '/home')
-    : '/register/step6';
+  const backRoute = isLoggedIn.value ? localStorage.getItem('verificationRedirect') || '/home' : '/register/step6';
   if (selfiePhoto.value !== null) {
     const alert = await alertController.create({
       header: 'Discard Photo?',
@@ -532,42 +470,44 @@ const submitVerification = async () => {
 
     const email = reg.data.email || auth.userEmail;
     const endpoint = isLoggedIn.value ? '/seller/verify' : '/seller/register';
-    const body = isLoggedIn.value ? {
-      email,
-      id_type: reg.data.idType || null,
-      id_type_name: reg.data.idTypeName || null,
-      id_front_photo: reg.data.idFrontPhoto || null,
-      id_back_photo: reg.data.idBackPhoto || null,
-      selfie_photo: reg.data.selfiePhoto || null,
-    } : {
-      email: reg.data.email,
-      country_code: reg.data.countryCode,
-      phone: reg.data.phone,
-      full_phone: reg.data.fullPhone,
-      email_verified: reg.data.emailVerified,
-      first_name: reg.data.firstName,
-      middle_name: reg.data.middleName || '',
-      last_name: reg.data.lastName,
-      country: reg.data.country,
-      birthdate: reg.data.birthdate,
-      birthplace: reg.data.birthplace,
-      current_address: reg.data.currentAddress,
-      store_name: reg.data.storeName,
-      region: reg.data.region,
-      city: reg.data.city,
-      barangay: reg.data.barangay,
-      store_place: reg.data.storePlace,
-      complete_address: reg.data.completeAddress,
-      latitude: reg.data.latitude || null,
-      longitude: reg.data.longitude || null,
-      verification_choice: reg.data.verificationChoice,
-      verification_status: reg.data.verificationStatus,
-      id_type: reg.data.idType,
-      id_type_name: reg.data.idTypeName,
-      id_front_photo: reg.data.idFrontPhoto || null,
-      id_back_photo: reg.data.idBackPhoto || null,
-      selfie_photo: reg.data.selfiePhoto || null,
-    };
+    const body = isLoggedIn.value
+      ? {
+          email,
+          id_type: reg.data.idType || null,
+          id_type_name: reg.data.idTypeName || null,
+          id_front_photo: reg.data.idFrontPhoto || null,
+          id_back_photo: reg.data.idBackPhoto || null,
+          selfie_photo: reg.data.selfiePhoto || null,
+        }
+      : {
+          email: reg.data.email,
+          country_code: reg.data.countryCode,
+          phone: reg.data.phone,
+          full_phone: reg.data.fullPhone,
+          email_verified: reg.data.emailVerified,
+          first_name: reg.data.firstName,
+          middle_name: reg.data.middleName || '',
+          last_name: reg.data.lastName,
+          country: reg.data.country,
+          birthdate: reg.data.birthdate,
+          birthplace: reg.data.birthplace,
+          current_address: reg.data.currentAddress,
+          store_name: reg.data.storeName,
+          region: reg.data.region,
+          city: reg.data.city,
+          barangay: reg.data.barangay,
+          store_place: reg.data.storePlace,
+          complete_address: reg.data.completeAddress,
+          latitude: reg.data.latitude || null,
+          longitude: reg.data.longitude || null,
+          verification_choice: reg.data.verificationChoice,
+          verification_status: reg.data.verificationStatus,
+          id_type: reg.data.idType,
+          id_type_name: reg.data.idTypeName,
+          id_front_photo: reg.data.idFrontPhoto || null,
+          id_back_photo: reg.data.idBackPhoto || null,
+          selfie_photo: reg.data.selfiePhoto || null,
+        };
 
     await api.post(endpoint, body, { skipAuth: true });
 
@@ -575,7 +515,7 @@ const submitVerification = async () => {
 
     const redirect = localStorage.getItem('verificationRedirect');
     localStorage.removeItem('verificationRedirect');
-    const destination = isLoggedIn.value ? (redirect || '/home') : '/register/success';
+    const destination = isLoggedIn.value ? redirect || '/home' : '/register/success';
 
     const toast = await toastController.create({
       message: 'Verification submitted successfully!',

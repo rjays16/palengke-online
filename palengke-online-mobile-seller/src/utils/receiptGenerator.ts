@@ -13,14 +13,7 @@ export interface ReceiptData {
   footer?: string;
 }
 
-function drawRoundedRect(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  r: number,
-) {
+function drawRoundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   ctx.beginPath();
   ctx.moveTo(x + r, y);
   ctx.lineTo(x + w - r, y);
@@ -264,10 +257,7 @@ export async function shareReceiptWithFallback(data: ReceiptData): Promise<void>
       {
         text: 'Share via Facebook',
         handler: () => {
-          window.open(
-            `https://www.facebook.com/sharer/sharer.php?quote=${encodeURIComponent(text)}`,
-            '_blank',
-          );
+          window.open(`https://www.facebook.com/sharer/sharer.php?quote=${encodeURIComponent(text)}`, '_blank');
         },
       },
       {

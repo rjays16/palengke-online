@@ -145,9 +145,7 @@
               <div class="gps-box-main">
                 <ion-icon :icon="locateOutline"></ion-icon>
                 <div>
-                  <p v-if="formData.latitude" class="gps-coords">
-                    {{ formData.latitude }}, {{ formData.longitude }}
-                  </p>
+                  <p v-if="formData.latitude" class="gps-coords">{{ formData.latitude }}, {{ formData.longitude }}</p>
                   <p v-else class="gps-hint">Pin the exact store location so drivers can find you.</p>
                 </div>
               </div>

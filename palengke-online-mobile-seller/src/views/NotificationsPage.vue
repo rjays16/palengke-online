@@ -122,8 +122,8 @@ import {
   closeCircleOutline,
 } from 'ionicons/icons';
 import { type Notification } from '@/types';
-import { useSuccessModal } from '@/composables/useSuccessModal';
-import { useModals } from '@/composables/useModals';
+import { useSuccessModal } from '@/components/modals/useSuccessModal';
+import { useModals } from '@/components/modals/useModals';
 const router = useRouter();
 const { showSuccessModal } = useSuccessModal();
 const { showLoadingModal } = useModals();
@@ -531,6 +531,4 @@ ion-segment-button {
     font-size: 13px;
   }
 }
-
-
 </style>

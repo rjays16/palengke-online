@@ -25,7 +25,14 @@
         </div>
 
         <div class="pin-inputs">
-          <OtpInput ref="pinInputRef" v-model="pinCodeStr" :length="5" type="pin" @complete="onPinComplete" :error="!!errorMessage" />
+          <OtpInput
+            ref="pinInputRef"
+            v-model="pinCodeStr"
+            :length="5"
+            type="pin"
+            @complete="onPinComplete"
+            :error="!!errorMessage"
+          />
         </div>
 
         <p v-if="errorMessage" class="error-text">{{ errorMessage }}</p>
@@ -103,12 +110,16 @@ const handleNext = async () => {
   isSaving.value = true;
 
   try {
-    const data = await api.post('/seller/device/register', {
-      email: userEmail.value,
-      device_id: deviceId.value,
-      pin: savedPin.value,
-      device_name: navigator.userAgent,
-    }, { skipAuth: true });
+    const data = await api.post(
+      '/seller/device/register',
+      {
+        email: userEmail.value,
+        device_id: deviceId.value,
+        pin: savedPin.value,
+        device_name: navigator.userAgent,
+      },
+      { skipAuth: true },
+    );
 
     auth.setSession(userEmail.value, data.token || '', true, deviceId.value);
 
@@ -123,7 +134,7 @@ const handleNext = async () => {
 
     router.push('/home');
   } catch (error) {
-    const message = error instanceof ApiError ? (error.data?.message || error.message) : error.message;
+    const message = error instanceof ApiError ? error.data?.message || error.message : error.message;
     const alert = await alertController.create({
       header: 'Error',
       message: message || 'Failed to save PIN. Please try again.',

@@ -308,8 +308,8 @@ import {
 } from 'ionicons/icons';
 import { api } from '@/utils/apiClient';
 import { type FAQ, type ContactSupport, type Report } from '@/types';
-import { useSuccessModal } from '@/composables/useSuccessModal';
-import { useModals } from '@/composables/useModals';
+import { useSuccessModal } from '@/components/modals/useSuccessModal';
+import { useModals } from '@/components/modals/useModals';
 
 const { showSuccessModal } = useSuccessModal();
 const { showLoadingModal } = useModals();
@@ -605,12 +605,7 @@ const giveFeedback = async () => {
         text: 'Submit',
         handler: async (data) => {
           if (data.feedback) {
-            const loading = await alertController.create({
-              cssClass: 'loading-modal-simple',
-              message: 'Sending feedback...',
-              buttons: [],
-            });
-            await loading.present();
+            const loading = await showLoadingModal('Sending feedback...');
             try {
               await api.post('/feedbacks', {
                 submitted_by: localStorage.getItem('userEmail') || 'Seller',
@@ -655,12 +650,7 @@ const requestFeature = async () => {
         text: 'Submit',
         handler: async (data) => {
           if (data.feature) {
-            const loading = await alertController.create({
-              cssClass: 'loading-modal-simple',
-              message: 'Sending feature request...',
-              buttons: [],
-            });
-            await loading.present();
+            const loading = await showLoadingModal('Sending feature request...');
             try {
               await api.post('/feedbacks', {
                 type: 'feature_request',
@@ -1309,6 +1299,4 @@ const viewPrivacy = async () => {
     grid-template-columns: 1fr;
   }
 }
-
-
 </style>

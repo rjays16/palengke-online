@@ -7,9 +7,7 @@
     <div class="inactivity-overlay" v-if="showInactivityModal" @click.prevent>
       <div class="inactivity-modal">
         <h3 class="inactivity-title">Session Expired</h3>
-        <p class="inactivity-desc">
-          You have been inactive for 10 minutes. You will be logged out for security.
-        </p>
+        <p class="inactivity-desc">You have been inactive for 10 minutes. You will be logged out for security.</p>
         <button class="inactivity-ok-btn" @click="handleInactivityOk">OK</button>
       </div>
     </div>
@@ -67,15 +65,18 @@ function handleInactivityOk() {
   router.push('/pin-login');
 }
 
-watch(() => auth.isAuthenticated, (loggedIn) => {
-  if (loggedIn) {
-    showInactivityModal.value = false;
-    resetInactivityTimer();
-  } else {
-    clearInactivityTimer();
-    showInactivityModal.value = false;
-  }
-});
+watch(
+  () => auth.isAuthenticated,
+  (loggedIn) => {
+    if (loggedIn) {
+      showInactivityModal.value = false;
+      resetInactivityTimer();
+    } else {
+      clearInactivityTimer();
+      showInactivityModal.value = false;
+    }
+  },
+);
 
 onMounted(async () => {
   const events = ['mousedown', 'touchstart', 'keydown', 'scroll', 'click'];

@@ -338,31 +338,15 @@
       </div>
 
       <!-- Date Range Modal -->
-      <ion-modal :is-open="showDateModal" @did-dismiss="showDateModal = false">
-        <ion-header>
-          <ion-toolbar color="success">
-            <ion-title>Custom Date Range</ion-title>
-            <ion-buttons slot="end">
-              <ion-button @click="showDateModal = false">Close</ion-button>
-            </ion-buttons>
-          </ion-toolbar>
-        </ion-header>
-        <ion-content>
-          <div class="date-range-modal">
-            <div class="date-field">
-              <label class="date-label">Start Date</label>
-              <input type="date" class="date-input" v-model="startDate" />
-            </div>
-            <div class="date-field">
-              <label class="date-label">End Date</label>
-              <input type="date" class="date-input" v-model="endDate" />
-            </div>
-            <ion-button expand="block" color="success" @click="applyCustomRange" class="apply-btn">
-              Apply Range
-            </ion-button>
-          </div>
-        </ion-content>
-      </ion-modal>
+      <DateRangeModal
+        :is-open="showDateModal"
+        :start-date="startDate"
+        :end-date="endDate"
+        @update:start-date="startDate = $event"
+        @update:end-date="endDate = $event"
+        @close="showDateModal = false"
+        @apply="applyCustomRange"
+      />
     </ion-content>
   </ion-page>
 </template>
@@ -384,7 +368,6 @@ import {
   alertController,
   toastController,
   IonSpinner,
-  IonModal,
 } from '@ionic/vue';
 import {
   calendarOutline,
@@ -405,7 +388,15 @@ import {
   informationCircleOutline,
   createOutline,
 } from 'ionicons/icons';
-import { type AnalyticsStats, type ChartDataPoint, type TopProduct, type CategorySales, type Activity, type MonthlyGoals } from '@/types';
+import {
+  type AnalyticsStats,
+  type ChartDataPoint,
+  type TopProduct,
+  type CategorySales,
+  type Activity,
+  type MonthlyGoals,
+} from '@/types';
+import DateRangeModal from '@/components/modals/DateRangeModal.vue';
 
 // State
 const selectedPeriod = ref('week');
@@ -1207,50 +1198,6 @@ const exportReport = async () => {
 }
 
 /* Responsive */
-/* Date Range Modal */
-.date-range-modal {
-  padding: 24px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.date-field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.date-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1a1a1a;
-}
-
-.date-input {
-  width: 100%;
-  padding: 12px 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
-  font-size: 16px;
-  font-family: inherit;
-  color: #333;
-  background: #f8f9fa;
-  outline: none;
-  transition: border-color 0.3s;
-}
-
-.date-input:focus {
-  border-color: #4caf50;
-}
-
-.apply-btn {
-  margin-top: 8px;
-  --border-radius: 12px;
-  font-weight: 600;
-  height: 48px;
-}
-
 @media (max-width: 360px) {
   .metrics-grid {
     grid-template-columns: 1fr;

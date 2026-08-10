@@ -195,7 +195,7 @@ import {
 import BottomNav from '@/components/BottomNav.vue';
 import { api } from '@/utils/apiClient';
 import { type Product } from '@/types';
-import { useSuccessModal } from '@/composables/useSuccessModal';
+import { useSuccessModal } from '@/components/modals/useSuccessModal';
 import { getSubscription, isExpired } from '@/services/subscriptionService';
 
 const router = useRouter();
@@ -358,8 +358,6 @@ const showToast = async (message: string, color: string = 'success') => {
   });
   await toast.present();
 };
-
-
 </script>
 
 <style scoped>

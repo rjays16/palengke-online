@@ -122,17 +122,11 @@ import {
   alertController,
   toastController,
 } from '@ionic/vue';
-import {
-  filterOutline,
-  receiptOutline,
-  personOutline,
-  cartOutline,
-  timeOutline,
-} from 'ionicons/icons';
+import { filterOutline, receiptOutline, personOutline, cartOutline, timeOutline } from 'ionicons/icons';
 import { type Order } from '@/types';
 import BottomNav from '@/components/BottomNav.vue';
-import { useSuccessModal } from '@/composables/useSuccessModal';
-import { useModals } from '@/composables/useModals';
+import { useSuccessModal } from '@/components/modals/useSuccessModal';
+import { useModals } from '@/components/modals/useModals';
 
 const router = useRouter();
 const { showSuccessModal } = useSuccessModal();
@@ -410,8 +404,6 @@ const showToast = async (message: string, color = 'dark') => {
   });
   await toast.present();
 };
-
-
 </script>
 
 <style scoped>
