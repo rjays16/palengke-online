@@ -9,6 +9,9 @@ import RegisterStep3 from '@/views/registration/steps/RegisterStep3.vue';
 import RegisterStep4 from '@/views/registration/steps/RegisterStep4.vue';
 import RegisterStep5 from '@/views/registration/steps/RegisterStep5.vue';
 import RegisterStep6 from '@/views/registration/steps/RegisterStep6.vue';
+import OTPVerificationPage from '@/views/OTPVerificationPage.vue';
+import CreatePinPage from '@/views/CreatePinPage.vue';
+import PinLoginPage from '@/views/PinLoginPage.vue';
 
 // Main app pages (add your existing pages here)
 import HomePage from '@/views/HomePage.vue';
@@ -88,6 +91,26 @@ const routes: Array<RouteRecordRaw> = [
     path: '/register/step6',
     name: 'RegisterStep6',
     component: RegisterStep6,
+    meta: { requiresAuth: false }
+  },
+
+  // Auth: OTP + device PIN
+  {
+    path: '/otp-verification/:email',
+    name: 'OTPVerification',
+    component: OTPVerificationPage,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/create-pin',
+    name: 'CreatePin',
+    component: CreatePinPage,
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/pin-login',
+    name: 'PinLogin',
+    component: PinLoginPage,
     meta: { requiresAuth: false }
   },
 
@@ -244,7 +267,7 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  const isAuthenticated = !!localStorage.getItem('customer_token') && localStorage.getItem('isAuthenticated') === 'true';
   if (to.meta.requiresAuth && !isAuthenticated) {
     next('/login');
   } else if (to.path === '/login' && isAuthenticated) {

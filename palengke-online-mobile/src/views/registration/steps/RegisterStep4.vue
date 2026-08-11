@@ -70,6 +70,7 @@ import {
   arrowBackOutline, arrowForwardOutline,
   shieldCheckmarkOutline
 } from 'ionicons/icons';
+import { useRegistrationStore } from '@/composables/useRegistrationStore';
 
 const router = useRouter();
 
@@ -100,10 +101,11 @@ const goBack = () => router.push('/register/step3');
 
 const handleNext = () => {
   if (!isFormValid.value) return;
-  const existing = JSON.parse(localStorage.getItem('buyerRegistrationData') || '{}');
-  existing.acceptMarketing = acceptMarketing.value;
-  existing.termsAccepted = true;
-  localStorage.setItem('buyerRegistrationData', JSON.stringify(existing));
+  const { setTerms } = useRegistrationStore();
+  setTerms({
+    acceptMarketing: acceptMarketing.value,
+    termsAccepted: true
+  });
   router.push('/register/step5');
 };
 </script>

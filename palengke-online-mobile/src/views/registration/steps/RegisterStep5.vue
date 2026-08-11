@@ -29,8 +29,8 @@
                 <ion-icon :icon="checkmarkOutline"></ion-icon>
               </div>
               <div class="check-text">
-                <span class="check-title">Basic account created</span>
-                <span class="check-sub">Phone verified, details saved</span>
+                <span class="check-title">Account created</span>
+                <span class="check-sub">Email and phone verified, details saved</span>
               </div>
             </div>
             <div class="check-connector"></div>
@@ -39,8 +39,8 @@
                 <ion-icon :icon="checkmarkOutline"></ion-icon>
               </div>
               <div class="check-text">
-                <span class="check-title">Password set</span>
-                <span class="check-sub">Account login secured</span>
+                <span class="check-title">Email verified</span>
+                <span class="check-sub">Email confirmed and account secured</span>
               </div>
             </div>
           </div>
@@ -50,13 +50,13 @@
             <ion-icon :icon="checkmarkCircleOutline"></ion-icon>
             <div class="info-content">
               <h3>Account Ready!</h3>
-              <p>Your account has been secured with a password. You can now continue to complete your registration.</p>
+              <p>Your email has been verified. You can now continue to complete your registration.</p>
             </div>
           </div>
 
-          <ion-button expand="block" class="next-button" @click="handleNext">
-            Continue
-            <ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon>
+          <ion-button expand="block" class="next-button" :disabled="isSubmitting" @click="handleNext">
+            <span v-if="!isSubmitting">Continue<ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon></span>
+            <ion-spinner v-else name="crescent"></ion-spinner>
           </ion-button>
 
         </div>
@@ -68,16 +68,49 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { IonPage, IonContent, IonButton, IonIcon, toastController } from '@ionic/vue';
+import { IonPage, IonContent, IonButton, IonIcon, IonSpinner, toastController } from '@ionic/vue';
 import {
   arrowBackOutline, arrowForwardOutline, shieldCheckmarkOutline,
   checkmarkOutline, checkmarkCircleOutline
 } from 'ionicons/icons';
+import { API_BASE } from '@/services/api';
+import { useRegistrationStore } from '@/composables/useRegistrationStore';
 
 const router = useRouter();
+const isSubmitting = ref(false);
 
-const handleNext = () => {
-  router.push('/register/step6');
+const handleNext = async () => {
+  if (isSubmitting.value) return;
+  isSubmitting.value = true;
+
+  try {
+    const { getApiPayload } = useRegistrationStore();
+    const res = await fetch(`${API_BASE}/api/customer/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(getApiPayload())
+    });
+
+    const result = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(result.message || 'Registration failed. Please try again.');
+    }
+
+    localStorage.setItem('customer_token', result.token);
+    localStorage.setItem('isAuthenticated', 'true');
+    router.push('/register/step6');
+  } catch (error) {
+    const toast = await toastController.create({
+      message: error.message || 'Registration failed. Please try again.',
+      duration: 3000,
+      color: 'danger',
+      position: 'top'
+    });
+    await toast.present();
+  } finally {
+    isSubmitting.value = false;
+  }
 };
 
 const goBack = () => router.push('/register/step4');

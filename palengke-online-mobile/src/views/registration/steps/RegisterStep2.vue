@@ -105,6 +105,7 @@ import {
   arrowBackOutline, arrowForwardOutline, personOutline,
   calendarOutline, shieldCheckmarkOutline
 } from 'ionicons/icons';
+import { useRegistrationStore } from '@/composables/useRegistrationStore';
 
 const router = useRouter();
 
@@ -156,15 +157,14 @@ const goBack = () => router.push('/register/step1');
 const handleNext = () => {
   const valid = ['firstName', 'lastName', 'birthdate'].every(f => validateField(f));
   if (!valid) return;
-  const existing = JSON.parse(localStorage.getItem('buyerRegistrationData') || '{}');
-  Object.assign(existing, {
+  const { setPersonalInfo } = useRegistrationStore();
+  setPersonalInfo({
     firstName: formData.value.firstName,
     middleName: noMiddleName.value ? '' : formData.value.middleName,
     lastName: formData.value.lastName,
     noMiddleName: noMiddleName.value,
     birthdate: formData.value.birthdate
   });
-  localStorage.setItem('buyerRegistrationData', JSON.stringify(existing));
   router.push('/register/step3');
 };
 </script>

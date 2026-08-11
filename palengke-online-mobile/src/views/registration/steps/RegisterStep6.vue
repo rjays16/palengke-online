@@ -16,12 +16,6 @@
           <p class="subtitle">Welcome to Palengke Online</p>
         </div>
 
-        <!-- Status Badge -->
-        <div class="status-badge">
-          <ion-icon :icon="informationCircleOutline"></ion-icon>
-          <span>Basic Account - Not Verified</span>
-        </div>
-
         <!-- Account Summary -->
         <div class="summary-card">
           <h3>Account Details</h3>
@@ -40,35 +34,6 @@
           <div class="summary-item">
             <span class="label">Address:</span>
             <span class="value">{{ accountData.address }}</span>
-          </div>
-        </div>
-
-        <!-- What's Missing -->
-        <div class="missing-features">
-          <h3>Limited Account Features</h3>
-          <p class="info-text">Verify your account to unlock all features:</p>
-          <div class="features-list">
-            <div class="feature-item limited">
-              <ion-icon :icon="lockClosedOutline"></ion-icon>
-              <span>Limited purchase amounts</span>
-            </div>
-            <div class="feature-item limited">
-              <ion-icon :icon="lockClosedOutline"></ion-icon>
-              <span>No verified buyer badge</span>
-            </div>
-            <div class="feature-item limited">
-              <ion-icon :icon="lockClosedOutline"></ion-icon>
-              <span>Standard support only</span>
-            </div>
-          </div>
-
-          <!-- Verify Later CTA -->
-          <div class="verify-cta">
-            <ion-icon :icon="informationCircleOutline"></ion-icon>
-            <div class="cta-text">
-              <strong>You can verify anytime!</strong><br>
-              Go to Settings → Account Verification to complete your verification.
-            </div>
           </div>
         </div>
 
@@ -104,17 +69,6 @@
         <div class="action-buttons">
           <ion-button 
             expand="block" 
-            fill="outline"
-            color="primary"
-            class="verify-button"
-            @click="goToVerify"
-          >
-            <ion-icon slot="start" :icon="shieldCheckmarkOutline"></ion-icon>
-            Verify Now
-          </ion-button>
-
-          <ion-button 
-            expand="block" 
             class="home-button"
             @click="goToHome"
           >
@@ -145,12 +99,9 @@ import {
 } from '@ionic/vue';
 import {
   checkmarkCircleOutline,
-  informationCircleOutline,
-  shieldCheckmarkOutline,
-  shieldHalfOutline,
-  lockClosedOutline,
   arrowForwardOutline
 } from 'ionicons/icons';
+import { useRegistrationStore } from '@/composables/useRegistrationStore';
 
 const router = useRouter();
 
@@ -178,18 +129,15 @@ onMounted(() => {
     : 'Not provided';
 });
 
-const goToVerify = () => {
-  router.push('/verify-account');
-};
-
 const goToHome = () => {
-  localStorage.removeItem('buyerRegistrationData');
+  localStorage.setItem('userEmail', accountData.value.email);
+  useRegistrationStore().onSubmitted();
   localStorage.setItem('isAuthenticated', 'true');
   
   showSuccessToast();
   
   setTimeout(() => {
-    router.push('/home');
+    router.push('/create-pin');
   }, 1000);
 };
 
@@ -284,24 +232,6 @@ const contactSupport = async () => {
   line-height: 1.5;
 }
 
-/* Status Badge */
-.status-badge {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  border-radius: 24px;
-  margin-bottom: 32px;
-  font-weight: 600;
-  font-size: 14px;
-  background: var(--color-unverified-bg);
-  color: var(--color-text-inverse);
-}
-
-.status-badge ion-icon {
-  font-size: 20px;
-}
-
 /* Summary Card */
 .summary-card {
   width: 100%;
@@ -349,84 +279,6 @@ const contactSupport = async () => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-/* Missing Features */
-.missing-features {
-  width: 100%;
-  max-width: 500px;
-  background: var(--color-card-bg);
-  border-radius: 20px;
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 16px var(--color-card-shadow);
-  border: 3px solid var(--color-unverified-bg);
-}
-
-.missing-features h3 {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--color-warning-text);
-  margin: 0 0 12px 0;
-}
-
-.info-text {
-  font-size: 14px;
-  color: var(--color-text-secondary);
-  margin: 0 0 16px 0;
-}
-
-.features-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.feature-item.limited {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.feature-item.limited ion-icon {
-  font-size: 20px;
-  color: var(--color-unverified-bg);
-  flex-shrink: 0;
-}
-
-.feature-item.limited span {
-  font-size: 14px;
-  color: var(--color-text-secondary);
-}
-
-/* Verify CTA */
-.verify-cta {
-  display: flex;
-  gap: 12px;
-  background: var(--color-warning-bg);
-  border-radius: 12px;
-  padding: 16px;
-  border-left: 4px solid var(--color-warning-border);
-}
-
-.verify-cta ion-icon {
-  font-size: 24px;
-  color: var(--color-warning-border);
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.cta-text {
-  font-size: 13px;
-  color: var(--color-warning-text);
-  line-height: 1.5;
-}
-
-.cta-text strong {
-  font-weight: 700;
-  display: block;
-  margin-bottom: 4px;
 }
 
 /* Next Steps */
@@ -499,15 +351,6 @@ const contactSupport = async () => {
   flex-direction: column;
   gap: 12px;
   margin-bottom: 16px;
-}
-
-.verify-button {
-  --border-radius: 12px;
-  --border-width: 2px;
-  height: 52px;
-  font-size: 15px;
-  font-weight: 600;
-  text-transform: none;
 }
 
 .home-button {

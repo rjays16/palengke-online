@@ -53,6 +53,8 @@ use App\Http\Controllers\Api\CallSignalController;
 use App\Http\Controllers\Api\TipController;
 use App\Http\Controllers\Api\DeliveryServiceController;
 use App\Http\Controllers\Api\AppStatsController;
+use App\Http\Controllers\Api\CustomerAuthController;
+use App\Http\Controllers\Api\CustomerDeviceController;
 
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -151,6 +153,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/driver/conversations/{id}', [DriverMessageController::class, 'destroy']);
     Route::delete('/driver/messages/{id}', [DriverMessageController::class, 'destroyMessage']);
 });
+
+// Customer app registration
+Route::post('/customer/check-email', [CustomerAuthController::class, 'checkEmail']);
+Route::post('/customer/register', [CustomerAuthController::class, 'register']);
+
+// Customer app login
+Route::post('/customer/login', [CustomerAuthController::class, 'login']);
+Route::post('/customer/forgot-pin', [CustomerAuthController::class, 'forgotPin']);
+
+// Customer device PIN management
+Route::post('/customer/device/register', [CustomerDeviceController::class, 'register']);
+Route::post('/customer/device/verify-pin', [CustomerDeviceController::class, 'verifyPin']);
+Route::post('/customer/device/change-pin', [CustomerDeviceController::class, 'changePin']);
+Route::post('/customer/device/status', [CustomerDeviceController::class, 'status']);
 
 // Seller app login
 Route::post('/seller/login', [AuthController::class, 'login']);

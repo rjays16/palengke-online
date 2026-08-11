@@ -37,7 +37,7 @@
                 class="custom-input with-icon"
                 :disabled="isEmailVerified"
                 @input="onEmailInput"
-                @blur="validateField('email')"
+                @blur="onEmailBlur"
               >
               <ion-icon 
                 v-if="isEmailVerified" 
@@ -46,94 +46,61 @@
               ></ion-icon>
             </div>
             <span v-if="errors.email" class="error-message">{{ errors.email }}</span>
+            <span v-else-if="emailExistsError" class="error-message">{{ emailExistsError }}</span>
+            <span v-else-if="isCheckingEmail" class="helper-text">Checking email...</span>
             <span v-else-if="isEmailVerified" class="verified-text">Email verified</span>
             <span v-else class="helper-text">We'll send verification to this email</span>
           </div>
 
-          <!-- Phone Number -->
+          <!-- Phone Number with Country Code -->
           <div class="input-group">
             <label class="input-label">Phone Number *</label>
-            <div class="phone-wrapper" :class="{ 
-              error: errors.phone, 
-              success: isPhoneValid && phone.length === 10
-            }">
-              <div class="country-code">
-                <span class="flag">🇵🇭</span>
-                <span class="code">+63</span>
+            <div class="phone-input-row">
+              <!-- Country Code Dropdown -->
+              <div class="country-code-wrapper">
+                <template v-if="isLoadingCountries">
+                  <div class="country-code-select loading-placeholder">
+                    <ion-spinner name="crescent" class="loading-spinner"></ion-spinner>
+                  </div>
+                </template>
+                <template v-else>
+                  <select v-model="countryCode" class="country-code-select">
+                    <option v-for="c in countryCodes" :key="c.code" :value="c.code">
+                      {{ c.code }} {{ c.abbr || c.country.substring(0, 2).toUpperCase() }}
+                    </option>
+                  </select>
+                </template>
               </div>
-              <div class="divider-line"></div>
-              <input
-                v-model="phone"
-                type="tel"
-                placeholder="9XX XXX XXXX"
-                class="phone-input"
-                maxlength="10"
-                @input="onPhoneInput"
-                @blur="validateField('phone')"
+              <!-- Phone Number Input -->
+              <div
+                class="phone-number-wrapper"
+                :class="{
+                  error: errors.phone,
+                  success: isPhoneValid,
+                }"
               >
-              <ion-icon
-                v-if="isPhoneValid && phone.length === 10"
-                :icon="checkmarkCircleOutline"
-                class="success-icon"
-              ></ion-icon>
+                <input
+                  v-model="phone"
+                  type="tel"
+                  :placeholder="phonePlaceholder"
+                  class="phone-input"
+                  :maxlength="maxPhoneLength"
+                  @input="onPhoneInput"
+                  @blur="validateField('phone')"
+                >
+                <ion-icon v-if="isPhoneValid" :icon="checkmarkCircleOutline" class="success-icon"></ion-icon>
+              </div>
             </div>
             <span v-if="errors.phone" class="error-message">{{ errors.phone }}</span>
-            <span v-else class="helper-text">10 digits starting with 9</span>
-          </div>
-
-          <!-- Password -->
-          <div class="input-group">
-            <label class="input-label">Password *</label>
-            <div class="input-wrapper" :class="{ error: errors.password, success: isPasswordValid }">
-              <ion-icon :icon="lockClosedOutline" class="input-icon"></ion-icon>
-              <input 
-                v-model="password" 
-                :type="showPassword ? 'text' : 'password'" 
-                placeholder="Create a password"
-                class="custom-input with-icon with-toggle"
-                @input="onPasswordInput"
-                @blur="validateField('password')"
-              >
-              <ion-icon 
-                :icon="showPassword ? eyeOffOutline : eyeOutline" 
-                class="password-toggle"
-                @click="showPassword = !showPassword"
-              ></ion-icon>
-            </div>
-            <span v-if="errors.password" class="error-message">{{ errors.password }}</span>
-            <span v-else class="helper-text">At least 8 characters</span>
-          </div>
-
-          <!-- Confirm Password -->
-          <div class="input-group">
-            <label class="input-label">Confirm Password *</label>
-            <div class="input-wrapper" :class="{ error: errors.confirmPassword, success: isConfirmPasswordValid }">
-              <ion-icon :icon="lockClosedOutline" class="input-icon"></ion-icon>
-              <input 
-                v-model="confirmPassword" 
-                :type="showConfirmPassword ? 'text' : 'password'" 
-                placeholder="Confirm your password"
-                class="custom-input with-icon with-toggle"
-                @input="onConfirmPasswordInput"
-                @blur="validateField('confirmPassword')"
-              >
-              <ion-icon 
-                :icon="showConfirmPassword ? eyeOffOutline : eyeOutline" 
-                class="password-toggle"
-                @click="showConfirmPassword = !showConfirmPassword"
-              ></ion-icon>
-            </div>
-            <span v-if="errors.confirmPassword" class="error-message">{{ errors.confirmPassword }}</span>
-            <span v-else-if="isConfirmPasswordValid" class="success-message">Passwords match</span>
-            <span v-else class="helper-text">Re-enter your password</span>
+            <span v-else class="helper-text">{{ phoneHelperText }}</span>
           </div>
 
           <!-- Send OTP Button (shows when email is valid but OTP not sent) -->
           <ion-button 
-            v-if="isEmailValid && !showOtpSection && !isEmailVerified && isPasswordValid && isConfirmPasswordValid"
+            v-if="isEmailValid && !showOtpSection && !isEmailVerified && !emailExistsError"
             expand="block" 
             class="send-otp-button"
-            :disabled="isSendingOtp"
+            :disabled="isSendingOtp || isCheckingEmail"
             @click="sendOtp"
           >
             <ion-icon slot="start" :icon="paperPlaneOutline"></ion-icon>
@@ -223,7 +190,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage,
@@ -237,26 +204,47 @@ import {
   arrowBackOutline,
   arrowForwardOutline,
   mailOutline,
-  callOutline,
-  lockClosedOutline,
-  eyeOutline,
-  eyeOffOutline,
   checkmarkCircleOutline,
   shieldCheckmarkOutline,
   paperPlaneOutline,
   informationCircleOutline,
   alertCircleOutline
 } from 'ionicons/icons';
+import { useRegistrationStore } from '@/composables/useRegistrationStore';
+import { API_BASE } from '@/services/api';
 
 const router = useRouter();
+
+const countryCodes = ref([]);
+const isLoadingCountries = ref(true);
+const countryCode = ref('+63');
+
+const defaultCountry = { code: '+63', country: 'Philippines', abbr: 'PH', digits: 10 };
+
+onMounted(async () => {
+  try {
+    const res = await fetch(`${API_BASE}/api/countries`);
+    const data = await res.json();
+    countryCodes.value = data.countries.map((c) => ({
+      code: c.dial_code,
+      country: c.name,
+      abbr: c.code,
+      digits: c.digit_count,
+    }));
+    if (countryCodes.value.length > 0) {
+      const ph = countryCodes.value.find((c) => c.code === '+63');
+      if (ph) countryCode.value = '+63';
+    }
+  } catch {
+    countryCodes.value = [];
+  } finally {
+    isLoadingCountries.value = false;
+  }
+});
 
 // Form data
 const email = ref('');
 const phone = ref('');
-const password = ref('');
-const confirmPassword = ref('');
-const showPassword = ref(false);
-const showConfirmPassword = ref(false);
 const isEmailVerified = ref(false);
 
 // OTP data
@@ -268,12 +256,13 @@ const resendTimer = ref(0);
 const isSendingOtp = ref(false);
 const isVerifyingOtp = ref(false);
 
+const emailExistsError = ref('');
+const isCheckingEmail = ref(false);
+
 // Errors
 const errors = ref({
   email: '',
-  phone: '',
-  password: '',
-  confirmPassword: ''
+  phone: ''
 });
 
 // Validation
@@ -282,16 +271,27 @@ const isEmailValid = computed(() => {
   return email.value && emailRegex.test(email.value);
 });
 
+const currentCountry = computed(() => {
+  if (countryCodes.value.length === 0) return defaultCountry;
+  return countryCodes.value.find((c) => c.code === countryCode.value) || countryCodes.value[0];
+});
+
+const maxPhoneLength = computed(() => {
+  return currentCountry.value.digits;
+});
+
+const phonePlaceholder = computed(() => {
+  const digits = currentCountry.value.digits;
+  if (countryCode.value === '+63') return '9XX XXX XXXX';
+  return '0'.repeat(digits);
+});
+
+const phoneHelperText = computed(() => {
+  return `${currentCountry.value.digits} digits for ${currentCountry.value.country}`;
+});
+
 const isPhoneValid = computed(() => {
-  return phone.value.startsWith('9') && phone.value.length === 10;
-});
-
-const isPasswordValid = computed(() => {
-  return password.value.length >= 8;
-});
-
-const isConfirmPasswordValid = computed(() => {
-  return confirmPassword.value === password.value && password.value.length >= 8;
+  return phone.value.length === currentCountry.value.digits && /^\d+$/.test(phone.value);
 });
 
 const otpValue = computed(() => {
@@ -299,28 +299,62 @@ const otpValue = computed(() => {
 });
 
 const isFormValid = computed(() => {
-  return isEmailValid.value && isEmailVerified.value && isPhoneValid.value && phone.value.length === 10 && isPasswordValid.value && isConfirmPasswordValid.value;
+  return isEmailValid.value && isEmailVerified.value && !emailExistsError.value && isPhoneValid.value && phone.value.length === currentCountry.value.digits;
 });
 
 // Email input handler
 const onEmailInput = () => {
   errors.value.email = '';
+  emailExistsError.value = '';
+};
+
+// Check if email already exists in the system
+const checkEmailExists = async () => {
+  if (!isEmailValid.value || isEmailVerified.value) {
+    emailExistsError.value = '';
+    return;
+  }
+
+  isCheckingEmail.value = true;
+  emailExistsError.value = '';
+
+  try {
+    const response = await fetch(`${API_BASE}/api/customer/check-email`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.value }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.available) {
+        emailExistsError.value = '';
+      } else {
+        emailExistsError.value = 'This email is already registered.';
+      }
+    }
+  } catch {
+    emailExistsError.value = '';
+  } finally {
+    isCheckingEmail.value = false;
+  }
+};
+
+// Email blur handler
+const onEmailBlur = () => {
+  validateField('email');
+  if (isEmailValid.value && !isEmailVerified.value) {
+    checkEmailExists();
+  }
 };
 
 // Phone input handler
 const onPhoneInput = () => {
   phone.value = phone.value.replace(/\D/g, '');
+  if (phone.value.length > currentCountry.value.digits) {
+    phone.value = phone.value.slice(0, currentCountry.value.digits);
+  }
   errors.value.phone = '';
-};
-
-// Password input handler
-const onPasswordInput = () => {
-  errors.value.password = '';
-};
-
-// Confirm password input handler
-const onConfirmPasswordInput = () => {
-  errors.value.confirmPassword = '';
 };
 
 // Validate field
@@ -343,49 +377,17 @@ const validateField = (field) => {
       errors.value.phone = 'Phone number is required';
       return false;
     }
-    if (!phone.value.startsWith('9')) {
-      errors.value.phone = 'Phone must start with 9';
+    if (phone.value.length !== currentCountry.value.digits) {
+      errors.value.phone = `Phone must be ${currentCountry.value.digits} digits`;
       return false;
     }
-    if (phone.value.length !== 10) {
-      errors.value.phone = 'Phone must be 10 digits';
+    if (!/^\d+$/.test(phone.value)) {
+      errors.value.phone = 'Phone must contain only numbers';
       return false;
     }
     errors.value.phone = '';
     return true;
   }
-
-  if (field === 'password') {
-    if (!password.value) {
-      errors.value.password = 'Password is required';
-      return false;
-    }
-    if (password.value.length < 8) {
-      errors.value.password = 'Password must be at least 8 characters';
-      return false;
-    }
-    errors.value.password = '';
-    return true;
-  }
-
-  if (field === 'confirmPassword') {
-    if (!confirmPassword.value) {
-      errors.value.confirmPassword = 'Please confirm your password';
-      return false;
-    }
-    if (confirmPassword.value !== password.value) {
-      errors.value.confirmPassword = 'Passwords do not match';
-      return false;
-    }
-    errors.value.confirmPassword = '';
-    return true;
-  }
-};
-
-// Format phone for display
-const formatPhone = (phoneNum) => {
-  if (!phoneNum || phoneNum.length !== 10) return phoneNum;
-  return `+63 ${phoneNum.slice(0,3)} ${phoneNum.slice(3,6)} ${phoneNum.slice(6)}`;
 };
 
 // Mask email for display
@@ -414,10 +416,16 @@ const sendOtp = async () => {
   isSendingOtp.value = true;
 
   try {
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    console.log('Sending OTP to:', email.value);
-    
+    const res = await fetch(`${API_BASE}/api/send-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.value }),
+    });
+
+    if (!res.ok) {
+      throw new Error('Failed to send code');
+    }
+
     const toast = await toastController.create({
       message: `Verification code sent to ${maskedEmail.value}`,
       duration: 3000,
@@ -518,27 +526,28 @@ const verifyOtp = async () => {
   otpError.value = '';
 
   try {
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    const isValid = true;
-    
-    if (isValid) {
-      isEmailVerified.value = true;
-      showOtpSection.value = false;
-      
-      const toast = await toastController.create({
-        message: 'Email verified successfully!',
-        duration: 2500,
-        color: 'success',
-        position: 'top'
-      });
-      await toast.present();
-    } else {
-      otpError.value = 'Invalid code. Please try again.';
+    const res = await fetch(`${API_BASE}/api/verify-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.value, otp: otpValue.value }),
+    });
+
+    if (!res.ok) {
+      throw new Error('Invalid code');
     }
 
+    isEmailVerified.value = true;
+    showOtpSection.value = false;
+
+    const toast = await toastController.create({
+      message: 'Email verified successfully!',
+      duration: 2500,
+      color: 'success',
+      position: 'top'
+    });
+    await toast.present();
   } catch (error) {
-    otpError.value = 'Verification failed. Please try again.';
+    otpError.value = 'Invalid verification code. Please try again.';
   } finally {
     isVerifyingOtp.value = false;
   }
@@ -552,13 +561,14 @@ const goBack = () => {
 const handleNext = () => {
   if (!isFormValid.value) return;
 
-  const registrationData = {
+  const { setContactInfo } = useRegistrationStore();
+  setContactInfo({
     email: email.value,
-    phone: `+63${phone.value}`,
-    emailVerified: isEmailVerified.value,
-    password: password.value
-  };
-  localStorage.setItem('buyerRegistrationData', JSON.stringify(registrationData));
+    countryCode: countryCode.value,
+    phone: phone.value,
+    fullPhone: `${countryCode.value}${phone.value}`,
+    emailVerified: isEmailVerified.value
+  });
 
   router.push('/register/step2');
 };
@@ -774,74 +784,91 @@ const handleNext = () => {
   color: var(--color-error);
 }
 
-/* Phone Wrapper */
-.phone-wrapper {
+/* Phone Input Row with Country Code */
+.phone-input-row {
   display: flex;
-  align-items: center;
-  border: 2px solid var(--color-border);
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--color-input-bg);
-  transition: border-color 0.2s;
-  position: relative;
+  gap: 8px;
 }
 
-.phone-wrapper:focus-within {
+.country-code-wrapper {
+  flex-shrink: 0;
+}
+
+.country-code-select {
+  padding: 14px 36px 14px 16px;
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  font-size: 15px;
+  background: var(--color-input-bg);
+  color: var(--color-text-primary);
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
+  min-width: 110px;
+  font-weight: 500;
+}
+
+.country-code-select:focus {
+  outline: none;
   border-color: var(--color-border-focus);
 }
 
-.phone-wrapper.success {
-  border-color: var(--color-success);
+.country-code-select option {
+  font-size: 16px;
+  padding: 10px;
 }
 
-.phone-wrapper.error {
+.loading-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+}
+
+.phone-number-wrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.phone-number-wrapper.error .phone-input {
   border-color: var(--color-error);
 }
 
-.country-code {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 14px 12px;
-  background: var(--color-bg-tertiary);
-  flex-shrink: 0;
-}
-
-.flag {
-  font-size: 18px;
-}
-
-.code {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-.divider-line {
-  width: 1px;
-  height: 28px;
-  background: var(--color-border);
-  flex-shrink: 0;
+.phone-number-wrapper.success .phone-input {
+  border-color: var(--color-success);
 }
 
 .phone-input {
-  flex: 1;
-  padding: 14px 12px;
-  border: none;
-  outline: none;
-  font-size: 18px;
-  font-weight: 600;
-  background: transparent;
-  letter-spacing: 2px;
+  width: 100%;
+  padding: 14px 48px 14px 16px;
+  border: 2px solid var(--color-border);
+  border-radius: 12px;
+  font-size: 15px;
+  background: var(--color-input-bg);
   color: var(--color-text-primary);
+  transition: border-color 0.2s;
   font-family: inherit;
+}
+
+.phone-input:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
 }
 
 .phone-input::placeholder {
   color: var(--color-input-placeholder);
-  font-weight: 400;
-  letter-spacing: 0;
-  font-size: 15px;
 }
 
 /* Helper/Error/Success Text */

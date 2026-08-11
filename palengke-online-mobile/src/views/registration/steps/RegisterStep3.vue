@@ -137,6 +137,7 @@ import {
   arrowBackOutline, arrowForwardOutline, locationOutline, mapOutline,
   businessOutline, homeOutline, flagOutline, briefcaseOutline, informationCircleOutline
 } from 'ionicons/icons';
+import { useRegistrationStore } from '@/composables/useRegistrationStore';
 
 const router = useRouter();
 
@@ -184,9 +185,8 @@ const goBack = () => router.push('/register/step2');
 
 const handleNext = () => {
   if (!isFormValid.value) return;
-  const existing = JSON.parse(localStorage.getItem('buyerRegistrationData') || '{}');
-  Object.assign(existing, { ...formData.value });
-  localStorage.setItem('buyerRegistrationData', JSON.stringify(existing));
+  const { setAddressInfo } = useRegistrationStore();
+  setAddressInfo({ ...formData.value });
   router.push('/register/step4');
 };
 </script>
