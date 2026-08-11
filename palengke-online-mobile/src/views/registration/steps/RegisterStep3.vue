@@ -30,11 +30,11 @@
             <div class="input-wrapper" :class="{ error: errors.region }">
               <ion-icon :icon="mapOutline" class="input-icon"></ion-icon>
               <select v-model="formData.region" class="custom-select with-icon"
-                @change="onRegionChange" @blur="validateField('region')">
+                @change="onRegionChange" @blur="validateField('region')"
+                :disabled="isLoadingLocations">
                 <option value="">Select region</option>
-                <option value="luzon">Luzon</option>
-                <option value="visayas">Visayas</option>
-                <option value="mindanao">Mindanao</option>
+                <option v-if="isLoadingLocations" value="">Loading regions...</option>
+                <option v-for="region in locations" :key="region.id" :value="region.name">{{ region.name }}</option>
               </select>
             </div>
             <span v-if="errors.region" class="error-message">{{ errors.region }}</span>
@@ -48,7 +48,7 @@
               <select v-model="formData.city" class="custom-select with-icon"
                 @change="onCityChange" @blur="validateField('city')">
                 <option value="">Select city</option>
-                <option v-for="city in availableCities" :key="city" :value="city">{{ city }}</option>
+                <option v-for="city in availableCities" :key="city.id" :value="city.name">{{ city.name }}</option>
               </select>
             </div>
             <span v-if="errors.city" class="error-message">{{ errors.city }}</span>
@@ -62,7 +62,7 @@
               <select v-model="formData.barangay" class="custom-select with-icon"
                 @blur="validateField('barangay')">
                 <option value="">Select barangay</option>
-                <option v-for="b in availableBarangays" :key="b" :value="b">{{ b }}</option>
+                <option v-for="b in availableBarangays" :key="b.id" :value="b.name">{{ b.name }}</option>
               </select>
             </div>
             <span v-if="errors.barangay" class="error-message">{{ errors.barangay }}</span>
@@ -130,7 +130,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon } from '@ionic/vue';
 import {
@@ -138,6 +138,7 @@ import {
   businessOutline, homeOutline, flagOutline, briefcaseOutline, informationCircleOutline
 } from 'ionicons/icons';
 import { useRegistrationStore } from '@/composables/useRegistrationStore';
+import { API_BASE } from '@/services/api';
 
 const router = useRouter();
 
@@ -146,23 +147,31 @@ const formData = ref({
 });
 const errors = ref({ region: '', city: '', barangay: '', street: '' });
 
-const citiesByRegion = {
-  luzon: ['Manila','Quezon City','Caloocan','Makati','Pasig','Taguig','Antipolo','Baguio','Cabanatuan','Lipa','Lucena','Olongapo','San Fernando (Pampanga)','Tarlac City'],
-  visayas: ['Cebu City','Mandaue','Lapu-Lapu','Bacolod','Iloilo City','Tacloban','Dumaguete','Tagbilaran'],
-  mindanao: ['Davao City','Cagayan de Oro','General Santos','Iligan','Butuan','Zamboanga City','Cotabato City','Koronadal','Kidapawan','Surigao City']
-};
+const locations = ref([]);
+const isLoadingLocations = ref(true);
 
-const barangaysByCity = {
-  'Cagayan de Oro': ['Agusan','Balulang','Bulua','Camaman-an','Carmen','Consolacion','Cugman','Gusa','Lapasan','Macasandig','Nazareth','Puerto','Puntod','Tablon'],
-  'Davao City': ['Agdao','Bago Gallera','Bunawan','Buhangin','Catalunan Grande','Panacan','Sasa','Talomo','Toril','Tugbok'],
-  'Manila': ['Binondo','Ermita','Intramuros','Malate','Paco','Pandacan','Port Area','Sampaloc','Santa Ana','Santa Cruz','Tondo'],
-  'Quezon City': ['Batasan Hills','Commonwealth','Cubao','Diliman','Fairview','Holy Spirit','Payatas','Tandang Sora','UP Campus'],
-  'Cebu City': ['Apas','Banilad','Capitol Site','Guadalupe','Lahug','Mabolo','Pardo','Talamban','Tisa'],
-  'default': ['Barangay 1 (Poblacion)','Barangay 2 (Poblacion)','Barangay 3 (Poblacion)','Barangay 4 (Poblacion)','Barangay 5 (Poblacion)','Others']
-};
+const availableCities = computed(() => {
+  const region = locations.value.find((r) => r.name === formData.value.region);
+  return region ? region.cities : [];
+});
 
-const availableCities = computed(() => citiesByRegion[formData.value.region] || []);
-const availableBarangays = computed(() => barangaysByCity[formData.value.city] || barangaysByCity['default']);
+const availableBarangays = computed(() => {
+  const region = locations.value.find((r) => r.name === formData.value.region);
+  const city = region ? region.cities.find((c) => c.name === formData.value.city) : null;
+  return city ? city.barangays : [];
+});
+
+onMounted(async () => {
+  try {
+    const res = await fetch(`${API_BASE}/api/locations`);
+    const data = await res.json();
+    locations.value = data.locations || [];
+  } catch {
+    locations.value = [];
+  } finally {
+    isLoadingLocations.value = false;
+  }
+});
 
 const isFormValid = computed(() =>
   formData.value.region && formData.value.city && formData.value.barangay && formData.value.street.trim()
