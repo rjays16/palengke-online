@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\SellingUnit;
 use App\Models\SellerRegistration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
 {
@@ -54,7 +56,7 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'category' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'selling_unit' => 'required|string|in:kilo,piece,pack',
+            'selling_unit' => ['required', 'string', Rule::in(SellingUnit::where('enabled', true)->pluck('code'))],
             'price' => 'required|numeric|min:0',
             'minimum_order' => 'nullable|numeric|min:0',
             'has_discount' => 'nullable|boolean',
@@ -105,7 +107,7 @@ class ProductController extends Controller
             'name' => 'sometimes|string|max:255',
             'category' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
-            'selling_unit' => 'sometimes|string|in:kilo,piece,pack',
+            'selling_unit' => ['sometimes', 'string', Rule::in(SellingUnit::where('enabled', true)->pluck('code'))],
             'price' => 'sometimes|numeric|min:0',
             'minimum_order' => 'nullable|numeric|min:0',
             'has_discount' => 'nullable|boolean',

@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             CountrySeeder::class,
             IdTypeSeeder::class,
             PayoutTypeSeeder::class,
+            SellingUnitSeeder::class,
             ContactSupportSeeder::class,
             SystemSettingSeeder::class,
             OrderSeeder::class,

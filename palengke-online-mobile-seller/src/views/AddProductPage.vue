@@ -105,17 +105,15 @@
               <div class="form-group">
                 <label>Selling Unit *</label>
                 <div class="unit-selector">
-                  <div class="unit-option" :class="{ active: sellingUnit === 'kilo' }" @click="sellingUnit = 'kilo'">
-                    <ion-icon :icon="scaleOutline"></ion-icon>
-                    <span>Per Kilo</span>
-                  </div>
-                  <div class="unit-option" :class="{ active: sellingUnit === 'piece' }" @click="sellingUnit = 'piece'">
-                    <ion-icon :icon="cubeOutline"></ion-icon>
-                    <span>Per Piece</span>
-                  </div>
-                  <div class="unit-option" :class="{ active: sellingUnit === 'pack' }" @click="sellingUnit = 'pack'">
-                    <ion-icon :icon="gridOutline"></ion-icon>
-                    <span>Per Pack</span>
+                  <div
+                    v-for="unit in sellingUnits"
+                    :key="unit.code"
+                    class="unit-option"
+                    :class="{ active: sellingUnit === unit.code }"
+                    @click="sellingUnit = unit.code"
+                  >
+                    <ion-icon :icon="unitIcons[unit.icon] || cubeOutline"></ion-icon>
+                    <span>{{ unit.label }}</span>
                   </div>
                 </div>
               </div>
@@ -136,7 +134,7 @@
                   <small class="helper-text">Price per {{ sellingUnit }}</small>
                 </div>
 
-                <div class="form-group" v-if="sellingUnit === 'kilo'">
+                <div class="form-group" v-if="currentUnit?.has_min_order">
                   <label>Minimum Order (kg)</label>
                   <input v-model="minimumOrder" type="number" placeholder="0.5" class="form-input" step="0.1" />
                   <small class="helper-text">Optional</small>
@@ -181,10 +179,10 @@
                 <input
                   v-model="stockQuantity"
                   type="number"
-                  :placeholder="sellingUnit === 'kilo' ? 'e.g., 50 (kilos)' : 'e.g., 100 (pieces)'"
+                  :placeholder="stockPlaceholder"
                   class="form-input"
                 />
-                <small class="helper-text">Available {{ sellingUnit }}s in stock</small>
+                <small class="helper-text">Available {{ currentUnit?.plural || sellingUnit }} in stock</small>
               </div>
 
               <div class="form-group">
@@ -321,6 +319,33 @@ const productName = ref('');
 const category = ref('');
 const description = ref('');
 const sellingUnit = ref('kilo');
+
+// Selling units loaded from the backend
+interface SellingUnit {
+  id: number;
+  code: string;
+  label: string;
+  plural: string;
+  icon: string;
+  has_min_order: boolean;
+  example_stock: number;
+}
+
+const fallbackSellingUnits: SellingUnit[] = [
+  { id: 1, code: 'kilo', label: 'Per Kilo', plural: 'kilos', icon: 'kilo', has_min_order: true, example_stock: 50 },
+  { id: 2, code: 'piece', label: 'Per Piece', plural: 'pieces', icon: 'piece', has_min_order: false, example_stock: 100 },
+  { id: 3, code: 'pack', label: 'Per Pack', plural: 'packs', icon: 'pack', has_min_order: false, example_stock: 20 },
+];
+
+const sellingUnits = ref<SellingUnit[]>(fallbackSellingUnits);
+
+const unitIcons: Record<string, any> = {
+  kilo: scaleOutline,
+  piece: cubeOutline,
+  pack: gridOutline,
+};
+
+const currentUnit = computed(() => sellingUnits.value.find((u) => u.code === sellingUnit.value));
 const price = ref('');
 const minimumOrder = ref('');
 const hasDiscount = ref(false);
@@ -344,6 +369,13 @@ const discountPercentage = computed(() => {
     }
   }
   return 0;
+});
+
+const stockPlaceholder = computed(() => {
+  const u = currentUnit.value;
+  if (!u) return 'e.g., 100 (pieces)';
+  if (u.code === 'kilo') return 'e.g., 50 (kilos)';
+  return `e.g., 100 (${u.plural})`;
 });
 
 // Methods
@@ -428,13 +460,19 @@ onMounted(async () => {
     return;
   }
   try {
-    const [profileData, locData] = await Promise.all([
+    const [profileData, locData, unitsData] = await Promise.all([
       api.get(`/seller/profile?email=${encodeURIComponent(userEmail || '')}`),
       api.get('/locations'),
+      api.get('/selling-units'),
     ]);
 
     verificationChoice.value = (profileData.user && profileData.user.verificationChoice) || '';
     categories.value = (profileData.user && profileData.user.categories) || [];
+
+    const units = unitsData.selling_units;
+    if (Array.isArray(units) && units.length) {
+      sellingUnits.value = units;
+    }
 
     const locs = locData.locations || [];
     const cityNames: string[] = [];

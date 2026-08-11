@@ -76,28 +76,14 @@
             <label>Selling Unit <span class="required">*</span></label>
             <div class="unit-selector">
               <div
+                v-for="unit in sellingUnits"
+                :key="unit.code"
                 class="unit-option"
-                :class="{ active: productData.unit === 'kilo' }"
-                @click="productData.unit = 'kilo'"
+                :class="{ active: productData.unit === unit.code }"
+                @click="productData.unit = unit.code"
               >
-                <div class="unit-icon"><font-awesome-icon icon="weight-hanging" /></div>
-                <div class="unit-text">Per Kilo</div>
-              </div>
-              <div
-                class="unit-option"
-                :class="{ active: productData.unit === 'piece' }"
-                @click="productData.unit = 'piece'"
-              >
-                <div class="unit-icon"><font-awesome-icon icon="box" /></div>
-                <div class="unit-text">Per Piece</div>
-              </div>
-              <div
-                class="unit-option"
-                :class="{ active: productData.unit === 'pack' }"
-                @click="productData.unit = 'pack'"
-              >
-                <div class="unit-icon"><font-awesome-icon icon="clipboard-list" /></div>
-                <div class="unit-text">Per Pack</div>
+                <div class="unit-icon"><font-awesome-icon :icon="unitIcons[unit.icon] || 'box'" /></div>
+                <div class="unit-text">{{ unit.label }}</div>
               </div>
             </div>
           </div>
@@ -117,7 +103,7 @@
             </div>
           </div>
 
-          <div class="input-group" v-if="productData.unit === 'kilo'">
+          <div class="input-group" v-if="currentUnit?.has_min_order">
             <label>Minimum Order (kg)</label>
             <input
               v-model.number="productData.minOrder"
@@ -302,15 +288,43 @@ const productData = ref({
 
 const productImage = ref('');
 
+// Selling units loaded from the backend
+interface SellingUnit {
+  id: number;
+  code: string;
+  label: string;
+  plural: string;
+  icon: string;
+  has_min_order: boolean;
+  example_stock: number;
+}
+
+const fallbackSellingUnits: SellingUnit[] = [
+  { id: 1, code: 'kilo', label: 'Per Kilo', plural: 'kilos', icon: 'kilo', has_min_order: true, example_stock: 50 },
+  { id: 2, code: 'piece', label: 'Per Piece', plural: 'pieces', icon: 'piece', has_min_order: false, example_stock: 100 },
+  { id: 3, code: 'pack', label: 'Per Pack', plural: 'packs', icon: 'pack', has_min_order: false, example_stock: 20 },
+];
+
+const sellingUnits = ref<SellingUnit[]>(fallbackSellingUnits);
+
+const unitIcons: Record<string, string> = {
+  kilo: 'weight-hanging',
+  piece: 'box',
+  pack: 'clipboard-list',
+};
+
+const currentUnit = computed(() => sellingUnits.value.find((u) => u.code === productData.value.unit));
+
 async function loadProduct() {
   const productId = route.params.id;
   if (!userEmail || !productId) return;
   loading.value = true;
   try {
-    const [profileData, prodData, locData] = await Promise.all([
+    const [profileData, prodData, locData, unitsData] = await Promise.all([
       api.get(`/seller/profile?email=${encodeURIComponent(userEmail || '')}`),
       api.get(`/seller/products/${productId}?email=${encodeURIComponent(userEmail || '')}`),
       api.get('/locations'),
+      api.get('/selling-units'),
     ]);
 
     let cats = (profileData.user && profileData.user.categories) || [];
@@ -319,6 +333,11 @@ async function loadProduct() {
       cats = (Array.isArray(allData) ? allData : allData.categories || []).map((c: any) => c.name);
     }
     categories.value = cats;
+
+    const units = unitsData.selling_units;
+    if (Array.isArray(units) && units.length) {
+      sellingUnits.value = units;
+    }
 
     const locs = locData.locations || [];
     const cityNames: string[] = [];
@@ -365,9 +384,9 @@ async function loadProduct() {
 
 // Computed
 const stockPlaceholder = computed(() => {
-  if (productData.value.unit === 'kilo') return 'e.g., 50 kilos';
-  if (productData.value.unit === 'piece') return 'e.g., 100 pieces';
-  return 'e.g., 20 packs';
+  const u = currentUnit.value;
+  if (!u) return 'e.g., 20 packs';
+  return `e.g., ${u.example_stock} ${u.plural}`;
 });
 
 const discountPercentage = computed(() => {
