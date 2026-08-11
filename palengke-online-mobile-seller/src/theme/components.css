@@ -110,6 +110,12 @@
   box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.1);
 }
 
+/* Mask PIN digits as dots while typing (OTP stays visible) */
+.pin-box {
+  -webkit-text-security: disc;
+  text-security: disc;
+}
+
 .otp-box.filled,
 .pin-box.filled {
   border-color: #4caf50;

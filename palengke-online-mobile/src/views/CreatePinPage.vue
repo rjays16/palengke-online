@@ -266,6 +266,8 @@ onMounted(() => {
   background: white;
   transition: all 0.2s;
   font-family: inherit;
+  -webkit-text-security: disc;
+  text-security: disc;
 }
 
 .pin-box:focus {

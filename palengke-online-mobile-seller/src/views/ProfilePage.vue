@@ -1069,32 +1069,35 @@ const changePin = async () => {
     inputs: [
       {
         name: 'currentPin',
-        type: 'tel',
+        type: 'password',
         placeholder: 'Current PIN',
         attributes: {
           inputmode: 'numeric',
           maxlength: 5,
           pattern: '[0-9]*',
+          autocomplete: 'off',
         },
       },
       {
         name: 'newPin',
-        type: 'tel',
+        type: 'password',
         placeholder: 'New PIN (5 digits)',
         attributes: {
           inputmode: 'numeric',
           maxlength: 5,
           pattern: '[0-9]*',
+          autocomplete: 'off',
         },
       },
       {
         name: 'confirmPin',
-        type: 'tel',
+        type: 'password',
         placeholder: 'Confirm New PIN',
         attributes: {
           inputmode: 'numeric',
           maxlength: 5,
           pattern: '[0-9]*',
+          autocomplete: 'off',
         },
       },
     ],
