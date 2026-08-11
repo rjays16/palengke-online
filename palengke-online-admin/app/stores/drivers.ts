@@ -50,6 +50,7 @@ export const useDriversStore = defineStore("drivers", () => {
       birthCertPhoto: raw.birthCertPhoto || "",
       selfiePhoto: raw.selfiePhoto || "",
       rejectReason: raw.rejectReason || null,
+      walletBalance: raw.walletBalance || 0,
     };
   }
 

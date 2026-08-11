@@ -33,6 +33,7 @@ use App\Http\Controllers\Api\PaymentMethodController;
 use App\Http\Controllers\Api\AdminPaymentMethodController;
 use App\Http\Controllers\Api\AdminSubscriptionPaymentController;
 use App\Http\Controllers\Api\AdminWalletController;
+use App\Http\Controllers\Api\AdminDriverWalletController;
 use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\AdminSubscriptionController;
 use App\Http\Controllers\Api\RestrictionCodeController;
@@ -308,6 +309,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/drivers/{id}/deliveries', [DriverRegistrationController::class, 'deliveries']);
     Route::post('/admin/drivers/{id}/approve', [DriverRegistrationController::class, 'approve']);
     Route::post('/admin/drivers/{id}/reject', [DriverRegistrationController::class, 'reject']);
+    Route::post('/admin/drivers/{id}/wallet/top-up', [AdminDriverWalletController::class, 'topUp']);
+    Route::get('/admin/drivers/{id}/wallet/transactions', [AdminDriverWalletController::class, 'transactions']);
 
     Route::get('/admin/notifications', [AdminNotificationController::class, 'index']);
     Route::get('/admin/notifications/unread-count', [AdminNotificationController::class, 'unreadCount']);

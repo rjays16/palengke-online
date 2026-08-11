@@ -87,6 +87,22 @@
         </div>
 
         <div class="info-card">
+          <h3>Palengke Wallet</h3>
+          <div class="wallet-balance">
+            <span class="wallet-amount">₱{{ driver.walletBalance.toLocaleString() }}</span>
+            <span class="wallet-label">Current Balance</span>
+          </div>
+          <div v-if="auth.isSuperAdmin" class="info-card-actions">
+            <button class="ghost-btn" @click="openTopUpModal">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Top Up
+            </button>
+          </div>
+        </div>
+
+        <div class="info-card">
           <h3>Palengke Online Licence</h3>
           <div class="toggle-row">
             <div class="toggle-info">
@@ -282,6 +298,39 @@
         </div>
       </div>
     </div>
+
+    <div
+      class="modal-overlay"
+      v-if="showTopUp"
+      @click.self="closeTopUp"
+    >
+      <div class="modal-card modal-sm" @click.stop>
+        <div class="modal-top">
+          <span class="modal-title">Top Up Wallet — {{ driver?.name }}</span>
+          <button class="modal-close" @click="closeTopUp">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="topup-section">
+            <label class="topup-label">Amount to Add</label>
+            <div class="topup-input-wrap">
+              <span class="topup-currency">₱</span>
+              <input type="number" v-model.number="topUpAmount" min="1" class="topup-input" placeholder="0" />
+            </div>
+          </div>
+          <div v-if="topUpError" class="topup-error">{{ topUpError }}</div>
+        </div>
+        <div class="modal-actions">
+          <button class="modal-btn secondary" @click="closeTopUp">Cancel</button>
+          <button class="modal-btn primary" @click="confirmTopUp" :disabled="topUpping">
+            {{ topUpping ? "Processing..." : "Add Balance" }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -289,6 +338,7 @@
 definePageMeta({ layout: "default" });
 const route = useRoute();
 const driversStore = useDriversStore();
+const auth = useAuthStore();
 const config = useRuntimeConfig();
 const apiBase = config.public.apiBaseUrl || "http://localhost:8000";
 
@@ -347,6 +397,58 @@ async function toggleDriverFree() {
       setTimeout(() => { notification.value = ""; }, 4000);
     }
   } catch {}
+}
+
+// Wallet top-up
+const showTopUp = ref(false);
+const topUpAmount = ref(100);
+const topUpping = ref(false);
+const topUpError = ref(null);
+
+function openTopUpModal() {
+  topUpAmount.value = 100;
+  topUpError.value = null;
+  showTopUp.value = true;
+}
+
+function closeTopUp() {
+  showTopUp.value = false;
+  topUpError.value = null;
+  topUpping.value = false;
+}
+
+async function confirmTopUp() {
+  if (!topUpAmount.value || topUpAmount.value < 1) {
+    topUpError.value = "Enter a valid amount.";
+    return;
+  }
+  topUpping.value = true;
+  topUpError.value = null;
+  const token = getToken();
+  if (!token) return;
+  try {
+    const res = await fetch(`${apiBase}/api/admin/drivers/${route.params.id}/wallet/top-up`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: "application/json" },
+      body: JSON.stringify({
+        amount: topUpAmount.value,
+      }),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      topUpError.value = json.message || "Top up failed.";
+      return;
+    }
+    if (driver.value) driver.value.walletBalance = json.balance;
+    closeTopUp();
+    const name = driver.value?.name || "Driver";
+    notification.value = `Wallet topped up by ₱${Number(json.amount_added || 0).toLocaleString()} for ${name}`;
+    setTimeout(() => { notification.value = ""; }, 4000);
+  } catch (e) {
+    topUpError.value = e.message || "Network error.";
+  } finally {
+    topUpping.value = false;
+  }
 }
 
 const driver = computed(() =>
@@ -757,6 +859,95 @@ const goBack = () => navigateTo("/drivers");
   padding: 40px 20px;
   color: #9ca3af;
   font-size: 13px;
+}
+.info-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+.ghost-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  font-family: "Inter", sans-serif;
+}
+.ghost-btn:hover {
+  border-color: #059669;
+  color: #059669;
+}
+.ghost-btn svg {
+  width: 14px;
+  height: 14px;
+}
+.wallet-balance {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0 8px;
+}
+.wallet-amount {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #059669;
+}
+.wallet-label {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+.topup-section {
+  margin-bottom: 20px;
+}
+.topup-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+.topup-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 4px 16px;
+  transition: border-color 0.15s;
+}
+.topup-input-wrap:focus-within {
+  border-color: #059669;
+}
+.topup-currency {
+  font-size: 20px;
+  font-weight: 700;
+  color: #9ca3af;
+}
+.topup-input {
+  flex: 1;
+  border: none;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  outline: none;
+  padding: 8px 0;
+  width: 100%;
+}
+.topup-error {
+  font-size: 13px;
+  color: #dc2626;
+  background: #fef2f2;
+  padding: 10px 14px;
+  border-radius: 8px;
 }
 .toggle-row {
   display: flex;

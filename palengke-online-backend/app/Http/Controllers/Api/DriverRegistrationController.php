@@ -1022,6 +1022,7 @@ class DriverRegistrationController extends Controller
             'reviewedAt' => $r->reviewed_at?->toDateString(),
             'reviewedBy' => $r->reviewedBy?->name ?? null,
             'rejectReason' => $r->rejection_reason,
+            'walletBalance' => (float) ($r->wallet_balance ?? 0),
         ];
     }
 }
