@@ -39,6 +39,7 @@ use App\Http\Controllers\Api\AdminSubscriptionController;
 use App\Http\Controllers\Api\RestrictionCodeController;
 use App\Http\Controllers\Api\LicenseTypeController;
 use App\Http\Controllers\Api\IdTypeController;
+use App\Http\Controllers\Api\PayoutTypeController;
 use App\Http\Controllers\Api\DriverRegistrationController;
 use App\Http\Controllers\Api\DriverWalletController;
 use App\Http\Controllers\Api\DriverAuthController;
@@ -292,6 +293,9 @@ Route::get('/locations', [LocationController::class, 'publicIndex']);
 
 // Public endpoint for seller app to fetch enabled government-issued ID types
 Route::get('/id-types', [IdTypeController::class, 'index']);
+
+// Public endpoint for seller app to fetch enabled seller payout types
+Route::get('/payout-types', [PayoutTypeController::class, 'index']);
 
 // Admin — categories
 Route::middleware('auth:sanctum')->group(function () {

@@ -576,6 +576,20 @@ const saveOperatingHours = async () => {
 // Payment Methods
 const paymentMethods = ref([] as PaymentMethod[]);
 
+// Seller payout types loaded from the backend
+const payoutTypes = ref([] as { key: string; name: string }[]);
+const payoutTypeNames = ref<Record<string, string>>({});
+
+const loadPayoutTypes = async () => {
+  try {
+    const data = await api.get<{ payout_types: { key: string; name: string }[] }>('/payout-types');
+    payoutTypes.value = data.payout_types || [];
+    payoutTypeNames.value = Object.fromEntries(payoutTypes.value.map((t) => [t.key, t.name]));
+  } catch {
+    payoutTypes.value = [];
+  }
+};
+
 const loadSettings = async () => {
   try {
     const data = await api.get('/settings');
@@ -614,17 +628,8 @@ const paymentIcon = (type?: string) => {
 };
 
 const displayType = (type?: string) => {
-  const names: Record<string, string> = {
-    gcash: 'GCash',
-    bdo: 'BDO',
-    bpi: 'BPI',
-    metrobank: 'Metrobank',
-    landbank: 'Landbank',
-    unionbank: 'Unionbank',
-    pnb: 'PNB',
-  };
   if (!type) return '';
-  return names[type] || type.charAt(0).toUpperCase() + type.slice(1);
+  return payoutTypeNames.value[type] || type.charAt(0).toUpperCase() + type.slice(1);
 };
 
 const maskAccount = (number?: string) => {
@@ -673,18 +678,28 @@ const showPaymentAgreement = async () => {
 };
 
 const showAddPaymentForm = async () => {
+  if (payoutTypes.value.length === 0) {
+    const toast = await toastController.create({
+      message: 'Unable to load payment types. Please try again.',
+      duration: 2000,
+      color: 'danger',
+      position: 'top',
+    });
+    await toast.present();
+    return;
+  }
+
   // Step 1: Select payment type
+  const inputs = payoutTypes.value.map((t, i) => ({
+    type: 'radio' as const,
+    label: t.name,
+    value: t.key,
+    ...(i === 0 ? { checked: true } : {}),
+  }));
+
   const typeAlert = await alertController.create({
     header: 'Select Payment Type',
-    inputs: [
-      { type: 'radio', label: 'GCash', value: 'gcash', checked: true },
-      { type: 'radio', label: 'BDO', value: 'bdo' },
-      { type: 'radio', label: 'BPI', value: 'bpi' },
-      { type: 'radio', label: 'Metrobank', value: 'metrobank' },
-      { type: 'radio', label: 'Landbank', value: 'landbank' },
-      { type: 'radio', label: 'Unionbank', value: 'unionbank' },
-      { type: 'radio', label: 'PNB', value: 'pnb' },
-    ],
+    inputs,
     buttons: [
       { text: 'Cancel', role: 'cancel' },
       {
@@ -1272,6 +1287,7 @@ onMounted(() => {
   loadProfile();
   loadSettings();
   loadPaymentMethods();
+  loadPayoutTypes();
 });
 </script>
 
