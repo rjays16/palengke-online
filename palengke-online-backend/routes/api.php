@@ -38,6 +38,7 @@ use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\AdminSubscriptionController;
 use App\Http\Controllers\Api\RestrictionCodeController;
 use App\Http\Controllers\Api\LicenseTypeController;
+use App\Http\Controllers\Api\IdTypeController;
 use App\Http\Controllers\Api\DriverRegistrationController;
 use App\Http\Controllers\Api\DriverWalletController;
 use App\Http\Controllers\Api\DriverAuthController;
@@ -288,6 +289,9 @@ Route::get('/app-stats', [AppStatsController::class, 'index']);
 
 // Public endpoint for seller app to fetch enabled locations (filtered by country_regions)
 Route::get('/locations', [LocationController::class, 'publicIndex']);
+
+// Public endpoint for seller app to fetch enabled government-issued ID types
+Route::get('/id-types', [IdTypeController::class, 'index']);
 
 // Admin — categories
 Route::middleware('auth:sanctum')->group(function () {

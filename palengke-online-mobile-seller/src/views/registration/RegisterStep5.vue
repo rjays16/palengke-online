@@ -33,30 +33,14 @@
                 class="custom-select with-icon"
                 @change="onIdTypeChange"
                 @blur="validateField('idType')"
+                :disabled="isLoadingIdTypes"
               >
                 <option value="">Select ID Type</option>
-                <optgroup label="Primary IDs">
-                  <option value="passport">Philippine Passport</option>
-                  <option value="drivers_license">Driver's License</option>
-                  <option value="umid">UMID (Unified Multi-Purpose ID)</option>
-                  <option value="sss">SSS ID</option>
-                  <option value="philhealth">PhilHealth ID</option>
-                  <option value="pagibig">Pag-IBIG ID</option>
-                  <option value="postal">Postal ID</option>
-                </optgroup>
-                <optgroup label="Government IDs">
-                  <option value="voters">Voter's ID</option>
-                  <option value="tin">TIN ID</option>
-                  <option value="national_id">National ID (PhilSys)</option>
-                  <option value="senior_citizen">Senior Citizen ID</option>
-                  <option value="pwd">PWD ID</option>
-                  <option value="owwa">OWWA ID</option>
-                  <option value="seaman">Seaman's Book</option>
-                </optgroup>
-                <optgroup label="Professional IDs">
-                  <option value="prc">PRC ID (Professional Regulation Commission)</option>
-                  <option value="company">Company ID (with DTI/SEC registration)</option>
-                  <option value="student">School ID (with NSO Birth Certificate)</option>
+                <option v-if="isLoadingIdTypes" value="">Loading ID types...</option>
+                <optgroup v-for="group in idTypeGroups" :key="group.key" :label="group.label">
+                  <option v-for="idType in group.types" :key="idType.key" :value="idType.key">
+                    {{ idType.name }}
+                  </option>
                 </optgroup>
               </select>
             </div>
@@ -164,7 +148,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { api } from '@/utils/apiClient';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon, alertController } from '@ionic/vue';
 import {
@@ -194,36 +179,53 @@ const errors = ref({
   idType: '',
 });
 
-// ID Type names mapping
-const idTypeNames = {
-  passport: 'Philippine Passport',
-  drivers_license: "Driver's License",
-  umid: 'UMID (Unified Multi-Purpose ID)',
-  sss: 'SSS ID',
-  philhealth: 'PhilHealth ID',
-  pagibig: 'Pag-IBIG ID',
-  postal: 'Postal ID',
-  voters: "Voter's ID",
-  tin: 'TIN ID',
-  national_id: 'National ID (PhilSys)',
-  senior_citizen: 'Senior Citizen ID',
-  pwd: 'PWD ID',
-  owwa: 'OWWA ID',
-  seaman: "Seaman's Book",
-  prc: 'PRC ID',
-  company: 'Company ID',
-  student: 'School ID',
-};
+// ID types loaded from the backend
+interface IdType {
+  key: string;
+  name: string;
+  group: string;
+}
+
+const idTypes = ref<IdType[]>([]);
+const isLoadingIdTypes = ref(true);
+
+// Grouped ID types for the optgroup dropdown
+const idTypeGroups = computed(() => {
+  const groups = [
+    { key: 'primary', label: 'Primary IDs' },
+    { key: 'government', label: 'Government IDs' },
+    { key: 'professional', label: 'Professional IDs' },
+  ];
+  return groups
+    .map((group) => ({
+      ...group,
+      types: idTypes.value.filter((t) => t.group === group.key),
+    }))
+    .filter((group) => group.types.length > 0);
+});
+
+// ID Type names mapping (built from the API for display)
+const idTypeNames = ref<Record<string, string>>({});
 
 // Load data
-onMounted(() => {
+onMounted(async () => {
+  try {
+    const data = await api.get<{ id_types: IdType[] }>('/id-types');
+    idTypes.value = data.id_types || [];
+    idTypeNames.value = Object.fromEntries(idTypes.value.map((t) => [t.key, t.name]));
+  } catch {
+    idTypes.value = [];
+  } finally {
+    isLoadingIdTypes.value = false;
+  }
+
   reg.load();
   if (reg.data.idType) formData.value.idType = reg.data.idType;
 });
 
 // Get ID name
 const getIdName = (idType: string) => {
-  return idTypeNames[idType as keyof typeof idTypeNames] || idType;
+  return idTypeNames.value[idType] || idType;
 };
 
 // ID type change handler
