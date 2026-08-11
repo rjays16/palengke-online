@@ -5,8 +5,8 @@
         <div class="card">
           <div class="icon-wrap" :class="iconClass">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 8v4m0 4h.01"/>
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 8v4m0 4h.01" />
             </svg>
           </div>
 
@@ -15,9 +15,12 @@
 
           <div class="info-box">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
             </svg>
-            <span>Your account is registered but <strong>not yet available</strong> in your selected {{ reasonLabel }}.</span>
+            <span
+              >Your account is registered but <strong>not yet available</strong> in your selected
+              {{ reasonLabel }}.</span
+            >
           </div>
 
           <ion-button expand="block" class="login-btn" @click="goToLogin">
@@ -149,7 +152,7 @@ const goToLogin = () => {
   color: #14532d;
 }
 .login-btn {
-  --background: #4CAF50;
+  --background: #4caf50;
   --background-hover: #45a049;
   --border-radius: 12px;
   height: 50px;

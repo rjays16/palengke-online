@@ -19,11 +19,7 @@
         </ion-toolbar>
 
         <ion-toolbar v-if="showSearch">
-          <ion-searchbar
-            v-model="searchQuery"
-            placeholder="Search conversations..."
-            animated
-          ></ion-searchbar>
+          <ion-searchbar v-model="searchQuery" placeholder="Search conversations..." animated></ion-searchbar>
         </ion-toolbar>
 
         <!-- Filter Tabs -->
@@ -235,7 +231,9 @@
             </div>
           </div>
           <h2 class="call-screen-name">{{ incomingCall.caller_name }}</h2>
-          <p class="call-screen-status">{{ incomingCall.caller_type === 'seller' ? 'Seller' : 'Driver' }} is calling you...</p>
+          <p class="call-screen-status">
+            {{ incomingCall.caller_type === 'seller' ? 'Seller' : 'Driver' }} is calling you...
+          </p>
         </div>
 
         <div class="call-screen-actions incoming-actions">
@@ -257,15 +255,36 @@
 import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import {
-  IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonFooter,
-  IonButtons, IonBackButton, IonButton, IonIcon, IonInput,
-  IonSpinner, alertController, toastController, actionSheetController,
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonFooter,
+  IonButtons,
+  IonBackButton,
+  IonButton,
+  IonIcon,
+  IonInput,
+  IonSpinner,
+  alertController,
+  toastController,
+  actionSheetController,
 } from '@ionic/vue';
 import {
-  searchOutline, personOutline, storefrontOutline, chatbubblesOutline,
-  arrowBackOutline, callOutline, ellipsisVerticalOutline,
-  checkmarkDoneOutline, checkmarkOutline, imageOutline, sendOutline,
-  trashOutline, cubeOutline,
+  searchOutline,
+  personOutline,
+  storefrontOutline,
+  chatbubblesOutline,
+  arrowBackOutline,
+  callOutline,
+  ellipsisVerticalOutline,
+  checkmarkDoneOutline,
+  checkmarkOutline,
+  imageOutline,
+  sendOutline,
+  trashOutline,
+  cubeOutline,
 } from 'ionicons/icons';
 import { useMesibo } from '@/services/mesibo';
 
@@ -282,10 +301,21 @@ async function fetchCallingSetting() {
       const data = await res.json();
       callingEnabled.value = data.enable_calling !== 'false';
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
-const { callState, callDuration, initMesibo, startCall, acceptCall, declineCall, endCall: endMesiboCall, formatCallDuration } = useMesibo();
+const {
+  callState,
+  callDuration,
+  initMesibo,
+  startCall,
+  acceptCall,
+  declineCall,
+  endCall: endMesiboCall,
+  formatCallDuration,
+} = useMesibo();
 
 function getToken() {
   if (typeof localStorage === 'undefined') return null;
@@ -333,12 +363,15 @@ function unlockAudio() {
   if (audioUnlocked) return;
   if (messageAudio.value) {
     messageAudio.value.volume = 0.01;
-    messageAudio.value.play().then(() => {
-      messageAudio.value?.pause();
-      messageAudio.value.currentTime = 0;
-      messageAudio.value.volume = 0.7;
-      audioUnlocked = true;
-    }).catch(() => {});
+    messageAudio.value
+      .play()
+      .then(() => {
+        messageAudio.value?.pause();
+        messageAudio.value.currentTime = 0;
+        messageAudio.value.volume = 0.7;
+        audioUnlocked = true;
+      })
+      .catch(() => {});
   }
 }
 
@@ -349,28 +382,28 @@ function playMessageSound() {
       messageAudio.value.currentTime = 0;
       messageAudio.value.play().catch(() => {});
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 // Computed
 const filteredConversations = computed(() => {
   let filtered = conversations.value;
   if (activeFilter.value === 'customers') {
-    filtered = filtered.filter(c => c.type === 'customer');
+    filtered = filtered.filter((c) => c.type === 'customer');
   } else if (activeFilter.value === 'sellers') {
-    filtered = filtered.filter(c => c.type === 'seller');
+    filtered = filtered.filter((c) => c.type === 'seller');
   }
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase();
-    filtered = filtered.filter(c =>
-      c.name.toLowerCase().includes(q) || c.lastMessage.toLowerCase().includes(q)
-    );
+    filtered = filtered.filter((c) => c.name.toLowerCase().includes(q) || c.lastMessage.toLowerCase().includes(q));
   }
   return filtered;
 });
 
-const customerCount = computed(() => conversations.value.filter(c => c.type === 'customer').length);
-const sellerCount = computed(() => conversations.value.filter(c => c.type === 'seller').length);
+const customerCount = computed(() => conversations.value.filter((c) => c.type === 'customer').length);
+const sellerCount = computed(() => conversations.value.filter((c) => c.type === 'seller').length);
 
 // API Calls
 async function apiGet(endpoint) {
@@ -381,7 +414,9 @@ async function apiGet(endpoint) {
       headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
     });
     if (res.ok) return await res.json();
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return null;
 }
 
@@ -400,7 +435,9 @@ async function apiPost(endpoint, body) {
       body: isFormData ? body : JSON.stringify(body),
     });
     if (res.ok) return await res.json();
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return null;
 }
 
@@ -413,7 +450,9 @@ async function apiDelete(endpoint) {
       headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
     });
     if (res.ok) return await res.json();
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return null;
 }
 
@@ -585,11 +624,16 @@ async function makeCall() {
 
 const callStatusLabel = computed(() => {
   switch (callState.value) {
-    case 'ringing': return 'Ringing...';
-    case 'connecting': return 'Connecting...';
-    case 'connected': return formatCallDuration(callDuration.value);
-    case 'ended': return 'Call Ended';
-    default: return 'Calling...';
+    case 'ringing':
+      return 'Ringing...';
+    case 'connecting':
+      return 'Connecting...';
+    case 'connected':
+      return formatCallDuration(callDuration.value);
+    case 'ended':
+      return 'Call Ended';
+    default:
+      return 'Calling...';
   }
 });
 
@@ -635,7 +679,9 @@ function startIncomingCallPolling() {
             startIncomingCallPolling();
           }
         }
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
       return;
     }
 
@@ -650,7 +696,9 @@ function startIncomingCallPolling() {
       if (data.signal) {
         incomingCall.value = data.signal;
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, 2000);
 }
 
@@ -668,7 +716,9 @@ function playCallSound() {
       callAudio.value.currentTime = 0;
       callAudio.value.play().catch(() => {});
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 // Action Sheets & Alerts
@@ -705,8 +755,10 @@ async function deleteChat() {
         role: 'destructive',
         handler: async () => {
           const email = getUserEmail();
-          await apiDelete(`/api/driver/conversations/${selectedChat.value?.id}?email=${encodeURIComponent(email || '')}`);
-          const index = conversations.value.findIndex(c => c.id === selectedChat.value?.id);
+          await apiDelete(
+            `/api/driver/conversations/${selectedChat.value?.id}?email=${encodeURIComponent(email || '')}`,
+          );
+          const index = conversations.value.findIndex((c) => c.id === selectedChat.value?.id);
           if (index > -1) conversations.value.splice(index, 1);
           closeChat();
         },
@@ -730,7 +782,7 @@ async function confirmDeleteMessage(message) {
           const email = getUserEmail();
           await apiDelete(`/api/driver/messages/${message.id}?email=${encodeURIComponent(email || '')}`);
           if (selectedChat.value) {
-            const idx = selectedChat.value.messages.findIndex(m => m.id === message.id);
+            const idx = selectedChat.value.messages.findIndex((m) => m.id === message.id);
             if (idx > -1) selectedChat.value.messages.splice(idx, 1);
           }
         },
@@ -794,7 +846,10 @@ function handleBackButton(event) {
 watch(callState, (newState) => {
   if (newState === 'ended') {
     showCallModal.value = false;
-    if (maxCallTimer) { clearTimeout(maxCallTimer); maxCallTimer = null; }
+    if (maxCallTimer) {
+      clearTimeout(maxCallTimer);
+      maxCallTimer = null;
+    }
   } else if (newState === 'connected') {
     if (maxCallTimer) clearTimeout(maxCallTimer);
     maxCallTimer = setTimeout(() => {
@@ -834,7 +889,9 @@ onMounted(async () => {
 watch(showCallModal, (val) => {
   if (val) {
     setTimeout(() => {
-      globalCallCloseHandler = () => { if (showCallModal.value) endCall(); };
+      globalCallCloseHandler = () => {
+        if (showCallModal.value) endCall();
+      };
       document.addEventListener('click', globalCallCloseHandler);
       document.addEventListener('touchend', globalCallCloseHandler);
     }, 300);
@@ -852,7 +909,10 @@ onUnmounted(() => {
   stopConversationPolling();
   stopMessagePolling();
   stopIncomingCallPolling();
-  if (maxCallTimer) { clearTimeout(maxCallTimer); maxCallTimer = null; }
+  if (maxCallTimer) {
+    clearTimeout(maxCallTimer);
+    maxCallTimer = null;
+  }
   if (globalCallCloseHandler) {
     document.removeEventListener('click', globalCallCloseHandler);
     document.removeEventListener('touchend', globalCallCloseHandler);
@@ -862,89 +922,378 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.messages-view { height: 100%; }
+.messages-view {
+  height: 100%;
+}
 
 /* Loading */
-.loading-state { text-align: center; padding: 60px 20px; }
-.loading-icon { font-size: 60px; color: #4caf50; margin-bottom: 16px; animation: pulse 1.5s ease-in-out infinite; }
-@keyframes pulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 1; transform: scale(1.1); } }
-.loading-state p { font-size: 15px; color: #666; margin-top: 12px; }
-.loading-state ion-spinner { width: 40px; height: 40px; }
+.loading-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+.loading-icon {
+  font-size: 60px;
+  color: #4caf50;
+  margin-bottom: 16px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+.loading-state p {
+  font-size: 15px;
+  color: #666;
+  margin-top: 12px;
+}
+.loading-state ion-spinner {
+  width: 40px;
+  height: 40px;
+}
 
 /* Filter Tabs */
-.filter-tabs { display: flex; background: white; border-bottom: 1px solid #e0e0e0; padding: 0 16px; gap: 8px; }
-.tab { flex: 1; text-align: center; padding: 14px 12px; font-size: 14px; font-weight: 600; color: #666; cursor: pointer; position: relative; border-bottom: 3px solid transparent; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 6px; }
-.tab.active { color: #4caf50; border-bottom-color: #4caf50; }
-.tab .count { background: #f0f0f0; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
-.tab.active .count { background: #e8f5e9; color: #4caf50; }
+.filter-tabs {
+  display: flex;
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 0 16px;
+  gap: 8px;
+}
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 14px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  position: relative;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.tab.active {
+  color: #4caf50;
+  border-bottom-color: #4caf50;
+}
+.tab .count {
+  background: #f0f0f0;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.tab.active .count {
+  background: #e8f5e9;
+  color: #4caf50;
+}
 
 /* Conversations List */
-.conversations-list { background: #f8f9fa; }
-.conversation-item { background: white; padding: 16px; display: flex; gap: 12px; border-bottom: 1px solid #f0f0f0; cursor: pointer; transition: background 0.2s; }
-.conversation-item:active { background: #f8f9fa; }
-.conversation-item.unread { background: #f9fef9; }
+.conversations-list {
+  background: #f8f9fa;
+}
+.conversation-item {
+  background: white;
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.conversation-item:active {
+  background: #f8f9fa;
+}
+.conversation-item.unread {
+  background: #f9fef9;
+}
 
-.avatar { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 28px; background: #f0f0f0; color: #999; }
-.avatar.customer { background: #e8f5e9; color: #4caf50; }
-.avatar.seller { background: #e3f2fd; color: #2196f3; }
-.avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 28px;
+  background: #f0f0f0;
+  color: #999;
+}
+.avatar.customer {
+  background: #e8f5e9;
+  color: #4caf50;
+}
+.avatar.seller {
+  background: #e3f2fd;
+  color: #2196f3;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
 
-.conversation-content { flex: 1; min-width: 0; }
-.conversation-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.name { font-size: 16px; font-weight: 700; color: #1a1a1a; margin: 0; }
-.time { font-size: 12px; color: #999; }
+.conversation-content {
+  flex: 1;
+  min-width: 0;
+}
+.conversation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+.time {
+  font-size: 12px;
+  color: #999;
+}
 
-.conversation-preview { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.last-message { font-size: 14px; color: #666; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
-.conversation-item.unread .last-message { font-weight: 600; color: #333; }
+.conversation-preview {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.last-message {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+.conversation-item.unread .last-message {
+  font-weight: 600;
+  color: #333;
+}
 
-.meta { display: flex; gap: 8px; align-items: center; }
-.order-badge { background: #e3f2fd; color: #2196f3; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
-.unread-badge { background: #4caf50; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+.meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.order-badge {
+  background: #e3f2fd;
+  color: #2196f3;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.unread-badge {
+  background: #4caf50;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+}
 
 /* Empty State */
-.empty-state { text-align: center; padding: 60px 20px; }
-.empty-icon { font-size: 80px; color: #ddd; margin-bottom: 16px; }
-.empty-state h3 { font-size: 18px; font-weight: 700; color: #333; margin: 0 0 8px 0; }
-.empty-state p { font-size: 14px; color: #999; margin: 0; }
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+.empty-icon {
+  font-size: 80px;
+  color: #ddd;
+  margin-bottom: 16px;
+}
+.empty-state h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+.empty-state p {
+  font-size: 14px;
+  color: #999;
+  margin: 0;
+}
 
 /* Chat View */
-.chat-view { height: 100%; display: flex; flex-direction: column; }
-.chat-header-info { display: flex; align-items: center; gap: 12px; flex: 1; }
-.avatar-small { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; background: rgba(255,255,255,0.2); color: white; }
-.avatar-small img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-.chat-title { font-size: 16px; font-weight: 700; padding: 0; }
-.chat-subtitle { font-size: 12px; color: rgba(255,255,255,0.8); margin: 0; }
+.chat-view {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.chat-header-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+.avatar-small {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+.avatar-small img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.chat-title {
+  font-size: 16px;
+  font-weight: 700;
+  padding: 0;
+}
+.chat-subtitle {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
 
-.chat-content { --background: #f0f2f5; }
+.chat-content {
+  --background: #f0f2f5;
+}
 
-.date-divider { text-align: center; padding: 16px 0; }
-.date-divider span { background: white; padding: 6px 16px; border-radius: 20px; font-size: 12px; color: #666; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.date-divider {
+  text-align: center;
+  padding: 16px 0;
+}
+.date-divider span {
+  background: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  color: #666;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
 
-.messages-container { padding: 0 16px 16px 16px; }
-.message-wrapper { display: flex; margin-bottom: 12px; }
-.message-wrapper.message-sent { justify-content: flex-end; }
-.message-wrapper.message-received { justify-content: flex-start; }
+.messages-container {
+  padding: 0 16px 16px 16px;
+}
+.message-wrapper {
+  display: flex;
+  margin-bottom: 12px;
+}
+.message-wrapper.message-sent {
+  justify-content: flex-end;
+}
+.message-wrapper.message-received {
+  justify-content: flex-start;
+}
 
-.message-bubble { max-width: 75%; padding: 10px 14px; border-radius: 18px; position: relative; animation: messageSlideIn 0.3s ease; }
-.message-bubble.sent { background: #4caf50; color: white; border-bottom-right-radius: 4px; }
-.message-wrapper.message-received .message-bubble { background: white; color: #1a1a1a; border-bottom-left-radius: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+.message-bubble {
+  max-width: 75%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  position: relative;
+  animation: messageSlideIn 0.3s ease;
+}
+.message-bubble.sent {
+  background: #4caf50;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+.message-wrapper.message-received .message-bubble {
+  background: white;
+  color: #1a1a1a;
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
 
-.message-text { margin: 0; font-size: 15px; line-height: 1.4; word-wrap: break-word; }
-.message-time { font-size: 11px; opacity: 0.7; margin-top: 4px; display: block; }
-.message-bubble.sent .message-time { text-align: right; }
+.message-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+.message-time {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-top: 4px;
+  display: block;
+}
+.message-bubble.sent .message-time {
+  text-align: right;
+}
 
-.read-status, .delivered-status { font-size: 14px; margin-left: 4px; vertical-align: middle; }
-.message-image { margin-bottom: 8px; }
-.message-image img { width: 100%; border-radius: 12px; max-width: 250px; }
+.read-status,
+.delivered-status {
+  font-size: 14px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+.message-image {
+  margin-bottom: 8px;
+}
+.message-image img {
+  width: 100%;
+  border-radius: 12px;
+  max-width: 250px;
+}
 
-@keyframes messageSlideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 /* Message Input */
-.message-input-container { display: flex; align-items: center; gap: 8px; padding: 8px; background: white; }
-.message-input { flex: 1; --padding-start: 12px; --padding-end: 12px; background: #f0f0f0; border-radius: 20px; font-size: 15px; }
-.send-button { --border-radius: 50%; width: 44px; height: 44px; margin: 0; --background: #f0f0f0; --color: #999; }
-.send-button.active { --background: #4caf50; --color: white; }
+.message-input-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: white;
+}
+.message-input {
+  flex: 1;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  background: #f0f0f0;
+  border-radius: 20px;
+  font-size: 15px;
+}
+.send-button {
+  --border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  --background: #f0f0f0;
+  --color: #999;
+}
+.send-button.active {
+  --background: #4caf50;
+  --color: white;
+}
 
 /* Full-Screen Call Screen */
 .call-screen {
@@ -968,10 +1317,25 @@ onUnmounted(() => {
   color: white;
 }
 
-.call-screen-top { text-align: center; }
-.call-screen-label { font-size: 13px; color: rgba(255,255,255,0.6); margin: 0; text-transform: uppercase; letter-spacing: 2px; }
+.call-screen-top {
+  text-align: center;
+}
+.call-screen-label {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
 
-.call-screen-profile { text-align: center; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.call-screen-profile {
+  text-align: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
 
 .call-screen-avatar {
   width: 120px;
@@ -979,16 +1343,27 @@ onUnmounted(() => {
   border-radius: 50%;
   overflow: hidden;
   margin-bottom: 24px;
-  border: 4px solid rgba(255,255,255,0.3);
+  border: 4px solid rgba(255, 255, 255, 0.3);
   animation: callPulse 2s ease-in-out infinite;
 }
 
 @keyframes callPulse {
-  0%, 100% { border-color: rgba(76,175,80,0.4); transform: scale(1); }
-  50% { border-color: rgba(76,175,80,0.9); transform: scale(1.03); }
+  0%,
+  100% {
+    border-color: rgba(76, 175, 80, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    border-color: rgba(76, 175, 80, 0.9);
+    transform: scale(1.03);
+  }
 }
 
-.call-screen-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.call-screen-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
 .call-screen-avatar-fallback {
   width: 100%;
@@ -996,19 +1371,40 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
   font-size: 48px;
 }
 
-.call-screen-name { font-size: 26px; font-weight: 700; margin: 0 0 8px; color: white; }
-.call-screen-status { font-size: 16px; color: #4caf50; font-weight: 500; margin: 0; animation: callPulseStatus 1.5s ease-in-out infinite; }
-
-@keyframes callPulseStatus {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+.call-screen-name {
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: white;
+}
+.call-screen-status {
+  font-size: 16px;
+  color: #4caf50;
+  font-weight: 500;
+  margin: 0;
+  animation: callPulseStatus 1.5s ease-in-out infinite;
 }
 
-.call-screen-actions { padding-bottom: 20px; width: 100%; display: flex; justify-content: center; }
+@keyframes callPulseStatus {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.call-screen-actions {
+  padding-bottom: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
 
 .call-action-btn {
   display: flex;
@@ -1028,22 +1424,48 @@ onUnmounted(() => {
   transition: transform 0.2s;
 }
 
-.call-action-btn .call-action-icon { font-size: 28px; margin-top: 16px; pointer-events: none; }
-.call-action-btn:active { transform: scale(0.9); }
-.call-action-btn span { pointer-events: none; }
+.call-action-btn .call-action-icon {
+  font-size: 28px;
+  margin-top: 16px;
+  pointer-events: none;
+}
+.call-action-btn:active {
+  transform: scale(0.9);
+}
+.call-action-btn span {
+  pointer-events: none;
+}
 
-.incoming-actions { gap: 40px; }
-.decline-btn { background: #ff3b30; }
-.accept-btn { background: #4caf50; }
+.incoming-actions {
+  gap: 40px;
+}
+.decline-btn {
+  background: #ff3b30;
+}
+.accept-btn {
+  background: #4caf50;
+}
 
-.incoming-pulse { animation: incomingPulse 1.5s ease-in-out infinite; }
+.incoming-pulse {
+  animation: incomingPulse 1.5s ease-in-out infinite;
+}
 @keyframes incomingPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(76,175,80,0.6); }
-  50% { box-shadow: 0 0 0 20px rgba(76,175,80,0); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 20px rgba(76, 175, 80, 0);
+  }
 }
 
 @media (max-width: 360px) {
-  .message-bubble { max-width: 85%; }
-  .avatar { width: 48px; height: 48px; }
+  .message-bubble {
+    max-width: 85%;
+  }
+  .avatar {
+    width: 48px;
+    height: 48px;
+  }
 }
 </style>

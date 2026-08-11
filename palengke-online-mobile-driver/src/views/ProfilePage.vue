@@ -12,12 +12,11 @@
     </ion-header>
 
     <ion-content :fullscreen="true" class="profile-content">
-
       <!-- Profile Header -->
       <div class="profile-header">
         <div class="avatar-container">
           <div class="avatar">
-            <img v-if="profileData.avatar" :src="profileData.avatar" alt="Profile">
+            <img v-if="profileData.avatar" :src="profileData.avatar" alt="Profile" />
             <ion-icon v-else :icon="personOutline"></ion-icon>
           </div>
         </div>
@@ -66,7 +65,7 @@
             <span class="rating-label">Rating</span>
           </div>
           <div class="rating-bars">
-            <div class="rating-bar-row" v-for="star in [5,4,3,2,1]" :key="star">
+            <div class="rating-bar-row" v-for="star in [5, 4, 3, 2, 1]" :key="star">
               <span class="star-num">{{ star }}</span>
               <div class="bar-track">
                 <div
@@ -89,18 +88,10 @@
       <!-- Achievements / Improvements Tabs -->
       <div class="section">
         <div class="tab-row">
-          <div
-            class="tab-btn"
-            :class="{ active: activeTab === 'achievements' }"
-            @click="activeTab = 'achievements'"
-          >
+          <div class="tab-btn" :class="{ active: activeTab === 'achievements' }" @click="activeTab = 'achievements'">
             Achievements
           </div>
-          <div
-            class="tab-btn"
-            :class="{ active: activeTab === 'improvements' }"
-            @click="activeTab = 'improvements'"
-          >
+          <div class="tab-btn" :class="{ active: activeTab === 'improvements' }" @click="activeTab = 'improvements'">
             Improvements
           </div>
         </div>
@@ -223,13 +214,22 @@
             </div>
           </div>
           <div class="licence-bar-track" v-if="!licenceStore.state.isFree">
-            <div class="licence-bar-fill" :style="{ width: licenceBarPercent + '%', background: licenceStatusColor }"></div>
+            <div
+              class="licence-bar-fill"
+              :style="{ width: licenceBarPercent + '%', background: licenceStatusColor }"
+            ></div>
           </div>
           <div class="licence-footer-text">
             <span v-if="licenceStore.state.isFree">Licence is free — no payment needed</span>
-            <span v-else-if="licenceStore.licenceActive.value">Active until {{ licenceStore.getPaidUntilDisplay() }} — renew annually</span>
-            <span v-else-if="licenceStore.state.isPaid && licenceStore.licenceExpired.value">Licence expired — renew ₱{{ licenceStore.state.amount.toLocaleString() }}/yr to continue</span>
-            <span v-else-if="licenceStore.trialExpired.value">Trial ended — pay ₱{{ licenceStore.state.amount.toLocaleString() }}/yr to continue delivering</span>
+            <span v-else-if="licenceStore.licenceActive.value"
+              >Active until {{ licenceStore.getPaidUntilDisplay() }} — renew annually</span
+            >
+            <span v-else-if="licenceStore.state.isPaid && licenceStore.licenceExpired.value"
+              >Licence expired — renew ₱{{ licenceStore.state.amount.toLocaleString() }}/yr to continue</span
+            >
+            <span v-else-if="licenceStore.trialExpired.value"
+              >Trial ended — pay ₱{{ licenceStore.state.amount.toLocaleString() }}/yr to continue delivering</span
+            >
             <span v-else>{{ licenceStore.trialDaysRemaining.value }} days remaining in trial</span>
           </div>
           <ion-button
@@ -239,7 +239,9 @@
             class="licence-pay-btn"
             @click="goToLicencePayment"
           >
-            <span v-if="licenceStore.state.isPaid && licenceStore.licenceExpired.value">Renew ₱{{ licenceStore.state.amount.toLocaleString() }} to Continue</span>
+            <span v-if="licenceStore.state.isPaid && licenceStore.licenceExpired.value"
+              >Renew ₱{{ licenceStore.state.amount.toLocaleString() }} to Continue</span
+            >
             <span v-else>Pay ₱{{ licenceStore.state.amount.toLocaleString() }} to Continue</span>
           </ion-button>
         </div>
@@ -288,7 +290,6 @@
         <p>Palengke Online Driver</p>
         <p>Version 1.0.0 (Build 100)</p>
       </div>
-
     </ion-content>
 
     <!-- Bottom Navigation -->
@@ -321,19 +322,42 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
-  IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
-  IonFooter, IonButton, IonButtons, IonIcon,
-  alertController
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonFooter,
+  IonButton,
+  IonButtons,
+  IonIcon,
+  alertController,
 } from '@ionic/vue';
 import {
-  helpCircleOutline, personOutline,
-  shieldCheckmarkOutline, chevronForwardOutline,
-  happyOutline, callOutline, mailOutline, bicycleOutline,
-  cardOutline, colorPaletteOutline, checkmarkCircleOutline,
-  settingsOutline, logOutOutline,
-  homeOutline, cubeOutline, cashOutline, trophyOutline,
-  starOutline, flashOutline, thumbsUpOutline, heartOutline,
-  timeOutline, closeCircleOutline, warningOutline
+  helpCircleOutline,
+  personOutline,
+  shieldCheckmarkOutline,
+  chevronForwardOutline,
+  happyOutline,
+  callOutline,
+  mailOutline,
+  bicycleOutline,
+  cardOutline,
+  colorPaletteOutline,
+  checkmarkCircleOutline,
+  settingsOutline,
+  logOutOutline,
+  homeOutline,
+  cubeOutline,
+  cashOutline,
+  trophyOutline,
+  starOutline,
+  flashOutline,
+  thumbsUpOutline,
+  heartOutline,
+  timeOutline,
+  closeCircleOutline,
+  warningOutline,
 } from 'ionicons/icons';
 import { useLicenceStore } from '@/composables/useLicenceStore';
 import {
@@ -385,7 +409,9 @@ async function fetchProfile() {
         ratingCounts.value = data.ratingCounts;
       }
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 onMounted(async () => {
@@ -399,24 +425,24 @@ onMounted(async () => {
 });
 
 const licenceStatusIcon = computed(() => {
-  if (licenceStore.licenceActive.value) return checkmarkIcon
-  if (licenceStore.licenceExpired.value) return closeIcon
-  if (licenceStore.trialExpired.value) return closeIcon
-  return timeIcon
-})
+  if (licenceStore.licenceActive.value) return checkmarkIcon;
+  if (licenceStore.licenceExpired.value) return closeIcon;
+  if (licenceStore.trialExpired.value) return closeIcon;
+  return timeIcon;
+});
 
 const licenceStatusColor = computed(() => {
-  return licenceStore.getStatusColor()
-})
+  return licenceStore.getStatusColor();
+});
 
 const licenceBarPercent = computed(() => {
   if (licenceStore.licenceActive.value) {
-    const remaining = licenceStore.licenceDaysLeft.value
-    return Math.min(100, Math.max(5, (remaining / 365) * 100))
+    const remaining = licenceStore.licenceDaysLeft.value;
+    return Math.min(100, Math.max(5, (remaining / 365) * 100));
   }
-  const used = licenceStore.getDaysUsed()
-  return Math.min(100, (used / 30) * 100)
-})
+  const used = licenceStore.getDaysUsed();
+  return Math.min(100, (used / 30) * 100);
+});
 
 // Rating distribution
 const ratingCounts = ref({ 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 });
@@ -469,16 +495,20 @@ async function fetchBadges() {
     });
     if (res.ok) {
       const data = await res.json();
-      badges.value = (data.badges || []).filter((b) => b.earned).map((b) => ({
-        id: b.id,
-        name: b.name,
-        icon: iconMap[b.icon] || helpCircleOutline,
-        color: b.color,
-        isNew: b.isNew,
-        count: b.isNew ? 1 : 0,
-      }));
+      badges.value = (data.badges || [])
+        .filter((b) => b.earned)
+        .map((b) => ({
+          id: b.id,
+          name: b.name,
+          icon: iconMap[b.icon] || helpCircleOutline,
+          color: b.color,
+          isNew: b.isNew,
+          count: b.isNew ? 1 : 0,
+        }));
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 async function fetchPerformance() {
@@ -495,7 +525,9 @@ async function fetchPerformance() {
         icon: iconMap[item.icon] || helpCircleOutline,
       }));
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 // Methods
@@ -503,7 +535,7 @@ const showSafetyReport = async () => {
   const alert = await alertController.create({
     header: 'Driving Safety Report',
     message: 'Your driving safety score is excellent! Keep up the good work.',
-    buttons: ['Close']
+    buttons: ['Close'],
   });
   await alert.present();
 };
@@ -512,7 +544,7 @@ const showBadgeInfo = async (badge) => {
   const alert = await alertController.create({
     header: badge.name,
     message: `You have earned the ${badge.name} badge! Keep up the great work.`,
-    buttons: ['Close']
+    buttons: ['Close'],
   });
   await alert.present();
 };
@@ -523,8 +555,17 @@ const handleLogout = async () => {
     message: 'Are you sure you want to logout?',
     buttons: [
       { text: 'Cancel', role: 'cancel' },
-      { text: 'Logout', role: 'destructive', handler: () => { localStorage.removeItem('isAuthenticated'); localStorage.removeItem('driver_token'); localStorage.removeItem('pendingAuth'); router.push('/login'); } }
-    ]
+      {
+        text: 'Logout',
+        role: 'destructive',
+        handler: () => {
+          localStorage.removeItem('isAuthenticated');
+          localStorage.removeItem('driver_token');
+          localStorage.removeItem('pendingAuth');
+          router.push('/login');
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -542,248 +583,635 @@ const goToLicencePayment = () => router.push('/licence-payment');
 </script>
 
 <style scoped>
-.profile-content { --background: #f8f9fa; }
+.profile-content {
+  --background: #f8f9fa;
+}
 
 /* Profile Header */
 .profile-header {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-  padding: 32px 20px 28px; text-align: center; color: white;
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  padding: 32px 20px 28px;
+  text-align: center;
+  color: white;
 }
 
-.avatar-container { position: relative; display: inline-block; margin-bottom: 14px; }
+.avatar-container {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 14px;
+}
 
 .avatar {
-  width: 90px; height: 90px; border-radius: 50%;
-  background: rgba(255,255,255,0.2); border: 3px solid white;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 44px; overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: 3px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
-.avatar img { width: 100%; height: 100%; object-fit: cover; }
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-.profile-name { font-size: 22px; font-weight: 700; margin: 0 0 4px 0; }
-.profile-type { font-size: 14px; margin: 0 0 20px 0; opacity: 0.9; }
+.profile-name {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+}
+.profile-type {
+  font-size: 14px;
+  margin: 0 0 20px 0;
+  opacity: 0.9;
+}
 
-.profile-stats { display: flex; justify-content: center; align-items: center; gap: 20px; }
-.stat-item { text-align: center; }
-.stat-value { font-size: 22px; font-weight: 800; }
-.stat-label { font-size: 12px; opacity: 0.85; }
-.stat-divider { width: 1px; height: 36px; background: rgba(255,255,255,0.3); }
+.profile-stats {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+.stat-item {
+  text-align: center;
+}
+.stat-value {
+  font-size: 22px;
+  font-weight: 800;
+}
+.stat-label {
+  font-size: 12px;
+  opacity: 0.85;
+}
+.stat-divider {
+  width: 1px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.3);
+}
 
 /* Safety Card */
 .safety-card {
-  background: white; margin: 16px 16px 0;
-  border-radius: 16px; padding: 16px 20px;
-  display: flex; align-items: center; justify-content: space-between;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer;
+  background: white;
+  margin: 16px 16px 0;
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
 }
-.safety-card:active { transform: scale(0.98); }
-.safety-left { display: flex; align-items: center; gap: 14px; }
-.safety-icon { font-size: 28px; color: #4CAF50; }
-.safety-left h3 { font-size: 15px; font-weight: 700; color: #1a1a1a; margin: 0 0 3px 0; }
-.safety-left p { font-size: 13px; color: #666; margin: 0; }
-.safety-card > ion-icon { font-size: 20px; color: #ccc; }
+.safety-card:active {
+  transform: scale(0.98);
+}
+.safety-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.safety-icon {
+  font-size: 28px;
+  color: #4caf50;
+}
+.safety-left h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 3px 0;
+}
+.safety-left p {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+}
+.safety-card > ion-icon {
+  font-size: 20px;
+  color: #ccc;
+}
 
 /* Section */
 .section {
-  background: white; margin: 12px 16px 0;
-  border-radius: 16px; padding: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  background: white;
+  margin: 12px 16px 0;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .section-header-row {
-  display: flex; justify-content: space-between;
-  align-items: center; margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
-.section-title { font-size: 16px; font-weight: 700; color: #1a1a1a; margin: 0 0 16px 0; }
-.updated-text { font-size: 12px; color: #999; }
-.view-all-link { font-size: 13px; color: #4CAF50; font-weight: 600; cursor: pointer; }
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 16px 0;
+}
+.updated-text {
+  font-size: 12px;
+  color: #999;
+}
+.view-all-link {
+  font-size: 13px;
+  color: #4caf50;
+  font-weight: 600;
+  cursor: pointer;
+}
 
 /* Rating Breakdown */
-.rating-breakdown { display: flex; gap: 20px; align-items: center; margin-bottom: 14px; }
+.rating-breakdown {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 14px;
+}
 
-.rating-big { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
-.rating-number { font-size: 40px; font-weight: 900; color: #1a1a1a; line-height: 1; }
-.rating-label { font-size: 12px; color: #666; font-weight: 600; }
+.rating-big {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.rating-number {
+  font-size: 40px;
+  font-weight: 900;
+  color: #1a1a1a;
+  line-height: 1;
+}
+.rating-label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 600;
+}
 
-.rating-bars { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.rating-bars {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 
-.rating-bar-row { display: flex; align-items: center; gap: 8px; }
-.star-num { font-size: 13px; color: #666; width: 10px; text-align: right; flex-shrink: 0; }
-.bar-track { flex: 1; height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden; }
-.bar-fill { height: 100%; background: #e0e0e0; border-radius: 4px; transition: width 0.5s; }
-.bar-fill.highlight { background: #FFD700; }
-.bar-count { font-size: 12px; color: #666; width: 28px; text-align: right; flex-shrink: 0; }
+.rating-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.star-num {
+  font-size: 13px;
+  color: #666;
+  width: 10px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.bar-track {
+  flex: 1;
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  background: #e0e0e0;
+  border-radius: 4px;
+  transition: width 0.5s;
+}
+.bar-fill.highlight {
+  background: #ffd700;
+}
+.bar-count {
+  font-size: 12px;
+  color: #666;
+  width: 28px;
+  text-align: right;
+  flex-shrink: 0;
+}
 
-.avg-notice { display: flex; align-items: center; gap: 8px; background: #f8f9fa; border-radius: 10px; padding: 10px 12px; }
-.avg-notice ion-icon { font-size: 20px; color: #4CAF50; flex-shrink: 0; }
-.avg-notice span { font-size: 13px; color: #555; line-height: 1.4; }
+.avg-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.avg-notice ion-icon {
+  font-size: 20px;
+  color: #4caf50;
+  flex-shrink: 0;
+}
+.avg-notice span {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.4;
+}
 
 /* Tabs */
-.tab-row { display: flex; border-bottom: 2px solid #f0f0f0; margin-bottom: 16px; }
-.tab-btn {
-  flex: 1; text-align: center; padding: 12px;
-  font-size: 14px; font-weight: 700; color: #999;
-  cursor: pointer; border-bottom: 3px solid transparent;
-  margin-bottom: -2px; transition: all 0.2s;
+.tab-row {
+  display: flex;
+  border-bottom: 2px solid #f0f0f0;
+  margin-bottom: 16px;
 }
-.tab-btn.active { color: #4CAF50; border-bottom-color: #4CAF50; }
+.tab-btn {
+  flex: 1;
+  text-align: center;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #999;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+.tab-btn.active {
+  color: #4caf50;
+  border-bottom-color: #4caf50;
+}
 
 /* Badges */
-.badges-label { font-size: 13px; color: #999; font-weight: 600; margin: 0 0 12px 0; text-transform: uppercase; }
-.badges-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.badges-label {
+  font-size: 13px;
+  color: #999;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+}
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
 
 .badge-item {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 6px;
-  position: relative; cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  cursor: pointer;
 }
 
 .badge-icon-wrap {
-  width: 56px; height: 56px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 26px; color: white;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  color: white;
 }
 
 .badge-new {
-  position: absolute; top: -4px; right: -4px;
-  background: #f44336; color: white;
-  border-radius: 10px; padding: 2px 6px;
-  font-size: 9px; font-weight: 700;
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #f44336;
+  color: white;
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: 9px;
+  font-weight: 700;
 }
 
-.badge-name { font-size: 10px; color: #333; font-weight: 600; text-align: center; line-height: 1.2; }
+.badge-name {
+  font-size: 10px;
+  color: #333;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+}
 
 /* Improvements */
 .improvement-item {
-  display: flex; align-items: center; gap: 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
   padding: 12px 0;
   border-bottom: 1px solid #f0f0f0;
 }
-.improvement-item:last-child { border-bottom: none; }
+.improvement-item:last-child {
+  border-bottom: none;
+}
 
 .improvement-icon {
-  width: 44px; height: 44px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px; flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
 }
-.improvement-icon.good { background: #E8F5E9; color: #4CAF50; }
-.improvement-icon.great { background: #E3F2FD; color: #2196F3; }
-.improvement-icon.warning { background: #FFF3E0; color: #FF9800; }
+.improvement-icon.good {
+  background: #e8f5e9;
+  color: #4caf50;
+}
+.improvement-icon.great {
+  background: #e3f2fd;
+  color: #2196f3;
+}
+.improvement-icon.warning {
+  background: #fff3e0;
+  color: #ff9800;
+}
 
-.improvement-info { flex: 1; }
-.improvement-info h4 { font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 0 0 2px 0; }
-.improvement-info p { font-size: 12px; color: #666; margin: 0; }
+.improvement-info {
+  flex: 1;
+}
+.improvement-info h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 2px 0;
+}
+.improvement-info p {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+}
 
-.improvement-score { font-size: 16px; font-weight: 800; }
-.improvement-score.good { color: #4CAF50; }
-.improvement-score.great { color: #2196F3; }
-.improvement-score.warning { color: #FF9800; }
+.improvement-score {
+  font-size: 16px;
+  font-weight: 800;
+}
+.improvement-score.good {
+  color: #4caf50;
+}
+.improvement-score.great {
+  color: #2196f3;
+}
+.improvement-score.warning {
+  color: #ff9800;
+}
 
 /* Info List */
-.info-list { display: flex; flex-direction: column; gap: 12px; }
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
 .info-item {
-  display: flex; align-items: center; gap: 12px;
-  cursor: pointer; padding: 10px;
-  margin: -10px; border-radius: 12px; transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 10px;
+  margin: -10px;
+  border-radius: 12px;
+  transition: background 0.2s;
 }
-.info-item:active { background: #f8f9fa; }
+.info-item:active {
+  background: #f8f9fa;
+}
 
 .info-icon {
-  width: 40px; height: 40px; border-radius: 12px;
-  background: #E8F5E9; color: #4CAF50;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px; flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #e8f5e9;
+  color: #4caf50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
 }
 
-.info-content { flex: 1; }
-.info-label { font-size: 12px; color: #999; margin: 0 0 2px 0; }
-.info-value { font-size: 14px; font-weight: 600; color: #1a1a1a; margin: 0; }
+.info-content {
+  flex: 1;
+}
+.info-label {
+  font-size: 12px;
+  color: #999;
+  margin: 0 0 2px 0;
+}
+.info-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
 /* Palengke Licence */
 .licence-card {
-  background: #f8f9fa; border-radius: 14px;
-  padding: 16px; border: 2px solid #4CAF50;
+  background: #f8f9fa;
+  border-radius: 14px;
+  padding: 16px;
+  border: 2px solid #4caf50;
   margin-top: 8px;
 }
 
 .licence-header {
-  display: flex; align-items: center; gap: 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
   margin-bottom: 14px;
 }
 
-.licence-icon { font-size: 32px; }
+.licence-icon {
+  font-size: 32px;
+}
 
-.licence-info { flex: 1; }
-.licence-id { font-size: 16px; font-weight: 700; color: #1a1a1a; margin: 0 0 2px 0; font-family: monospace; letter-spacing: 0.5px; }
-.licence-status { font-size: 13px; font-weight: 600; margin: 0; }
+.licence-info {
+  flex: 1;
+}
+.licence-id {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 2px 0;
+  font-family: monospace;
+  letter-spacing: 0.5px;
+}
+.licence-status {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+}
 
 .licence-details {
-  display: flex; gap: 16px; margin-bottom: 12px;
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
 }
 
 .licence-detail-item {
-  flex: 1; display: flex; flex-direction: column; gap: 2px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.licence-detail-label { font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600; }
-.licence-detail-value { font-size: 14px; font-weight: 700; color: #1a1a1a; }
+.licence-detail-label {
+  font-size: 11px;
+  color: #999;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.licence-detail-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
 
 .licence-bar-track {
-  width: 100%; height: 6px; background: #e0e0e0;
-  border-radius: 3px; overflow: hidden; margin-bottom: 8px;
+  width: 100%;
+  height: 6px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
 }
 
 .licence-bar-fill {
-  height: 100%; border-radius: 3px; transition: width 0.5s;
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s;
 }
 
-.licence-footer-text { font-size: 12px; color: #666; margin-bottom: 8px; }
+.licence-footer-text {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 8px;
+}
 
 .licence-pay-btn {
-  --border-radius: 10px; height: 40px;
-  font-size: 14px; font-weight: 700; text-transform: none;
+  --border-radius: 10px;
+  height: 40px;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: none;
   margin-top: 4px;
 }
 
 /* Documents Preview */
-.docs-preview { display: flex; flex-direction: column; gap: 8px; }
-.doc-preview-item { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #555; }
-.doc-check { font-size: 20px; }
-.doc-check.verified { color: #4CAF50; }
-.doc-check.pending { color: #FF9800; }
+.docs-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.doc-preview-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #555;
+}
+.doc-check {
+  font-size: 20px;
+}
+.doc-check.verified {
+  color: #4caf50;
+}
+.doc-check.pending {
+  color: #ff9800;
+}
 
 /* Settings List */
-.settings-list { display: flex; flex-direction: column; gap: 4px; }
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 .settings-item {
-  display: flex; align-items: center; gap: 12px;
-  cursor: pointer; padding: 12px;
-  margin: 0 -12px; border-radius: 12px; transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 12px;
+  margin: 0 -12px;
+  border-radius: 12px;
+  transition: background 0.2s;
 }
-.settings-item:active { background: #f8f9fa; }
+.settings-item:active {
+  background: #f8f9fa;
+}
 .settings-icon {
-  width: 40px; height: 40px; border-radius: 12px;
-  background: #f0f0f0; color: #666;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px; flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #f0f0f0;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
 }
-.settings-content { flex: 1; }
-.settings-content p { font-size: 15px; font-weight: 600; color: #1a1a1a; margin: 0; }
-.settings-arrow { font-size: 18px; color: #ccc; }
+.settings-content {
+  flex: 1;
+}
+.settings-content p {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+.settings-arrow {
+  font-size: 18px;
+  color: #ccc;
+}
 
 /* Logout */
-.logout-section { padding: 16px; }
-.logout-btn { --border-radius: 12px; height: 48px; font-weight: 600; text-transform: none; }
+.logout-section {
+  padding: 16px;
+}
+.logout-btn {
+  --border-radius: 12px;
+  height: 48px;
+  font-weight: 600;
+  text-transform: none;
+}
 
-.app-version { text-align: center; padding: 0 0 24px; }
-.app-version p { font-size: 12px; color: #999; margin: 4px 0; }
+.app-version {
+  text-align: center;
+  padding: 0 0 24px;
+}
+.app-version p {
+  font-size: 12px;
+  color: #999;
+  margin: 4px 0;
+}
 
 /* Bottom Nav */
-.bottom-nav { display: grid; grid-template-columns: repeat(4, 1fr); height: 60px; }
-.nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; color: #999; }
-.nav-item ion-icon { font-size: 24px; }
-.nav-item span { font-size: 11px; font-weight: 500; }
-.nav-item.active { color: #4CAF50; }
-.nav-item:active { transform: scale(0.95); }
+.bottom-nav {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  height: 60px;
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  color: #999;
+}
+.nav-item ion-icon {
+  font-size: 24px;
+}
+.nav-item span {
+  font-size: 11px;
+  font-weight: 500;
+}
+.nav-item.active {
+  color: #4caf50;
+}
+.nav-item:active {
+  transform: scale(0.95);
+}
 </style>

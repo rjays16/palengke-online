@@ -2,7 +2,6 @@
   <ion-page>
     <ion-content :fullscreen="true" class="requirements-content">
       <div class="requirements-container">
-        
         <!-- Header with Back Button -->
         <div class="header-section">
           <div class="back-button" @click="goBack">
@@ -14,7 +13,6 @@
 
         <!-- Requirements Checklist -->
         <div class="requirements-list">
-          
           <!-- Age Requirement -->
           <div class="requirement-card" :class="{ completed: requirements.ageConfirmed }">
             <div class="requirement-icon">
@@ -25,10 +23,7 @@
               <p>Are you at least 18 years old and do you have an updated NBI or Police Clearance?</p>
             </div>
             <div class="requirement-toggle">
-              <ion-checkbox 
-                v-model="requirements.ageConfirmed"
-                color="success"
-              ></ion-checkbox>
+              <ion-checkbox v-model="requirements.ageConfirmed" color="success"></ion-checkbox>
             </div>
           </div>
 
@@ -42,10 +37,7 @@
               <p>Do you have a Professional Driver's License?</p>
             </div>
             <div class="requirement-toggle">
-              <ion-checkbox 
-                v-model="requirements.hasLicense"
-                color="success"
-              ></ion-checkbox>
+              <ion-checkbox v-model="requirements.hasLicense" color="success"></ion-checkbox>
             </div>
           </div>
 
@@ -59,10 +51,7 @@
               <p>Do you have the following Vehicle Requirements?</p>
             </div>
             <div class="requirement-toggle">
-              <ion-checkbox 
-                v-model="requirements.hasVehicle"
-                color="success"
-              ></ion-checkbox>
+              <ion-checkbox v-model="requirements.hasVehicle" color="success"></ion-checkbox>
             </div>
           </div>
 
@@ -76,13 +65,9 @@
               <p>Do you have a copy of your Birth Certificate?</p>
             </div>
             <div class="requirement-toggle">
-              <ion-checkbox 
-                v-model="requirements.hasBirthCertificate"
-                color="success"
-              ></ion-checkbox>
+              <ion-checkbox v-model="requirements.hasBirthCertificate" color="success"></ion-checkbox>
             </div>
           </div>
-
         </div>
 
         <!-- Qualification Message -->
@@ -100,8 +85,8 @@
 
         <!-- Action Button -->
         <div class="action-section">
-          <ion-button 
-            expand="block" 
+          <ion-button
+            expand="block"
             class="proceed-button"
             @click="proceedToRegistration"
             :disabled="!allRequirementsMet"
@@ -110,7 +95,6 @@
             <ion-spinner v-else name="crescent"></ion-spinner>
           </ion-button>
         </div>
-
       </div>
     </ion-content>
   </ion-page>
@@ -119,23 +103,15 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { 
-  IonPage, 
-  IonContent, 
-  IonButton, 
-  IonIcon,
-  IonCheckbox,
-  IonSpinner,
-  alertController 
-} from '@ionic/vue';
-import { 
+import { IonPage, IonContent, IonButton, IonIcon, IonCheckbox, IonSpinner, alertController } from '@ionic/vue';
+import {
   arrowBackOutline,
   personOutline,
   cardOutline,
   carOutline,
   documentTextOutline,
   checkmarkCircleOutline,
-  alertCircleOutline
+  alertCircleOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -146,11 +122,11 @@ const requirements = ref({
   ageConfirmed: false,
   hasLicense: false,
   hasVehicle: false,
-  hasBirthCertificate: false
+  hasBirthCertificate: false,
 });
 
 const allRequirementsMet = computed(() => {
-  return Object.values(requirements.value).every(v => v === true);
+  return Object.values(requirements.value).every((v) => v === true);
 });
 
 const goBack = () => {
@@ -162,21 +138,21 @@ const proceedToRegistration = async () => {
     const alert = await alertController.create({
       header: 'Requirements Not Met',
       message: 'Please confirm all requirements to proceed with registration.',
-      buttons: ['OK']
+      buttons: ['OK'],
     });
     await alert.present();
     return;
   }
 
   isLoading.value = true;
-  
+
   try {
     router.push('/register/step1');
   } catch (error) {
     const alert = await alertController.create({
       header: 'Error',
       message: 'Something went wrong. Please try again.',
-      buttons: ['OK']
+      buttons: ['OK'],
     });
     await alert.present();
   } finally {

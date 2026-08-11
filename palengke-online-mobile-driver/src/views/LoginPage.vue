@@ -51,6 +51,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonContent, IonButton, IonIcon, IonSpinner, alertController } from '@ionic/vue';
 import { mailOutline } from 'ionicons/icons';
+import { useModals } from '@/components/modals/useModals';
 
 const router = useRouter();
 import { API_BASE } from '@/services/api';
@@ -58,18 +59,7 @@ import { API_BASE } from '@/services/api';
 const email = ref('');
 const isLoading = ref(false);
 
-const showLoadingModal = async (message = 'Loading...', autoDismiss = true) => {
-  const alert = await alertController.create({
-    cssClass: 'loading-modal-simple',
-    message: message,
-    buttons: [],
-  });
-  await alert.present();
-  if (autoDismiss) {
-    setTimeout(() => alert.dismiss(), 1500);
-  }
-  return alert;
-};
+const { showLoadingModal } = useModals();
 
 const checkAvailability = async () => {
   const savedData = localStorage.getItem('registrationData');
@@ -102,9 +92,7 @@ const checkAvailability = async () => {
       let foundCity = null;
 
       for (const region of locData.locations) {
-        const city = region.cities.find((c) =>
-          userCity.toLowerCase().includes(c.name.toLowerCase())
-        );
+        const city = region.cities.find((c) => userCity.toLowerCase().includes(c.name.toLowerCase()));
         if (city) {
           foundRegion = region;
           foundCity = city;
@@ -254,7 +242,7 @@ const handleLogin = async () => {
           text: 'Send Code',
           cssClass: 'alert-button-confirm',
           handler: async () => {
-            const loading = await showLoadingModal('Sending verification code...', false);
+            const loading = await showLoadingModal('Sending verification code...');
 
             try {
               await fetch(`${API_BASE}/api/send-otp`, {
@@ -418,7 +406,7 @@ onMounted(async () => {
   top: 50%;
   transform: translateY(-50%);
   font-size: 20px;
-  color: #4CAF50;
+  color: #4caf50;
   z-index: 2;
 }
 
@@ -435,7 +423,7 @@ onMounted(async () => {
 
 .custom-input:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: #4caf50;
 }
 
 .custom-input::placeholder {
@@ -443,7 +431,7 @@ onMounted(async () => {
 }
 
 .login-button {
-  --background: #4CAF50;
+  --background: #4caf50;
   --background-hover: #45a049;
   --border-radius: 12px;
   height: 56px;
@@ -466,7 +454,7 @@ onMounted(async () => {
 }
 
 .signup-text a {
-  color: #4CAF50;
+  color: #4caf50;
   text-decoration: none;
   font-weight: 600;
   margin-left: 4px;
@@ -548,14 +536,18 @@ onMounted(async () => {
   width: 50px;
   height: 50px;
   border: 5px solid #f0f0f0;
-  border-top: 5px solid #4CAF50;
+  border-top: 5px solid #4caf50;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 :deep(.loading-modal-simple .alert-button-group) {
@@ -581,7 +573,7 @@ onMounted(async () => {
 }
 
 :deep(.otp-confirm-alert .alert-button-confirm) {
-  color: #4CAF50;
+  color: #4caf50;
   font-weight: 600;
 }
 
@@ -628,7 +620,7 @@ onMounted(async () => {
 
 :deep(.alert-login .alert-button-primary) {
   color: #fff !important;
-  background: #4CAF50;
+  background: #4caf50;
 }
 
 .custom-alert-body {

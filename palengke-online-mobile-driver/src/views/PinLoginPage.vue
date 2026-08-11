@@ -69,19 +69,12 @@ import {
   alertController,
 } from '@ionic/vue';
 import { lockClosedOutline } from 'ionicons/icons';
+import { useModals } from '@/components/modals/useModals';
 
 const router = useRouter();
 import { API_BASE } from '@/services/api';
 
-const showLoadingModal = async (message = 'Loading...') => {
-  const alert = await alertController.create({
-    cssClass: 'loading-modal-simple',
-    message: message,
-    buttons: [],
-  });
-  await alert.present();
-  return alert;
-};
+const { showLoadingModal } = useModals();
 
 const userEmail = ref(localStorage.getItem('userEmail') || '');
 const deviceId = ref(localStorage.getItem('deviceId') || '');
@@ -117,9 +110,7 @@ const checkAvailability = async () => {
       let foundCity = null;
 
       for (const region of locData.locations) {
-        const city = region.cities.find((c) =>
-          userCity.toLowerCase().includes(c.name.toLowerCase())
-        );
+        const city = region.cities.find((c) => userCity.toLowerCase().includes(c.name.toLowerCase()));
         if (city) {
           foundRegion = region;
           foundCity = city;
@@ -551,7 +542,7 @@ onMounted(async () => {
   width: 50px;
   height: 50px;
   border: 5px solid #f0f0f0;
-  border-top: 5px solid #4CAF50;
+  border-top: 5px solid #4caf50;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

@@ -19,25 +19,13 @@
       <!-- Filter Tabs -->
       <ion-toolbar>
         <div class="custom-tabs">
-          <div
-            class="custom-tab"
-            :class="{ active: selectedFilter === 'all' }"
-            @click="selectedFilter = 'all'"
-          >
+          <div class="custom-tab" :class="{ active: selectedFilter === 'all' }" @click="selectedFilter = 'all'">
             All ({{ notifications.length }})
           </div>
-          <div
-            class="custom-tab"
-            :class="{ active: selectedFilter === 'unread' }"
-            @click="selectedFilter = 'unread'"
-          >
+          <div class="custom-tab" :class="{ active: selectedFilter === 'unread' }" @click="selectedFilter = 'unread'">
             Unread ({{ unreadCount }})
           </div>
-          <div
-            class="custom-tab"
-            :class="{ active: selectedFilter === 'orders' }"
-            @click="selectedFilter = 'orders'"
-          >
+          <div class="custom-tab" :class="{ active: selectedFilter === 'orders' }" @click="selectedFilter = 'orders'">
             Orders
           </div>
           <div
@@ -47,11 +35,7 @@
           >
             Earnings
           </div>
-          <div
-            class="custom-tab"
-            :class="{ active: selectedFilter === 'wallet' }"
-            @click="selectedFilter = 'wallet'"
-          >
+          <div class="custom-tab" :class="{ active: selectedFilter === 'wallet' }" @click="selectedFilter = 'wallet'">
             Wallet
           </div>
         </div>
@@ -59,7 +43,6 @@
     </ion-header>
 
     <ion-content :fullscreen="true" class="notif-content">
-
       <!-- Empty -->
       <div v-if="filteredNotifications.length === 0" class="empty-state">
         <div class="empty-icon-wrap">
@@ -92,7 +75,6 @@
           <div class="unread-indicator" v-if="!notif.read"></div>
         </div>
       </div>
-
     </ion-content>
   </ion-page>
 </template>
@@ -101,15 +83,28 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
-  IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
-  IonButtons, IonBackButton, IonButton, IonIcon,
-  actionSheetController, toastController
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonButtons,
+  IonBackButton,
+  IonButton,
+  IonIcon,
+  actionSheetController,
+  toastController,
 } from '@ionic/vue';
 import {
-  checkmarkDoneOutline, ellipsisVerticalOutline,
-  notificationsOffOutline, cartOutline, cashOutline,
-  warningOutline, informationCircleOutline, trophyOutline,
-  walletOutline
+  checkmarkDoneOutline,
+  ellipsisVerticalOutline,
+  notificationsOffOutline,
+  cartOutline,
+  cashOutline,
+  warningOutline,
+  informationCircleOutline,
+  trophyOutline,
+  walletOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -124,22 +119,25 @@ function getToken() {
 const selectedFilter = ref('all');
 const notifications = ref([]);
 
-const unreadCount = computed(() => notifications.value.filter(n => !n.read).length);
+const unreadCount = computed(() => notifications.value.filter((n) => !n.read).length);
 
 const filteredNotifications = computed(() => {
-  if (selectedFilter.value === 'unread') return notifications.value.filter(n => !n.read);
-  if (selectedFilter.value === 'orders') return notifications.value.filter(n => n.category === 'orders');
-  if (selectedFilter.value === 'earnings') return notifications.value.filter(n => n.category === 'earnings');
-  if (selectedFilter.value === 'wallet') return notifications.value.filter(n => n.category === 'wallet');
+  if (selectedFilter.value === 'unread') return notifications.value.filter((n) => !n.read);
+  if (selectedFilter.value === 'orders') return notifications.value.filter((n) => n.category === 'orders');
+  if (selectedFilter.value === 'earnings') return notifications.value.filter((n) => n.category === 'earnings');
+  if (selectedFilter.value === 'wallet') return notifications.value.filter((n) => n.category === 'wallet');
   return notifications.value;
 });
 
 const getNotifIcon = (type) => {
   const icons = {
-    order: cartOutline, payment: cashOutline,
-    tip: cashOutline, warning: warningOutline,
-    info: informationCircleOutline, achievement: trophyOutline,
-    wallet_top_up: walletOutline
+    order: cartOutline,
+    payment: cashOutline,
+    tip: cashOutline,
+    warning: warningOutline,
+    info: informationCircleOutline,
+    achievement: trophyOutline,
+    wallet_top_up: walletOutline,
   };
   return icons[type] || informationCircleOutline;
 };
@@ -155,7 +153,9 @@ const fetchNotifications = async () => {
       const data = await res.json();
       notifications.value = data.notifications || [];
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 };
 
 const handleNotifClick = async (notif) => {
@@ -167,20 +167,24 @@ const handleNotifClick = async (notif) => {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}` },
         });
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
     notif.read = true;
   }
   if (notif.type === 'tip') {
     router.push({
       path: '/tip-received',
-      query: notif.data ? {
-        orderId: notif.data.order_id,
-        amount: notif.data.amount,
-        customerName: notif.data.customer_name,
-        message: notif.data.message,
-        deliveryFee: notif.data.delivery_fee,
-      } : {},
+      query: notif.data
+        ? {
+            orderId: notif.data.order_id,
+            amount: notif.data.amount,
+            customerName: notif.data.customer_name,
+            message: notif.data.message,
+            deliveryFee: notif.data.delivery_fee,
+          }
+        : {},
     });
   }
   if (notif.type === 'order') router.push('/orders');
@@ -195,10 +199,17 @@ const markAllRead = async () => {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
-  notifications.value.forEach(n => n.read = true);
-  const toast = await toastController.create({ message: 'All marked as read', duration: 2000, color: 'medium', position: 'top' });
+  notifications.value.forEach((n) => (n.read = true));
+  const toast = await toastController.create({
+    message: 'All marked as read',
+    duration: 2000,
+    color: 'medium',
+    position: 'top',
+  });
   await toast.present();
 };
 
@@ -207,22 +218,33 @@ const showOptions = async () => {
     header: 'Notification Options',
     buttons: [
       { text: 'Mark All as Read', handler: () => markAllRead() },
-      { text: 'Clear All', role: 'destructive', handler: async () => {
-        const token = getToken();
-        if (token) {
-          try {
-            await fetch(`${API_BASE}/api/driver/notifications`, {
-              method: 'DELETE',
-              headers: { Authorization: `Bearer ${token}` },
-            });
-          } catch { /* ignore */ }
-        }
-        notifications.value = [];
-        const toast = await toastController.create({ message: 'All notifications cleared', duration: 2000, color: 'medium', position: 'top' });
-        await toast.present();
-      }},
-      { text: 'Cancel', role: 'cancel' }
-    ]
+      {
+        text: 'Clear All',
+        role: 'destructive',
+        handler: async () => {
+          const token = getToken();
+          if (token) {
+            try {
+              await fetch(`${API_BASE}/api/driver/notifications`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` },
+              });
+            } catch {
+              /* ignore */
+            }
+          }
+          notifications.value = [];
+          const toast = await toastController.create({
+            message: 'All notifications cleared',
+            duration: 2000,
+            color: 'medium',
+            position: 'top',
+          });
+          await toast.present();
+        },
+      },
+      { text: 'Cancel', role: 'cancel' },
+    ],
   });
   await actionSheet.present();
 };
@@ -238,20 +260,26 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.notif-content { --background: #f8f9fa; }
+.notif-content {
+  --background: #f8f9fa;
+}
 
 /* Custom Tabs */
 .custom-tabs {
-  display: flex; gap: 8px;
+  display: flex;
+  gap: 8px;
   padding: 8px 16px;
   overflow-x: auto;
 }
-.custom-tabs::-webkit-scrollbar { display: none; }
+.custom-tabs::-webkit-scrollbar {
+  display: none;
+}
 
 .custom-tab {
   padding: 8px 20px;
   border-radius: 20px;
-  font-size: 13px; font-weight: 600;
+  font-size: 13px;
+  font-weight: 600;
   color: #666;
   background: #f0f0f0;
   cursor: pointer;
@@ -260,47 +288,154 @@ onUnmounted(() => {
   user-select: none;
 }
 .custom-tab.active {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
 }
-.custom-tab:active { transform: scale(0.95); }
+.custom-tab:active {
+  transform: scale(0.95);
+}
 
 /* Notifications */
 
-.notif-list { padding: 8px 16px 16px; }
+.notif-list {
+  padding: 8px 16px 16px;
+}
 
 .notif-card {
-  background: white; border-radius: 16px;
-  padding: 16px; margin-bottom: 12px;
-  display: flex; align-items: flex-start; gap: 14px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  cursor: pointer; position: relative; transition: transform 0.2s;
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.2s;
 }
-.notif-card.unread { background: #F0F9F0; border-left: 4px solid #4CAF50; }
-.notif-card:active { transform: scale(0.98); }
+.notif-card.unread {
+  background: #f0f9f0;
+  border-left: 4px solid #4caf50;
+}
+.notif-card:active {
+  transform: scale(0.98);
+}
 
-.notif-icon { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
-.notif-icon.order { background: #E8F5E9; color: #4CAF50; }
-.notif-icon.payment { background: #E3F2FD; color: #2196F3; }
-.notif-icon.tip { background: #FFF3E0; color: #FF9800; }
-.notif-icon.warning { background: #FFEBEE; color: #f44336; }
-.notif-icon.info { background: #F3E5F5; color: #9C27B0; }
-.notif-icon.achievement { background: #FFF8E1; color: #FFD700; }
-.notif-icon.wallet_top_up { background: #E8F5E9; color: #4CAF50; }
+.notif-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.notif-icon.order {
+  background: #e8f5e9;
+  color: #4caf50;
+}
+.notif-icon.payment {
+  background: #e3f2fd;
+  color: #2196f3;
+}
+.notif-icon.tip {
+  background: #fff3e0;
+  color: #ff9800;
+}
+.notif-icon.warning {
+  background: #ffebee;
+  color: #f44336;
+}
+.notif-icon.info {
+  background: #f3e5f5;
+  color: #9c27b0;
+}
+.notif-icon.achievement {
+  background: #fff8e1;
+  color: #ffd700;
+}
+.notif-icon.wallet_top_up {
+  background: #e8f5e9;
+  color: #4caf50;
+}
 
-.notif-body { flex: 1; min-width: 0; }
-.notif-body h4 { font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 0 0 5px 0; }
-.notif-body p { font-size: 13px; color: #555; margin: 0 0 8px 0; line-height: 1.4; }
+.notif-body {
+  flex: 1;
+  min-width: 0;
+}
+.notif-body h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 5px 0;
+}
+.notif-body p {
+  font-size: 13px;
+  color: #555;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
 
-.notif-footer { display: flex; align-items: center; gap: 8px; }
-.notif-time { font-size: 12px; color: #999; }
-.notif-badge { background: #4CAF50; color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+.notif-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.notif-time {
+  font-size: 12px;
+  color: #999;
+}
+.notif-badge {
+  background: #4caf50;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+}
 
-.unread-indicator { width: 10px; height: 10px; background: #4CAF50; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+.unread-indicator {
+  width: 10px;
+  height: 10px;
+  background: #4caf50;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 6px;
+}
 
-.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 40px; text-align: center; }
-.empty-icon-wrap { width: 100px; height: 100px; background: #f0f0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; }
-.empty-icon-wrap ion-icon { font-size: 48px; color: #999; }
-.empty-state h3 { font-size: 20px; font-weight: 700; color: #1a1a1a; margin: 0 0 8px 0; }
-.empty-state p { font-size: 14px; color: #999; margin: 0; }
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 40px;
+  text-align: center;
+}
+.empty-icon-wrap {
+  width: 100px;
+  height: 100px;
+  background: #f0f0f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+.empty-icon-wrap ion-icon {
+  font-size: 48px;
+  color: #999;
+}
+.empty-state h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+}
+.empty-state p {
+  font-size: 14px;
+  color: #999;
+  margin: 0;
+}
 </style>

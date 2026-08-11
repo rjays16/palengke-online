@@ -92,8 +92,6 @@
             <span v-else class="helper-text">{{ phoneHelperText }}</span>
           </div>
 
-
-
           <!-- Send OTP Button (shows when email is valid but OTP not sent) -->
           <ion-button
             v-if="isEmailValid && !showOtpSection && !isEmailVerified && !emailExistsError"
@@ -207,14 +205,14 @@ onMounted(async () => {
   try {
     const res = await fetch(`${API_BASE}/api/countries`);
     const data = await res.json();
-    countryCodes.value = data.countries.map(c => ({
+    countryCodes.value = data.countries.map((c) => ({
       code: c.dial_code,
       country: c.name,
       abbr: c.code,
       digits: c.digit_count,
     }));
     if (countryCodes.value.length > 0) {
-      const ph = countryCodes.value.find(c => c.code === '+63');
+      const ph = countryCodes.value.find((c) => c.code === '+63');
       if (ph) countryCode.value = '+63';
     }
   } catch {
@@ -398,7 +396,6 @@ const validateField = (field) => {
     errors.value.phone = '';
     return true;
   }
-
 };
 
 // Send OTP to email
@@ -826,9 +823,15 @@ const handleNext = () => {
 }
 
 @keyframes scaleIn {
-  0% { transform: translateY(-50%) scale(0); }
-  50% { transform: translateY(-50%) scale(1.2); }
-  100% { transform: translateY(-50%) scale(1); }
+  0% {
+    transform: translateY(-50%) scale(0);
+  }
+  50% {
+    transform: translateY(-50%) scale(1.2);
+  }
+  100% {
+    transform: translateY(-50%) scale(1);
+  }
 }
 
 /* Input States */

@@ -2,7 +2,6 @@
   <ion-page>
     <ion-content :fullscreen="true" class="step-content">
       <div class="step-container">
-        
         <!-- Back Button -->
         <div class="back-button" @click="goBack">
           <ion-icon :icon="arrowBackOutline"></ion-icon>
@@ -24,7 +23,6 @@
 
         <!-- Form -->
         <div class="form-section">
-          
           <!-- Contact Information -->
           <div class="review-card">
             <div class="review-header">
@@ -115,14 +113,10 @@
 
           <!-- Terms Checkbox -->
           <div class="terms-checkbox">
-            <input 
-              type="checkbox" 
-              id="terms" 
-              v-model="acceptedTerms"
-              class="checkbox-input"
-            >
+            <input type="checkbox" id="terms" v-model="acceptedTerms" class="checkbox-input" />
             <label for="terms">
-              I agree to the <a href="#" @click.prevent="showTerms">Terms & Conditions</a> and confirm that all information provided is accurate.
+              I agree to the <a href="#" @click.prevent="showTerms">Terms & Conditions</a> and confirm that all
+              information provided is accurate.
             </label>
           </div>
 
@@ -130,26 +124,21 @@
           <div class="info-box">
             <ion-icon :icon="informationCircleOutline"></ion-icon>
             <div class="info-text">
-              <strong>What happens next?</strong><br>
-              Our team will review your application within 24-48 hours. You will receive an email notification once approved.
+              <strong>What happens next?</strong><br />
+              Our team will review your application within 24-48 hours. You will receive an email notification once
+              approved.
             </div>
           </div>
 
           <!-- Navigation Buttons -->
           <div class="button-group">
-            <ion-button 
-              expand="block" 
-              fill="outline"
-              color="medium"
-              class="back-btn"
-              @click="goBack"
-            >
+            <ion-button expand="block" fill="outline" color="medium" class="back-btn" @click="goBack">
               <ion-icon slot="start" :icon="arrowBackOutline"></ion-icon>
               Back
             </ion-button>
 
-            <ion-button 
-              expand="block" 
+            <ion-button
+              expand="block"
               class="submit-button"
               @click="handleSubmit"
               :disabled="!acceptedTerms || isSubmitting"
@@ -159,7 +148,6 @@
             </ion-button>
           </div>
         </div>
-
       </div>
     </ion-content>
   </ion-page>
@@ -168,14 +156,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import {
-  IonPage,
-  IonContent,
-  IonButton,
-  IonIcon,
-  IonSpinner,
-  alertController
-} from '@ionic/vue';
+import { IonPage, IonContent, IonButton, IonIcon, IonSpinner, alertController } from '@ionic/vue';
 import { useRegistrationStore } from '@/composables/useRegistrationStore';
 import {
   arrowBackOutline,
@@ -183,8 +164,9 @@ import {
   personOutline,
   cardOutline,
   carOutline,
-  informationCircleOutline
+  informationCircleOutline,
 } from 'ionicons/icons';
+import { useSuccessModal } from '@/components/modals/useSuccessModal';
 
 const router = useRouter();
 
@@ -202,8 +184,9 @@ const fullName = computed(() => {
 const showTerms = async () => {
   const alert = await alertController.create({
     header: 'Terms & Conditions',
-    message: 'By submitting this application, you agree to our terms of service and privacy policy. You confirm that all information you provide is accurate, that you meet the eligibility requirements (at least 18 years old with a valid driver\u2019s license appropriate for your vehicle), and that you will comply with all applicable laws, safety regulations, and the driver partnership agreement.',
-    buttons: ['Close']
+    message:
+      'By submitting this application, you agree to our terms of service and privacy policy. You confirm that all information you provide is accurate, that you meet the eligibility requirements (at least 18 years old with a valid driver\u2019s license appropriate for your vehicle), and that you will comply with all applicable laws, safety regulations, and the driver partnership agreement.',
+    buttons: ['Close'],
   });
   await alert.present();
 };
@@ -237,14 +220,14 @@ const handleSubmit = async () => {
 
     onSubmitted();
 
-    await showSuccessModal('Application submitted successfully!\nWe\'ll review it within 24-48 hours.');
+    await showSuccessModal("Application submitted successfully!\nWe'll review it within 24-48 hours.");
 
     router.push('/register/success');
   } catch (error) {
     const alert = await alertController.create({
       header: 'Error',
       message: error.message || 'Something went wrong. Please try again.',
-      buttons: ['OK']
+      buttons: ['OK'],
     });
     await alert.present();
   } finally {
@@ -252,51 +235,7 @@ const handleSubmit = async () => {
   }
 };
 
-const showSuccessModal = async (message) => {
-  const alert = await alertController.create({
-    cssClass: 'success-modal',
-    header: ' ',
-    message: message,
-    buttons: ['OK']
-  });
-  
-  await alert.present();
-  
-  setTimeout(() => {
-    const alertElement = document.querySelector('.success-modal .alert-message');
-    if (alertElement) {
-      const textContent = alertElement.textContent;
-      alertElement.innerHTML = '';
-      
-      const wrapper = document.createElement('div');
-      wrapper.style.display = 'flex';
-      wrapper.style.flexDirection = 'column';
-      wrapper.style.alignItems = 'center';
-      wrapper.style.textAlign = 'center';
-      
-      const img = document.createElement('img');
-      img.src = '/assets/images/checkmark_success.png';
-      img.style.width = '80px';
-      img.style.height = '80px';
-      img.style.margin = '0 auto 16px auto';
-      img.style.display = 'block';
-      
-      const textDiv = document.createElement('div');
-      textDiv.textContent = textContent;
-      textDiv.style.fontSize = '18px';
-      textDiv.style.fontWeight = '600';
-      textDiv.style.color = '#1a1a1a';
-      textDiv.style.textAlign = 'center';
-      textDiv.style.whiteSpace = 'pre-line';
-      
-      wrapper.appendChild(img);
-      wrapper.appendChild(textDiv);
-      alertElement.appendChild(wrapper);
-    }
-  }, 50);
-  
-  await alert.onDidDismiss();
-};
+const { showSuccessModal } = useSuccessModal();
 </script>
 
 <style scoped>
@@ -353,7 +292,7 @@ const showSuccessModal = async (message) => {
 
 .progress-fill {
   height: 100%;
-  background: #4CAF50;
+  background: #4caf50;
   transition: width 0.3s ease;
 }
 
@@ -407,7 +346,7 @@ const showSuccessModal = async (message) => {
 
 .review-header ion-icon {
   font-size: 20px;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .review-header h2 {
@@ -458,7 +397,7 @@ const showSuccessModal = async (message) => {
   height: 22px;
   margin-top: 2px;
   cursor: pointer;
-  accent-color: #4CAF50;
+  accent-color: #4caf50;
   flex-shrink: 0;
 }
 
@@ -470,7 +409,7 @@ const showSuccessModal = async (message) => {
 }
 
 .terms-checkbox a {
-  color: #4CAF50;
+  color: #4caf50;
   text-decoration: none;
   font-weight: 600;
 }
@@ -478,8 +417,8 @@ const showSuccessModal = async (message) => {
 .info-box {
   display: flex;
   gap: 12px;
-  background: #E8F5E9;
-  border-left: 4px solid #4CAF50;
+  background: #e8f5e9;
+  border-left: 4px solid #4caf50;
   padding: 16px;
   border-radius: 8px;
   margin-bottom: 24px;
@@ -487,14 +426,14 @@ const showSuccessModal = async (message) => {
 
 .info-box ion-icon {
   font-size: 24px;
-  color: #4CAF50;
+  color: #4caf50;
   flex-shrink: 0;
   margin-top: 2px;
 }
 
 .info-text {
   font-size: 13px;
-  color: #2E7D32;
+  color: #2e7d32;
   line-height: 1.5;
 }
 
@@ -519,7 +458,7 @@ const showSuccessModal = async (message) => {
 }
 
 .submit-button {
-  --background: #4CAF50;
+  --background: #4caf50;
   --background-hover: #45a049;
   --border-radius: 12px;
   height: 52px;

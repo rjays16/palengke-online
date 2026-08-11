@@ -5,7 +5,7 @@
         <div class="card">
           <div class="icon-wrap icon-pending">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32">
-              <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
 
@@ -17,9 +17,12 @@
 
           <div class="info-box">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-              <circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/>
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4m0-4h.01" />
             </svg>
-            <span>You'll receive an email at <strong>{{ email }}</strong> once approved.</span>
+            <span
+              >You'll receive an email at <strong>{{ email }}</strong> once approved.</span
+            >
           </div>
 
           <ion-button expand="block" class="login-btn" @click="goToLogin">
@@ -129,7 +132,7 @@ const goToLogin = () => {
 }
 
 .login-btn {
-  --background: #4CAF50;
+  --background: #4caf50;
   --background-hover: #45a049;
   --border-radius: 12px;
   height: 52px;

@@ -224,7 +224,7 @@ onMounted(async () => {
   try {
     const res = await fetch(`${API_BASE}/api/countries`);
     const data = await res.json();
-    countries.value = data.countries.filter(c => c.enabled).map(c => ({ code: c.code, name: c.name }));
+    countries.value = data.countries.filter((c) => c.enabled).map((c) => ({ code: c.code, name: c.name }));
   } catch {
     countries.value = [];
   } finally {

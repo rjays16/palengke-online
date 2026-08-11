@@ -1,7 +1,6 @@
 <template>
   <ion-page>
     <ion-content :fullscreen="true" class="delivery-content">
-
       <!-- Map Container -->
       <div id="delivery-map" class="map-container"></div>
 
@@ -22,24 +21,22 @@
         </div>
       </div>
 
-<!-- No Active Order -->
+      <!-- No Active Order -->
       <div v-if="!orderData" class="no-order-overlay">
         <div class="no-order-card">
           <ion-icon :icon="bicycleOutline"></ion-icon>
           <h3>No active delivery</h3>
           <p>There is no active order assigned to you right now.</p>
-          <ion-button expand="block" class="no-order-btn" @click="router.replace('/home')">
-            Back to Home
-          </ion-button>
+          <ion-button expand="block" class="no-order-btn" @click="router.replace('/home')"> Back to Home </ion-button>
         </div>
       </div>
 
-<!-- Bottom Sheet - scrollable -->
+      <!-- Bottom Sheet - scrollable -->
       <div v-if="orderData" class="bottom-sheet" :class="{ expanded: sheetExpanded }">
         <div class="sheet-handle" @click="sheetExpanded = !sheetExpanded">
           <div class="handle-bar"></div>
         </div>
-        
+
         <!-- Delivery Progress -->
         <div class="delivery-progress">
           <div class="progress-step" :class="{ active: currentStep >= 1, done: currentStep > 1 }">
@@ -63,7 +60,7 @@
             <span>Delivered</span>
           </div>
         </div>
-        
+
         <!-- Scrollable Content -->
         <div class="sheet-content">
           <!-- Step 1: Pickup -->
@@ -96,7 +93,7 @@
               Collect: ₱{{ orderData.totalAmount }} ({{ orderData.paymentMethod }})
             </p>
           </div>
-          
+
           <!-- Step 2: Delivering -->
           <div v-if="currentStep === 2" class="step-detail">
             <div class="step-badge delivering">
@@ -118,7 +115,7 @@
               Collect: ₱{{ orderData.totalAmount }} on arrival
             </p>
           </div>
-          
+
           <!-- Step 3: Arrived -->
           <div v-if="currentStep === 3" class="step-detail">
             <div class="step-badge arrived">
@@ -132,7 +129,7 @@
             </p>
           </div>
         </div>
-        
+
         <!-- Quick Action Button -->
         <div class="action-row">
           <button v-if="currentStep === 1" class="action-btn pickup-btn" @click="confirmPickup">
@@ -149,7 +146,6 @@
           </button>
         </div>
       </div>
-
     </ion-content>
   </ion-page>
 </template>
@@ -157,20 +153,24 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { IonPage, IonContent, IonButton, IonIcon, alertController, toastController } from '@ionic/vue';
 import {
-  IonPage, IonContent, IonButton, IonIcon,
-  alertController, toastController
-} from '@ionic/vue';
-import {
-  arrowBackOutline, timeOutline,
-  bicycleOutline, homeOutline,
-  checkmarkCircleOutline, cubeOutline,
-  cashOutline, callOutline,
-  locationOutline, locateOutline, storefrontOutline,
-  documentTextOutline
+  arrowBackOutline,
+  timeOutline,
+  bicycleOutline,
+  homeOutline,
+  checkmarkCircleOutline,
+  cubeOutline,
+  cashOutline,
+  callOutline,
+  locationOutline,
+  locateOutline,
+  storefrontOutline,
+  documentTextOutline,
 } from 'ionicons/icons';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { useSuccessModal } from '@/components/modals/useSuccessModal';
 
 const router = useRouter();
 import { API_BASE } from '@/services/api';
@@ -238,9 +238,10 @@ const fetchActiveOrder = async () => {
       paymentMethod: paymentLabel(active.paymentMethod),
       driverEarnings: active.driverEarnings || 0,
       pickupInstructions: active.pickupInstructions || '',
-      items: Array.isArray(active.items) && active.items.length
-        ? active.items.map((i) => `${i.qty ?? ''}${i.unit ?? ''} ${i.name ?? ''}`.trim())
-        : [],
+      items:
+        Array.isArray(active.items) && active.items.length
+          ? active.items.map((i) => `${i.qty ?? ''}${i.unit ?? ''} ${i.name ?? ''}`.trim())
+          : [],
     };
 
     if (active.dbStatus === 'processing') {
@@ -322,7 +323,8 @@ const initMap = () => {
   map.on('moveend', onMapDragEnd);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap', maxZoom: 19
+    attribution: '© OpenStreetMap',
+    maxZoom: 19,
   }).addTo(map);
 
   // Custom vendor icon (green store)
@@ -331,7 +333,8 @@ const initMap = () => {
   const vendorIcon = L.divIcon({
     className: 'vendor-marker',
     html: vendorIconHtml,
-    iconSize: [44, 44], iconAnchor: [22, 22]
+    iconSize: [44, 44],
+    iconAnchor: [22, 22],
   });
 
   // Custom customer icon (red home)
@@ -340,7 +343,8 @@ const initMap = () => {
   const customerIcon = L.divIcon({
     className: 'customer-marker',
     html: customerIconHtml,
-    iconSize: [44, 44], iconAnchor: [22, 22]
+    iconSize: [44, 44],
+    iconAnchor: [22, 22],
   });
 
   // Driver icon (blue motorcycle)
@@ -349,12 +353,12 @@ const initMap = () => {
   const driverIcon = L.divIcon({
     className: 'driver-marker',
     html: driverIconHtml,
-    iconSize: [48, 48], iconAnchor: [24, 24]
+    iconSize: [48, 48],
+    iconAnchor: [24, 24],
   });
 
   if (vendorPos.value) {
-    L.marker(vendorPos.value, { icon: vendorIcon })
-      .addTo(map).bindPopup(`
+    L.marker(vendorPos.value, { icon: vendorIcon }).addTo(map).bindPopup(`
         <div style="text-align:center;min-width:160px;">
           <strong style="color:#4CAF50;font-size:14px;">🏪 PICKUP HERE</strong><br>
           <span style="color:#666;font-size:12px;">${orderData.value?.sellerName || ''}</span><br>
@@ -366,8 +370,7 @@ const initMap = () => {
   }
 
   if (customerPos.value) {
-    L.marker(customerPos.value, { icon: customerIcon })
-      .addTo(map).bindPopup(`
+    L.marker(customerPos.value, { icon: customerIcon }).addTo(map).bindPopup(`
         <div style="text-align:center;min-width:160px;">
           <strong style="color:#f44336;font-size:14px;">🏠 DELIVER HERE</strong><br>
           <span style="color:#666;font-size:12px;">${orderData.value?.customerName || ''}</span><br>
@@ -379,8 +382,7 @@ const initMap = () => {
   }
 
   if (driverPos.value) {
-    driverMarker = L.marker(driverPos.value, { icon: driverIcon })
-      .addTo(map).bindPopup('<b>🏍️ Driver</b>');
+    driverMarker = L.marker(driverPos.value, { icon: driverIcon }).addTo(map).bindPopup('<b>🏍️ Driver</b>');
   }
 
   drawPickupRoute();
@@ -400,7 +402,7 @@ const drawPickupRoute = () => {
         weight: 5,
         opacity: 0.9,
         dashArray: '12, 8',
-        lineCap: 'round'
+        lineCap: 'round',
       }).addTo(map);
     }
 
@@ -410,7 +412,7 @@ const drawPickupRoute = () => {
         weight: 3,
         opacity: 0.6,
         dashArray: '8, 8',
-        lineCap: 'round'
+        lineCap: 'round',
       }).addTo(map);
     }
   }
@@ -418,7 +420,9 @@ const drawPickupRoute = () => {
 
 // Track when user is dragging the map
 let userIsDragging = false;
-const onMapDragStart = () => { userIsDragging = true; };
+const onMapDragStart = () => {
+  userIsDragging = true;
+};
 const onMapDragEnd = () => {
   // Resume following the driver once the user lets go
   userIsDragging = false;
@@ -436,7 +440,7 @@ const drawDeliveryRoute = () => {
       weight: 5,
       opacity: 0.9,
       dashArray: '12, 8',
-      lineCap: 'round'
+      lineCap: 'round',
     }).addTo(map);
   }
 };
@@ -486,7 +490,9 @@ const updateOrderStatus = async (status) => {
   } catch (e) {
     const toast = await toastController.create({
       message: e.message || 'Could not update the order. Please try again.',
-      duration: 3000, color: 'danger', position: 'top'
+      duration: 3000,
+      color: 'danger',
+      position: 'top',
     });
     await toast.present();
     return false;
@@ -512,12 +518,14 @@ const confirmPickup = async () => {
           updateMapForStep();
           const toast = await toastController.create({
             message: 'Order picked up! Now deliver to customer.',
-            duration: 2500, color: 'medium', position: 'top'
+            duration: 2500,
+            color: 'medium',
+            position: 'top',
           });
           await toast.present();
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -528,7 +536,9 @@ const confirmArrived = async () => {
   etaDistance.value = '0 m';
   const toast = await toastController.create({
     message: 'You have arrived! Confirm delivery with customer.',
-    duration: 2500, color: 'medium', position: 'top'
+    duration: 2500,
+    color: 'medium',
+    position: 'top',
   });
   await toast.present();
 };
@@ -547,58 +557,14 @@ const confirmDelivery = async () => {
           stopWatchingPosition();
           await showSuccessModal(`Delivery complete!\nYou earned ₱${orderData.value.driverEarnings}`);
           router.replace('/home');
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
 
-const showSuccessModal = async (message) => {
-  const alert = await alertController.create({
-    cssClass: 'success-modal',
-    header: ' ',
-    message: message,
-    buttons: ['OK']
-  });
-
-  await alert.present();
-
-  setTimeout(() => {
-    const alertElement = document.querySelector('.success-modal .alert-message');
-    if (alertElement) {
-      const textContent = alertElement.textContent;
-      alertElement.innerHTML = '';
-
-      const wrapper = document.createElement('div');
-      wrapper.style.display = 'flex';
-      wrapper.style.flexDirection = 'column';
-      wrapper.style.alignItems = 'center';
-      wrapper.style.textAlign = 'center';
-
-      const img = document.createElement('img');
-      img.src = '/assets/images/checkmark_success.png';
-      img.style.width = '80px';
-      img.style.height = '80px';
-      img.style.margin = '0 auto 16px auto';
-      img.style.display = 'block';
-
-      const textDiv = document.createElement('div');
-      textDiv.textContent = textContent;
-      textDiv.style.fontSize = '18px';
-      textDiv.style.fontWeight = '600';
-      textDiv.style.color = '#1a1a1a';
-      textDiv.style.textAlign = 'center';
-      textDiv.style.whiteSpace = 'pre-line';
-
-      wrapper.appendChild(img);
-      wrapper.appendChild(textDiv);
-      alertElement.appendChild(wrapper);
-    }
-  }, 50);
-
-  await alert.onDidDismiss();
-};
+const { showSuccessModal } = useSuccessModal();
 
 const goBack = async () => {
   const alert = await alertController.create({
@@ -608,9 +574,9 @@ const goBack = async () => {
       { text: 'Stay', role: 'cancel' },
       {
         text: 'Go Back',
-        handler: () => router.replace('/home')
-      }
-    ]
+        handler: () => router.replace('/home'),
+      },
+    ],
   });
   await alert.present();
 };
@@ -630,7 +596,9 @@ onMounted(async () => {
   if (orderData.value && (!vendorPos.value || !customerPos.value)) {
     const toast = await toastController.create({
       message: 'Some location data is missing for this order.',
-      duration: 3000, color: 'warning', position: 'top'
+      duration: 3000,
+      color: 'warning',
+      position: 'top',
     });
     await toast.present();
   }
@@ -638,115 +606,188 @@ onMounted(async () => {
 
 onUnmounted(() => {
   stopWatchingPosition();
-  if (map) { map.remove(); map = null; }
+  if (map) {
+    map.remove();
+    map = null;
+  }
 });
 </script>
 
 <style scoped>
-.delivery-content { --background: #f0f0f0; }
+.delivery-content {
+  --background: #f0f0f0;
+}
 
 /* Map */
 .map-container {
-  position: absolute; top: 0; left: 0;
-  width: 100%; height: 100%; z-index: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
 }
 
 /* Top Overlay */
 .top-overlay {
-  position: absolute; top: 16px; left: 16px; right: 16px;
-  display: flex; align-items: center; gap: 12px;
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   z-index: 1000;
 }
 
-.back-btn, .center-btn {
-  width: 44px; height: 44px;
-  background: white; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 3px 12px rgba(0,0,0,0.15);
-  cursor: pointer; flex-shrink: 0;
+.back-btn,
+.center-btn {
+  width: 44px;
+  height: 44px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  flex-shrink: 0;
 }
-.back-btn ion-icon, .center-btn ion-icon { font-size: 22px; color: #1a1a1a; }
+.back-btn ion-icon,
+.center-btn ion-icon {
+  font-size: 22px;
+  color: #1a1a1a;
+}
 
 .top-info-card {
-  flex: 1; background: white; border-radius: 20px;
+  flex: 1;
+  background: white;
+  border-radius: 20px;
   padding: 10px 16px;
-  box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
 }
 
-.eta-info { display: flex; align-items: center; gap: 6px; }
-.eta-label { font-size: 16px; font-weight: 800; color: #1a1a1a; }
-.eta-dist { font-size: 14px; color: #666; font-weight: 500; }
+.eta-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.eta-label {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1a1a1a;
+}
+.eta-dist {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
 
 /* No Active Order */
 .no-order-overlay {
-  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 1500;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 24px;
 }
 
 .no-order-card {
-  background: white; border-radius: 20px;
-  padding: 32px 24px; text-align: center;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.15);
-  width: 100%; max-width: 320px;
+  background: white;
+  border-radius: 20px;
+  padding: 32px 24px;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 320px;
 }
 
 .no-order-card ion-icon {
-  font-size: 56px; color: #999; margin-bottom: 12px;
+  font-size: 56px;
+  color: #999;
+  margin-bottom: 12px;
 }
 
 .no-order-card h3 {
-  font-size: 18px; font-weight: 700; color: #1a1a1a; margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
 }
 
 .no-order-card p {
-  font-size: 14px; color: #666; margin: 0 0 20px 0; line-height: 1.5;
+  font-size: 14px;
+  color: #666;
+  margin: 0 0 20px 0;
+  line-height: 1.5;
 }
 
 .no-order-btn {
-  --background: #4CAF50; --border-radius: 12px;
-  font-size: 15px; font-weight: 600; text-transform: none;
+  --background: #4caf50;
+  --border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: none;
 }
 
 /* Bottom Sheet - scrollable */
 .bottom-sheet {
-  position: absolute; left: 0; right: 0; bottom: 0;
-  background: white; border-radius: 24px 24px 0 0;
-  box-shadow: 0 -4px 24px rgba(0,0,0,0.2);
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.2);
   z-index: 1000;
-  display: flex; flex-direction: column;
+  display: flex;
+  flex-direction: column;
   max-height: 55%;
 }
 
 .sheet-handle {
   padding: 12px 0 10px;
-  display: flex; justify-content: center;
+  display: flex;
+  justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .handle-bar {
-  width: 40px; height: 4px;
-  background: #ccc; border-radius: 2px;
+  width: 40px;
+  height: 4px;
+  background: #ccc;
+  border-radius: 2px;
 }
 
 /* Delivery Progress */
 .delivery-progress {
-  display: flex; align-items: center;
+  display: flex;
+  align-items: center;
   padding: 0 20px 12px;
   flex-shrink: 0;
 }
 
 .progress-step {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 }
 
 .step-icon {
-  width: 36px; height: 36px;
-  border-radius: 50%; background: #f0f0f0;
-  display: flex; align-items: center; justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .step-icon ion-icon {
@@ -755,8 +796,8 @@ onUnmounted(() => {
 }
 
 .progress-step.active .step-icon {
-  background: #4CAF50;
-  box-shadow: 0 0 0 3px rgba(76,175,80,0.2);
+  background: #4caf50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
 }
 
 .progress-step.active .step-icon ion-icon {
@@ -764,7 +805,7 @@ onUnmounted(() => {
 }
 
 .progress-step.done .step-icon {
-  background: #4CAF50;
+  background: #4caf50;
 }
 
 .progress-step.done .step-icon ion-icon {
@@ -772,64 +813,114 @@ onUnmounted(() => {
 }
 
 .progress-step span {
-  font-size: 10px; font-weight: 600; color: #666;
+  font-size: 10px;
+  font-weight: 600;
+  color: #666;
 }
 
 .progress-line {
-  flex: 1; height: 3px; background: #e0e0e0;
+  flex: 1;
+  height: 3px;
+  background: #e0e0e0;
   margin: 0 8px;
 }
-.progress-line.done { background: #4CAF50; }
+.progress-line.done {
+  background: #4caf50;
+}
 
 /* Scrollable Content */
 .sheet-content {
-  flex: 1; overflow-y: auto;
+  flex: 1;
+  overflow-y: auto;
   padding: 0 20px 12px;
 }
 
-.step-detail { }
+.step-detail {
+}
 
 .step-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 6px 12px; border-radius: 16px;
-  font-size: 12px; font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 700;
   margin-bottom: 10px;
 }
-.step-badge.pickup { background: #E8F5E9; color: #2E7D32; }
-.step-badge.delivering { background: #E3F2FD; color: #1565C0; }
-.step-badge.arrived { background: #E8F5E9; color: #2E7D32; }
+.step-badge.pickup {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+.step-badge.delivering {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+.step-badge.arrived {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
 
 .step-detail h3 {
-  font-size: 16px; font-weight: 700; color: #1a1a1a; margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
 }
 .step-detail p {
-  font-size: 13px; color: #666; margin: 0 0 8px 0;
+  font-size: 13px;
+  color: #666;
+  margin: 0 0 8px 0;
 }
-.step-detail .phone { color: #333; font-weight: 600; }
+.step-detail .phone {
+  color: #333;
+  font-weight: 600;
+}
 .step-detail .instructions {
-  background: #FFF3E0; padding: 10px 12px; border-radius: 10px;
-  color: #E65100;
+  background: #fff3e0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: #e65100;
 }
 .step-detail .eta {
-  background: #E3F2FD; padding: 10px 12px; border-radius: 10px;
-  color: #1565C0;
+  background: #e3f2fd;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: #1565c0;
 }
 .step-detail .collect {
-  font-size: 14px; font-weight: 700; color: #1a1a1a;
-  padding: 10px 12px; background: #f5f5f5; border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+  padding: 10px 12px;
+  background: #f5f5f5;
+  border-radius: 10px;
 }
 
 .items-row {
-  display: flex; flex-direction: column; gap: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   margin-bottom: 10px;
 }
-.items-row > span { font-size: 12px; color: #666; font-weight: 600; }
+.items-row > span {
+  font-size: 12px;
+  color: #666;
+  font-weight: 600;
+}
 
-.item-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.item-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
 .item-tag {
-  background: #E8F5E9; color: #2E7D32;
-  padding: 4px 10px; border-radius: 12px;
-  font-size: 11px; font-weight: 600;
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
 }
 
 /* Action Row */
@@ -839,11 +930,25 @@ onUnmounted(() => {
 }
 
 .action-btn {
-  width: 100%; padding: 14px; border-radius: 14px;
-  font-size: 14px; font-weight: 700; border: none;
-  cursor: pointer; font-family: inherit;
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
 }
-.pickup-btn { background: #4CAF50; color: white; }
-.arrived-btn { background: #2196F3; color: white; }
-.complete-btn { background: #4CAF50; color: white; }
+.pickup-btn {
+  background: #4caf50;
+  color: white;
+}
+.arrived-btn {
+  background: #2196f3;
+  color: white;
+}
+.complete-btn {
+  background: #4caf50;
+  color: white;
+}
 </style>

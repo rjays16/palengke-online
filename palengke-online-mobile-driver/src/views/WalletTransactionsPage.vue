@@ -72,7 +72,14 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonButtons, IonIcon } from '@ionic/vue';
-import { arrowBackOutline, walletOutline, addCircleOutline, removeCircleOutline, receiptOutline, giftOutline } from 'ionicons/icons';
+import {
+  arrowBackOutline,
+  walletOutline,
+  addCircleOutline,
+  removeCircleOutline,
+  receiptOutline,
+  giftOutline,
+} from 'ionicons/icons';
 import { API_BASE } from '@/services/api';
 
 const router = useRouter();

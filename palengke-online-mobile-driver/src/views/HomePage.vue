@@ -17,7 +17,6 @@
 
     <ion-content :fullscreen="true" class="dashboard-content">
       <div class="dashboard-container">
-
         <!-- Welcome + Active/Inactive Section -->
         <div class="welcome-section">
           <div class="welcome-header">
@@ -30,7 +29,7 @@
                 <span class="rating-label">({{ totalTrips }} trips)</span>
               </div>
             </div>
-            <img src="/assets/images/palengke-driver.png" alt="Driver" class="welcome-avatar">
+            <img src="/assets/images/palengke-driver.png" alt="Driver" class="welcome-avatar" />
           </div>
 
           <!-- Active/Inactive Toggle -->
@@ -39,7 +38,9 @@
               <div class="toggle-status-dot" :class="{ online: isActive }"></div>
               <div>
                 <p class="toggle-status-text">{{ isActive ? "You're Active" : "You're Inactive" }}</p>
-                <p class="toggle-status-sub">{{ isActive ? 'Finding orders near you...' : 'Go active to receive orders' }}</p>
+                <p class="toggle-status-sub">
+                  {{ isActive ? 'Finding orders near you...' : 'Go active to receive orders' }}
+                </p>
               </div>
             </div>
             <button class="toggle-btn" :class="{ online: isActive }" @click="toggleActiveStatus">
@@ -50,7 +51,13 @@
         </div>
 
         <!-- Palengke Licence Banner -->
-        <div class="licence-banner" :class="licenceBannerClass" v-if="licenceStore.showLicenceFeature.value && !licenceStore.licenceActive.value && !licenceStore.state.isFree">
+        <div
+          class="licence-banner"
+          :class="licenceBannerClass"
+          v-if="
+            licenceStore.showLicenceFeature.value && !licenceStore.licenceActive.value && !licenceStore.state.isFree
+          "
+        >
           <div class="licence-banner-left">
             <ion-icon :icon="licenceBannerIcon" class="licence-banner-icon"></ion-icon>
             <div>
@@ -157,12 +164,21 @@
           </div>
           <div class="active-delivery-card" @click="goToActiveDelivery">
             <div class="delivery-status-bar">
-              <div class="delivery-step" :class="{ active: activeDelivery.status === 'pickup', done: activeDelivery.status !== 'pickup' }">
+              <div
+                class="delivery-step"
+                :class="{ active: activeDelivery.status === 'pickup', done: activeDelivery.status !== 'pickup' }"
+              >
                 <ion-icon :icon="storefrontOutline"></ion-icon>
                 <span>Pickup</span>
               </div>
-              <div class="delivery-line" :class="{ done: activeDelivery.status === 'delivering' || activeDelivery.status === 'delivered' }"></div>
-              <div class="delivery-step" :class="{ active: activeDelivery.status === 'delivering', done: activeDelivery.status === 'delivered' }">
+              <div
+                class="delivery-line"
+                :class="{ done: activeDelivery.status === 'delivering' || activeDelivery.status === 'delivered' }"
+              ></div>
+              <div
+                class="delivery-step"
+                :class="{ active: activeDelivery.status === 'delivering', done: activeDelivery.status === 'delivered' }"
+              >
                 <ion-icon :icon="bicycleOutline"></ion-icon>
                 <span>Delivering</span>
               </div>
@@ -199,8 +215,12 @@
             <ion-button fill="clear" size="small" @click="goToHistory">View All</ion-button>
           </div>
 
-          <div class="delivery-card" v-for="delivery in recentDeliveries" :key="delivery.id"
-            @click="viewDeliveryDetails(delivery)">
+          <div
+            class="delivery-card"
+            v-for="delivery in recentDeliveries"
+            :key="delivery.id"
+            @click="viewDeliveryDetails(delivery)"
+          >
             <div class="delivery-header">
               <div class="delivery-id">Order #{{ delivery.id }}</div>
               <div class="delivery-status" :class="delivery.status">{{ delivery.status }}</div>
@@ -219,7 +239,9 @@
               <div class="delivery-time">{{ delivery.time }}</div>
               <div class="delivery-earn">
                 <span class="earn-amount">₱{{ delivery.amount.toLocaleString() }}</span>
-                <span class="tip-badge" v-if="delivery.tipped"><font-awesome-icon :icon="['fas', 'money-bill']" /> Tipped</span>
+                <span class="tip-badge" v-if="delivery.tipped"
+                  ><font-awesome-icon :icon="['fas', 'money-bill']" /> Tipped</span
+                >
               </div>
             </div>
           </div>
@@ -228,12 +250,9 @@
           <div class="empty-state" v-if="recentDeliveries.length === 0">
             <ion-icon :icon="bicycleOutline" class="empty-icon"></ion-icon>
             <p>No deliveries yet</p>
-            <ion-button size="small" @click="toggleActiveStatus" v-if="!isActive">
-              Go Active to Start
-            </ion-button>
+            <ion-button size="small" @click="toggleActiveStatus" v-if="!isActive"> Go Active to Start </ion-button>
           </div>
         </div>
-
       </div>
     </ion-content>
 
@@ -268,21 +287,44 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
-  IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
-  IonFooter, IonButton, IonButtons, IonIcon,
-  alertController, actionSheetController, toastController, onIonViewWillEnter
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonFooter,
+  IonButton,
+  IonButtons,
+  IonIcon,
+  alertController,
+  actionSheetController,
+  toastController,
+  onIonViewWillEnter,
 } from '@ionic/vue';
 import {
-  notificationsOutline, settingsOutline, starOutline,
-  powerOutline, cashOutline, bicycleOutline, timeOutline,
-  trendingUpOutline, cubeOutline, chatbubblesOutline,
-  receiptOutline, homeOutline, personOutline, locationOutline,
-  navigateOutline, storefrontOutline, logOutOutline,
-  helpCircleOutline, informationCircleOutline,
-  closeCircleOutline, walletOutline
+  notificationsOutline,
+  settingsOutline,
+  starOutline,
+  powerOutline,
+  cashOutline,
+  bicycleOutline,
+  timeOutline,
+  trendingUpOutline,
+  cubeOutline,
+  chatbubblesOutline,
+  receiptOutline,
+  homeOutline,
+  personOutline,
+  locationOutline,
+  navigateOutline,
+  storefrontOutline,
+  logOutOutline,
+  helpCircleOutline,
+  informationCircleOutline,
+  closeCircleOutline,
+  walletOutline,
 } from 'ionicons/icons';
 import { useLicenceStore } from '@/composables/useLicenceStore';
-
 
 const router = useRouter();
 const licenceStore = useLicenceStore();
@@ -318,29 +360,31 @@ onIonViewWillEnter(() => {
 
 // Driver Data
 const licenceBannerClass = computed(() => {
-  if (licenceStore.licenceExpired.value || licenceStore.trialExpired.value) return 'expired'
-  if (licenceStore.trialDaysRemaining.value <= 5) return 'warning'
-  return ''
-})
+  if (licenceStore.licenceExpired.value || licenceStore.trialExpired.value) return 'expired';
+  if (licenceStore.trialDaysRemaining.value <= 5) return 'warning';
+  return '';
+});
 
 const licenceBannerIcon = computed(() => {
-  if (licenceStore.licenceExpired.value || licenceStore.trialExpired.value) return closeCircleOutline
-  return timeOutline
-})
+  if (licenceStore.licenceExpired.value || licenceStore.trialExpired.value) return closeCircleOutline;
+  return timeOutline;
+});
 
 const licenceBannerTitle = computed(() => {
-  if (licenceStore.licenceExpired.value) return 'Licence Expired'
-  if (licenceStore.trialExpired.value) return 'Trial Expired'
-  return `${licenceStore.trialDaysRemaining.value} days trial remaining`
-})
+  if (licenceStore.licenceExpired.value) return 'Licence Expired';
+  if (licenceStore.trialExpired.value) return 'Trial Expired';
+  return `${licenceStore.trialDaysRemaining.value} days trial remaining`;
+});
 
 const licenceBannerSub = computed(() => {
-  if (licenceStore.licenceExpired.value) return `Renew ₱${licenceStore.state.amount.toLocaleString()}/yr to keep delivering`
-  if (licenceStore.trialExpired.value) return `Pay ₱${licenceStore.state.amount.toLocaleString()}/yr to continue delivering`
-  return `Pay ₱${licenceStore.state.amount.toLocaleString()}/yr after trial to keep delivering`
-})
+  if (licenceStore.licenceExpired.value)
+    return `Renew ₱${licenceStore.state.amount.toLocaleString()}/yr to keep delivering`;
+  if (licenceStore.trialExpired.value)
+    return `Pay ₱${licenceStore.state.amount.toLocaleString()}/yr to continue delivering`;
+  return `Pay ₱${licenceStore.state.amount.toLocaleString()}/yr after trial to keep delivering`;
+});
 
-const goToLicencePayment = () => router.push('/licence-payment')
+const goToLicencePayment = () => router.push('/licence-payment');
 
 const driverName = ref('');
 const driverRating = ref(0);
@@ -386,7 +430,9 @@ const fetchActiveDelivery = async () => {
         activeDelivery.value = null;
       }
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 };
 
 const fetchDashboardStats = async () => {
@@ -415,7 +461,9 @@ const fetchDashboardStats = async () => {
       totalTrips.value = data.totalTrips || 0;
       isActive.value = data.availabilityStatus === 'active';
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 };
 
 // Recent Deliveries
@@ -432,7 +480,9 @@ const fetchRecentDeliveries = async () => {
       const data = await res.json();
       recentDeliveries.value = data.deliveries || [];
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 };
 
 const fetchNotificationCount = async () => {
@@ -446,7 +496,9 @@ const fetchNotificationCount = async () => {
       const data = await res.json();
       notificationCount.value = data.unread_count || 0;
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 };
 
 const fetchWalletBalance = async () => {
@@ -460,7 +512,9 @@ const fetchWalletBalance = async () => {
       const data = await res.json();
       walletBalance.value = data.balance || 0;
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 };
 
 // Toggle Active/Inactive
@@ -475,10 +529,10 @@ const toggleActiveStatus = async () => {
         {
           text: 'Pay Now',
           cssClass: 'alert-button-primary',
-          handler: () => router.push('/licence-payment')
+          handler: () => router.push('/licence-payment'),
         },
-        { text: 'Later', role: 'cancel', cssClass: 'alert-button-cancel' }
-      ]
+        { text: 'Later', role: 'cancel', cssClass: 'alert-button-cancel' },
+      ],
     });
     await alert.present();
     const alertEl = document.querySelector('.alert-licence');
@@ -529,12 +583,12 @@ const toggleActiveStatus = async () => {
               message: 'You are now inactive',
               duration: 2000,
               color: 'medium',
-              position: 'top'
+              position: 'top',
             });
             await toast.present();
-          }
-        }
-      ]
+          },
+        },
+      ],
     });
     await alert.present();
   } else {
@@ -559,7 +613,7 @@ const toggleActiveStatus = async () => {
       message: 'You are now active! Finding orders...',
       duration: 2500,
       color: 'medium',
-      position: 'top'
+      position: 'top',
     });
     await toast.present();
   }
@@ -573,15 +627,15 @@ const openSettings = async () => {
       {
         text: 'About',
         icon: informationCircleOutline,
-        handler: () => router.push('/about')
+        handler: () => router.push('/about'),
       },
       {
         text: 'Logout',
         icon: logOutOutline,
         role: 'destructive',
-        handler: () => handleLogout()
-      }
-    ]
+        handler: () => handleLogout(),
+      },
+    ],
   });
   await actionSheet.present();
 };
@@ -600,9 +654,9 @@ const handleLogout = async () => {
           localStorage.removeItem('driver_token');
           localStorage.removeItem('pendingAuth');
           router.push('/login');
-        }
-      }
-    ]
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -625,8 +679,8 @@ const viewDeliveryDetails = (delivery) => {
 </script>
 
 <style scoped>
-.dashboard-content { 
-  --background: var(--color-bg-secondary); 
+.dashboard-content {
+  --background: var(--color-bg-secondary);
 }
 
 /* Fix header buttons */
@@ -636,15 +690,26 @@ ion-header ion-toolbar ion-buttons ion-button {
   --padding-end: 8px;
 }
 
-.notification-btn { position: relative; }
+.notification-btn {
+  position: relative;
+}
 .notification-badge {
-  position: absolute; top: -2px; right: -2px;
-  background: #f44336; color: white; border-radius: 50%;
-  min-width: 12px; height: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 8px; font-weight: 700; z-index: 10;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
-  border: 1px solid #4CAF50;
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: #f44336;
+  color: white;
+  border-radius: 50%;
+  min-width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 700;
+  z-index: 10;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  border: 1px solid #4caf50;
 }
 
 .wallet-pill {
@@ -657,14 +722,23 @@ ion-header ion-toolbar ion-buttons ion-button {
   cursor: pointer;
   margin-right: 4px;
 }
-.wallet-pill-icon { font-size: 14px; color: white; }
-.wallet-pill-balance { font-size: 13px; font-weight: 600; color: white; }
+.wallet-pill-icon {
+  font-size: 14px;
+  color: white;
+}
+.wallet-pill-balance {
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+}
 
-.dashboard-container { padding-bottom: 80px; }
+.dashboard-container {
+  padding-bottom: 80px;
+}
 
 /* ─── Welcome Section ────────────────────────── */
 .welcome-section {
-  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
   padding: 20px 20px 20px;
   color: white;
 }
@@ -676,28 +750,50 @@ ion-header ion-toolbar ion-buttons ion-button {
   margin-bottom: 16px;
 }
 
-.welcome-title { font-size: 22px; font-weight: 700; margin: 0 0 4px 0; }
-.driver-name { font-size: 15px; margin: 0 0 6px 0; opacity: 0.95; }
+.welcome-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+}
+.driver-name {
+  font-size: 15px;
+  margin: 0 0 6px 0;
+  opacity: 0.95;
+}
 
 .rating-row {
-  display: flex; align-items: center; gap: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
-.star-icon { font-size: 16px; color: #FFD700; }
-.rating-value { font-size: 15px; font-weight: 700; }
-.rating-label { font-size: 12px; opacity: 0.8; }
+.star-icon {
+  font-size: 16px;
+  color: #ffd700;
+}
+.rating-value {
+  font-size: 15px;
+  font-weight: 700;
+}
+.rating-label {
+  font-size: 12px;
+  opacity: 0.8;
+}
 
-.welcome-avatar { width: 90px; height: auto; }
+.welcome-avatar {
+  width: 90px;
+  height: auto;
+}
 
 /* Active/Inactive Toggle */
 .online-toggle-card {
-  background: rgba(0,0,0,0.2);
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 16px;
   padding: 14px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  border: 2px solid rgba(255,255,255,0.2);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   transition: all 0.3s;
 }
 
@@ -706,36 +802,57 @@ ion-header ion-toolbar ion-buttons ion-button {
   border-color: rgba(76, 175, 80, 0.6);
 }
 
-.toggle-info { display: flex; align-items: center; gap: 12px; }
+.toggle-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 
 .toggle-status-dot {
-  width: 12px; height: 12px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   background: #f44336;
   flex-shrink: 0;
-  box-shadow: 0 0 0 3px rgba(244,67,54,0.3);
+  box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.3);
 }
 
 .toggle-status-dot.online {
-  background: #4CAF50;
-  box-shadow: 0 0 0 3px rgba(76,175,80,0.4);
+  background: #4caf50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.4);
   animation: pulse-dot 2s infinite;
 }
 
 @keyframes pulse-dot {
-  0%, 100% { box-shadow: 0 0 0 3px rgba(76,175,80,0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(76,175,80,0.15); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(76, 175, 80, 0.15);
+  }
 }
 
-.toggle-status-text { font-size: 15px; font-weight: 700; color: white; margin: 0 0 2px 0; }
-.toggle-status-sub { font-size: 12px; color: rgba(255,255,255,0.8); margin: 0; }
+.toggle-status-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 2px 0;
+}
+.toggle-status-sub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
 
 .toggle-btn {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
   padding: 12px 16px;
-  background: rgba(0,0,0,0.25);
-  border: 2px solid rgba(255,255,255,0.3);
+  background: rgba(0, 0, 0, 0.25);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 14px;
   color: white;
   cursor: pointer;
@@ -746,14 +863,18 @@ ion-header ion-toolbar ion-buttons ion-button {
   flex-shrink: 0;
 }
 
-.toggle-btn ion-icon { font-size: 22px; }
-
-.toggle-btn.online {
-  background: rgba(244,67,54,0.3);
-  border-color: rgba(244,67,54,0.5);
+.toggle-btn ion-icon {
+  font-size: 22px;
 }
 
-.toggle-btn:active { transform: scale(0.95); }
+.toggle-btn.online {
+  background: rgba(244, 67, 54, 0.3);
+  border-color: rgba(244, 67, 54, 0.5);
+}
+
+.toggle-btn:active {
+  transform: scale(0.95);
+}
 
 /* ─── Stats Section ──────────────────────────── */
 .stats-section {
@@ -774,24 +895,57 @@ ion-header ion-toolbar ion-buttons ion-button {
 }
 
 .stat-icon {
-  width: 48px; height: 48px;
+  width: 48px;
+  height: 48px;
   border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 24px; flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
 }
 
-.stat-card.green .stat-icon { background: var(--color-success-bg); color: var(--color-success); }
-.stat-card.blue .stat-icon { background: var(--color-info-bg); color: var(--color-info); }
-.stat-card.orange .stat-icon { background: var(--color-warning-bg); color: var(--color-warning); }
-.stat-card.purple .stat-icon { background: #F3E5F5; color: #9C27B0; }
+.stat-card.green .stat-icon {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+.stat-card.blue .stat-icon {
+  background: var(--color-info-bg);
+  color: var(--color-info);
+}
+.stat-card.orange .stat-icon {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+.stat-card.purple .stat-icon {
+  background: #f3e5f5;
+  color: #9c27b0;
+}
 
-.stat-value { font-size: 18px; font-weight: 700; color: var(--color-text-primary); margin-bottom: 2px; }
-.stat-label { font-size: 12px; color: var(--color-text-secondary); }
+.stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 2px;
+}
+.stat-label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
 
 /* ─── Actions Section ────────────────────────── */
-.actions-section { padding: 0 20px 20px; }
-.section-title { font-size: 18px; font-weight: 700; color: var(--color-text-primary); margin: 0 0 16px 0; }
-.section-header .section-title { margin-bottom: 0; }
+.actions-section {
+  padding: 0 20px 20px;
+}
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 16px 0;
+}
+.section-header .section-title {
+  margin-bottom: 0;
+}
 
 .actions-grid {
   display: grid;
@@ -810,50 +964,95 @@ ion-header ion-toolbar ion-buttons ion-button {
   transition: transform 0.2s;
 }
 
-.action-card:active { transform: scale(0.97); }
+.action-card:active {
+  transform: scale(0.97);
+}
 
 .action-icon {
-  width: 52px; height: 52px;
+  width: 52px;
+  height: 52px;
   border-radius: 14px;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin: 0 auto 10px;
   font-size: 24px;
 }
 
-.action-icon.green { background: var(--color-success-bg); color: var(--color-success); }
-.action-icon.blue { background: var(--color-info-bg); color: var(--color-info); }
-.action-icon.orange { background: var(--color-warning-bg); color: var(--color-warning); }
-.action-icon.purple { background: #F3E5F5; color: #9C27B0; }
-.action-icon.red { background: #FFEBEE; color: #f44336; }
-.action-icon.teal { background: #E0F2F1; color: #009688; }
+.action-icon.green {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+.action-icon.blue {
+  background: var(--color-info-bg);
+  color: var(--color-info);
+}
+.action-icon.orange {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+.action-icon.purple {
+  background: #f3e5f5;
+  color: #9c27b0;
+}
+.action-icon.red {
+  background: #ffebee;
+  color: #f44336;
+}
+.action-icon.teal {
+  background: #e0f2f1;
+  color: #009688;
+}
 
-.action-text { font-size: 13px; color: var(--color-text-primary); font-weight: 600; line-height: 1.3; }
+.action-text {
+  font-size: 13px;
+  color: var(--color-text-primary);
+  font-weight: 600;
+  line-height: 1.3;
+}
 
 .action-badge {
-  position: absolute; top: -4px; right: 4px;
-  background: #f44336; color: white;
-  border-radius: 10px; padding: 2px 6px;
-  font-size: 10px; font-weight: 700;
+  position: absolute;
+  top: -4px;
+  right: 4px;
+  background: #f44336;
+  color: white;
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: 700;
 }
 
 /* ─── Active Delivery Section ────────────────── */
-.active-delivery-section { padding: 0 20px 20px; }
+.active-delivery-section {
+  padding: 0 20px 20px;
+}
 
 .section-header {
-  display: flex; justify-content: space-between;
-  align-items: center; margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
 .live-badge {
-  background: #f44336; color: white;
-  padding: 4px 10px; border-radius: 12px;
-  font-size: 11px; font-weight: 700;
+  background: #f44336;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
   animation: blink 1.5s infinite;
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
 .active-delivery-card {
@@ -867,21 +1066,28 @@ ion-header ion-toolbar ion-buttons ion-button {
 
 /* Delivery Status Bar */
 .delivery-status-bar {
-  display: flex; align-items: center;
+  display: flex;
+  align-items: center;
   margin-bottom: 16px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--color-border);
 }
 
 .delivery-step {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
   flex: 1;
   opacity: 0.4;
 }
 
-.delivery-step.active { opacity: 1; }
-.delivery-step.done { opacity: 1; }
+.delivery-step.active {
+  opacity: 1;
+}
+.delivery-step.done {
+  opacity: 1;
+}
 
 .delivery-step ion-icon {
   font-size: 24px;
@@ -903,43 +1109,74 @@ ion-header ion-toolbar ion-buttons ion-button {
 }
 
 @keyframes pulse-step {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(76,175,80,0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(76,175,80,0); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(76, 175, 80, 0);
+  }
 }
 
-.delivery-step span { font-size: 11px; font-weight: 600; color: var(--color-text-primary); }
+.delivery-step span {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
 
 .delivery-line {
-  flex: 1; height: 3px;
+  flex: 1;
+  height: 3px;
   background: var(--color-border);
   margin: 0 4px;
   border-radius: 2px;
   margin-bottom: 20px;
 }
 
-.delivery-line.done { background: var(--color-primary); }
-
-/* Delivery Info */
-.delivery-info { display: flex; flex-direction: column; gap: 8px; }
-
-.delivery-detail {
-  display: flex; align-items: center; gap: 8px;
-  font-size: 14px; color: var(--color-text-secondary);
+.delivery-line.done {
+  background: var(--color-primary);
 }
 
-.delivery-detail ion-icon { font-size: 18px; color: var(--color-primary); flex-shrink: 0; }
+/* Delivery Info */
+.delivery-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.delivery-detail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+.delivery-detail ion-icon {
+  font-size: 18px;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
 
 .delivery-footer {
-  display: flex; justify-content: space-between;
-  align-items: center; margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
   padding-top: 12px;
   border-top: 1px solid var(--color-border);
 }
 
-.delivery-amount { font-size: 20px; font-weight: 700; color: var(--color-primary); }
+.delivery-amount {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
 
 /* ─── Recent Deliveries Section ──────────────── */
-.recent-section { padding: 0 20px 20px; }
+.recent-section {
+  padding: 0 20px 20px;
+}
 
 .delivery-card {
   background: var(--color-card-bg);
@@ -951,46 +1188,89 @@ ion-header ion-toolbar ion-buttons ion-button {
   transition: transform 0.2s;
 }
 
-.delivery-card:active { transform: scale(0.98); }
-
-.delivery-header {
-  display: flex; justify-content: space-between;
-  align-items: center; margin-bottom: 12px;
+.delivery-card:active {
+  transform: scale(0.98);
 }
 
-.delivery-id { font-size: 14px; font-weight: 700; color: var(--color-text-primary); }
+.delivery-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.delivery-id {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
 
 .delivery-status {
-  padding: 4px 12px; border-radius: 12px;
-  font-size: 11px; font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
   text-transform: uppercase;
 }
 
-.delivery-status.completed { background: var(--color-success-bg); color: var(--color-success); }
-.delivery-status.pending { background: var(--color-warning-bg); color: var(--color-warning); }
-.delivery-status.cancelled { background: var(--color-error-bg); color: var(--color-error); }
+.delivery-status.completed {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+.delivery-status.pending {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+.delivery-status.cancelled {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
 
-.delivery-details { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.delivery-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
 
-.delivery-customer, .delivery-location {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 13px; color: var(--color-text-secondary);
+.delivery-customer,
+.delivery-location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
 }
 
 .delivery-customer ion-icon,
-.delivery-location ion-icon { font-size: 16px; color: var(--color-primary); }
+.delivery-location ion-icon {
+  font-size: 16px;
+  color: var(--color-primary);
+}
 
 .delivery-footer-row {
-  display: flex; justify-content: space-between;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
   padding-top: 12px;
   border-top: 1px solid var(--color-border);
 }
 
-.delivery-time { font-size: 12px; color: var(--color-text-tertiary); }
+.delivery-time {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+}
 
-.delivery-earn { display: flex; align-items: center; gap: 8px; }
-.earn-amount { font-size: 16px; font-weight: 700; color: var(--color-primary); }
+.delivery-earn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.earn-amount {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
 
 .tip-badge {
   background: var(--color-warning-bg);
@@ -1002,9 +1282,19 @@ ion-header ion-toolbar ion-buttons ion-button {
 }
 
 /* Empty State */
-.empty-state { text-align: center; padding: 40px 20px; }
-.empty-icon { font-size: 64px; color: var(--color-text-tertiary); margin-bottom: 16px; }
-.empty-state p { color: var(--color-text-secondary); margin-bottom: 16px; }
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+}
+.empty-icon {
+  font-size: 64px;
+  color: var(--color-text-tertiary);
+  margin-bottom: 16px;
+}
+.empty-state p {
+  color: var(--color-text-secondary);
+  margin-bottom: 16px;
+}
 
 /* ─── Licence Banner ──────────────────────────── */
 .licence-banner {
@@ -1015,17 +1305,17 @@ ion-header ion-toolbar ion-buttons ion-button {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  background: #E8F5E9;
-  border: 1px solid #4CAF50;
+  background: #e8f5e9;
+  border: 1px solid #4caf50;
 }
 
 .licence-banner.warning {
-  background: #FFF8E1;
-  border-color: #FF9800;
+  background: #fff8e1;
+  border-color: #ff9800;
 }
 
 .licence-banner.expired {
-  background: #FFEBEE;
+  background: #ffebee;
   border-color: #f44336;
 }
 
@@ -1036,16 +1326,36 @@ ion-header ion-toolbar ion-buttons ion-button {
   flex: 1;
 }
 
-.licence-banner-icon { font-size: 24px; color: #4CAF50; flex-shrink: 0; }
-.licence-banner.warning .licence-banner-icon { color: #FF9800; }
-.licence-banner.expired .licence-banner-icon { color: #f44336; }
+.licence-banner-icon {
+  font-size: 24px;
+  color: #4caf50;
+  flex-shrink: 0;
+}
+.licence-banner.warning .licence-banner-icon {
+  color: #ff9800;
+}
+.licence-banner.expired .licence-banner-icon {
+  color: #f44336;
+}
 
-.licence-banner-title { font-size: 14px; font-weight: 700; color: #1a1a1a; margin: 0 0 2px 0; }
-.licence-banner-sub { font-size: 12px; color: #666; margin: 0; }
+.licence-banner-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 2px 0;
+}
+.licence-banner-sub {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+}
 
 .licence-banner-btn {
-  --border-radius: 10px; height: 34px;
-  font-size: 12px; font-weight: 700; text-transform: none;
+  --border-radius: 10px;
+  height: 34px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: none;
   flex-shrink: 0;
 }
 
@@ -1057,30 +1367,58 @@ ion-header ion-toolbar ion-buttons ion-button {
 }
 
 .nav-item {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  gap: 4px; cursor: pointer; color: var(--color-text-tertiary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  color: var(--color-text-tertiary);
   transition: color 0.2s;
   position: relative;
 }
 
-.nav-item ion-icon { font-size: 24px; }
-.nav-item span { font-size: 11px; font-weight: 500; }
-.nav-item.active { color: var(--color-primary); }
-.nav-item:active { transform: scale(0.95); }
+.nav-item ion-icon {
+  font-size: 24px;
+}
+.nav-item span {
+  font-size: 11px;
+  font-weight: 500;
+}
+.nav-item.active {
+  color: var(--color-primary);
+}
+.nav-item:active {
+  transform: scale(0.95);
+}
 
 .nav-badge {
-  position: absolute; top: 6px; right: 12px;
-  background: #f44336; color: white;
-  border-radius: 10px; padding: 1px 5px;
-  font-size: 10px; font-weight: 700;
+  position: absolute;
+  top: 6px;
+  right: 12px;
+  background: #f44336;
+  color: white;
+  border-radius: 10px;
+  padding: 1px 5px;
+  font-size: 10px;
+  font-weight: 700;
 }
 
 /* ─── Responsive ──────────────────────────────── */
 @media (max-width: 360px) {
-  .stats-section { gap: 8px; }
-  .stat-value { font-size: 16px; }
-  .actions-grid { gap: 8px; }
-  .action-icon { width: 48px; height: 48px; font-size: 22px; }
+  .stats-section {
+    gap: 8px;
+  }
+  .stat-value {
+    font-size: 16px;
+  }
+  .actions-grid {
+    gap: 8px;
+  }
+  .action-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+  }
 }
 </style>

@@ -1,34 +1,34 @@
-import { reactive, watch } from 'vue'
+import { reactive, watch } from 'vue';
 
-const STORAGE_KEY = 'driverRegistrationData'
+const STORAGE_KEY = 'driverRegistrationData';
 
 export interface RegistrationData {
-  email: string
-  countryCode: string
-  phone: string
-  fullPhone: string
-  emailVerified: boolean
-  firstName: string
-  middleName: string
-  lastName: string
-  country: string
-  birthdate: string
-  birthplace: string
-  currentAddress: string
-  sameAsBirthplace: boolean
-  licenseNumber: string
-  licenseType: string
-  restrictionCode: string
-  expiryDate: string
-  vehicleType: string
-  plateNumber: string
-  vehicleModel: string
-  vehicleColor: string
-  license_front_photo: string
-  vehicle_reg_photo: string
-  nbi_clearance_photo: string
-  birth_cert_photo: string
-  selfiePhoto: string
+  email: string;
+  countryCode: string;
+  phone: string;
+  fullPhone: string;
+  emailVerified: boolean;
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  country: string;
+  birthdate: string;
+  birthplace: string;
+  currentAddress: string;
+  sameAsBirthplace: boolean;
+  licenseNumber: string;
+  licenseType: string;
+  restrictionCode: string;
+  expiryDate: string;
+  vehicleType: string;
+  plateNumber: string;
+  vehicleModel: string;
+  vehicleColor: string;
+  license_front_photo: string;
+  vehicle_reg_photo: string;
+  nbi_clearance_photo: string;
+  birth_cert_photo: string;
+  selfiePhoto: string;
 }
 
 function defaults(): RegistrationData {
@@ -59,61 +59,82 @@ function defaults(): RegistrationData {
     nbi_clearance_photo: '',
     birth_cert_photo: '',
     selfiePhoto: '',
-  }
+  };
 }
 
 function load(): RegistrationData {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (raw) return { ...defaults(), ...JSON.parse(raw) }
-  } catch { /* ignore */ }
-  return defaults()
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return { ...defaults(), ...JSON.parse(raw) };
+  } catch {
+    /* ignore */
+  }
+  return defaults();
 }
 
-const state = reactive<RegistrationData>(load())
+const state = reactive<RegistrationData>(load());
 
-let timer: ReturnType<typeof setTimeout> | null = null
+let timer: ReturnType<typeof setTimeout> | null = null;
 function save() {
-  if (timer) clearTimeout(timer)
+  if (timer) clearTimeout(timer);
   timer = setTimeout(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...state }))
-  }, 300)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...state }));
+  }, 300);
 }
 
-watch(state, () => save(), { deep: true })
+watch(state, () => save(), { deep: true });
 
 export function useRegistrationStore() {
   function setContactInfo(data: {
-    email: string; countryCode: string; phone: string; fullPhone: string; emailVerified: boolean
+    email: string;
+    countryCode: string;
+    phone: string;
+    fullPhone: string;
+    emailVerified: boolean;
   }) {
-    Object.assign(state, data)
+    Object.assign(state, data);
   }
 
   function setPersonalInfo(data: {
-    firstName: string; middleName: string; lastName: string; country: string;
-    birthdate: string; birthplace: string; currentAddress: string; sameAsBirthplace: boolean
+    firstName: string;
+    middleName: string;
+    lastName: string;
+    country: string;
+    birthdate: string;
+    birthplace: string;
+    currentAddress: string;
+    sameAsBirthplace: boolean;
   }) {
-    Object.assign(state, data)
+    Object.assign(state, data);
   }
 
   function setLicenseInfo(data: {
-    licenseNumber: string; licenseType: string; restrictionCode: string; expiryDate: string
+    licenseNumber: string;
+    licenseType: string;
+    restrictionCode: string;
+    expiryDate: string;
   }) {
-    Object.assign(state, data)
+    Object.assign(state, data);
   }
 
   function setVehicleInfo(data: {
-    vehicleType: string; plateNumber: string; vehicleModel: string; vehicleColor: string
+    vehicleType: string;
+    plateNumber: string;
+    vehicleModel: string;
+    vehicleColor: string;
   }) {
-    Object.assign(state, data)
+    Object.assign(state, data);
   }
 
-  function setPhoto(key: 'license_front_photo' | 'vehicle_reg_photo' | 'nbi_clearance_photo' | 'birth_cert_photo', url: string) {
-    state[key] = url
+  function setPhoto(
+    key: 'license_front_photo' | 'vehicle_reg_photo' | 'nbi_clearance_photo' | 'birth_cert_photo',
+    url: string,
+  ) {
+    state[key] = url;
   }
 
   function setSelfiePhoto(url: string) {
-    state.selfiePhoto = url
+    state.selfiePhoto = url;
   }
 
   function getApiPayload(): Record<string, unknown> {
@@ -143,37 +164,39 @@ export function useRegistrationStore() {
       nbi_clearance_photo: state.nbi_clearance_photo || '',
       birth_cert_photo: state.birth_cert_photo || '',
       selfie_photo: state.selfiePhoto || '',
-    }
+    };
   }
 
   function onSubmitted() {
-    localStorage.setItem('submittedRegistrationData', JSON.stringify({ ...state }))
-    reset()
+    localStorage.setItem('submittedRegistrationData', JSON.stringify({ ...state }));
+    reset();
   }
 
   function reset() {
-    Object.assign(state, defaults())
-    localStorage.removeItem(STORAGE_KEY)
+    Object.assign(state, defaults());
+    localStorage.removeItem(STORAGE_KEY);
   }
 
   function getRestrictionCode(): string {
-    return state.restrictionCode
+    return state.restrictionCode;
   }
 
   function getEmail(): string {
-    return state.email
+    return state.email;
   }
 
   function getSubmittedData(): RegistrationData | null {
     try {
-      const raw = localStorage.getItem('submittedRegistrationData')
-      if (raw) return JSON.parse(raw)
-    } catch { /* ignore */ }
-    return null
+      const raw = localStorage.getItem('submittedRegistrationData');
+      if (raw) return JSON.parse(raw);
+    } catch {
+      /* ignore */
+    }
+    return null;
   }
 
   function clearSubmittedData() {
-    localStorage.removeItem('submittedRegistrationData')
+    localStorage.removeItem('submittedRegistrationData');
   }
 
   return {
@@ -191,5 +214,5 @@ export function useRegistrationStore() {
     getEmail,
     getSubmittedData,
     clearSubmittedData,
-  }
+  };
 }

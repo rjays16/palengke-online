@@ -32,7 +32,10 @@
           <!-- Restriction Info -->
           <div class="restriction-info" v-if="getRestrictionCode()">
             <ion-icon :icon="codeSlashOutline"></ion-icon>
-            <span>Restriction Code <strong>{{ getRestrictionCode() }}</strong> — {{ restrictionCodes[getRestrictionCode()] }}</span>
+            <span
+              >Restriction Code <strong>{{ getRestrictionCode() }}</strong> —
+              {{ restrictionCodes[getRestrictionCode()] }}</span
+            >
           </div>
           <!-- Vehicle Type -->
           <div class="input-group">
@@ -54,8 +57,14 @@
             <span v-if="errors.vehicleType" class="error-message">{{ errors.vehicleType }}</span>
             <span v-else-if="loadingCodes" class="helper-text">Loading available vehicle types...</span>
             <span v-else-if="!getRestrictionCode()" class="helper-text">Select your restriction code first</span>
-            <span v-else-if="vehicleOptions.length === 0" class="warning-message">No vehicle types configured for restriction code {{ getRestrictionCode() }}. Please contact support.</span>
-            <span v-else class="helper-text">{{ vehicleOptions.length }} vehicle type(s) available for restriction code {{ getRestrictionCode() }}</span>
+            <span v-else-if="vehicleOptions.length === 0" class="warning-message"
+              >No vehicle types configured for restriction code {{ getRestrictionCode() }}. Please contact
+              support.</span
+            >
+            <span v-else class="helper-text"
+              >{{ vehicleOptions.length }} vehicle type(s) available for restriction code
+              {{ getRestrictionCode() }}</span
+            >
           </div>
 
           <!-- Plate Number -->
@@ -98,12 +107,7 @@
             <label class="input-label">Vehicle Color *</label>
             <div class="input-wrapper">
               <ion-icon :icon="colorPaletteOutline" class="input-icon"></ion-icon>
-              <input
-                v-model="formData.vehicleColor"
-                type="text"
-                placeholder="Black"
-                class="custom-input with-icon"
-              />
+              <input v-model="formData.vehicleColor" type="text" placeholder="Black" class="custom-input with-icon" />
             </div>
           </div>
 
@@ -235,11 +239,7 @@ function getAvailableVehicles() {
 const vehicleOptions = computed(() => getAvailableVehicles());
 
 const isFormValid = computed(() => {
-  return (
-    formData.value.vehicleType &&
-    formData.value.plateNumber.trim() &&
-    formData.value.vehicleModel.trim()
-  );
+  return formData.value.vehicleType && formData.value.plateNumber.trim() && formData.value.vehicleModel.trim();
 });
 
 const validateField = (fieldName) => {

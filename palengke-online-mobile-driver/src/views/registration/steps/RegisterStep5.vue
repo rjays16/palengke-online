@@ -2,7 +2,6 @@
   <ion-page>
     <ion-content :fullscreen="true" class="step-content">
       <div class="step-container">
-        
         <!-- Back Button -->
         <div class="back-button" @click="goBack">
           <ion-icon :icon="arrowBackOutline"></ion-icon>
@@ -24,7 +23,6 @@
 
         <!-- Form -->
         <div class="form-section">
-          
           <!-- Section Header -->
           <div class="section-header">
             <ion-icon :icon="documentTextOutline"></ion-icon>
@@ -37,17 +35,21 @@
               <ion-icon :icon="cardOutline"></ion-icon>
               <span>Driver's License (Front & Back) *</span>
             </div>
-              <div class="upload-box" :class="{ uploaded: uploadedDocs.license, error: uploadErrors.license }">
-              <input 
-                type="file" 
-                accept="image/*" 
+            <div class="upload-box" :class="{ uploaded: uploadedDocs.license, error: uploadErrors.license }">
+              <input
+                type="file"
+                accept="image/*"
                 class="upload-input"
                 @change="onFileUpload('license', $event)"
                 :disabled="uploadStates.license === 'uploading'"
-              >
+              />
               <div class="upload-content">
                 <ion-icon v-if="uploadStates.license === 'uploading'" :icon="syncOutline" class="spinning"></ion-icon>
-                <ion-icon v-else-if="uploadStates.license === 'error'" :icon="alertCircleOutline" class="error-icon"></ion-icon>
+                <ion-icon
+                  v-else-if="uploadStates.license === 'error'"
+                  :icon="alertCircleOutline"
+                  class="error-icon"
+                ></ion-icon>
                 <ion-icon v-else :icon="cloudUploadOutline"></ion-icon>
                 <p v-if="uploadStates.license === 'uploading'">Uploading...</p>
                 <p v-else-if="uploadStates.license === 'error'">Tap to retry</p>
@@ -64,17 +66,25 @@
               <ion-icon :icon="carOutline"></ion-icon>
               <span>Vehicle Registration (OR/CR) *</span>
             </div>
-              <div class="upload-box" :class="{ uploaded: uploadedDocs.vehicleReg, error: uploadErrors.vehicleReg }">
-              <input 
-                type="file" 
-                accept="image/*" 
+            <div class="upload-box" :class="{ uploaded: uploadedDocs.vehicleReg, error: uploadErrors.vehicleReg }">
+              <input
+                type="file"
+                accept="image/*"
                 class="upload-input"
                 @change="onFileUpload('vehicleReg', $event)"
                 :disabled="uploadStates.vehicleReg === 'uploading'"
-              >
+              />
               <div class="upload-content">
-                <ion-icon v-if="uploadStates.vehicleReg === 'uploading'" :icon="syncOutline" class="spinning"></ion-icon>
-                <ion-icon v-else-if="uploadStates.vehicleReg === 'error'" :icon="alertCircleOutline" class="error-icon"></ion-icon>
+                <ion-icon
+                  v-if="uploadStates.vehicleReg === 'uploading'"
+                  :icon="syncOutline"
+                  class="spinning"
+                ></ion-icon>
+                <ion-icon
+                  v-else-if="uploadStates.vehicleReg === 'error'"
+                  :icon="alertCircleOutline"
+                  class="error-icon"
+                ></ion-icon>
                 <ion-icon v-else :icon="cloudUploadOutline"></ion-icon>
                 <p v-if="uploadStates.vehicleReg === 'uploading'">Uploading...</p>
                 <p v-else-if="uploadStates.vehicleReg === 'error'">Tap to retry</p>
@@ -91,17 +101,21 @@
               <ion-icon :icon="shieldOutline"></ion-icon>
               <span>NBI or Police Clearance *</span>
             </div>
-              <div class="upload-box" :class="{ uploaded: uploadedDocs.nbi, error: uploadErrors.nbi }">
-              <input 
-                type="file" 
-                accept="image/*" 
+            <div class="upload-box" :class="{ uploaded: uploadedDocs.nbi, error: uploadErrors.nbi }">
+              <input
+                type="file"
+                accept="image/*"
                 class="upload-input"
                 @change="onFileUpload('nbi', $event)"
                 :disabled="uploadStates.nbi === 'uploading'"
-              >
+              />
               <div class="upload-content">
                 <ion-icon v-if="uploadStates.nbi === 'uploading'" :icon="syncOutline" class="spinning"></ion-icon>
-                <ion-icon v-else-if="uploadStates.nbi === 'error'" :icon="alertCircleOutline" class="error-icon"></ion-icon>
+                <ion-icon
+                  v-else-if="uploadStates.nbi === 'error'"
+                  :icon="alertCircleOutline"
+                  class="error-icon"
+                ></ion-icon>
                 <ion-icon v-else :icon="cloudUploadOutline"></ion-icon>
                 <p v-if="uploadStates.nbi === 'uploading'">Uploading...</p>
                 <p v-else-if="uploadStates.nbi === 'error'">Tap to retry</p>
@@ -118,17 +132,21 @@
               <ion-icon :icon="documentOutline"></ion-icon>
               <span>Birth Certificate *</span>
             </div>
-              <div class="upload-box" :class="{ uploaded: uploadedDocs.birthCert, error: uploadErrors.birthCert }">
-              <input 
-                type="file" 
-                accept="image/*" 
+            <div class="upload-box" :class="{ uploaded: uploadedDocs.birthCert, error: uploadErrors.birthCert }">
+              <input
+                type="file"
+                accept="image/*"
                 class="upload-input"
                 @change="onFileUpload('birthCert', $event)"
                 :disabled="uploadStates.birthCert === 'uploading'"
-              >
+              />
               <div class="upload-content">
                 <ion-icon v-if="uploadStates.birthCert === 'uploading'" :icon="syncOutline" class="spinning"></ion-icon>
-                <ion-icon v-else-if="uploadStates.birthCert === 'error'" :icon="alertCircleOutline" class="error-icon"></ion-icon>
+                <ion-icon
+                  v-else-if="uploadStates.birthCert === 'error'"
+                  :icon="alertCircleOutline"
+                  class="error-icon"
+                ></ion-icon>
                 <ion-icon v-else :icon="cloudUploadOutline"></ion-icon>
                 <p v-if="uploadStates.birthCert === 'uploading'">Uploading...</p>
                 <p v-else-if="uploadStates.birthCert === 'error'">Tap to retry</p>
@@ -143,36 +161,24 @@
           <div class="info-box">
             <ion-icon :icon="informationCircleOutline"></ion-icon>
             <div class="info-text">
-              <strong>File Requirements:</strong><br>
+              <strong>File Requirements:</strong><br />
               Images must be clear and readable. Accepted formats: JPG, PNG (max 5MB each).
             </div>
           </div>
 
           <!-- Navigation Buttons -->
           <div class="button-group">
-            <ion-button 
-              expand="block" 
-              fill="outline"
-              color="medium"
-              class="back-btn"
-              @click="goBack"
-            >
+            <ion-button expand="block" fill="outline" color="medium" class="back-btn" @click="goBack">
               <ion-icon slot="start" :icon="arrowBackOutline"></ion-icon>
               Back
             </ion-button>
 
-            <ion-button 
-              expand="block" 
-              class="next-button"
-              @click="handleNext"
-              :disabled="!isFormValid"
-            >
+            <ion-button expand="block" class="next-button" @click="handleNext" :disabled="!isFormValid">
               Next
               <ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon>
             </ion-button>
           </div>
         </div>
-
       </div>
     </ion-content>
   </ion-page>
@@ -183,12 +189,7 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { compressImage, readFileAsDataURL as readFileAsBase64 } from '@/utils/imageCompression';
 import { useRegistrationStore } from '@/composables/useRegistrationStore';
-import {
-  IonPage,
-  IonContent,
-  IonButton,
-  IonIcon
-} from '@ionic/vue';
+import { IonPage, IonContent, IonButton, IonIcon } from '@ionic/vue';
 import {
   arrowBackOutline,
   arrowForwardOutline,
@@ -223,7 +224,7 @@ const uploadedDocs = ref({
   license: false,
   vehicleReg: false,
   nbi: false,
-  birthCert: false
+  birthCert: false,
 });
 
 const uploadStates = ref({
@@ -241,10 +242,12 @@ const uploadErrors = ref({
 });
 
 const isFormValid = computed(() => {
-  return uploadedDocs.value.license && 
-         uploadedDocs.value.vehicleReg && 
-         uploadedDocs.value.nbi &&
-         uploadedDocs.value.birthCert;
+  return (
+    uploadedDocs.value.license &&
+    uploadedDocs.value.vehicleReg &&
+    uploadedDocs.value.nbi &&
+    uploadedDocs.value.birthCert
+  );
 });
 
 async function uploadPhoto(backendField, base64) {
@@ -404,7 +407,7 @@ const handleNext = () => {
 
 .section-header ion-icon {
   font-size: 24px;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .section-header h2 {
@@ -430,7 +433,7 @@ const handleNext = () => {
 
 .upload-label ion-icon {
   font-size: 20px;
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .upload-box {
@@ -444,12 +447,12 @@ const handleNext = () => {
 }
 
 .upload-box:hover {
-  border-color: #4CAF50;
+  border-color: #4caf50;
   background: #f9f9f9;
 }
 
 .upload-box.uploaded {
-  border-color: #4CAF50;
+  border-color: #4caf50;
   background: #e8f5e9;
 }
 
@@ -479,7 +482,7 @@ const handleNext = () => {
 }
 
 .upload-box.uploaded .upload-content ion-icon {
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .upload-content p {
@@ -505,20 +508,24 @@ const handleNext = () => {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .uploaded-text {
-  color: #4CAF50 !important;
+  color: #4caf50 !important;
   font-weight: 600;
 }
 
 .info-box {
   display: flex;
   gap: 12px;
-  background: #E3F2FD;
-  border-left: 4px solid #2196F3;
+  background: #e3f2fd;
+  border-left: 4px solid #2196f3;
   padding: 16px;
   border-radius: 8px;
   margin: 24px 0;
@@ -526,14 +533,14 @@ const handleNext = () => {
 
 .info-box ion-icon {
   font-size: 24px;
-  color: #2196F3;
+  color: #2196f3;
   flex-shrink: 0;
   margin-top: 2px;
 }
 
 .info-text {
   font-size: 13px;
-  color: #1565C0;
+  color: #1565c0;
   line-height: 1.5;
 }
 
@@ -558,7 +565,7 @@ const handleNext = () => {
 }
 
 .next-button {
-  --background: #4CAF50;
+  --background: #4caf50;
   --background-hover: #45a049;
   --border-radius: 12px;
   height: 52px;

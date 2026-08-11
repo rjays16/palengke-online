@@ -105,7 +105,8 @@
             <ion-icon :icon="bulbOutline"></ion-icon>
             <div class="tips-text">
               <strong>Tips for best results:</strong><br />
-              Use natural lighting when possible. Hold your phone steady and ensure both your face and ID are clearly in frame.
+              Use natural lighting when possible. Hold your phone steady and ensure both your face and ID are clearly in
+              frame.
             </div>
           </div>
 

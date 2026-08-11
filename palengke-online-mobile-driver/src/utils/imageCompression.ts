@@ -4,7 +4,7 @@ const DEFAULT_QUALITY = 0.7;
 export function compressImage(
   dataUrl: string,
   maxDimension = MAX_DIMENSION,
-  quality = DEFAULT_QUALITY
+  quality = DEFAULT_QUALITY,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -44,7 +44,11 @@ export function readFileAsDataURL(file: File): Promise<string> {
   });
 }
 
-export async function compressFile(file: File, maxDimension = MAX_DIMENSION, quality = DEFAULT_QUALITY): Promise<string> {
+export async function compressFile(
+  file: File,
+  maxDimension = MAX_DIMENSION,
+  quality = DEFAULT_QUALITY,
+): Promise<string> {
   const dataUrl = await readFileAsDataURL(file);
   return compressImage(dataUrl, maxDimension, quality);
 }

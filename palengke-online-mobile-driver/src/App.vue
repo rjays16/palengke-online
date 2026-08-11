@@ -64,15 +64,18 @@ function handleInactivityOk() {
   router.push('/pin-login');
 }
 
-watch(() => localStorage.getItem('isAuthenticated') === 'true', (loggedIn) => {
-  if (loggedIn) {
-    showInactivityModal.value = false;
-    resetInactivityTimer();
-  } else {
-    clearInactivityTimer();
-    showInactivityModal.value = false;
-  }
-});
+watch(
+  () => localStorage.getItem('isAuthenticated') === 'true',
+  (loggedIn) => {
+    if (loggedIn) {
+      showInactivityModal.value = false;
+      resetInactivityTimer();
+    } else {
+      clearInactivityTimer();
+      showInactivityModal.value = false;
+    }
+  },
+);
 
 onMounted(async () => {
   localStorage.removeItem('token');
@@ -117,7 +120,7 @@ onUnmounted(() => {
 <style>
 /* Global Alert/Modal Styles - Same as Customer & Seller apps */
 :root {
-  --color-primary: #4CAF50;
+  --color-primary: #4caf50;
   --color-bg: #f8f9fa;
   --color-text: #1a1a1a;
 }
@@ -127,7 +130,7 @@ onUnmounted(() => {
   border-radius: 20px;
   max-width: 320px;
   background: white;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
 
 :deep(.alert-head) {
@@ -182,7 +185,7 @@ onUnmounted(() => {
 }
 
 /* Cancel button - gray */
-:deep(.alert-button[role="cancel"]) {
+:deep(.alert-button[role='cancel']) {
   background: #f5f5f5;
   color: #666;
 }
@@ -221,8 +224,12 @@ onUnmounted(() => {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 :deep(.loading-modal .alert-button-group) {
@@ -261,21 +268,21 @@ onUnmounted(() => {
   :deep(.alert-wrapper) {
     background: #1a1a1a;
   }
-  
+
   :deep(.alert-title),
   :deep(.success-modal .alert-message) {
     color: white;
   }
-  
+
   :deep(.alert-message) {
     color: #aaa;
   }
-  
-  :deep(.alert-button[role="cancel"]) {
+
+  :deep(.alert-button[role='cancel']) {
     background: #333;
     color: #aaa;
   }
-  
+
   :deep(.loading-modal .alert-wrapper),
   :deep(.success-modal .alert-wrapper) {
     background: #1a1a1a;

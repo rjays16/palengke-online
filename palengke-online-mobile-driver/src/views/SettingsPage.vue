@@ -11,7 +11,6 @@
 
     <ion-content :fullscreen="true" class="settings-content">
       <div class="settings-container">
-
         <!-- Job Settings Section -->
         <div class="settings-section">
           <h3 class="settings-group-title">Job Settings</h3>
@@ -22,14 +21,12 @@
               <div class="item-icon green"><ion-icon :icon="flashOutline"></ion-icon></div>
               <div class="item-info">
                 <h4>Auto Accept</h4>
-                <p>{{ autoAccept ? 'Incoming jobs will be accepted automatically.' : 'Manually accept incoming jobs.' }}</p>
+                <p>
+                  {{ autoAccept ? 'Incoming jobs will be accepted automatically.' : 'Manually accept incoming jobs.' }}
+                </p>
               </div>
             </div>
-            <ion-toggle
-              v-model="autoAccept"
-              color="success"
-              @ionChange="onAutoAcceptChange"
-            ></ion-toggle>
+            <ion-toggle v-model="autoAccept" color="success" @ionChange="onAutoAcceptChange"></ion-toggle>
           </div>
 
           <!-- Service Type -->
@@ -50,14 +47,14 @@
               <div class="item-icon orange"><ion-icon :icon="cubeOutline"></ion-icon></div>
               <div class="item-info">
                 <h4>Bulky Item Delivery</h4>
-                <p>{{ bulkyEnabled ? 'You can accept large or heavy orders' : 'Large or heavy orders will be filtered out' }}</p>
+                <p>
+                  {{
+                    bulkyEnabled ? 'You can accept large or heavy orders' : 'Large or heavy orders will be filtered out'
+                  }}
+                </p>
               </div>
             </div>
-            <ion-toggle
-              v-model="bulkyEnabled"
-              color="success"
-              @ionChange="onBulkyToggle"
-            ></ion-toggle>
+            <ion-toggle v-model="bulkyEnabled" color="success" @ionChange="onBulkyToggle"></ion-toggle>
           </div>
 
           <!-- My Destination -->
@@ -71,7 +68,6 @@
             </div>
             <ion-icon :icon="chevronForwardOutline" class="item-arrow"></ion-icon>
           </div>
-
         </div>
 
         <!-- Support Section -->
@@ -113,7 +109,6 @@
             Logout
           </ion-button>
         </div>
-
       </div>
     </ion-content>
   </ion-page>
@@ -123,15 +118,28 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
-  IonPage, IonHeader, IonToolbar, IonTitle, IonContent,
-  IonButtons, IonBackButton, IonButton, IonIcon, IonToggle,
-  alertController, toastController
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonButtons,
+  IonBackButton,
+  IonButton,
+  IonIcon,
+  IonToggle,
+  alertController,
+  toastController,
 } from '@ionic/vue';
 import {
-  flashOutline, bicycleOutline, cubeOutline,
+  flashOutline,
+  bicycleOutline,
+  cubeOutline,
   locationOutline,
-  shieldCheckmarkOutline, informationCircleOutline,
-  logOutOutline, chevronForwardOutline
+  shieldCheckmarkOutline,
+  informationCircleOutline,
+  logOutOutline,
+  chevronForwardOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -181,7 +189,9 @@ const onAutoAcceptChange = async () => {
   await saveSettings();
   const toast = await toastController.create({
     message: autoAccept.value ? 'Auto Accept is ON' : 'Auto Accept is OFF',
-    duration: 2000, color: 'medium', position: 'top'
+    duration: 2000,
+    color: 'medium',
+    position: 'top',
   });
   await toast.present();
 };
@@ -190,7 +200,9 @@ const onBulkyToggle = async () => {
   await saveSettings();
   const toast = await toastController.create({
     message: bulkyEnabled.value ? 'Bulky orders enabled' : 'Bulky orders disabled',
-    duration: 2000, color: 'medium', position: 'top'
+    duration: 2000,
+    color: 'medium',
+    position: 'top',
   });
   await toast.present();
 };
@@ -198,8 +210,9 @@ const onBulkyToggle = async () => {
 const showTerms = async () => {
   const alert = await alertController.create({
     header: 'Terms & Conditions',
-    message: 'By using Palengke Online Driver, you agree to our terms of service. You must be at least 18 years old, hold a valid driver\u2019s license appropriate for your vehicle, and provide accurate information. You operate as an independent contractor and are responsible for complying with all applicable traffic laws, safety regulations, and local ordinances while using the app. We may update these terms from time to time.',
-    buttons: ['Close']
+    message:
+      'By using Palengke Online Driver, you agree to our terms of service. You must be at least 18 years old, hold a valid driver\u2019s license appropriate for your vehicle, and provide accurate information. You operate as an independent contractor and are responsible for complying with all applicable traffic laws, safety regulations, and local ordinances while using the app. We may update these terms from time to time.',
+    buttons: ['Close'],
   });
   await alert.present();
 };
@@ -207,8 +220,9 @@ const showTerms = async () => {
 const showPrivacy = async () => {
   const alert = await alertController.create({
     header: 'Privacy Policy',
-    message: 'We collect personal information to provide our services, including your profile, vehicle, and document details. Your data is encrypted and never sold to third parties. We share only the information needed to complete deliveries and comply with the Data Privacy Act of 2012 (RA 10173).',
-    buttons: ['Close']
+    message:
+      'We collect personal information to provide our services, including your profile, vehicle, and document details. Your data is encrypted and never sold to third parties. We share only the information needed to complete deliveries and comply with the Data Privacy Act of 2012 (RA 10173).',
+    buttons: ['Close'],
   });
   await alert.present();
 };
@@ -219,8 +233,17 @@ const handleLogout = async () => {
     message: 'Are you sure you want to logout?',
     buttons: [
       { text: 'Cancel', role: 'cancel' },
-      { text: 'Logout', role: 'destructive', handler: () => { localStorage.removeItem('isAuthenticated'); localStorage.removeItem('driver_token'); localStorage.removeItem('pendingAuth'); router.push('/login'); } }
-    ]
+      {
+        text: 'Logout',
+        role: 'destructive',
+        handler: () => {
+          localStorage.removeItem('isAuthenticated');
+          localStorage.removeItem('driver_token');
+          localStorage.removeItem('pendingAuth');
+          router.push('/login');
+        },
+      },
+    ],
   });
   await alert.present();
 };
@@ -231,33 +254,114 @@ const goToAbout = () => router.push('/about');
 </script>
 
 <style scoped>
-.settings-content { --background: #f8f9fa; }
-.settings-container { padding: 16px; padding-bottom: 40px; }
+.settings-content {
+  --background: #f8f9fa;
+}
+.settings-container {
+  padding: 16px;
+  padding-bottom: 40px;
+}
 
-.settings-section { background: white; border-radius: 16px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.settings-section {
+  background: white;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
 
-.settings-group-title { font-size: 13px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 16px 0; }
+.settings-group-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 16px 0;
+}
 
-.settings-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
-.settings-item:last-child { border-bottom: none; padding-bottom: 0; }
-.settings-item:first-of-type { padding-top: 0; }
-.settings-item:active { opacity: 0.7; }
+.settings-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+}
+.settings-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.settings-item:first-of-type {
+  padding-top: 0;
+}
+.settings-item:active {
+  opacity: 0.7;
+}
 
-.toggle-item { cursor: default; }
+.toggle-item {
+  cursor: default;
+}
 
-.item-left { display: flex; align-items: center; gap: 14px; flex: 1; }
+.item-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+}
 
-.item-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
-.item-icon.green { background: #E8F5E9; color: #4CAF50; }
-.item-icon.blue { background: #E3F2FD; color: #2196F3; }
-.item-icon.orange { background: #FFF3E0; color: #FF9800; }
-.item-icon.purple { background: #F3E5F5; color: #9C27B0; }
+.item-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.item-icon.green {
+  background: #e8f5e9;
+  color: #4caf50;
+}
+.item-icon.blue {
+  background: #e3f2fd;
+  color: #2196f3;
+}
+.item-icon.orange {
+  background: #fff3e0;
+  color: #ff9800;
+}
+.item-icon.purple {
+  background: #f3e5f5;
+  color: #9c27b0;
+}
 
-.item-info h4 { font-size: 15px; font-weight: 700; color: #1a1a1a; margin: 0 0 3px 0; }
-.item-info p { font-size: 12px; color: #666; margin: 0; line-height: 1.4; }
+.item-info h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 3px 0;
+}
+.item-info p {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
+}
 
-.item-arrow { font-size: 20px; color: #ccc; flex-shrink: 0; }
+.item-arrow {
+  font-size: 20px;
+  color: #ccc;
+  flex-shrink: 0;
+}
 
-.logout-section { padding-top: 8px; }
-.logout-btn { --border-radius: 12px; height: 48px; font-weight: 600; text-transform: none; }
+.logout-section {
+  padding-top: 8px;
+}
+.logout-btn {
+  --border-radius: 12px;
+  height: 48px;
+  font-weight: 600;
+  text-transform: none;
+}
 </style>

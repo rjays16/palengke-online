@@ -108,7 +108,9 @@
           </div>
           <div class="success-row">
             <span>Transaction ID</span>
-            <span class="success-txn">{{ receiptData?.transactionId || 'WLT-' + String(topUpTransactionId).padStart(6, '0') }}</span>
+            <span class="success-txn">{{
+              receiptData?.transactionId || 'WLT-' + String(topUpTransactionId).padStart(6, '0')
+            }}</span>
           </div>
           <div class="success-row">
             <span>Date</span>
@@ -138,8 +140,25 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonButtons, IonIcon, toastController } from '@ionic/vue';
-import { arrowBackOutline, walletOutline, checkmarkCircle, chevronForwardOutline, downloadOutline, shareSocialOutline } from 'ionicons/icons';
+import {
+  IonPage,
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonButton,
+  IonButtons,
+  IonIcon,
+  toastController,
+} from '@ionic/vue';
+import {
+  arrowBackOutline,
+  walletOutline,
+  checkmarkCircle,
+  chevronForwardOutline,
+  downloadOutline,
+  shareSocialOutline,
+} from 'ionicons/icons';
 import { API_BASE } from '@/services/api';
 import { downloadReceipt, shareReceiptWithFallback } from '@/utils/receiptGenerator';
 
@@ -244,7 +263,9 @@ async function fetchBalance() {
       const data = await res.json();
       balance.value = data.balance || 0;
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 async function fetchPaymentMethods() {

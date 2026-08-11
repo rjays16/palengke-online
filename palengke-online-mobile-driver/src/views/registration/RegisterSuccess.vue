@@ -2,7 +2,6 @@
   <ion-page>
     <ion-content :fullscreen="true" class="success-content">
       <div class="success-container">
-
         <!-- Success Animation/Icon -->
         <div class="success-icon">
           <div class="icon-circle" :class="{ verified: isVerified, basic: !isVerified }">
@@ -13,7 +12,9 @@
         <!-- Title -->
         <div class="title-section">
           <h1 class="title">{{ isVerified ? 'Driver Verified!' : 'Application Submitted!' }}</h1>
-          <p class="subtitle">{{ isVerified ? 'Welcome to Palengke Online Driver' : 'Your application is being reviewed' }}</p>
+          <p class="subtitle">
+            {{ isVerified ? 'Welcome to Palengke Online Driver' : 'Your application is being reviewed' }}
+          </p>
         </div>
 
         <!-- Verification Status Badge -->
@@ -103,7 +104,7 @@
           <div class="verify-cta">
             <ion-icon :icon="informationCircleOutline"></ion-icon>
             <div class="cta-text">
-              <strong>What happens next?</strong><br>
+              <strong>What happens next?</strong><br />
               Once your documents are verified, you'll receive an email with your login credentials.
             </div>
           </div>
@@ -139,11 +140,7 @@
 
         <!-- Action Buttons -->
         <div class="action-buttons">
-          <ion-button 
-            expand="block" 
-            class="login-button"
-            @click="goToLogin"
-          >
+          <ion-button expand="block" class="login-button" @click="goToLogin">
             Go to Login
             <ion-icon slot="end" :icon="arrowForwardOutline"></ion-icon>
           </ion-button>
@@ -153,7 +150,6 @@
         <div class="support-link">
           <p>Need help? <a href="#" @click.prevent="contactSupport">Contact Support</a></p>
         </div>
-
       </div>
     </ion-content>
   </ion-page>
@@ -162,13 +158,7 @@
 <script setup>
 import { ref, computed, onMounted, onActivated } from 'vue';
 import { useRouter } from 'vue-router';
-import {
-  IonPage,
-  IonContent,
-  IonButton,
-  IonIcon,
-  toastController
-} from '@ionic/vue';
+import { IonPage, IonContent, IonButton, IonIcon, toastController } from '@ionic/vue';
 import { useRegistrationStore } from '@/composables/useRegistrationStore';
 import {
   checkmarkCircleOutline,
@@ -178,7 +168,7 @@ import {
   arrowForwardOutline,
   timeOutline,
   documentTextOutline,
-  mailOutline
+  mailOutline,
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -189,7 +179,7 @@ const accountData = ref({
   email: '',
   phone: '',
   vehicleType: '',
-  verificationStatus: 'pending'
+  verificationStatus: 'pending',
 });
 
 // Computed: Is account verified?
@@ -218,10 +208,10 @@ onActivated(loadAccountData);
 const goToLogin = () => {
   const { clearSubmittedData } = useRegistrationStore();
   clearSubmittedData();
-  
+
   // Show success toast
   showSuccessToast();
-  
+
   // Navigate to login
   setTimeout(() => {
     router.push('/login');
@@ -233,7 +223,7 @@ const showSuccessToast = async () => {
     message: 'Application submitted! Please check your email for updates.',
     duration: 3000,
     color: 'medium',
-    position: 'top'
+    position: 'top',
   });
   await toast.present();
 };
@@ -243,7 +233,7 @@ const contactSupport = async () => {
     message: 'Support: support@palengkeonline.com',
     duration: 3000,
     color: 'medium',
-    position: 'bottom'
+    position: 'bottom',
   });
   await toast.present();
 };
@@ -283,7 +273,7 @@ const contactSupport = async () => {
 }
 
 .icon-circle.basic {
-  background: linear-gradient(135deg, var(--color-warning) 0%, var(--color-warning-hover, #FF9800) 100%);
+  background: linear-gradient(135deg, var(--color-warning) 0%, var(--color-warning-hover, #ff9800) 100%);
   box-shadow: 0 8px 24px rgba(255, 152, 0, 0.3);
 }
 

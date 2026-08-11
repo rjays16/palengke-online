@@ -52,7 +52,7 @@ const routes: Array<RouteRecordRaw> = [
   // ============================================
   {
     path: '/',
-    redirect: '/login'
+    redirect: '/login',
   },
 
   // ============================================
@@ -62,43 +62,43 @@ const routes: Array<RouteRecordRaw> = [
     path: '/login',
     name: 'Login',
     component: LoginPage,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false },
   },
   {
     path: '/pin-login',
     name: 'PinLogin',
     component: PinLoginPage,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false },
   },
   {
     path: '/create-pin',
     name: 'CreatePin',
     component: CreatePinPage,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false },
   },
   {
     path: '/otp-verification/:email',
     name: 'OTPVerification',
     component: OTPVerificationPage,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false },
   },
   {
     path: '/account-pending',
     name: 'AccountPending',
     component: AccountPendingPage,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false },
   },
   {
     path: '/area-not-available/:reason',
     name: 'AreaNotAvailable',
     component: AreaNotAvailablePage,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false },
   },
   {
     path: '/signup',
     name: 'DriverRequirements',
     component: DriverRequirements,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false },
   },
 
   // ============================================
@@ -108,49 +108,49 @@ const routes: Array<RouteRecordRaw> = [
     path: '/register/step1',
     name: 'RegisterStep1',
     component: RegisterStep1,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false },
   },
   {
     path: '/register/step2',
     name: 'RegisterStep2',
     component: RegisterStep2,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false },
   },
   {
     path: '/register/step3',
     name: 'RegisterStep3',
     component: RegisterStep3,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false },
   },
   {
     path: '/register/step4',
     name: 'RegisterStep4',
     component: RegisterStep4,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false },
   },
   {
     path: '/register/step5',
     name: 'RegisterStep5',
     component: RegisterStep5,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false },
   },
   {
     path: '/register/step6',
     name: 'RegisterStep6',
     component: RegisterStep6,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false },
   },
   {
     path: '/register/step7',
     name: 'RegisterStep7',
     component: RegisterStep7,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false },
   },
   {
     path: '/register/success',
     name: 'RegisterSuccess',
     component: RegisterSuccess,
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false },
   },
 
   // ============================================
@@ -160,19 +160,19 @@ const routes: Array<RouteRecordRaw> = [
     path: '/home',
     name: 'Home',
     component: HomePage,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
   {
     path: '/orders',
     name: 'Orders',
     component: AvailableOrdersPage,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
   {
     path: '/active-delivery',
     name: 'ActiveDelivery',
     component: ActiveDeliveryPage,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
 
   // ============================================
@@ -182,37 +182,37 @@ const routes: Array<RouteRecordRaw> = [
     path: '/earnings',
     name: 'Earnings',
     component: EarningsPage,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
   {
     path: '/wallet',
     name: 'Wallet',
     component: WalletTopUpPage,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
   {
     path: '/wallet/transactions',
     name: 'WalletTransactions',
     component: WalletTransactionsPage,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
   {
     path: '/history',
     name: 'History',
     component: HistoryPage,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
   {
     path: '/history/:job',
     name: 'OrderDetails',
     component: OrderDetailsPage,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
   {
     path: '/tip-received',
     name: 'TipReceived',
     component: TipReceivedPage,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
 
   // ============================================
@@ -222,37 +222,37 @@ const routes: Array<RouteRecordRaw> = [
     path: '/profile',
     name: 'Profile',
     component: ProfilePage,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
   {
     path: '/licence-payment',
     name: 'LicencePayment',
     component: LicencePaymentPage,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
   {
     path: '/documents',
     name: 'Documents',
     component: DocumentsPage,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
   {
     path: '/settings',
     name: 'Settings',
     component: SettingsPage,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
   {
     path: '/service-type',
     name: 'ServiceType',
     component: ServiceTypePage,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
   {
     path: '/my-destination',
     name: 'MyDestination',
     component: MyDestinationPage,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
 
   // ============================================
@@ -262,25 +262,25 @@ const routes: Array<RouteRecordRaw> = [
     path: '/messages',
     name: 'Messages',
     component: MessagesPage,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
   {
     path: '/notifications',
     name: 'Notifications',
     component: NotificationsPage,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
   {
     path: '/help',
     name: 'Help',
     component: HelpSupportPage,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
   {
     path: '/about',
     name: 'About',
     component: AboutPage,
-    meta: { requiresAuth: true }
+    meta: { requiresAuth: true },
   },
 ];
 
@@ -289,7 +289,7 @@ const routes: Array<RouteRecordRaw> = [
 // ============================================
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes
+  routes,
 });
 
 // ============================================
@@ -298,7 +298,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
   const hasToken = !!localStorage.getItem('driver_token');
-  
+
   if (to.meta.requiresAuth && (!isAuthenticated || !hasToken)) {
     next('/login');
   } else if (to.path === '/login' && isAuthenticated && hasToken) {
