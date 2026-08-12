@@ -81,10 +81,10 @@ export const useSellersStore = defineStore("sellers", () => {
   }
 
   const AVAILABLE_PLANS = [
-    { name: "1 Month", months: 1, amount: 600 },
-    { name: "2 Months", months: 2, amount: 1200 },
-    { name: "4 Months", months: 4, amount: 2100 },
-    { name: "8 Months", months: 8, amount: 4000 },
+    { name: "1 Month", months: 1, amount: 800 },
+    { name: "2 Months", months: 2, amount: 1500 },
+    { name: "4 Months", months: 4, amount: 2800 },
+    { name: "8 Months", months: 8, amount: 5200 },
   ];
 
   function changeSubscriptionPlan(id: number | string, planName: string, amount: number, months: number) {
